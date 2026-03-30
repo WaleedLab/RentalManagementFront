@@ -1,11 +1,19 @@
 <div [ngClass]="navmenu.isDisplay ? 'page-header close_icon':'page-header'">
   <div class="header-wrapper row m-0">
     <div class="header-logo-wrapper col-auto p-0">
-      <div class="toggle-sidebar" (click)="openMenu()">
+      <button
+        type="button"
+        class="toggle-sidebar"
+        (click)="openMenu()"
+        [attr.data-state]="navmenu.isDisplay ? 'collapsed' : 'expanded'"
+        [attr.aria-controls]="'pageWrapper'"
+        [attr.aria-label]="navmenu.isDisplay ? 'Open sidebar' : 'Collapse sidebar'"
+        [attr.title]="navmenu.isDisplay ? 'Open sidebar' : 'Collapse sidebar'"
+      >
         <svg class="sidebar-toggle">
           <use href="assets/svg/icon-sprite.svg#stroke-animation"></use>
         </svg>
-      </div>
+      </button>
     </div>
     <div
       class="nav-right col-auto pull-right right-header p-0 ms-auto"
