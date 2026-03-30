@@ -1,19 +1,39 @@
-<div class="translate_wrapper" [class.active]="navServices.language">
-  <div class="current_lang">
-    <div class="lang">
-      <i class="flag-icon flag-icon-{{selectedLanguage.icon}}"></i>
-    </div>
-  </div>
-  <div class="more_lang" [class.active]="navServices.language">
-    @for(lang of languages; track lang){
-    <div class="lang" [attr.data-value]="lang.code" (click)="changeLanguage(lang)">
-      <i class="flag-icon flag-icon-{{lang.icon}}"></i>
+<div
+  class="translate_wrapper"
+  [class.active]="navServices.language"
+  (click)="$event.stopPropagation()"
+>
+  <button
+    type="button"
+    class="current_lang"
+    [attr.aria-expanded]="navServices.language"
+    aria-haspopup="menu"
+    title="Change language"
+    (click)="toggleLanguageMenu($event)"
+  >
+    <span class="lang">
+      <i class="flag-icon flag-icon-{{ selectedLanguage.icon }}"></i>
+    </span>
+  </button>
+  <div
+    class="more_lang"
+    [class.active]="navServices.language"
+    (click)="$event.stopPropagation()"
+  >
+    @for(lang of languages; track lang.code){
+    <button
+      type="button"
+      class="lang"
+      [attr.data-value]="lang.code"
+      (click)="changeLanguage(lang, $event)"
+    >
+      <i class="flag-icon flag-icon-{{ lang.icon }}"></i>
       <span class="lang-txt"
-        >{{lang.language}} @if(lang.type){
-        <span>({{lang.type}})</span>
+        >{{ lang.language }} @if(lang.type){
+        <span>({{ lang.type }})</span>
         }
       </span>
-    </div>
+    </button>
     }
   </div>
 </div>

@@ -1,9 +1,20 @@
-<div class="notification-box">
+<button
+  type="button"
+  class="notification-box"
+  [attr.aria-expanded]="isOpen"
+  aria-haspopup="menu"
+  title="Notifications"
+  (click)="toggleDropdown($event)"
+>
   <svg>
     <use href="assets/svg/icon-sprite.svg#fill-Bell"></use>
   </svg>
-</div>
-<div class="onhover-show-div notification-dropdown">
+</button>
+<div
+  class="onhover-show-div notification-dropdown"
+  [class.active]="isOpen"
+  (click)="$event.stopPropagation()"
+>
   <h6 class="f-18 mb-0 dropdown-title">Notitications</h6>
   <ul>
     <li class="b-l-primary bg-light-primary border-4 mt-3">

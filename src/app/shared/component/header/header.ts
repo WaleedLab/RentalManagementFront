@@ -30,8 +30,4 @@ export class Header {
   onResize() {
     this.navmenu.isDisplay = window.innerWidth < 992;
   }
-
-  languageToggle() {
-    this.navmenu.language = !this.navmenu.language;
-  }
 }
