@@ -114,6 +114,17 @@
         </ng-template>
       </ul>
     </div>
+    <div class="sidebar-footer">
+      <button
+        type="button"
+        class="sidebar-link sidebar-title sidebar-logout"
+        [attr.aria-label]="'Log out' | translate"
+        (click)="logout()"
+      >
+        <app-feathericon [icon]="'log-out'" />
+        <span class="sidebar-logout__label">{{ 'Log out' | translate }}</span>
+      </button>
+    </div>
     <div
       class="right-arrow"
       id="right-arrow"

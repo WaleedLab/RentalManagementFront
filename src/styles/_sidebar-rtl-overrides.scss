@@ -20,6 +20,12 @@ html[dir='rtl'] .page-wrapper.compact-wrapper {
       .sidebar-wrapper {
         inset-inline-start: auto;
         inset-inline-end: 0;
+        box-shadow: -18px 0 42px rgba(15, 23, 42, 0.16);
+
+        &::after {
+          inset-inline-start: auto;
+          inset-inline-end: 100%;
+        }
       }
 
       .sidebar-wrapper.close_icon {

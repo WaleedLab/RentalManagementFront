@@ -1,0 +1,11 @@
+<app-finance-list-shell
+  [title]="'Journals'"
+  [subtitle]="'Track simplified journal entries generated from operational and financial activity.'"
+  [emptyTitle]="'No records found'"
+  [emptyDescription]="'No records were returned for the current fleet context.'"
+  [columns]="columns"
+  [rows]="rows()"
+  [loading]="loading()"
+  [error]="loadError()"
+  [count]="rows().length"
+/>

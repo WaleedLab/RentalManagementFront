@@ -1,0 +1,29 @@
+.finance-list-shell__card {
+  border-radius: 18px;
+}
+
+.finance-list-shell__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.finance-list-shell__card .table thead th {
+  white-space: nowrap;
+}
+
+.finance-list-shell__card .table td,
+.finance-list-shell__card .table th {
+  padding-block: 0.95rem;
+}
+
+html[dir='rtl'] .finance-list-shell__meta {
+  flex-direction: row-reverse;
+}
+
+@media (max-width: 767.98px) {
+  .finance-list-shell__card .table td,
+  .finance-list-shell__card .table th {
+    padding-block: 0.75rem;
+  }
+}

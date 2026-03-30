@@ -5,6 +5,7 @@ import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthStateService } from '../../../core/auth/auth-state.service';
+import { AuthService } from '../../services/auth/auth.service';
 import { SidebarService } from '../../services/layout/sidebar.service';
 import { LayoutService } from '../../services/layout/layout.service';
 import { Menu, NavMenuService } from '../../services/layout/nav-menu.service';
@@ -30,6 +31,7 @@ export class Sidebar implements OnInit {
   private router = inject(Router);
   private sidebarService = inject(SidebarService);
   private authState = inject(AuthStateService);
+  private authService = inject(AuthService);
 
   public menuItems: Menu[] = this.navServices.MENUITEMS;
   public margin: number = 0;
@@ -194,5 +196,9 @@ export class Sidebar implements OnInit {
     } else {
       this.pined = true;
     }
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 }

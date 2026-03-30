@@ -2,6 +2,10 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 import { ADMIN_ROLES, APP_PRIVILEGES } from '../../../core/auth/access.constants';
+import {
+  FINANCE_MENU_ICONS,
+  FINANCE_ROUTE_PATHS,
+} from '../../../modules/finance/common/finance.constants';
 
 export interface Menu {
   headTitle1?: string;
@@ -60,6 +64,61 @@ export class NavMenuService {
       imageIcon: 'assets/images/rent_icon/Customers.png',
       type: 'link',
       privileges: [APP_PRIVILEGES.customer],
+    },
+    { headTitle1: 'Finance' },
+    {
+      level: 1,
+      path: `/${FINANCE_ROUTE_PATHS.banks}`,
+      title: 'Banks',
+      icon: 'sample-page',
+      imageIcon: FINANCE_MENU_ICONS.banks,
+      type: 'link',
+      privileges: [APP_PRIVILEGES.financialReports],
+    },
+    {
+      level: 1,
+      path: `/${FINANCE_ROUTE_PATHS.cash}`,
+      title: 'Cash Accounts',
+      icon: 'sample-page',
+      imageIcon: FINANCE_MENU_ICONS.cash,
+      type: 'link',
+      privileges: [APP_PRIVILEGES.financialReports],
+    },
+    {
+      level: 1,
+      path: `/${FINANCE_ROUTE_PATHS.counting}`,
+      title: 'Chart of Accounts',
+      icon: 'sample-page',
+      imageIcon: FINANCE_MENU_ICONS.counting,
+      type: 'link',
+      privileges: [APP_PRIVILEGES.financialReports],
+    },
+    {
+      level: 1,
+      path: `/${FINANCE_ROUTE_PATHS.financialYears}`,
+      title: 'Financial Years',
+      icon: 'sample-page',
+      imageIcon: FINANCE_MENU_ICONS.financialYears,
+      type: 'link',
+      privileges: [APP_PRIVILEGES.financialReports],
+    },
+    {
+      level: 1,
+      path: `/${FINANCE_ROUTE_PATHS.journals}`,
+      title: 'Journals',
+      icon: 'sample-page',
+      imageIcon: FINANCE_MENU_ICONS.journals,
+      type: 'link',
+      privileges: [APP_PRIVILEGES.financialReports],
+    },
+    {
+      level: 1,
+      path: `/${FINANCE_ROUTE_PATHS.paymentCounts}`,
+      title: 'Payment Counts',
+      icon: 'sample-page',
+      imageIcon: FINANCE_MENU_ICONS.paymentCounts,
+      type: 'link',
+      privileges: [APP_PRIVILEGES.financialReports],
     },
     { headTitle1: 'Management' },
     {

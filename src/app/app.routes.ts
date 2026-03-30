@@ -21,6 +21,10 @@ export const routes: Routes = [
     children: [
       {
         path: '',
+        loadChildren: () => import('./modules/finance/finance.module').then(m => m.FinanceModule),
+      },
+      {
+        path: '',
         loadChildren: () => import('./modules/rent/rent.module').then(m => m.RentModule),
       },
     ],

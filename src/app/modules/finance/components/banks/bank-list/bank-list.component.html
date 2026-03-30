@@ -1,0 +1,11 @@
+<app-finance-list-shell
+  [title]="'Banks'"
+  [subtitle]="'Manage bank accounts, codes, and operational balances linked to fleet payments.'"
+  [emptyTitle]="'No records found'"
+  [emptyDescription]="'No records were returned for the current fleet context.'"
+  [columns]="columns"
+  [rows]="rows()"
+  [loading]="loading()"
+  [error]="loadError()"
+  [count]="rows().length"
+/>

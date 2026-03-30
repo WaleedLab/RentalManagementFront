@@ -15,6 +15,7 @@ $sidebar-collapsed-width: 90px;
       width: 100%;
       box-sizing: border-box;
       overflow: hidden;
+      background-color: #f4f6fb;
     }
 
     .logo-wrapper {
@@ -36,6 +37,11 @@ $sidebar-collapsed-width: 90px;
         max-height: 40px;
         object-fit: contain;
         margin-inline: auto;
+        filter: var(--app-sidebar-logo-filter);
+        opacity: var(--app-sidebar-logo-opacity);
+        transition:
+          filter 0.22s ease,
+          opacity 0.22s ease;
       }
     }
 
@@ -49,7 +55,20 @@ $sidebar-collapsed-width: 90px;
         max-height: 24px;
         object-fit: contain;
         margin-inline: auto;
+        filter: var(--app-sidebar-logo-filter);
+        opacity: var(--app-sidebar-logo-opacity);
+        transition:
+          filter 0.22s ease,
+          opacity 0.22s ease;
       }
+    }
+
+    .back-btn img {
+      filter: var(--app-sidebar-logo-filter);
+      opacity: var(--app-sidebar-logo-opacity);
+      transition:
+        filter 0.22s ease,
+        opacity 0.22s ease;
     }
 
     .sidebar-main {
@@ -201,15 +220,21 @@ $sidebar-collapsed-width: 90px;
       .sidebar-wrapper {
         position: fixed !important;
         inset-block: 0;
-        inset-inline-start: 0;
+        inset-inline-start: auto;
+        inset-inline-end: 0;
         width: $sidebar-width;
         max-width: 82vw;
         height: 100dvh;
         max-height: 100dvh;
+        margin: 0 !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        border-radius: 0 !important;
         overflow-y: auto;
         overflow-x: hidden;
         z-index: 1050;
         opacity: 1;
+        box-shadow: -18px 0 42px rgba(15, 23, 42, 0.16);
         transition:
           transform 0.3s ease,
           opacity 0.2s ease,
@@ -217,13 +242,25 @@ $sidebar-collapsed-width: 90px;
         visibility: visible;
         pointer-events: auto;
         will-change: transform, opacity;
+
+        &::after {
+          content: '';
+          position: fixed;
+          inset-block: 0;
+          inset-inline-start: auto;
+          inset-inline-end: 100%;
+          width: 100vw;
+          background: rgba(15, 23, 42, 0.08);
+          pointer-events: none;
+        }
       }
 
       .sidebar-wrapper.close_icon {
-        transform: translateX(-100%);
+        transform: translateX(100%);
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
+        box-shadow: none;
         transition:
           transform 0.3s ease,
           opacity 0.18s ease,

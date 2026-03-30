@@ -1,0 +1,11 @@
+<app-finance-list-shell
+  [title]="'Payment Counts'"
+  [subtitle]="'Review payment operations tied to bookings, branches, and collection channels.'"
+  [emptyTitle]="'No records found'"
+  [emptyDescription]="'No records were returned for the current fleet context.'"
+  [columns]="columns"
+  [rows]="rows()"
+  [loading]="loading()"
+  [error]="loadError()"
+  [count]="rows().length"
+/>

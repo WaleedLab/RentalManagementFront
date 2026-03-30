@@ -43,12 +43,24 @@ html[dir='rtl'] .page-header-card {
 @media (max-width: 767.98px) {
   .page-header-card {
     .card-body {
+      display: block;
       padding: 1.15rem 1rem 1.2rem;
     }
 
+    .page-header-copy,
     .page-header-actions {
       width: 100%;
-      justify-content: stretch;
+      flex: 1 1 100%;
+      justify-content: flex-start;
+    }
+
+    h3 {
+      font-size: 1.35rem;
+    }
+
+    p {
+      max-width: none;
+      margin-bottom: 0;
     }
   }
 }

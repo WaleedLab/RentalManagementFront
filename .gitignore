@@ -28,6 +28,10 @@ proxy.conf.json
 .vscode/
 .idea/
 .codex/
+.playwright-cli/
+output/playwright/
+.sass-cache/
+.cache/
 
 # Temporary files
 tmp/

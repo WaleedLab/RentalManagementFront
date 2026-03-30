@@ -30,6 +30,12 @@
   }
 }
 
+.dashboard-issue-alert {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.65;
+}
+
 .dashboard-stats {
   .stat-card {
     border-radius: 18px;
@@ -288,7 +294,7 @@ html[dir='rtl'] {
 @media (max-width: 991.98px) {
   .dashboard-actions {
     width: 100%;
-    justify-content: stretch;
+    justify-content: flex-start;
   }
 
   .dashboard-actions .btn {
@@ -306,12 +312,101 @@ html[dir='rtl'] {
 }
 
 @media (max-width: 767.98px) {
+  .dashboard-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
   .dashboard-actions .btn {
+    width: 100%;
     flex: 1 1 100%;
   }
 
+  .dashboard-panel {
+    border-radius: 18px;
+  }
+
+  .dashboard-panel__header {
+    padding: 1.15rem 1rem 0;
+
+    h3,
+    h4 {
+      font-size: 1.3rem;
+    }
+
+    span {
+      max-width: none;
+      font-size: 0.92rem;
+      line-height: 1.7;
+    }
+  }
+
+  .dashboard-stats .stat-card .card-body {
+    min-height: 118px;
+    padding: 1rem 0.95rem 0.9rem;
+  }
+
+  .stat-card__eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+  }
+
+  .stat-card__value {
+    margin-top: 0.8rem;
+    font-size: 1.85rem;
+  }
+
+  .stat-card__caption {
+    padding-top: 0.7rem;
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .latest-users-card,
+  .distribution-card,
+  .quick-actions-card,
+  .dashboard-summary .card-body {
+    padding-top: 0.9rem;
+  }
+
+  .latest-users-card__item {
+    padding-block: 0.25rem;
+  }
+
+  .latest-users-card__item > div {
+    gap: 0.6rem;
+  }
+
+  .quick-actions-card .btn {
+    min-height: 60px;
+    padding: 0.85rem 1rem;
+  }
+
+  .quick-actions-card__meta {
+    line-height: 1.55;
+  }
+
+  .summary-tile {
+    padding: 0.9rem 1rem;
+  }
+
+  .summary-tile__value,
+  .distribution-card__value {
+    font-size: 1.75rem;
+  }
+
   .distribution-card__row {
-    min-height: 80px;
+    min-height: auto;
     padding: 0.95rem 1rem;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  html[dir='rtl'] {
+    .latest-users-card .list-group-item > div,
+    .distribution-card__row {
+      flex-direction: column;
+      align-items: flex-start !important;
+    }
   }
 }
