@@ -6,7 +6,6 @@ import { BaseService } from '../../../../shared/services/base/base.service';
 import { Customer, CustomerFilters, CustomerUpsertRequest } from '../../models';
 import { normalizePaginatedResponse } from '../../../../shared/utils/paginated-response.normalizer';
 import { normalizeCustomer } from '../../models/customers/customer.normalizer';
-import { appendFormDataValue } from '../../../../shared/utils/form-data.utils';
 
 @Injectable({
   providedIn: 'root',
@@ -36,36 +35,38 @@ export class CustomerService {
   }
 
   create(body: CustomerUpsertRequest): Observable<unknown> {
-    return this.api.postData(this.base, this.toFormData(body));
+    return this.api.postData(this.base, this.toApiPayload(body));
   }
 
   update(body: CustomerUpsertRequest): Observable<unknown> {
-    return this.api.putData(`${this.base}/${body.id}`, this.toFormData(body));
+    return this.api.putData(`${this.base}/${body.id}`, this.toApiPayload(body));
   }
 
-  private toFormData(body: CustomerUpsertRequest): FormData {
-    const formData = new FormData();
-    appendFormDataValue(formData, 'NameAr', body.nameAr);
-    appendFormDataValue(formData, 'NameEn', body.nameEn);
-    appendFormDataValue(formData, 'FirstMobileNumber', body.firstMobileNumber);
-    appendFormDataValue(formData, 'SecondMobileNumber', body.secondMobileNumber);
-    appendFormDataValue(formData, 'ThirdMobileNumber', body.thirdMobileNumber);
-    appendFormDataValue(formData, 'Address', body.address);
-    appendFormDataValue(formData, 'LicenceNo', body.licenceNo);
-    appendFormDataValue(formData, 'IdNationality', body.idNationality);
-    appendFormDataValue(formData, 'DateIdNationality', body.dateIdNationality);
-    appendFormDataValue(formData, 'BirthDay', body.birthDay);
-    appendFormDataValue(formData, 'PlaseIdNationality', body.plaseIdNationality);
-    appendFormDataValue(formData, 'PlaseDrivinglicense', body.plaseDrivinglicense);
-    appendFormDataValue(formData, 'Nationality', body.nationality);
-    appendFormDataValue(formData, 'DateDrivinglicense', body.dateDrivinglicense);
-    appendFormDataValue(formData, 'DateDrivinglicenseHajri', body.dateDrivinglicenseHajri);
-    appendFormDataValue(formData, 'TaxRecord', body.taxRecord);
-    appendFormDataValue(formData, 'Email', body.email);
-    appendFormDataValue(formData, 'IdSubscriptionsOfCustomer', body.idSubscriptionsOfCustomer);
-    appendFormDataValue(formData, 'FleetId', body.fleetId);
-    appendFormDataValue(formData, 'Image', body.image);
-    return formData;
+  private toApiPayload(body: CustomerUpsertRequest): Record<string, unknown> {
+    return {
+      id: body.id,
+      nameAr: body.nameAr,
+      nameEn: body.nameEn,
+      firstMobileNumber: body.firstMobileNumber,
+      secondMobileNumber: body.secondMobileNumber,
+      thirdMobileNumber: body.thirdMobileNumber,
+      address: body.address,
+      licenceNo: body.licenceNo,
+      idNationality: body.idNationality,
+      dateIdNationality: body.dateIdNationality,
+      birthDay: body.birthDay,
+      plaseIdNationality: body.plaseIdNationality,
+      plaseDrivinglicense: body.plaseDrivinglicense,
+      nationality: body.nationality,
+      dateDrivinglicense: body.dateDrivinglicense,
+      dateDrivinglicenseHajri: body.dateDrivinglicenseHajri,
+      taxRecord: body.taxRecord,
+      email: body.email,
+      idSubscriptionsOfCustomer: body.idSubscriptionsOfCustomer,
+      fleetId: body.fleetId,
+      notes: body.notes,
+      isActive: body.isActive,
+    };
   }
 }
 
