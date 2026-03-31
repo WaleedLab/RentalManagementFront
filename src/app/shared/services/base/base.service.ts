@@ -1,10 +1,15 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
+import { SUPPRESS_ERROR_TOAST } from '../../http-interceptors/http-context.tokens';
 import { ApiResponse } from '../../models';
+
+export interface BaseRequestOptions {
+  suppressErrorToast?: boolean;
+}
 
 /**
  * Base API service: all requests go to environment.apiBaseUrl (Api/V1/CarRentalManagament).
@@ -18,7 +23,11 @@ export class BaseService {
 
   constructor(private http: HttpClient) {}
 
-  get<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>): Observable<ApiResponse<T>> {
+  get<T>(
+    endpoint: string,
+    params?: Record<string, string | number | boolean | undefined>,
+    options?: BaseRequestOptions,
+  ): Observable<ApiResponse<T>> {
     let httpParams = new HttpParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -27,7 +36,10 @@ export class BaseService {
         }
       });
     }
-    return this.http.get<ApiResponse<T> | T>(`${this.baseUrl}/${endpoint}`, { params: httpParams }).pipe(
+    return this.http.get<ApiResponse<T> | T>(`${this.baseUrl}/${endpoint}`, {
+      params: httpParams,
+      context: this.buildHttpContext(options),
+    }).pipe(
       map(response => this.normalizeResponse<T>(response)),
     );
   }
@@ -35,7 +47,11 @@ export class BaseService {
   /**
    * GET for endpoints التي لا تُرجع Result<T>، بل T مباشرة (مثل PaginatedList<User>).
    */
-  getPlain<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>): Observable<T> {
+  getPlain<T>(
+    endpoint: string,
+    params?: Record<string, string | number | boolean | undefined>,
+    options?: BaseRequestOptions,
+  ): Observable<T> {
     let httpParams = new HttpParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -44,7 +60,10 @@ export class BaseService {
         }
       });
     }
-    return this.http.get<T>(`${this.baseUrl}/${endpoint}`, { params: httpParams });
+    return this.http.get<T>(`${this.baseUrl}/${endpoint}`, {
+      params: httpParams,
+      context: this.buildHttpContext(options),
+    });
   }
 
   post<T>(endpoint: string, body: unknown): Observable<ApiResponse<T>> {
@@ -72,8 +91,12 @@ export class BaseService {
   }
 
   /** Returns only the data part of ApiResponse; throws if !succeeded */
-  getData<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>): Observable<T> {
-    return this.get<T>(endpoint, params).pipe(
+  getData<T>(
+    endpoint: string,
+    params?: Record<string, string | number | boolean | undefined>,
+    options?: BaseRequestOptions,
+  ): Observable<T> {
+    return this.get<T>(endpoint, params, options).pipe(
       map(res => {
         if (!res.succeeded) {
           throw new Error(this.getErrorMessage(endpoint, res));
@@ -164,5 +187,15 @@ export class BaseService {
 
     const candidate = value as Record<string, unknown>;
     return 'succeeded' in candidate || 'data' in candidate || 'httpStatusCode' in candidate;
+  }
+
+  private buildHttpContext(options?: BaseRequestOptions): HttpContext {
+    let context = new HttpContext();
+
+    if (options?.suppressErrorToast) {
+      context = context.set(SUPPRESS_ERROR_TOAST, true);
+    }
+
+    return context;
   }
 }

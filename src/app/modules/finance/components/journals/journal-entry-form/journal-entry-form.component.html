@@ -1,0 +1,94 @@
+<div class="container-fluid">
+  <app-page-header
+    [title]="'Create Journal Entry' | translate"
+    [subtitle]="'Capture a simplified accounting entry tied to branch and fleet activity.' | translate"
+  >
+    <a class="btn btn-outline-secondary" routerLink="/journals">{{ 'Back to Journals' | translate }}</a>
+  </app-page-header>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">{{ 'Date' | translate }} <span class="text-danger">*</span></label>
+                <input type="datetime-local" class="form-control" formControlName="date" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">{{ 'Branch ID' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="idBranch" />
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">{{ 'Note' | translate }} <span class="text-danger">*</span></label>
+                <textarea class="form-control" rows="3" formControlName="node"></textarea>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Debit' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="debtir" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Credit' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="credit" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Balance' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="balannce" />
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Operation Type' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="operationType" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Status' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="status" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ 'FleetId' | translate }} <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" formControlName="fleetId" />
+              </div>
+
+              <div class="col-md-6 d-flex align-items-end">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="journalType" formControlName="journalType" />
+                  <label class="form-check-label" for="journalType">{{ 'Journal Type' | translate }}</label>
+                </div>
+              </div>
+
+              <div class="col-md-6 d-flex align-items-end">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="isSystemOperation"
+                    formControlName="isSystemOperation"
+                  />
+                  <label class="form-check-label" for="isSystemOperation">{{ 'System Operation' | translate }}</label>
+                </div>
+              </div>
+            </div>
+
+            @if (form.invalid && form.touched) {
+              <div class="text-danger small mt-3">{{ 'Required field' | translate }}</div>
+            }
+
+            <div class="mt-4 d-flex gap-2">
+              <button class="btn btn-primary" type="submit" [disabled]="loading() || form.invalid">
+                @if (loading()) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                {{ 'Create' | translate }}
+              </button>
+              <a class="btn btn-outline-secondary" routerLink="/journals">{{ 'Cancel' | translate }}</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

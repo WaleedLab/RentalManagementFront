@@ -12,6 +12,10 @@ coverage/
 
 # Logs
 *.log
+*.out
+*.err
+*.pid
+*.pid.lock
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -28,7 +32,11 @@ proxy.conf.json
 .vscode/
 .idea/
 .codex/
+.eslintcache
+.stylelintcache
 .playwright-cli/
+playwright-report/
+test-results/
 output/playwright/
 .sass-cache/
 .cache/
@@ -36,8 +44,14 @@ output/playwright/
 # Temporary files
 tmp/
 temp/
+*.orig
+*.rej
+*.seed
 *.tmp
 *.bak
+*.swp
+*.swo
+*~
 
 # OS files
 .DS_Store

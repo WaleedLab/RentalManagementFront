@@ -8,3 +8,12 @@ export interface CashAccount {
   updatedAt?: string;
 }
 
+export interface CreateCashAccountRequest {
+  id: string;
+  countingId: string;
+  name: string;
+  description?: string;
+  createdBy: string;
+  fleetId: string;
+}
+

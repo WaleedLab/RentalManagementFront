@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
 import { BaseService } from '../../../../shared/services/base/base.service';
-import { FinancialYear } from '../../models/financial-years/financial-year.model';
+import { CreateFinancialYearRequest, FinancialYear } from '../../models/financial-years/financial-year.model';
 import { normalizeFinancialYear } from '../../models/financial-years/financial-year.normalizer';
 
 @Injectable({
@@ -16,6 +16,10 @@ export class FinancialYearService {
     return this.api.getData<unknown[]>(`${this.base}/List`, { IdFleet: fleetId }).pipe(
       map(items => (items ?? []).map(normalizeFinancialYear)),
     );
+  }
+
+  create(payload: CreateFinancialYearRequest): Observable<unknown> {
+    return this.api.postData<unknown>(this.base, payload);
   }
 }
 

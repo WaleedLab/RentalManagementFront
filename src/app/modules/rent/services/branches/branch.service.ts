@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
 import type { PaginatedAggregatorResponse } from '../../../../core/interfaces';
+import { BaseRequestOptions } from '../../../../shared/services/base/base.service';
 import { BaseService } from '../../../../shared/services/base/base.service';
 import type { Branch, BranchPaginatedRequest, BranchUpsertRequest } from '../../models';
 import { normalizePaginatedResponse } from '../../../../shared/utils/paginated-response.normalizer';
@@ -14,7 +15,10 @@ export class BranchService {
   private api = inject(BaseService);
   private readonly base = 'Branch';
 
-  getPaginated(params: BranchPaginatedRequest): Observable<PaginatedAggregatorResponse<Branch>> {
+  getPaginated(
+    params: BranchPaginatedRequest,
+    options?: BaseRequestOptions,
+  ): Observable<PaginatedAggregatorResponse<Branch>> {
     return this.api.getData<unknown>(`${this.base}/Paginated`, {
       FleetId: params.fleetId,
       Fleetid: params.fleetId,
@@ -30,7 +34,7 @@ export class BranchService {
       OrderByDirection: params.orderByDirection,
       orderBy: params.orderBy as any,
       orderByDirection: params.orderByDirection,
-    }).pipe(map(response => normalizePaginatedResponse(response, normalizeBranch)));
+    }, options).pipe(map(response => normalizePaginatedResponse(response, normalizeBranch)));
   }
 
   getById(id: number, fleetId: string): Observable<Branch> {

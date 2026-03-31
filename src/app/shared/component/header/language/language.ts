@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 
 import { TranslateService } from '@ngx-translate/core';
 
@@ -61,11 +61,23 @@ export class Language {
     this.applyLanguageDirection(match.code);
   }
 
-  changeLanguage(lang: selectedlanguage) {
+  toggleLanguageMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.navServices.language = !this.navServices.language;
+  }
+
+  changeLanguage(lang: selectedlanguage, event?: MouseEvent) {
+    event?.stopPropagation();
     this.translate.use(lang.code);
     this.selectedLanguage = lang;
     localStorage.setItem('app_language', lang.code);
+    this.navServices.language = false;
     this.applyLanguageDirection(lang.code);
+  }
+
+  @HostListener('document:click')
+  closeLanguageMenu(): void {
+    this.navServices.language = false;
   }
 
   private applyLanguageDirection(languageCode: string): void {

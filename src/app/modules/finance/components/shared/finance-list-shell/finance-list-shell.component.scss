@@ -8,6 +8,13 @@
   gap: 0.5rem;
 }
 
+.finance-list-shell__header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .finance-list-shell__card .table thead th {
   white-space: nowrap;
 }
@@ -21,9 +28,18 @@ html[dir='rtl'] .finance-list-shell__meta {
   flex-direction: row-reverse;
 }
 
+html[dir='rtl'] .finance-list-shell__header-actions {
+  flex-direction: row-reverse;
+}
+
 @media (max-width: 767.98px) {
   .finance-list-shell__card .table td,
   .finance-list-shell__card .table th {
     padding-block: 0.75rem;
+  }
+
+  .finance-list-shell__header-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 }

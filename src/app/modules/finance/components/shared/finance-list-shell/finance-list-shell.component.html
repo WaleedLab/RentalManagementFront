@@ -1,8 +1,13 @@
 <div class="container-fluid">
   <app-page-header [title]="title | translate" [subtitle]="subtitle | translate">
-    <div class="finance-list-shell__meta">
-      <span class="badge rounded-pill text-bg-light">{{ count }}</span>
-      <small class="text-muted">{{ 'Records' | translate }}</small>
+    <div class="finance-list-shell__header-actions">
+      <div class="finance-list-shell__meta">
+        <span class="badge rounded-pill text-bg-light">{{ count }}</span>
+        <small class="text-muted">{{ 'Records' | translate }}</small>
+      </div>
+      @if (createLink) {
+        <a class="btn btn-primary" [routerLink]="createLink">{{ createLabel | translate }}</a>
+      }
     </div>
   </app-page-header>
 

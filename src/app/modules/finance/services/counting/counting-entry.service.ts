@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
 import { BaseService } from '../../../../shared/services/base/base.service';
-import { CountingEntry } from '../../models/counting/counting-entry.model';
+import { CountingEntry, CreateCountingEntryRequest } from '../../models/counting/counting-entry.model';
 import { normalizeCountingEntry } from '../../models/counting/counting-entry.normalizer';
 
 @Injectable({
@@ -16,6 +16,10 @@ export class CountingEntryService {
     return this.api.getData<unknown[]>(`${this.base}/List`, { IdFleet: fleetId }).pipe(
       map(items => (items ?? []).map(normalizeCountingEntry)),
     );
+  }
+
+  create(payload: CreateCountingEntryRequest): Observable<unknown> {
+    return this.api.postData<unknown>(this.base, payload);
   }
 }
 

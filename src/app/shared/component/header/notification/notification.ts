@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-notification',
@@ -6,4 +6,16 @@ import { Component } from '@angular/core';
   styleUrls: ['./notification.scss'],
   imports: [],
 })
-export class Notification {}
+export class Notification {
+  public isOpen = false;
+
+  toggleDropdown(event: MouseEvent): void {
+    event.stopPropagation();
+    this.isOpen = !this.isOpen;
+  }
+
+  @HostListener('document:click')
+  closeDropdown(): void {
+    this.isOpen = false;
+  }
+}

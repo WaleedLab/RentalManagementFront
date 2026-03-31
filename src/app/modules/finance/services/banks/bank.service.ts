@@ -3,7 +3,7 @@ import { map, Observable } from 'rxjs';
 
 import { BaseService } from '../../../../shared/services/base/base.service';
 import { normalizeBank } from '../../models/banks/bank.normalizer';
-import { Bank } from '../../models/banks/bank.model';
+import { Bank, CreateBankRequest } from '../../models/banks/bank.model';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +16,10 @@ export class BankService {
     return this.api.getData<unknown[]>(`${this.base}/List`, { IdFleet: fleetId }).pipe(
       map(items => (items ?? []).map(normalizeBank)),
     );
+  }
+
+  create(payload: CreateBankRequest): Observable<unknown> {
+    return this.api.postData<unknown>(this.base, payload);
   }
 }
 

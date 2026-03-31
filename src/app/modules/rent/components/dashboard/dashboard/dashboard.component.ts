@@ -1,22 +1,32 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { catchError, forkJoin, of } from 'rxjs';
 
 import { PaginatedAggregatorResponse } from '../../../../../core/interfaces';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
+import { Menu, NavMenuService } from '../../../../../shared/services/layout/nav-menu.service';
 import { Branch, User, Vehicle, VehicleGroupSummary } from '../../../models';
 import { BranchService } from '../../../services/branches/branch.service';
 import { FleetService } from '../../../services/fleet/fleet.service';
 import { PrivilegeService } from '../../../services/privileges/privilege.service';
 import { RoleService } from '../../../services/roles/role.service';
-import { ToastService } from '../../../../../shared/services/toast.service';
 import { UserService } from '../../../services/users/user.service';
 import { VehicleService } from '../../../services/vehicles/vehicle.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
+
+interface DashboardShortcutItem {
+  title: string;
+  path: string;
+  imageIcon: string;
+}
+
+interface DashboardShortcutSection {
+  title: string;
+  items: DashboardShortcutItem[];
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -27,16 +37,15 @@ import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/stat
 })
 export class DashboardComponent implements OnInit {
   private authState = inject(AuthStateService);
+  private navMenuService = inject(NavMenuService);
   private userService = inject(UserService);
   private roleService = inject(RoleService);
   private privilegeService = inject(PrivilegeService);
   private fleetService = inject(FleetService);
   private branchService = inject(BranchService);
   private vehicleService = inject(VehicleService);
-  private toast = inject(ToastService);
 
   loading = signal(false);
-  loadIssue = signal<string | null>(null);
   groups = signal<VehicleGroupSummary[]>([]);
   latestUsers = signal<User[]>([]);
   userDistribution = signal({ active: 0, inactive: 0 });
@@ -55,6 +64,7 @@ export class DashboardComponent implements OnInit {
       return sum + groupVehicles;
     }, 0),
   );
+  navigationSections = computed(() => this.buildNavigationSections());
 
   ngOnInit(): void {
     this.loadDashboard();
@@ -62,7 +72,6 @@ export class DashboardComponent implements OnInit {
 
   private loadDashboard(): void {
     this.loading.set(true);
-    this.loadIssue.set(null);
     const fleetId = this.authState.fleetId() ?? '';
     const emptyPage = <T>(items: T[] = []): PaginatedAggregatorResponse<T> => ({
       items,
@@ -83,8 +92,12 @@ export class DashboardComponent implements OnInit {
       usersPage: this.userService.getPaginated({ pageNumber: 1, pageSize: 100 }).pipe(
         catchError(error => of(this.handleDashboardError(error, emptyPage<User>()))),
       ),
-      roles: this.roleService.getList().pipe(catchError(error => of(this.handleDashboardError(error, [] as never[])))),
-      privileges: this.privilegeService.getList().pipe(catchError(error => of(this.handleDashboardError(error, [] as never[])))),
+      roles: this.roleService.getList().pipe(
+        catchError(error => of(this.handleDashboardError(error, [] as never[]))),
+      ),
+      privileges: this.privilegeService.getList().pipe(
+        catchError(error => of(this.handleDashboardError(error, [] as never[]))),
+      ),
       fleets: this.fleetService.getPaginated({ pageNumber: 1, pageSize: 1 }).pipe(
         catchError(error => of(this.handleDashboardError(error, emptyPage()))),
       ),
@@ -102,7 +115,11 @@ export class DashboardComponent implements OnInit {
           this.applyUsersSnapshot(paginatedUsers, usersPage.totalCount ?? paginatedUsers.length);
         } else {
           this.userService.getList('Default').pipe(
-            catchError(() => this.userService.getList().pipe(catchError(error => of(this.handleDashboardError(error, []))))),
+            catchError(() =>
+              this.userService.getList(undefined).pipe(
+                catchError(error => of(this.handleDashboardError(error, []))),
+              ),
+            ),
           ).subscribe({
             next: users => this.applyUsersSnapshot(users, users.length),
             error: () => this.applyUsersSnapshot([], 0),
@@ -122,16 +139,6 @@ export class DashboardComponent implements OnInit {
   }
 
   private handleDashboardError<T>(error: unknown, fallback: T): T {
-    const httpError = error as HttpErrorResponse;
-    if (httpError?.status === 401) {
-      this.loadIssue.set('Dashboard data requests are returning 401 Unauthorized. The token is missing, expired, or not being accepted by the API.');
-      return fallback;
-    }
-
-    if (!this.loadIssue()) {
-      this.loadIssue.set(httpError?.error?.errors?.join(' ') || httpError?.message || 'Dashboard data could not be loaded from the API.');
-    }
-
     return fallback;
   }
 
@@ -183,6 +190,75 @@ export class DashboardComponent implements OnInit {
       ...current,
       users: totalCount,
     }));
+  }
+
+  private buildNavigationSections(): DashboardShortcutSection[] {
+    const sections: DashboardShortcutSection[] = [];
+    let currentSectionTitle: string | null = null;
+
+    for (const item of this.navMenuService.MENUITEMS) {
+      if (item.headTitle1) {
+        currentSectionTitle = item.headTitle1;
+        continue;
+      }
+
+      if (!currentSectionTitle) {
+        continue;
+      }
+
+      const shortcuts = this.extractShortcutItems(item);
+      if (shortcuts.length === 0) {
+        continue;
+      }
+
+      let section = sections.find(entry => entry.title === currentSectionTitle);
+      if (!section) {
+        section = {
+          title: currentSectionTitle,
+          items: [],
+        };
+        sections.push(section);
+      }
+
+      section.items.push(...shortcuts);
+    }
+
+    return sections;
+  }
+
+  private extractShortcutItems(item: Menu): DashboardShortcutItem[] {
+    if (!this.canAccessMenuItem(item)) {
+      return [];
+    }
+
+    if (item.type === 'sub') {
+      return (item.children ?? [])
+        .filter(child => this.canAccessMenuItem(child))
+        .filter((child): child is Menu & { path: string; title: string; imageIcon: string } =>
+          !!child.path && !!child.title && !!child.imageIcon,
+        )
+        .map(child => ({
+          title: child.title,
+          path: child.path,
+          imageIcon: child.imageIcon,
+        }));
+    }
+
+    if (!item.path || !item.title || !item.imageIcon) {
+      return [];
+    }
+
+    return [
+      {
+        title: item.title,
+        path: item.path,
+        imageIcon: item.imageIcon,
+      },
+    ];
+  }
+
+  private canAccessMenuItem(item: Menu): boolean {
+    return this.authState.hasAnyRole(item.roles ?? []) && this.authState.hasAnyPrivilege(item.privileges ?? []);
   }
 }
 

@@ -1,0 +1,100 @@
+<div class="container-fluid">
+  <app-page-header
+    [title]="'Create Payment Count' | translate"
+    [subtitle]="'Record a payment against booking, customer, branch, and selected collection channel.' | translate"
+  >
+    <a class="btn btn-outline-secondary" routerLink="/payment-counts">{{ 'Back to Payment Counts' | translate }}</a>
+  </app-page-header>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Customer ID' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="idCustomer" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Vehicle ID' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="idVehicle" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Booking ID' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="idBooking" />
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Branch ID' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="idBranch" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Amount' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" step="0.01" class="form-control" formControlName="paid" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ 'FleetId' | translate }} <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" formControlName="fleetId" />
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Payment Type' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="paymentType" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Bond Type' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="bondType" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Payment Status' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="status" />
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Paid Cash' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" step="0.01" class="form-control" formControlName="paidCash" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Paid Bank' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" step="0.01" class="form-control" formControlName="paidBank" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ 'Booking Status' | translate }} <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" formControlName="stutusbooking" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">{{ 'Cash Account ID' | translate }}</label>
+                <input type="text" class="form-control" formControlName="idCash" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ 'Bank ID' | translate }}</label>
+                <input type="text" class="form-control" formControlName="idBank" />
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">{{ 'Description' | translate }} <span class="text-danger">*</span></label>
+                <textarea class="form-control" rows="3" formControlName="dscription"></textarea>
+              </div>
+            </div>
+
+            @if (form.invalid && form.touched) {
+              <div class="text-danger small mt-3">{{ 'Required field' | translate }}</div>
+            }
+
+            <div class="mt-4 d-flex gap-2">
+              <button class="btn btn-primary" type="submit" [disabled]="loading() || form.invalid">
+                @if (loading()) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                {{ 'Create' | translate }}
+              </button>
+              <a class="btn btn-outline-secondary" routerLink="/payment-counts">{{ 'Cancel' | translate }}</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

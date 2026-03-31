@@ -7,3 +7,21 @@ export interface PaymentCount {
   idBooking?: number;
 }
 
+export interface CreatePaymentCountRequest {
+  idCustomer: number;
+  paid: number;
+  dscription: string;
+  idVehicle: number;
+  idBranch: number;
+  paymentType: number;
+  bondType: number;
+  status: number;
+  idCash?: string;
+  idBank?: string;
+  paidCash: number;
+  paidBank: number;
+  idBooking: number;
+  stutusbooking: number;
+  fleetId: string;
+}
+

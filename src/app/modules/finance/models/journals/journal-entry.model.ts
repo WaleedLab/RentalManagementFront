@@ -7,3 +7,17 @@ export interface JournalEntry {
   isManual?: boolean;
 }
 
+export interface CreateJournalEntryRequest {
+  date: string;
+  node: string;
+  journalType: boolean;
+  debtir: number;
+  credit: number;
+  balannce: number;
+  operationType: number;
+  status: number;
+  isSystemOperation: boolean;
+  idBranch: number;
+  fleetId: string;
+}
+

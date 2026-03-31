@@ -8,6 +8,8 @@ interface AuthSessionState {
   user: CurrentUser | null;
 }
 
+const SESSION_RESTORE_GRACE_PERIOD_MS = 5 * 60 * 1000;
+
 const ADMIN_ROLE_ALIASES = [
   'admin',
   'super_admin',
@@ -75,11 +77,12 @@ export class AuthStateService {
   readonly currentUser = computed(() => this.state().user);
   readonly roles = computed(() => this.state().user?.roles ?? []);
   readonly privileges = computed(() => this.state().user?.privileges ?? []);
-  readonly fleetId = computed(() => this.state().user?.fleetId ?? null);
+  readonly fleetId = computed(() => this.state().user?.fleetId ?? this.tokenService.getFleetId() ?? null);
   readonly branchId = computed(() => this.state().user?.branchId ?? null);
   readonly isAuthenticated = computed(() => !!this.state().token);
 
   constructor() {
+    this.registerCloseTracking();
     this.restoreSession();
   }
 
@@ -90,12 +93,18 @@ export class AuthStateService {
       return;
     }
 
+    if (this.tokenService.isTokenExpired(token) || this.isClosedBeyondGracePeriod()) {
+      this.clearSession();
+      return;
+    }
+
     const user = this.parseCurrentUser(token);
     if (!user) {
       this.clearSession();
       return;
     }
 
+    this.tokenService.clearClosedAt();
     this.state.set({ token, user });
     this.persistDerivedClaims(user);
   }
@@ -158,14 +167,18 @@ export class AuthStateService {
       return null;
     }
 
+    const fleetId =
+      this.readClaim(payload, ['fleetId', 'FleetId', 'fleetID', 'FleetID', 'fleetid', 'fleet_id']) ??
+      this.tokenService.getFleetId();
+
     return {
       id: this.readClaim(payload, ['id', 'Id', 'nameid', 'sub']),
       username: this.readClaim(payload, ['username', 'userName', 'unique_name']),
       name: this.readClaim(payload, ['name', 'fullName', 'Name']),
       nameEn: this.readClaim(payload, ['nameEn', 'NameEn']),
       email: this.readClaim(payload, ['email', 'Email']),
-      branchId: this.readClaim(payload, ['branchId', 'BranchId', 'branchID', 'BranchID']),
-      fleetId: this.readClaim(payload, ['fleetId', 'FleetId', 'fleetID', 'FleetID']),
+      branchId: this.readClaim(payload, ['branchId', 'BranchId', 'branchID', 'BranchID', 'branchid', 'branch_id']),
+      fleetId,
       roles: this.readClaimArray(payload, [
         'roles',
         'role',
@@ -246,5 +259,29 @@ export class AuthStateService {
   private isAdminLikeUser(): boolean {
     const roles = this.roles().map(role => role.toLowerCase().trim());
     return roles.some(role => ADMIN_ROLE_ALIASES.includes(role));
+  }
+
+  private registerCloseTracking(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const persistCloseTime = () => {
+      if (this.state().token) {
+        this.tokenService.markClosedAt();
+      }
+    };
+
+    window.addEventListener('pagehide', persistCloseTime);
+    window.addEventListener('beforeunload', persistCloseTime);
+  }
+
+  private isClosedBeyondGracePeriod(): boolean {
+    const closedAt = this.tokenService.getClosedAt();
+    if (!closedAt) {
+      return false;
+    }
+
+    return Date.now() - closedAt > SESSION_RESTORE_GRACE_PERIOD_MS;
   }
 }

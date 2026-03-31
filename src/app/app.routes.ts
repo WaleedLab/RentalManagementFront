@@ -9,7 +9,7 @@ import { authGuard } from './shared/services/auth/auth.guard';
  * - قالب واحد (ContentComponent) وأطفاله: dashboard + loadChildren لكل module
  */
 export const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
   {
     path: 'auth',
     loadChildren: () => import('./auth/authentication.module').then(m => m.AuthenticationModule),

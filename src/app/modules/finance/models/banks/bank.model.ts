@@ -8,3 +8,11 @@ export interface Bank {
   updatedAt?: string;
 }
 
+export interface CreateBankRequest {
+  countingId: string;
+  name: string;
+  description?: string;
+  code?: string;
+  fleetId: string;
+}
+

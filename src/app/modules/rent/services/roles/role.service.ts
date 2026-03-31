@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
 import { PaginatedAggregatorResponse } from '../../../../core/interfaces';
+import { BaseRequestOptions } from '../../../../shared/services/base/base.service';
 import {
   ApiResponse,
   RoleLookup,
@@ -21,8 +22,8 @@ export class RoleService {
 
   private readonly base = 'RoleLookup';
 
-  getList(): Observable<RoleLookup[]> {
-    return this.api.getData<unknown[]>(`${this.base}/roleLookup-list`).pipe(
+  getList(options?: BaseRequestOptions): Observable<RoleLookup[]> {
+    return this.api.getData<unknown[]>(`${this.base}/roleLookup-list`, undefined, options).pipe(
       map(items => (items ?? []).map(normalizeRole)),
     );
   }

@@ -7,3 +7,15 @@ export interface CountingEntry {
   balannce?: number;
 }
 
+export interface CreateCountingEntryRequest {
+  countingNumber: number;
+  countingMain: number;
+  countingType: number;
+  reportNumber: number;
+  countingLevel: number;
+  balannce: number;
+  nameAr: string;
+  nameEn?: string;
+  fleetId: string;
+}
+

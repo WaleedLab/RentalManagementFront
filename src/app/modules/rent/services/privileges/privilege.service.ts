@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
 import { PaginatedAggregatorResponse } from '../../../../core/interfaces';
+import { BaseRequestOptions } from '../../../../shared/services/base/base.service';
 import {
   ApiResponse,
   PrivilegeTypeLookup,
@@ -22,8 +23,8 @@ export class PrivilegeService {
 
   private readonly base = 'PrivilegeTypeLookup';
 
-  getList(): Observable<PrivilegeTypeLookup[]> {
-    return this.api.getData<unknown[]>(`${this.base}/privilegeTypeLookup-list`).pipe(
+  getList(options?: BaseRequestOptions): Observable<PrivilegeTypeLookup[]> {
+    return this.api.getData<unknown[]>(`${this.base}/privilegeTypeLookup-list`, undefined, options).pipe(
       map(items => (items ?? []).map(normalizePrivilege)),
     );
   }
