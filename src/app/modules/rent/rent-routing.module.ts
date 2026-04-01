@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { ADMIN_ROLES, APP_PRIVILEGES } from '../../core/auth/access.constants';
+import { ADMIN_ROLES, APP_PRIVILEGES, TENANT_ADMIN_ROLES } from '../../core/auth/access.constants';
 import { authGuard } from '../../shared/services/auth/auth.guard';
 import { privilegeGuard } from '../../shared/services/auth/privilege.guard';
 
@@ -179,6 +179,34 @@ const routes: Routes = [
       {
         path: ':id/details',
         loadComponent: () => import('./components/customers/customer-details/customer-details.component').then(m => m.CustomerDetailsComponent),
+      },
+    ],
+  },
+  {
+    path: 'customer-subscriptions',
+    data: { title: 'Customer Subscriptions', breadcrumb: 'Customer Subscriptions', roles: TENANT_ADMIN_ROLES },
+    canActivate: [authGuard, privilegeGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./components/subscriptions/customer-subscription-list/customer-subscription-list.component').then(
+            m => m.CustomerSubscriptionListComponent,
+          ),
+      },
+      {
+        path: 'create',
+        loadComponent: () =>
+          import('./components/subscriptions/customer-subscription-form/customer-subscription-form.component').then(
+            m => m.CustomerSubscriptionFormComponent,
+          ),
+      },
+      {
+        path: 'edit/:id',
+        loadComponent: () =>
+          import('./components/subscriptions/customer-subscription-form/customer-subscription-form.component').then(
+            m => m.CustomerSubscriptionFormComponent,
+          ),
       },
     ],
   },

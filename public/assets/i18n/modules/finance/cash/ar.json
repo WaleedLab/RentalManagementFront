@@ -1,0 +1,13 @@
+{
+  "Back to Cash Accounts": "الرجوع إلى الحسابات النقدية",
+  "Cancel": "إلغاء",
+  "Cash account created successfully": "تم إنشاء الحساب النقدي بنجاح",
+  "Create": "إنشاء",
+  "Create a cash drawer or collection point linked to the selected fleet.": "إنشاء صندوق نقدي أو نقطة تحصيل مرتبطة بالأسطول المحدد.",
+  "Create Cash Account": "إضافة حساب نقدي",
+  "Current user is required": "المستخدم الحالي مطلوب",
+  "Description": "الوصف",
+  "Failed to save cash account": "فشل حفظ الحساب النقدي",
+  "FleetId": "معرف الأسطول",
+  "Name": "الاسم"
+}

@@ -1,0 +1,21 @@
+{
+  "Automatic": "Automatic",
+  "Back to Journals": "Back to Journals",
+  "Branch ID": "Branch ID",
+  "Cancel": "Cancel",
+  "Capture a simplified accounting entry tied to branch and fleet activity.": "Capture a simplified accounting entry tied to branch and fleet activity.",
+  "Create": "Create",
+  "Create Journal Entry": "Create Journal Entry",
+  "Credit": "Credit",
+  "Date": "Date",
+  "Debit": "Debit",
+  "Failed to save journal entry": "Failed to save journal entry",
+  "FleetId": "FleetId",
+  "Journal entry created successfully": "Journal entry created successfully",
+  "Journal Type": "Journal Type",
+  "Manual": "Manual",
+  "Note": "Note",
+  "Operation Type": "Operation Type",
+  "Status": "Status",
+  "System Operation": "System Operation"
+}

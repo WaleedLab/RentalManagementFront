@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-import { ADMIN_ROLES, APP_PRIVILEGES } from '../../../core/auth/access.constants';
+import { ADMIN_ROLES, APP_PRIVILEGES, TENANT_ADMIN_ROLES } from '../../../core/auth/access.constants';
 import {
   FINANCE_MENU_ICONS,
   FINANCE_ROUTE_PATHS,
@@ -64,6 +64,15 @@ export class NavMenuService {
       imageIcon: 'assets/images/rent_icon/Customers.png',
       type: 'link',
       privileges: [APP_PRIVILEGES.customer],
+    },
+    {
+      level: 1,
+      path: '/customer-subscriptions',
+      title: 'Customer Subscriptions',
+      icon: 'sample-page',
+      imageIcon: 'assets/images/rent_icon/subscription_customer.png',
+      type: 'link',
+      roles: TENANT_ADMIN_ROLES,
     },
     { headTitle1: 'Finance' },
     {

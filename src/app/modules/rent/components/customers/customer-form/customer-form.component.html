@@ -3,7 +3,14 @@
     [title]="(isEdit() ? 'Edit Customer' : 'Create Customer') | translate"
     [subtitle]="'Clean customer forms with image upload, identity, and license details.' | translate"
   >
-    <a class="btn btn-outline-secondary" routerLink="/customers">{{ 'Back to Customers' | translate }}</a>
+    <div class="d-flex gap-2">
+      @if (canManageSubscriptions()) {
+        <a class="btn btn-outline-primary" routerLink="/customer-subscriptions">
+          {{ 'Subscription Offers' | translate }}
+        </a>
+      }
+      <a class="btn btn-outline-secondary" routerLink="/customers">{{ 'Back to Customers' | translate }}</a>
+    </div>
   </app-page-header>
 
   <div class="row g-4 customer-form-layout">
@@ -169,6 +176,60 @@
                 <p class="mb-0">{{ 'Customer Section Extra Subtitle' | translate }}</p>
               </div>
               <div class="row g-3">
+                @if (canManageSubscriptions() && isEdit()) {
+                  <div class="col-12">
+                    <div class="subscription-offer-box">
+                      <div class="subscription-offer-box__header">
+                        <h6 class="mb-1">{{ 'Subscription Offer Strategy' | translate }}</h6>
+                        <p class="mb-0">{{ 'Set customer offer by automatic rental-count rule or by manual admin assignment.' | translate }}</p>
+                      </div>
+
+                      <div class="row g-3">
+                        <div class="col-md-4">
+                          <label class="form-label">{{ 'Rental Count' | translate }}</label>
+                          <input class="form-control" type="text" [value]="rentalCount()" readonly />
+                          <div class="form-text">{{ 'Calculated from customer booking history.' | translate }}</div>
+                        </div>
+
+                        <div class="col-md-8">
+                          <label class="form-label">{{ 'Auto Suggested Category' | translate }}</label>
+                          <input class="form-control" type="text" [value]="getAutoAssignedSubscriptionName()" readonly />
+                          <div class="form-text">{{ 'Highest eligible offer based on approved-after bookings.' | translate }}</div>
+                        </div>
+
+                        <div class="col-12">
+                          <label class="form-label">{{ 'Offer Assignment Mode' | translate }}</label>
+                          <div class="subscription-mode-toggle">
+                            <label class="form-check">
+                              <input class="form-check-input" type="radio" formControlName="subscriptionAssignmentMode" value="auto" />
+                              <span class="form-check-label">{{ 'Automatic by rental count' | translate }}</span>
+                            </label>
+                            <label class="form-check">
+                              <input class="form-check-input" type="radio" formControlName="subscriptionAssignmentMode" value="manual" />
+                              <span class="form-check-label">{{ 'Manual admin assignment' | translate }}</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        @if (form.controls.subscriptionAssignmentMode.value === 'manual') {
+                          <div class="col-12">
+                            <label class="form-label">{{ 'Manual Subscription Category' | translate }}</label>
+                            <select class="form-select" formControlName="idSubscriptionsOfCustomer">
+                              <option [ngValue]="0">{{ 'Select category' | translate }}</option>
+                              @for (subscription of getSelectableSubscriptions(); track subscription.id) {
+                                <option [ngValue]="subscription.id">
+                                  {{ getSubscriptionName(subscription) }}
+                                </option>
+                              }
+                            </select>
+                            <div class="form-text">{{ 'Admin can force a specific offer category for this customer.' | translate }}</div>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+
                 <div class="col-md-6">
                   <label class="form-label">{{ 'Tax Record' | translate }}</label>
                   <input class="form-control" type="number" min="0" formControlName="taxRecord" [placeholder]="'Example Tax Record' | translate" />

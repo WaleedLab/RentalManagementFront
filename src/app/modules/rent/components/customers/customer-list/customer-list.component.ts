@@ -4,9 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
+import { TENANT_ADMIN_ROLES } from '../../../../../core/auth/access.constants';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { Customer } from '../../../models';
+import { CustomerSubscription } from '../../../models/subscriptions/customer-subscription.model';
 import { CustomerService } from '../../../services/customers/customer.service';
+import { CustomerSubscriptionService } from '../../../services/subscriptions/customer-subscription.service';
 import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
@@ -14,7 +17,7 @@ import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-h
 
 type CustomerSearchField =
   | 'all'
-  | 'membershipNo'
+  | 'subscription'
   | 'nameAr'
   | 'phone'
   | 'licenseExpiry'
@@ -32,17 +35,20 @@ type CustomerSearchField =
 export class CustomerListComponent implements OnInit {
   private authState = inject(AuthStateService);
   private customerService = inject(CustomerService);
+  private customerSubscriptionService = inject(CustomerSubscriptionService);
   private confirm = inject(ConfirmService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
 
   customers = signal<Customer[]>([]);
+  customerSubscriptions = signal<CustomerSubscription[]>([]);
+  canManageSubscriptions = computed(() => this.authState.hasAnyRole(TENANT_ADMIN_ROLES));
   search = signal('');
   searchField = signal<CustomerSearchField>('all');
   loading = signal(false);
   searchFieldOptions: Array<{ value: CustomerSearchField; label: string }> = [
     { value: 'all', label: 'All Fields' },
-    { value: 'membershipNo', label: 'Membership No' },
+    { value: 'subscription', label: 'Subscription' },
     { value: 'nameAr', label: 'Arabic Name' },
     { value: 'phone', label: 'Phone' },
     { value: 'licenseExpiry', label: 'License Expiry' },
@@ -60,6 +66,7 @@ export class CustomerListComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.loadSubscriptions();
     this.load();
   }
 
@@ -77,6 +84,15 @@ export class CustomerListComponent implements OnInit {
         next: page => this.customers.set(page.items ?? []),
         error: err => this.toast.error(err?.message ?? this.translate.instant('Failed to load customers')),
         complete: () => this.loading.set(false),
+      });
+  }
+
+  loadSubscriptions(): void {
+    this.customerSubscriptionService
+      .getList(this.authState.fleetId() || undefined)
+      .subscribe({
+        next: subscriptions => this.customerSubscriptions.set(subscriptions ?? []),
+        error: () => this.customerSubscriptions.set([]),
       });
   }
 
@@ -107,8 +123,25 @@ export class CustomerListComponent implements OnInit {
       });
   }
 
-  getMembershipNo(customer: Customer): string {
-    return String(customer.code || customer.idSubscriptionsOfCustomer || '-');
+  getSubscriptionName(customer: Customer): string {
+    const subscriptionId = Number(customer.idSubscriptionsOfCustomer ?? 0);
+    if (!subscriptionId) {
+      return '-';
+    }
+
+    const matchedSubscription = this.customerSubscriptions().find(
+      subscription => Number(subscription.id) === subscriptionId,
+    );
+    if (!matchedSubscription) {
+      return '-';
+    }
+
+    const lang = (this.translate.currentLang || this.translate.getDefaultLang() || 'en').toLowerCase();
+    if (lang.startsWith('ar')) {
+      return matchedSubscription.nameAr || matchedSubscription.nameEn || '-';
+    }
+
+    return matchedSubscription.nameEn || matchedSubscription.nameAr || '-';
   }
 
   getArabicName(customer: Customer): string {
@@ -141,7 +174,7 @@ export class CustomerListComponent implements OnInit {
     const field = this.searchField();
     if (field === 'all') {
       const searchableFields: CustomerSearchField[] = [
-        'membershipNo',
+        'subscription',
         'nameAr',
         'phone',
         'licenseExpiry',
@@ -160,8 +193,8 @@ export class CustomerListComponent implements OnInit {
 
   private getSearchFieldValue(customer: Customer, field: CustomerSearchField): string {
     switch (field) {
-      case 'membershipNo':
-        return this.getMembershipNo(customer).toLowerCase();
+      case 'subscription':
+        return this.getSubscriptionName(customer).toLowerCase();
       case 'nameAr':
         return this.getArabicName(customer).toLowerCase();
       case 'phone':

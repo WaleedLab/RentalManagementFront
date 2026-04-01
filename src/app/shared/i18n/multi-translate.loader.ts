@@ -26,17 +26,34 @@ export class MultiTranslateLoader implements TranslateLoader {
 
   getTranslation(lang: string): Observable<any> {
     const l = (lang || 'en').toLowerCase();
+    const rentModules = [
+      'dashboard',
+      'users',
+      'roles',
+      'privileges',
+      'fleet',
+      'branches',
+      'vehicles',
+      'category-vehicles',
+      'customers',
+      'subscriptions',
+      'booking',
+      'security',
+    ];
+    const financeModules = [
+      'common',
+      'banks',
+      'cash',
+      'counting',
+      'financial-years',
+      'journals',
+      'payment-counts',
+    ];
+
     const paths = [
       `./assets/i18n/common/${l}.json`,
-      `./assets/i18n/modules/dashboard/${l}.json`,
-      `./assets/i18n/modules/users/${l}.json`,
-      `./assets/i18n/modules/fleet/${l}.json`,
-      `./assets/i18n/modules/branches/${l}.json`,
-      `./assets/i18n/modules/vehicles/${l}.json`,
-      `./assets/i18n/modules/category-vehicles/${l}.json`,
-      `./assets/i18n/modules/customers/${l}.json`,
-      `./assets/i18n/modules/booking/${l}.json`,
-      `./assets/i18n/modules/security/${l}.json`,
+      ...rentModules.map(moduleName => `./assets/i18n/modules/rent/${moduleName}/${l}.json`),
+      ...financeModules.map(moduleName => `./assets/i18n/modules/finance/${moduleName}/${l}.json`),
     ];
 
     const requests = paths.map(p =>

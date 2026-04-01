@@ -1,38 +1,211 @@
 <div class="container-fluid">
-  <app-page-header title="Customer Details" subtitle="Review profile, contact, and license information.">
-    <div class="d-flex gap-2">
-      <a class="btn btn-outline-secondary" routerLink="/customers">Back</a>
-      @if (customer(); as item) {
-        <a class="btn btn-primary" [routerLink]="['/customers', item.id, 'edit']">Edit Customer</a>
-      }
-    </div>
+  <app-page-header
+    [title]="'Customer Details' | translate"
+    [subtitle]="'Review profile, contact, and license information.' | translate"
+  >
+    <a class="btn btn-outline-secondary" routerLink="/customers">
+      {{ 'Back to Customers' | translate }}
+    </a>
   </app-page-header>
 
-  <div class="card">
-    <div class="card-body">
-      @if (loading()) {
-        <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
-      } @else if (customer(); as item) {
-        <div class="row g-4">
-          <div class="col-lg-4">
-            @if (imageUrl()) {
-              <img class="img-fluid rounded border" [src]="imageUrl()" alt="customer" />
-            }
-          </div>
-          <div class="col-lg-8">
-            <div class="row g-3">
-              <div class="col-md-6"><strong>Name:</strong> {{ item.fullName }}</div>
-              <div class="col-md-6"><strong>Email:</strong> {{ item.email || '-' }}</div>
-              <div class="col-md-6"><strong>Phone:</strong> {{ item.phoneNumber || '-' }}</div>
-              <div class="col-md-6"><strong>Identity:</strong> {{ item.identityNumber || '-' }}</div>
-              <div class="col-md-6"><strong>License:</strong> {{ item.drivingLicenseNumber || '-' }}</div>
-              <div class="col-md-6"><strong>Nationality:</strong> {{ item.nationality || '-' }}</div>
-              <div class="col-md-12"><strong>Address:</strong> {{ item.address || '-' }}</div>
-              <div class="col-md-12"><strong>Status:</strong> <app-status-badge [label]="item.isActive ? 'Active' : 'Inactive'" [tone]="item.isActive ? 'success' : 'secondary'" /></div>
+  @if (loading()) {
+    <div class="card">
+      <div class="card-body text-center py-5">
+        <div class="spinner-border text-primary"></div>
+      </div>
+    </div>
+  } @else if (customer(); as item) {
+    <div class="row g-4 customer-details-layout">
+      <div class="col-xl-8">
+        <div class="card customer-details-card">
+          <div class="card-body">
+            <div class="customer-details-section">
+              <div class="customer-details-section__header">
+                <h6 class="mb-1">{{ 'Customer Section Identity Title' | translate }}</h6>
+                <p class="mb-0">{{ 'Customer Section Identity Subtitle' | translate }}</p>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'Full Name' | translate }}</label>
+                  <input
+                    class="form-control customer-details-readonly"
+                    readonly
+                    [value]="display(item.nameAr || item.fullName)"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'Name (En)' | translate }}</label>
+                  <input class="form-control customer-details-readonly" readonly [value]="display(item.nameEn)" />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">{{ 'Nationality' | translate }}</label>
+                  <input class="form-control customer-details-readonly" readonly [value]="display(item.nationality)" />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">{{ 'Date of Birth' | translate }}</label>
+                  <input
+                    class="form-control customer-details-readonly"
+                    readonly
+                    [value]="formatDate(item.birthDay || item.dateOfBirth)"
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">{{ 'Identity Number' | translate }}</label>
+                  <input
+                    class="form-control customer-details-readonly"
+                    readonly
+                    [value]="display(item.idNationality || item.identityNumber)"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'Identity Issue Date' | translate }}</label>
+                  <input
+                    class="form-control customer-details-readonly"
+                    readonly
+                    [value]="formatDate(item.dateIdNationality)"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'Identity Issue Place' | translate }}</label>
+                  <input
+                    class="form-control customer-details-readonly"
+                    readonly
+                    [value]="display(item.plaseIdNationality)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="customer-details-section">
+              <div class="customer-details-section__header">
+                <h6 class="mb-1">{{ 'Customer Section Contact Title' | translate }}</h6>
+                <p class="mb-0">{{ 'Customer Section Contact Subtitle' | translate }}</p>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'Primary Mobile Number' | translate }}</label>
+                  <input
+                    class="form-control customer-details-readonly"
+                    readonly
+                    [value]="display(item.firstMobileNumber || item.phoneNumber)"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'Secondary Mobile Number' | translate }}</label>
+                  <input class="form-control customer-details-readonly" readonly [value]="display(item.secondMobileNumber)" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'Third Mobile Number' | translate }}</label>
+                  <input class="form-control customer-details-readonly" readonly [value]="display(item.thirdMobileNumber)" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'Email' | translate }}</label>
+                  <input class="form-control customer-details-readonly" readonly [value]="display(item.email)" />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">{{ 'Address' | translate }}</label>
+                  <textarea
+                    class="form-control customer-details-readonly"
+                    rows="3"
+                    readonly
+                    [value]="display(item.address)"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="customer-details-section">
+              <div class="customer-details-section__header">
+                <h6 class="mb-1">{{ 'Customer Section License Title' | translate }}</h6>
+                <p class="mb-0">{{ 'Customer Section License Subtitle' | translate }}</p>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'Driving License Number' | translate }}</label>
+                  <input
+                    class="form-control customer-details-readonly"
+                    readonly
+                    [value]="display(item.licenceNo || item.drivingLicenseNumber)"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'License Expiry Date' | translate }}</label>
+                  <input
+                    class="form-control customer-details-readonly"
+                    readonly
+                    [value]="formatDate(item.dateDrivinglicense || item.drivingLicenseExpiryDate)"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'License Hijri Date' | translate }}</label>
+                  <input
+                    class="form-control customer-details-readonly"
+                    readonly
+                    [value]="display(item.dateDrivinglicenseHajri)"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'License Issue Place' | translate }}</label>
+                  <input
+                    class="form-control customer-details-readonly"
+                    readonly
+                    [value]="display(item.plaseDrivinglicense)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="customer-details-section">
+              <div class="customer-details-section__header">
+                <h6 class="mb-1">{{ 'Customer Section Extra Title' | translate }}</h6>
+                <p class="mb-0">{{ 'Customer Section Extra Subtitle' | translate }}</p>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'Subscription' | translate }}</label>
+                  <input class="form-control customer-details-readonly" readonly [value]="display(getSubscriptionName())" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">{{ 'Tax Record' | translate }}</label>
+                  <input class="form-control customer-details-readonly" readonly [value]="display(item.taxRecord)" />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">{{ 'Notes' | translate }}</label>
+                  <textarea
+                    class="form-control customer-details-readonly"
+                    rows="3"
+                    readonly
+                    [value]="display(item.notes)"
+                  ></textarea>
+                </div>
+                <div class="col-12">
+                  <div class="customer-details-status">
+                    <span class="customer-details-status__label">{{ 'Status' | translate }}</span>
+                    <app-status-badge
+                      [label]="item.isActive ? ('Active' | translate) : ('Inactive' | translate)"
+                      [tone]="item.isActive ? 'success' : 'secondary'"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      }
+      </div>
+      <div class="col-xl-4">
+        <div class="card customer-details-card customer-details-card--side">
+          <div class="card-body">
+            <h6 class="mb-3">{{ 'Customer Image' | translate }}</h6>
+            @if (imageUrl()) {
+              <img class="img-fluid customer-details-image" [src]="imageUrl()" alt="customer" />
+            } @else {
+              <div class="customer-details-image-placeholder">
+                {{ 'Unknown' | translate }}
+              </div>
+            }
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+  }
 </div>

@@ -4,8 +4,11 @@
   place-items: center;
   padding: 32px 20px;
   background:
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.7), transparent 28%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.96));
+    linear-gradient(135deg, rgba(245, 248, 255, 0.74), rgba(255, 255, 255, 0.86)),
+    url('/assets/images/login/BG_login.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .auth-panel {
@@ -127,8 +130,11 @@
 :host-context(body.dark-only) {
   .auth-shell {
     background:
-      radial-gradient(circle at top right, rgba(255, 255, 255, 0.06), transparent 24%),
-      linear-gradient(180deg, rgba(20, 24, 34, 0.96), rgba(15, 18, 26, 1));
+      linear-gradient(135deg, rgba(14, 20, 36, 0.84), rgba(13, 17, 31, 0.9)),
+      url('/assets/images/login/BG_login.jpg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
   }
 
   .auth-panel {

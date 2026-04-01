@@ -1,0 +1,21 @@
+{
+  "Automatic": "تلقائي",
+  "Back to Journals": "الرجوع إلى القيود اليومية",
+  "Branch ID": "معرف الفرع",
+  "Cancel": "إلغاء",
+  "Capture a simplified accounting entry tied to branch and fleet activity.": "تسجيل قيد محاسبي مبسط مرتبط بحركة الفرع والأسطول.",
+  "Create": "إنشاء",
+  "Create Journal Entry": "إضافة قيد يومي",
+  "Credit": "دائن",
+  "Date": "التاريخ",
+  "Debit": "مدين",
+  "Failed to save journal entry": "فشل حفظ القيد اليومي",
+  "FleetId": "معرف الأسطول",
+  "Journal entry created successfully": "تم إنشاء القيد اليومي بنجاح",
+  "Journal Type": "نوع القيد",
+  "Manual": "يدوي",
+  "Note": "البيان",
+  "Operation Type": "نوع العملية",
+  "Status": "الحالة",
+  "System Operation": "عملية نظام"
+}

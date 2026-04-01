@@ -29,6 +29,7 @@ export class PageHeaderComponent {
     if (url.includes('/security')) return 'assets/images/rent_icon/My_Access.png';
 
     if (url.includes('/booking')) return 'assets/images/rent_icon/Booking.png';
+    if (url.includes('/customer-subscriptions')) return 'assets/images/rent_icon/subscription_customer.png';
     if (url.includes('/customers')) return 'assets/images/rent_icon/Customers.png';
     if (url.includes('/vehicles')) return 'assets/images/rent_icon/Vehicles.png';
     if (url.includes('/fleet')) return 'assets/images/rent_icon/Fleet.png';

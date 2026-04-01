@@ -1,0 +1,14 @@
+{
+  "Current user access, roles, and privilege visibility across the admin system.": "Current user access, roles, and privilege visibility across the admin system.",
+  "Current user roles and privileges": "Current user roles and privileges",
+  "Email:": "Email:",
+  "No privileges found for the current session.": "No privileges found for the current session.",
+  "No privileges found in local storage.": "No privileges found in local storage.",
+  "No roles found for the current session.": "No roles found for the current session.",
+  "No roles found in local storage.": "No roles found in local storage.",
+  "Privileges": "Privileges",
+  "Roles": "Roles",
+  "Security Overview": "Security Overview",
+  "User": "User",
+  "Username:": "Username:"
+}

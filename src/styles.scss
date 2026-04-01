@@ -161,11 +161,11 @@ html[dir='rtl'] .table-actions {
 body.dark-only {
   --app-table-border-color: rgba(148, 163, 184, 0.16);
   --app-table-surface: linear-gradient(180deg, rgba(25, 32, 56, 0.96) 0%, rgba(23, 30, 52, 0.92) 100%);
-  --app-table-head-bg: rgba(148, 163, 184, 0.08);
+  --app-table-head-bg: rgba(45, 58, 96, 0.62);
   --app-table-head-color: rgba(241, 245, 249, 0.88);
   --app-table-text-color: rgba(248, 250, 252, 0.92);
   --app-table-muted-color: rgba(148, 163, 184, 0.82);
-  --app-table-row-alt: rgba(148, 163, 184, 0.05);
+  --app-table-row-alt: rgba(24, 34, 62, 0.9);
   --app-table-row-hover: rgba(59, 130, 246, 0.14);
   --app-table-shadow: 0 22px 48px -30px rgba(2, 6, 23, 0.8);
   --app-table-action-surface: rgba(255, 255, 255, 0.04);
@@ -185,6 +185,23 @@ body.dark-only {
   .table-action-icon--secondary:hover {
     background: var(--app-table-row-hover);
   }
+}
+
+body.dark-only .table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: rgba(24, 34, 62, 0.92) !important;
+}
+
+body.dark-only .table-striped > tbody > tr:nth-of-type(even) > * {
+  background-color: rgba(16, 24, 46, 0.94) !important;
+}
+
+body.dark-only .table-hover > tbody > tr:hover > * {
+  background-color: rgba(45, 96, 190, 0.28) !important;
+  color: var(--app-table-text-color) !important;
+}
+
+body.dark-only .table tbody tr > * {
+  color: var(--app-table-text-color) !important;
 }
 
 .form-text {

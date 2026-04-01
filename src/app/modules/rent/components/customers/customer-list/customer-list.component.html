@@ -1,7 +1,14 @@
 <div class="container-fluid">
   <app-page-header [title]="'Customers' | translate" [subtitle]="'Customer records with identity, contact, license, and profile image support.' | translate">
     <div class="list-header-actions">
-      <a class="btn btn-primary" routerLink="/customers/create">{{ 'Create Customer' | translate }}</a>
+      <div class="d-flex gap-2">
+        @if (canManageSubscriptions()) {
+          <a class="btn btn-outline-primary" routerLink="/customer-subscriptions">
+            {{ 'Subscription Offers' | translate }}
+          </a>
+        }
+        <a class="btn btn-primary" routerLink="/customers/create">{{ 'Create Customer' | translate }}</a>
+      </div>
     </div>
   </app-page-header>
 
@@ -41,7 +48,7 @@
           <table class="table table-striped align-middle customer-grid">
             <thead>
               <tr>
-                <th>{{ 'Membership No' | translate }}</th>
+                <th>{{ 'Subscription' | translate }}</th>
                 <th>{{ 'Arabic Name' | translate }}</th>
                 <th>{{ 'Phone' | translate }}</th>
                 <th>{{ 'License Expiry Date' | translate }}</th>
@@ -54,7 +61,7 @@
             <tbody>
               @for (customer of filteredCustomers(); track customer.id) {
                 <tr>
-                  <td>{{ getMembershipNo(customer) }}</td>
+                  <td>{{ getSubscriptionName(customer) }}</td>
                   <td>{{ getArabicName(customer) }}</td>
                   <td>{{ getPhone(customer) }}</td>
                   <td>{{ getLicenseExpiry(customer) }}</td>

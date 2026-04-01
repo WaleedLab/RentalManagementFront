@@ -1,0 +1,83 @@
+<div class="container-fluid">
+  <app-page-header
+    [title]="(isEdit() ? 'Edit Subscription Offer' : 'Create Subscription Offer') | translate"
+    [subtitle]="'Define customer discount offers and booking-threshold eligibility.' | translate"
+  >
+    <a class="btn btn-outline-secondary" routerLink="/customer-subscriptions">
+      {{ 'Back to Subscription Offers' | translate }}
+    </a>
+  </app-page-header>
+
+  <div class="card">
+    <div class="card-body">
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">{{ 'Name (Ar)' | translate }}</label>
+            <input class="form-control" formControlName="nameAr" maxlength="255" />
+            @if (form.controls.nameAr.invalid && form.controls.nameAr.touched) {
+              <div class="text-danger small mt-1">
+                {{ 'Arabic subscription name is required and must be valid.' | translate }}
+              </div>
+            }
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'Name (En)' | translate }}</label>
+            <input class="form-control" formControlName="nameEn" maxlength="255" />
+            @if (form.controls.nameEn.invalid && form.controls.nameEn.touched) {
+              <div class="text-danger small mt-1">
+                {{ 'English subscription name is required and must be valid.' | translate }}
+              </div>
+            }
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'Discount (%)' | translate }}</label>
+            <input class="form-control" type="number" min="0" max="100" formControlName="discount" />
+            @if (form.controls.discount.invalid && form.controls.discount.touched) {
+              <div class="text-danger small mt-1">
+                {{ 'Discount must be between 0 and 100.' | translate }}
+              </div>
+            }
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'Approved After Bookings' | translate }}</label>
+            <input
+              class="form-control"
+              type="number"
+              min="0"
+              formControlName="subscriptionApprovedAfter"
+            />
+            @if (form.controls.subscriptionApprovedAfter.invalid && form.controls.subscriptionApprovedAfter.touched) {
+              <div class="text-danger small mt-1">
+                {{ 'Approved-after value must be zero or greater.' | translate }}
+              </div>
+            }
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">{{ 'Description' | translate }}</label>
+            <textarea class="form-control" rows="3" formControlName="description"></textarea>
+          </div>
+
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" formControlName="isOld" />
+              <label class="form-check-label">{{ 'Old Plan' | translate }}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2">
+          <button class="btn btn-primary" type="submit" [disabled]="loading()">
+            {{ (isEdit() ? 'Update Subscription Offer' : 'Create Subscription Offer') | translate }}
+          </button>
+          <a class="btn btn-light" routerLink="/customer-subscriptions">{{ 'Cancel' | translate }}</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+

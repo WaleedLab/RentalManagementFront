@@ -1,0 +1,103 @@
+:host {
+  display: block;
+}
+
+.customer-details-layout {
+  align-items: flex-start;
+}
+
+.customer-details-card {
+  border-radius: 18px;
+}
+
+.customer-details-card--side {
+  position: sticky;
+  top: 88px;
+}
+
+.customer-details-section {
+  border: 1px solid var(--app-table-border-color);
+  border-radius: 16px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: color-mix(in srgb, var(--app-table-row-alt) 38%, transparent);
+}
+
+.customer-details-section:last-child {
+  margin-bottom: 0;
+}
+
+.customer-details-section__header {
+  margin-bottom: 0.85rem;
+
+  h6 {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  p {
+    color: var(--app-form-hint-color);
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+}
+
+.customer-details-readonly {
+  background: color-mix(in srgb, var(--app-table-row-hover) 24%, transparent);
+  border-color: var(--app-table-border-color);
+  color: inherit;
+  cursor: default;
+}
+
+textarea.customer-details-readonly {
+  resize: vertical;
+  min-height: 92px;
+}
+
+.customer-details-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px dashed var(--app-table-border-color);
+  border-radius: 10px;
+  padding: 0.45rem 0.7rem;
+}
+
+.customer-details-status__label {
+  font-size: 0.84rem;
+  color: var(--app-form-hint-color);
+}
+
+.customer-details-image {
+  border-radius: 12px;
+  border: 1px solid var(--app-table-border-color);
+  width: 100%;
+  object-fit: cover;
+}
+
+.customer-details-image-placeholder {
+  display: grid;
+  place-items: center;
+  min-height: 160px;
+  border-radius: 12px;
+  border: 1px dashed var(--app-table-border-color);
+  color: var(--app-form-hint-color);
+  font-size: 0.85rem;
+}
+
+body.dark-only {
+  .customer-details-section {
+    background: color-mix(in srgb, var(--app-table-row-hover) 35%, transparent);
+  }
+
+  .customer-details-readonly {
+    background: color-mix(in srgb, var(--app-table-row-hover) 42%, transparent);
+  }
+}
+
+@media (max-width: 1199.98px) {
+  .customer-details-card--side {
+    position: static;
+    top: auto;
+  }
+}

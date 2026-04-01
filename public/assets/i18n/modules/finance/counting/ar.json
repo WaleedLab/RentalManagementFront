@@ -1,0 +1,17 @@
+{
+  "Account Level": "مستوى الحساب",
+  "Add an account to the reporting hierarchy with its operational balance.": "إضافة حساب جديد إلى التسلسل المحاسبي مع رصيده التشغيلي.",
+  "Back to Chart of Accounts": "الرجوع إلى دليل الحسابات",
+  "Cancel": "إلغاء",
+  "Counting entry created successfully": "تم إنشاء الحساب المحاسبي بنجاح",
+  "Counting Number": "رقم الحساب",
+  "Counting Type": "نوع الحساب",
+  "Create": "إنشاء",
+  "Create Counting Entry": "إضافة حساب محاسبي",
+  "Failed to save counting entry": "فشل حفظ الحساب المحاسبي",
+  "FleetId": "معرف الأسطول",
+  "Main Counting Number": "رقم الحساب الرئيسي",
+  "Name (AR)": "الاسم (عربي)",
+  "Name (EN)": "الاسم (إنجليزي)",
+  "Report Number": "رقم التقرير"
+}

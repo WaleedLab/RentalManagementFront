@@ -16,6 +16,22 @@ export class BookingService {
   private api = inject(BaseService);
   private readonly base = 'Booking';
 
+  getList(params: { fleetId?: string | null; branchId?: number | null } = {}): Observable<Booking[]> {
+    return this.api
+      .getData<unknown[]>(
+        `${this.base}/List`,
+        {
+          ...buildFleetQueryParams(params.fleetId, 'id'),
+          BranchId: params.branchId ?? undefined,
+        },
+        { suppressErrorToast: true },
+      )
+      .pipe(
+        map(items => (items ?? []).map(normalizeBooking)),
+        catchError(() => of([])),
+      );
+  }
+
   getPaginated(params: BookingFilters): Observable<PaginatedAggregatorResponse<Booking>> {
     return this.api
       .getData<unknown>(

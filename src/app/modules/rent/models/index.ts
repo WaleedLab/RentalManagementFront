@@ -8,6 +8,7 @@ export * from './dashboard/dashboard.model';
 export * from './fleet/fleet.model';
 export * from './privileges/privilege.model';
 export * from './roles/role.model';
+export * from './subscriptions/customer-subscription.model';
 export * from './users/user.model';
 export * from './vehicles/vehicle.model';
 

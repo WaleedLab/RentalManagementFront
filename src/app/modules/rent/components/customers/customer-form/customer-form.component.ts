@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -7,13 +7,17 @@ import { startWith } from 'rxjs';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
+import { TENANT_ADMIN_ROLES } from '../../../../../core/auth/access.constants';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-upload.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
+import { CustomerSubscription } from '../../../models/subscriptions/customer-subscription.model';
 import { CustomerUpsertRequest } from '../../../models';
+import { BookingService } from '../../../services/booking/booking.service';
 import { CustomerService } from '../../../services/customers/customer.service';
+import { CustomerSubscriptionService } from '../../../services/subscriptions/customer-subscription.service';
 
 @Component({
   selector: 'app-customer-form',
@@ -42,7 +46,9 @@ export class CustomerFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authState = inject(AuthStateService);
+  private bookingService = inject(BookingService);
   private customerService = inject(CustomerService);
+  private customerSubscriptionService = inject(CustomerSubscriptionService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
   private readonly countryNameToCode = new Map<string, string>();
@@ -212,6 +218,11 @@ export class CustomerFormComponent implements OnInit {
   loading = signal(false);
   selectedImage = signal<File | null>(null);
   previewUrl = signal<string | null>(null);
+  canManageSubscriptions = computed(() => this.authState.hasAnyRole(TENANT_ADMIN_ROLES));
+  customerSubscriptions = signal<CustomerSubscription[]>([]);
+  defaultSubscriptionId = signal<number | null>(null);
+  rentalCount = signal(0);
+  autoAssignedSubscriptionId = signal<number | null>(null);
   nationalitySuggestions = signal<string[]>([]);
   issuePlaceSuggestions = signal<string[]>([]);
 
@@ -276,13 +287,16 @@ export class CustomerFormComponent implements OnInit {
     plaseIdNationality: ['', [Validators.maxLength(150)]],
     plaseDrivinglicense: ['', [Validators.maxLength(150)]],
     address: ['', [Validators.maxLength(250)]],
-    idSubscriptionsOfCustomer: [46],
+    subscriptionAssignmentMode: ['auto' as 'auto' | 'manual'],
+    idSubscriptionsOfCustomer: [0],
     taxRecord: [null as number | null],
     notes: [''],
     isActive: [true],
   });
 
   ngOnInit(): void {
+    this.loadCustomerSubscriptions();
+    this.rentalCount.set(0);
     this.initializeNationalitySuggestions();
     this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.applyLocalizedNationalitySuggestions();
@@ -296,10 +310,14 @@ export class CustomerFormComponent implements OnInit {
       .subscribe(value => this.updateIssuePlaceSuggestions(value));
 
     const id = this.route.snapshot.paramMap.get('id');
-    if (!id) return;
+    if (!id) {
+      this.refreshAutoAssignedSubscription();
+      return;
+    }
 
     this.isEdit.set(true);
     this.customerId.set(id);
+    this.loadCustomerRentalCount(id);
     this.loading.set(true);
     this.customerService.getById(id, this.authState.fleetId() ?? '').subscribe({
       next: customer => {
@@ -323,11 +341,17 @@ export class CustomerFormComponent implements OnInit {
           plaseIdNationality: customer.plaseIdNationality || '',
           plaseDrivinglicense: customer.plaseDrivinglicense || '',
           address: customer.address || '',
-          idSubscriptionsOfCustomer: customer.idSubscriptionsOfCustomer ?? 46,
+          idSubscriptionsOfCustomer:
+            customer.idSubscriptionsOfCustomer ??
+            this.resolveSubscriptionId(this.form.controls.idSubscriptionsOfCustomer.value) ??
+            0,
+          subscriptionAssignmentMode: 'auto',
           taxRecord: customer.taxRecord ?? null,
           notes: customer.notes || '',
           isActive: customer.isActive,
         });
+
+        this.syncSubscriptionAssignmentModeWithCustomer();
       },
       error: () => this.toast.error(this.translate.instant('Failed to load customer')),
       complete: () => this.loading.set(false),
@@ -428,6 +452,182 @@ export class CustomerFormComponent implements OnInit {
     return uniqueValues.sort((a, b) => a.localeCompare(b, 'ar'));
   }
 
+  private loadCustomerSubscriptions(): void {
+    this.customerSubscriptionService
+      .getList(this.authState.fleetId() ?? undefined)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: subscriptions => {
+          const validSubscriptions = (subscriptions ?? []).filter(
+            subscription => Number(subscription.id) > 0,
+          );
+          this.customerSubscriptions.set(validSubscriptions);
+
+          const preferredId = this.getPreferredSubscriptionId(validSubscriptions);
+          this.defaultSubscriptionId.set(preferredId);
+
+          if (!this.isEdit() && preferredId && Number(this.form.controls.idSubscriptionsOfCustomer.value) <= 0) {
+            this.form.controls.idSubscriptionsOfCustomer.setValue(preferredId);
+          }
+
+          this.refreshAutoAssignedSubscription();
+          this.syncSubscriptionAssignmentModeWithCustomer();
+        },
+      });
+  }
+
+  private loadCustomerRentalCount(customerId: string): void {
+    const fleetId = this.authState.fleetId() ?? undefined;
+    if (!fleetId) {
+      this.rentalCount.set(0);
+      this.refreshAutoAssignedSubscription();
+      return;
+    }
+
+    this.bookingService
+      .getList({ fleetId })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: bookings => {
+          const rentals = (bookings ?? []).filter(
+            booking => String(booking.customerId) === String(customerId),
+          ).length;
+          this.rentalCount.set(rentals);
+          this.refreshAutoAssignedSubscription();
+          this.syncSubscriptionAssignmentModeWithCustomer();
+        },
+        error: () => {
+          this.rentalCount.set(0);
+          this.refreshAutoAssignedSubscription();
+        },
+      });
+  }
+
+  private refreshAutoAssignedSubscription(): void {
+    const selectedSubscriptionId = this.pickSubscriptionByRentalCount(
+      this.customerSubscriptions(),
+      this.rentalCount(),
+    );
+    this.autoAssignedSubscriptionId.set(selectedSubscriptionId);
+  }
+
+  private pickSubscriptionByRentalCount(
+    subscriptions: CustomerSubscription[],
+    rentalCount: number,
+  ): number | null {
+    if (!subscriptions.length) {
+      return null;
+    }
+
+    const activeSubscriptions = subscriptions
+      .filter(subscription => !subscription.isOld)
+      .sort(
+        (left, right) =>
+          Number(left.subscriptionApprovedAfter ?? 0) -
+          Number(right.subscriptionApprovedAfter ?? 0),
+      );
+
+    if (!activeSubscriptions.length) {
+      return subscriptions[0]?.id ?? null;
+    }
+
+    let matchedSubscription: CustomerSubscription | undefined;
+    for (const subscription of activeSubscriptions) {
+      if (rentalCount >= Number(subscription.subscriptionApprovedAfter ?? 0)) {
+        matchedSubscription = subscription;
+      }
+    }
+
+    return (
+      matchedSubscription?.id ??
+      activeSubscriptions[0]?.id ??
+      this.getPreferredSubscriptionId(subscriptions)
+    );
+  }
+
+  private syncSubscriptionAssignmentModeWithCustomer(): void {
+    if (!this.isEdit()) {
+      return;
+    }
+
+    const currentSubscriptionId = Number(this.form.controls.idSubscriptionsOfCustomer.value ?? 0);
+    const autoSubscriptionId = Number(this.autoAssignedSubscriptionId() ?? 0);
+    if (currentSubscriptionId <= 0 || autoSubscriptionId <= 0) {
+      return;
+    }
+
+    this.form.controls.subscriptionAssignmentMode.setValue(
+      currentSubscriptionId === autoSubscriptionId ? 'auto' : 'manual',
+      { emitEvent: false },
+    );
+  }
+
+  getSelectableSubscriptions(): CustomerSubscription[] {
+    const currentId = Number(this.form.controls.idSubscriptionsOfCustomer.value ?? 0);
+
+    return this.customerSubscriptions()
+      .filter(subscription => !subscription.isOld || Number(subscription.id) === currentId)
+      .sort(
+        (left, right) =>
+          Number(left.subscriptionApprovedAfter ?? 0) -
+          Number(right.subscriptionApprovedAfter ?? 0),
+      );
+  }
+
+  getSubscriptionName(subscription?: CustomerSubscription | null): string {
+    if (!subscription) {
+      return '-';
+    }
+
+    return this.isArabicUi()
+      ? subscription.nameAr || subscription.nameEn || '-'
+      : subscription.nameEn || subscription.nameAr || '-';
+  }
+
+  getAutoAssignedSubscriptionName(): string {
+    const autoId = Number(this.autoAssignedSubscriptionId() ?? 0);
+    if (autoId <= 0) {
+      return '-';
+    }
+
+    const matchedSubscription = this.customerSubscriptions().find(
+      subscription => Number(subscription.id) === autoId,
+    );
+    return this.getSubscriptionName(matchedSubscription);
+  }
+
+  private getPreferredSubscriptionId(subscriptions: CustomerSubscription[]): number | null {
+    if (!subscriptions.length) {
+      return null;
+    }
+
+    const sortedSubscriptions = [...subscriptions].sort(
+      (left, right) => Number(left.id ?? 0) - Number(right.id ?? 0),
+    );
+
+    const firstActiveSubscription = sortedSubscriptions.find(subscription => !subscription.isOld);
+    if (firstActiveSubscription) {
+      return firstActiveSubscription.id;
+    }
+
+    return sortedSubscriptions[0]?.id ?? null;
+  }
+
+  private resolveSubscriptionId(value?: number | null): number | null {
+    const numericValue = Number(value ?? 0);
+    if (numericValue > 0) {
+      return numericValue;
+    }
+
+    const defaultId = this.defaultSubscriptionId();
+    if (defaultId && defaultId > 0) {
+      return defaultId;
+    }
+
+    const firstAvailable = this.customerSubscriptions()[0];
+    return firstAvailable?.id ?? null;
+  }
+
   private normalizeText(value: string): string {
     return value
       .normalize('NFKD')
@@ -443,6 +643,29 @@ export class CustomerFormComponent implements OnInit {
     }
 
     const raw = this.form.getRawValue();
+    const firstDefaultSubscriptionId =
+      this.defaultSubscriptionId() ?? this.getPreferredSubscriptionId(this.customerSubscriptions());
+
+    const isManualMode =
+      this.isEdit() &&
+      this.canManageSubscriptions() &&
+      raw.subscriptionAssignmentMode === 'manual';
+
+    const subscriptionId = this.isEdit()
+      ? isManualMode
+        ? this.resolveSubscriptionId(raw.idSubscriptionsOfCustomer)
+        : this.resolveSubscriptionId(
+            this.autoAssignedSubscriptionId() ??
+              raw.idSubscriptionsOfCustomer ??
+              firstDefaultSubscriptionId,
+          )
+      : this.resolveSubscriptionId(firstDefaultSubscriptionId ?? raw.idSubscriptionsOfCustomer);
+
+    if (!subscriptionId) {
+      this.toast.error(this.translate.instant('Customer subscription category is required.'));
+      return;
+    }
+
     const body: CustomerUpsertRequest = {
       id: this.customerId() || undefined,
       nameAr: raw.nameAr,
@@ -462,7 +685,7 @@ export class CustomerFormComponent implements OnInit {
       dateDrivinglicenseHajri: raw.dateDrivinglicenseHajri,
       taxRecord: raw.taxRecord ?? undefined,
       email: raw.email || undefined,
-      idSubscriptionsOfCustomer: Number(raw.idSubscriptionsOfCustomer || 46),
+      idSubscriptionsOfCustomer: subscriptionId,
       fleetId: this.authState.fleetId() || undefined,
       notes: raw.notes || undefined,
       isActive: raw.isActive,

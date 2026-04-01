@@ -1,0 +1,14 @@
+{
+  "Current user access, roles, and privilege visibility across the admin system.": "وصول المستخدم الحالي والأدوار وظهور الصلاحيات عبر النظام الإداري.",
+  "Current user roles and privileges": "أدوار وصلاحيات المستخدم الحالي",
+  "Email:": "البريد الإلكتروني:",
+  "No privileges found for the current session.": "لا توجد صلاحيات للجلسة الحالية.",
+  "No privileges found in local storage.": "لا توجد صلاحيات محفوظة.",
+  "No roles found for the current session.": "لا توجد أدوار للجلسة الحالية.",
+  "No roles found in local storage.": "لا توجد أدوار محفوظة.",
+  "Privileges": "الصلاحيات",
+  "Roles": "الأدوار",
+  "Security Overview": "نظرة عامة على الأمان",
+  "User": "المستخدم",
+  "Username:": "اسم المستخدم:"
+}
