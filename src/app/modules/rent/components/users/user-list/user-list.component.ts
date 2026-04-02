@@ -6,6 +6,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
+import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { UserService } from '../../../services/users/user.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { ConfirmService } from '../../../../../shared/services/confirm.service';
@@ -14,7 +15,7 @@ import { User } from '../../../models';
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [RouterLink, FormsModule, TranslateModule, PageHeaderComponent, PaginationBarComponent],
+  imports: [RouterLink, FormsModule, TranslateModule, PageHeaderComponent, PaginationBarComponent, SmoothSelectComponent],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss',
 })
@@ -33,6 +34,12 @@ export class UserListComponent implements OnInit {
   search = signal('');
   loading = signal(false);
   isSuperAdmin = computed(() => this.authState.isSuperAdmin());
+  readonly pageSizeFilterOptions: SmoothSelectOption[] = [
+    { label: '5', value: 5 },
+    { label: '10', value: 10 },
+    { label: '25', value: 25 },
+    { label: '50', value: 50 },
+  ];
 
   pageNumbers = computed(() => {
     const total = this.totalPages();

@@ -19,14 +19,13 @@
         </div>
         <div class="app-filter-field app-filter-field--narrow">
           <label class="app-filter-label">{{ 'Status' | translate }}</label>
-          <select class="form-select" [ngModel]="status()" (ngModelChange)="status.set($event)">
-            <option [ngValue]="''">{{ 'All statuses' | translate }}</option>
-            <option [ngValue]="'Draft'">{{ 'Draft' | translate }}</option>
-            <option [ngValue]="'Confirmed'">{{ 'Confirmed' | translate }}</option>
-            <option [ngValue]="'Active'">{{ 'Active' | translate }}</option>
-            <option [ngValue]="'Completed'">{{ 'Completed' | translate }}</option>
-            <option [ngValue]="'Cancelled'">{{ 'Cancelled' | translate }}</option>
-          </select>
+          <app-smooth-select
+            [ariaLabel]="'Status' | translate"
+            [placeholder]="'All statuses'"
+            [options]="statusFilterOptions"
+            [value]="status()"
+            (valueChange)="status.set($any($event))"
+          />
         </div>
         <div class="app-filter-field app-filter-field--narrow">
           <label class="app-filter-label">{{ 'Date From' | translate }}</label>

@@ -1,41 +1,33 @@
-<div class="d-flex align-items-center profile-media">
-  <img
-    class="b-r-10 img-40"
-    [src]="avatarUrl()"
-    [alt]="displayName()"
-    (error)="onAvatarError($event)"
-  />
-  <div class="flex-grow-1">
-    <span>{{ displayName() }}</span>
-    <p class="mb-0">
-      {{ primaryRole() }}
-      <i class="middle fa fa-angle-down"></i>
-    </p>
-  </div>
-</div>
-<ul class="profile-dropdown onhover-show-div">
-  <li>
-    <a href="javascript:void(0)"> <app-feathericon [icon]="'user'" /><span>Account </span> </a>
-  </li>
-  <li>
-    <a href="javascript:void(0)"> <app-feathericon [icon]="'mail'" /><span>Inbox</span> </a>
-  </li>
-  <li>
-    <a href="javascript:void(0)">
-      <app-feathericon [icon]="'file-text'" />
-      <span>Taskboard</span>
-    </a>
-  </li>
-  <li>
-    <a href="javascript:void(0)">
-      <app-feathericon [icon]="'settings'" />
-      <span>Settings</span>
-    </a>
-  </li>
-  <li>
-    <a href="javascript:void(0)" (click)="logout()">
+<div class="user-profile-dropdown">
+  <button
+    type="button"
+    class="user-profile-trigger d-flex align-items-center profile-media"
+    [attr.aria-expanded]="isMenuOpen()"
+    aria-haspopup="menu"
+    aria-label="Open profile menu"
+    (click)="toggleMenu($event)"
+  >
+    <img
+      class="b-r-10 img-40"
+      [src]="avatarUrl()"
+      [alt]="displayName()"
+      (error)="onAvatarError($event)"
+    />
+    <div class="flex-grow-1 user-profile-meta">
+      <span>{{ displayName() }}</span>
+      <p class="mb-0">{{ primaryRole() }}</p>
+    </div>
+    <i
+      class="fa fa-angle-down user-profile-caret"
+      [class.user-profile-caret--open]="isMenuOpen()"
+      aria-hidden="true"
+    ></i>
+  </button>
+
+  <div class="user-profile-menu" role="menu" [class.user-profile-menu--open]="isMenuOpen()">
+    <button type="button" class="user-profile-menu-item" role="menuitem" (click)="onLogout($event)">
       <app-feathericon [icon]="'log-out'" />
       <span>Log out</span>
-    </a>
-  </li>
-</ul>
+    </button>
+  </div>
+</div>

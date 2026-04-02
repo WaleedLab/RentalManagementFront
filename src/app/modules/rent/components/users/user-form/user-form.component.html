@@ -73,18 +73,12 @@
               @if (isSuperAdmin()) {
                 <div class="col-md-6">
                   <label class="form-label">{{ 'Fleet' | translate }} <span class="text-danger">*</span></label>
-                  <select
-                    class="form-select"
+                  <app-smooth-select
                     formControlName="fleetId"
-                    [class.is-invalid]="form.get('fleetId')?.invalid && form.get('fleetId')?.touched"
-                  >
-                    <option value="">{{ 'Select Fleet' | translate }}</option>
-                    @for (fleet of fleets(); track fleet.id) {
-                      <option [value]="fleet.id">
-                        {{ fleet.name }}{{ fleet.fleetCode ? ' (' + fleet.fleetCode + ')' : '' }}
-                      </option>
-                    }
-                  </select>
+                    [ariaLabel]="'Fleet' | translate"
+                    [placeholder]="'Select Fleet'"
+                    [options]="fleetSelectOptions()"
+                  />
                   <div class="form-text">{{ 'Super admin must choose the fleet for this user account.' | translate }}</div>
                   @if (fleetLoading()) {
                     <div class="small text-muted mt-1">{{ 'Loading fleets...' | translate }}</div>

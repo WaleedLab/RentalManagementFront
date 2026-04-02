@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
+import { SmoothSelectComponent, SmoothSelectOption } from '../smooth-select/smooth-select.component';
 
 @Component({
   selector: 'app-pagination-bar',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule, SmoothSelectComponent],
   templateUrl: './pagination-bar.component.html',
   styleUrl: './pagination-bar.component.scss',
 })
@@ -20,6 +21,13 @@ export class PaginationBarComponent {
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() pageSizeChange = new EventEmitter<number>();
+
+  get pageSizeSelectOptions(): SmoothSelectOption[] {
+    return this.pageSizeOptions.map(size => ({
+      label: String(size),
+      value: size,
+    }));
+  }
 
   get normalizedTotalPages(): number {
     return Math.max(1, this.totalPages || 1);
@@ -58,4 +66,3 @@ export class PaginationBarComponent {
     this.pageSizeChange.emit(parsed);
   }
 }
-

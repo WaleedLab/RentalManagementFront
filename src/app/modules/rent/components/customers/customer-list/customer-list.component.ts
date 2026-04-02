@@ -15,6 +15,7 @@ import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
+import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 
 type CustomerSearchField =
   | 'all'
@@ -29,7 +30,7 @@ type CustomerSearchField =
 @Component({
   selector: 'app-customer-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, PageHeaderComponent, EmptyStateComponent, PaginationBarComponent],
+  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, PageHeaderComponent, EmptyStateComponent, PaginationBarComponent, SmoothSelectComponent],
   templateUrl: './customer-list.component.html',
   styleUrl: './customer-list.component.scss',
 })
@@ -59,6 +60,12 @@ export class CustomerListComponent implements OnInit {
     { value: 'license', label: 'License' },
     { value: 'birthDate', label: 'Birth Date' },
   ];
+  searchFieldFilterOptions = computed<SmoothSelectOption[]>(() =>
+    this.searchFieldOptions.map(option => ({
+      label: option.label,
+      value: option.value,
+    })),
+  );
   filteredCustomers = computed(() => {
     const keyword = this.search().trim().toLowerCase();
     if (!keyword) {

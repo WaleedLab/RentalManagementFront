@@ -10,11 +10,12 @@ import { FleetService } from '../../../services/fleet/fleet.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { Fleet, RoleLookup, UserCreateRequest } from '../../../models';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 
 @Component({
   selector: 'app-user-form',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, RouterLink, TranslateModule, PageHeaderComponent],
+  imports: [ReactiveFormsModule, FormsModule, RouterLink, TranslateModule, PageHeaderComponent, SmoothSelectComponent],
   templateUrl: './user-form.component.html',
   styleUrl: './user-form.component.scss',
 })
@@ -40,6 +41,13 @@ export class UserFormComponent implements OnInit {
   fleetLoading = signal(false);
   loading = signal(false);
   isSuperAdmin = computed(() => this.authState.isSuperAdmin());
+  fleetSelectOptions = computed<SmoothSelectOption[]>(() => [
+    { label: 'Select Fleet', value: '' },
+    ...this.fleets().map(fleet => ({
+      label: `${fleet.name}${fleet.fleetCode ? ' (' + fleet.fleetCode + ')' : ''}`,
+      value: fleet.id,
+    })),
+  ]);
   filteredRoles = computed(() => {
     const keyword = this.roleSearch().trim().toLowerCase();
     if (!keyword) {

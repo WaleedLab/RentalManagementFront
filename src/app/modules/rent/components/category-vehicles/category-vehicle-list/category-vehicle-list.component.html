@@ -23,11 +23,12 @@
         </div>
         <div class="app-filter-field app-filter-field--narrow">
           <label class="app-filter-label">{{ 'Page Size' | translate }}</label>
-          <select class="form-select" [ngModel]="pageSize()" (ngModelChange)="changePageSize(+$event)">
-            <option [ngValue]="5">5</option>
-            <option [ngValue]="10">10</option>
-            <option [ngValue]="25">25</option>
-          </select>
+          <app-smooth-select
+            [ariaLabel]="'Page Size' | translate"
+            [options]="pageSizeFilterOptions"
+            [value]="pageSize()"
+            (valueChange)="changePageSize(+$any($event))"
+          />
         </div>
       </div>
 

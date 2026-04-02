@@ -17,11 +17,12 @@
       <div class="app-filters-toolbar">
         <div class="app-filter-field app-filter-field--narrow">
           <label class="app-filter-label">{{ 'All Fields' | translate }}</label>
-          <select class="form-select" [ngModel]="searchField()" (ngModelChange)="onSearchFieldChange($event)">
-            @for (option of searchFieldOptions; track option.value) {
-              <option [ngValue]="option.value">{{ option.label | translate }}</option>
-            }
-          </select>
+          <app-smooth-select
+            [ariaLabel]="'All Fields' | translate"
+            [options]="searchFieldFilterOptions()"
+            [value]="searchField()"
+            (valueChange)="onSearchFieldChange($any($event))"
+          />
         </div>
         <div class="app-filter-field app-filter-field--search">
           <label class="app-filter-label">{{ 'Search' | translate }}</label>

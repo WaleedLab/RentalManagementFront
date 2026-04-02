@@ -14,12 +14,13 @@ import { VehicleService } from '../../../services/vehicles/vehicle.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
+import { SmoothSelectOption, SmoothSelectComponent } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 
 @Component({
   selector: 'app-vehicle-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, PageHeaderComponent, EmptyStateComponent, PaginationBarComponent, StatusBadgeComponent],
+  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, PageHeaderComponent, EmptyStateComponent, PaginationBarComponent, SmoothSelectComponent, StatusBadgeComponent],
   templateUrl: './vehicle-list.component.html',
   styleUrl: './vehicle-list.component.scss',
 })
@@ -47,6 +48,36 @@ export class VehicleListComponent implements OnInit {
   orderBy = signal<VehicleOrderBy>('CreatedAt');
   orderByDirection = signal<VehicleOrderDirection>('DESC');
   loading = signal(false);
+  readonly statusFilterOptions: SmoothSelectOption[] = [
+    { label: 'All statuses', value: '' },
+    { label: 'Available', value: 'Available' },
+    { label: 'Booked', value: 'Booked' },
+    { label: 'Maintenance', value: 'Maintenance' },
+    { label: 'Inactive', value: 'Inactive' },
+  ];
+  readonly orderByFilterOptions: SmoothSelectOption[] = [
+    { label: 'Created Date', value: 'CreatedAt' },
+    { label: 'Year', value: 'Year' },
+    { label: 'Plate Number', value: 'Plantnumber' },
+  ];
+  readonly orderDirectionFilterOptions: SmoothSelectOption[] = [
+    { label: 'Descending', value: 'DESC' },
+    { label: 'Ascending', value: 'ASC' },
+  ];
+  branchFilterOptions = computed<SmoothSelectOption[]>(() => [
+    { label: 'All branches', value: '' },
+    ...this.branches().map(branch => ({
+      label: this.getBranchOptionLabel(branch),
+      value: Number(branch.id),
+    })),
+  ]);
+  categoryFilterOptions = computed<SmoothSelectOption[]>(() => [
+    { label: 'All categories', value: '' },
+    ...this.categories().map(category => ({
+      label: this.getCategoryOptionLabel(category),
+      value: String(category.id),
+    })),
+  ]);
 
   ngOnInit(): void {
     this.loadReferenceData();

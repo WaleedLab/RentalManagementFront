@@ -25,50 +25,55 @@
 
         <div class="app-filter-field app-filter-field--narrow">
           <label class="app-filter-label">{{ 'Status' | translate }}</label>
-          <select class="form-select" [ngModel]="status()" (ngModelChange)="status.set($event)">
-            <option [ngValue]="''">{{ 'All statuses' | translate }}</option>
-            <option [ngValue]="'Available'">{{ 'Available' | translate }}</option>
-            <option [ngValue]="'Booked'">{{ 'Booked' | translate }}</option>
-            <option [ngValue]="'Maintenance'">{{ 'Maintenance' | translate }}</option>
-            <option [ngValue]="'Inactive'">{{ 'Inactive' | translate }}</option>
-          </select>
+          <app-smooth-select
+            [ariaLabel]="'Status' | translate"
+            [placeholder]="'All statuses'"
+            [options]="statusFilterOptions"
+            [value]="status()"
+            (valueChange)="status.set($any($event))"
+          />
         </div>
 
         <div class="app-filter-field app-filter-field--narrow">
           <label class="app-filter-label">{{ 'Branch' | translate }}</label>
-          <select class="form-select" [ngModel]="branchId()" (ngModelChange)="branchId.set($event)">
-            <option [ngValue]="''">{{ 'All branches' | translate }}</option>
-            @for (branch of branches(); track branch.id) {
-              <option [ngValue]="branch.id">{{ getBranchOptionLabel(branch) }}</option>
-            }
-          </select>
+          <app-smooth-select
+            [ariaLabel]="'Branch' | translate"
+            [placeholder]="'All branches'"
+            [options]="branchFilterOptions()"
+            [value]="branchId()"
+            (valueChange)="branchId.set($any($event))"
+          />
         </div>
 
         <div class="app-filter-field app-filter-field--narrow">
           <label class="app-filter-label">{{ 'Vehicle Category' | translate }}</label>
-          <select class="form-select" [ngModel]="categoryId()" (ngModelChange)="categoryId.set($event)">
-            <option [ngValue]="''">{{ 'All categories' | translate }}</option>
-            @for (category of categories(); track category.id) {
-              <option [ngValue]="category.id">{{ getCategoryOptionLabel(category) }}</option>
-            }
-          </select>
+          <app-smooth-select
+            [ariaLabel]="'Vehicle Category' | translate"
+            [placeholder]="'All categories'"
+            [options]="categoryFilterOptions()"
+            [value]="categoryId()"
+            (valueChange)="categoryId.set($any($event))"
+          />
         </div>
 
         <div class="app-filter-field app-filter-field--narrow">
           <label class="app-filter-label">{{ 'Sort by' | translate }}</label>
-          <select class="form-select" [ngModel]="orderBy()" (ngModelChange)="orderBy.set($event)">
-            <option [ngValue]="'CreatedAt'">{{ 'Created Date' | translate }}</option>
-            <option [ngValue]="'Year'">{{ 'Year' | translate }}</option>
-            <option [ngValue]="'Plantnumber'">{{ 'Plate Number' | translate }}</option>
-          </select>
+          <app-smooth-select
+            [ariaLabel]="'Sort by' | translate"
+            [options]="orderByFilterOptions"
+            [value]="orderBy()"
+            (valueChange)="orderBy.set($any($event))"
+          />
         </div>
 
         <div class="app-filter-field app-filter-field--narrow">
           <label class="app-filter-label">{{ 'Order direction' | translate }}</label>
-          <select class="form-select" [ngModel]="orderByDirection()" (ngModelChange)="orderByDirection.set($event)">
-            <option [ngValue]="'DESC'">{{ 'Descending' | translate }}</option>
-            <option [ngValue]="'ASC'">{{ 'Ascending' | translate }}</option>
-          </select>
+          <app-smooth-select
+            [ariaLabel]="'Order direction' | translate"
+            [options]="orderDirectionFilterOptions"
+            [value]="orderByDirection()"
+            (valueChange)="orderByDirection.set($any($event))"
+          />
         </div>
       </div>
 

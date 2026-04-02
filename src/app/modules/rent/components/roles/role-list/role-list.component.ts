@@ -10,11 +10,12 @@ import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
+import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 
 @Component({
   selector: 'app-role-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, TranslateModule, EmptyStateComponent, PageHeaderComponent, PaginationBarComponent],
+  imports: [CommonModule, RouterLink, FormsModule, TranslateModule, EmptyStateComponent, PageHeaderComponent, PaginationBarComponent, SmoothSelectComponent],
   templateUrl: './role-list.component.html',
 })
 export class RoleListComponent implements OnInit {
@@ -29,6 +30,11 @@ export class RoleListComponent implements OnInit {
   pageSize = signal(10);
   search = signal('');
   loading = signal(false);
+  readonly pageSizeFilterOptions: SmoothSelectOption[] = [
+    { label: '10', value: 10 },
+    { label: '25', value: 25 },
+    { label: '50', value: 50 },
+  ];
 
   pageNumbers = computed(() => Array.from({ length: this.totalPages() }, (_, index) => index + 1));
 

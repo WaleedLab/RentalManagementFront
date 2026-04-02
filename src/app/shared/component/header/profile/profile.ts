@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, ElementRef, HostListener, inject, signal } from '@angular/core';
 
 import { AuthStateService } from '../../../../core/auth/auth-state.service';
 import { Feathericon } from '../../feathericon/feathericon';
@@ -19,6 +19,7 @@ export class Profile {
   private auth = inject(AuthService);
   private authState = inject(AuthStateService);
   private tokenService = inject(TokenService);
+  private hostElement = inject(ElementRef<HTMLElement>);
 
   readonly defaultAvatar = 'assets/images/user/defulte_user.png';
   readonly superAdminAvatar = 'assets/images/user/super_admin.png';
@@ -29,6 +30,7 @@ export class Profile {
   email = signal<string | null>(null);
   roles = signal<string[]>([]);
   avatarUrl = signal<string>(this.getFallbackAvatar());
+  isMenuOpen = signal<boolean>(false);
 
   primaryRole = computed(() => {
     const list = this.roles();
@@ -74,6 +76,40 @@ export class Profile {
 
   logout(): void {
     this.auth.logout();
+  }
+
+  toggleMenu(event: Event): void {
+    event.stopPropagation();
+    this.isMenuOpen.update(isOpen => !isOpen);
+  }
+
+  closeMenu(): void {
+    this.isMenuOpen.set(false);
+  }
+
+  onLogout(event: Event): void {
+    event.stopPropagation();
+    this.closeMenu();
+    this.logout();
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleDocumentClick(event: Event): void {
+    if (!this.isMenuOpen()) {
+      return;
+    }
+
+    const target = event.target as Node | null;
+    if (target && !this.hostElement.nativeElement.contains(target)) {
+      this.closeMenu();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscapeKey(): void {
+    if (this.isMenuOpen()) {
+      this.closeMenu();
+    }
   }
 
   onAvatarError(event: Event): void {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -14,6 +14,7 @@ import { VehicleService } from '../../../services/vehicles/vehicle.service';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-upload.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -26,6 +27,7 @@ import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-h
     FieldValueStateDirective,
     FileUploadComponent,
     PageHeaderComponent,
+    SmoothSelectComponent,
   ],
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',
@@ -57,6 +59,26 @@ export class VehicleFormComponent implements OnInit {
   branches = signal<Branch[]>([]);
   categories = signal<CategoryVehicle[]>([]);
   private readonly vehicleFallbackImage = 'assets/images/rent_icon/car_defulte.png';
+  readonly statusSelectOptions: SmoothSelectOption[] = [
+    { label: 'Available', value: 'Available' },
+    { label: 'Booked', value: 'Booked' },
+    { label: 'Maintenance', value: 'Maintenance' },
+    { label: 'Inactive', value: 'Inactive' },
+  ];
+  branchSelectOptions = computed<SmoothSelectOption[]>(() => [
+    { label: 'Select branch', value: null },
+    ...this.branches().map(branch => ({
+      label: this.getBranchLabel(branch),
+      value: Number(branch.id),
+    })),
+  ]);
+  categorySelectOptions = computed<SmoothSelectOption[]>(() => [
+    { label: 'Select category', value: null },
+    ...this.categories().map(category => ({
+      label: this.getCategoryLabel(category),
+      value: Number(category.id),
+    })),
+  ]);
 
   form = this.fb.group({
     fleetId: [this.authState.fleetId() || '', [Validators.required]],

@@ -1,16 +1,29 @@
+# ==============================
 # Dependencies
+# ==============================
 node_modules/
 
-# Angular build output and caches
+# ==============================
+# Build outputs and framework cache
+# ==============================
 dist/
+out-tsc/
 .angular/
-!.angular/config.json
 
-# Test and coverage output
+# ==============================
+# Test and coverage artifacts
+# ==============================
 coverage/
 .nyc_output/
+playwright-report/
+test-results/
+blob-report/
+output/playwright/
+.playwright-cli/
 
-# Logs
+# ==============================
+# Logs and runtime temp
+# ==============================
 *.log
 *.out
 *.err
@@ -21,27 +34,31 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Local env and proxy files
+# ==============================
+# Local env and machine configs
+# ==============================
 .env
 .env.*
 !.env.example
 proxy.conf.json
 
-# IDE and local tooling
+# ==============================
+# IDE/editor and tool caches
+# ==============================
 .vs/
 .vscode/
 .idea/
 .codex/
+.cache/
+.sass-cache/
 .eslintcache
 .stylelintcache
-.playwright-cli/
-playwright-report/
-test-results/
-output/playwright/
-.sass-cache/
-.cache/
+.npm/
+.pnpm-store/
 
-# Temporary files
+# ==============================
+# Temporary / backup files
+# ==============================
 tmp/
 temp/
 *.orig
@@ -53,7 +70,9 @@ temp/
 *.swo
 *~
 
+# ==============================
 # OS files
+# ==============================
 .DS_Store
 Thumbs.db
 Desktop.ini

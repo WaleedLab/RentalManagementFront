@@ -214,14 +214,12 @@
                         @if (form.controls.subscriptionAssignmentMode.value === 'manual') {
                           <div class="col-12">
                             <label class="form-label">{{ 'Manual Subscription Category' | translate }}</label>
-                            <select class="form-select" formControlName="idSubscriptionsOfCustomer">
-                              <option [ngValue]="0">{{ 'Select category' | translate }}</option>
-                              @for (subscription of getSelectableSubscriptions(); track subscription.id) {
-                                <option [ngValue]="subscription.id">
-                                  {{ getSubscriptionName(subscription) }}
-                                </option>
-                              }
-                            </select>
+                            <app-smooth-select
+                              formControlName="idSubscriptionsOfCustomer"
+                              [ariaLabel]="'Manual Subscription Category' | translate"
+                              [options]="getManualSubscriptionOptions()"
+                              [placeholder]="'Select category'"
+                            />
                             <div class="form-text">{{ 'Admin can force a specific offer category for this customer.' | translate }}</div>
                           </div>
                         }

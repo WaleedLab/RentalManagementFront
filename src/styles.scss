@@ -209,15 +209,60 @@ body.dark-only {
   }
 
   .app-filter-field {
+    --app-filter-select-border-color: rgba(100, 116, 139, 0.5);
+    --app-filter-select-text: rgba(241, 245, 249, 0.95);
+    --app-filter-select-bg: linear-gradient(145deg, rgba(32, 44, 67, 0.94), rgba(16, 24, 40, 0.9));
+    --app-filter-select-bg-hover: linear-gradient(145deg, rgba(40, 55, 84, 0.96), rgba(19, 29, 49, 0.94));
+    --app-filter-select-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%2393c5fd' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 6l5 5 5-5'/%3E%3C/svg%3E");
+    --app-filter-option-bg: rgba(15, 23, 42, 0.98);
+    --app-filter-option-color: rgba(241, 245, 249, 0.96);
+    --app-filter-select-radius: 15px;
+    --app-filter-select-shadow:
+      0 10px 20px -18px rgba(2, 6, 23, 0.62),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    --app-filter-select-shadow-hover:
+      0 16px 26px -18px rgba(59, 130, 246, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
     border-color: rgba(100, 116, 139, 0.38);
     background: linear-gradient(160deg, rgba(30, 41, 59, 0.76), rgba(15, 23, 42, 0.66));
     box-shadow: 0 14px 24px -20px rgba(2, 6, 23, 0.68);
 
-    .form-select,
     .form-control {
       border-color: rgba(100, 116, 139, 0.45);
       background-color: rgba(15, 23, 42, 0.5);
       color: rgba(241, 245, 249, 0.94);
+    }
+
+    .form-select {
+      border-color: var(--app-filter-select-border-color);
+      color: var(--app-filter-select-text);
+      background:
+        var(--app-filter-select-icon) no-repeat right 0.78rem center / 0.76rem,
+        var(--app-filter-select-bg);
+      padding-inline-end: 2.3rem;
+      border-radius: var(--app-filter-select-radius);
+      box-shadow: var(--app-filter-select-shadow);
+      cursor: pointer;
+      appearance: none;
+      transition:
+        border-color 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+        background 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .form-select:hover:not(:disabled) {
+      border-color: rgba(147, 197, 253, 0.64);
+      background:
+        var(--app-filter-select-icon) no-repeat right 0.78rem center / 0.76rem,
+        var(--app-filter-select-bg-hover);
+      box-shadow: var(--app-filter-select-shadow-hover);
+      transform: translateY(-1px) scale(1.005);
+    }
+
+    .form-select option {
+      color: var(--app-filter-option-color);
+      background: var(--app-filter-option-bg);
     }
 
     .form-control::placeholder {
@@ -227,8 +272,19 @@ body.dark-only {
     .form-select:focus,
     .form-control:focus {
       border-color: rgba(96, 165, 250, 0.62);
-      box-shadow: 0 0 0 0.18rem rgba(59, 130, 246, 0.2);
+      box-shadow:
+        0 0 0 0.16rem rgba(59, 130, 246, 0.24),
+        var(--app-filter-select-shadow-hover);
+    }
+
+    .form-control:focus {
       background-color: rgba(30, 64, 175, 0.2);
+    }
+
+    .form-select:focus {
+      background:
+        var(--app-filter-select-icon) no-repeat right 0.78rem center / 0.76rem,
+        var(--app-filter-select-bg-hover);
     }
   }
 
@@ -506,10 +562,24 @@ thead th,
 }
 
 .app-filter-field {
+  --app-filter-select-border-color: rgba(148, 163, 184, 0.36);
+  --app-filter-select-text: rgba(15, 23, 42, 0.9);
+  --app-filter-select-bg: linear-gradient(150deg, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.9));
+  --app-filter-select-bg-hover: linear-gradient(150deg, rgba(255, 255, 255, 0.99), rgba(236, 244, 255, 0.94));
+  --app-filter-select-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23307ef3' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 6l5 5 5-5'/%3E%3C/svg%3E");
+  --app-filter-option-bg: #ffffff;
+  --app-filter-option-color: rgba(15, 23, 42, 0.92);
+  --app-filter-select-radius: 15px;
+  --app-filter-select-shadow:
+    0 10px 18px -16px rgba(15, 23, 42, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  --app-filter-select-shadow-hover:
+    0 16px 24px -16px rgba(37, 99, 235, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.94);
   grid-column: span 3;
   padding: 0.72rem;
   border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 14px;
+  border-radius: 16px;
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(148, 163, 184, 0.04));
   box-shadow: 0 10px 20px -18px rgba(15, 23, 42, 0.45);
 
@@ -517,10 +587,9 @@ thead th,
   .form-control,
   .btn {
     min-height: 44px;
-    border-radius: 12px;
+    border-radius: 14px;
   }
 
-  .form-select,
   .form-control {
     border-color: rgba(148, 163, 184, 0.28);
     background-color: rgba(15, 23, 42, 0.04);
@@ -530,11 +599,59 @@ thead th,
       background-color 0.2s ease;
   }
 
+  .form-select {
+    border-color: var(--app-filter-select-border-color);
+    color: var(--app-filter-select-text);
+    background:
+      var(--app-filter-select-icon) no-repeat right 0.78rem center / 0.76rem,
+      var(--app-filter-select-bg);
+    padding-inline-end: 2.3rem;
+    border-radius: var(--app-filter-select-radius);
+    appearance: none;
+    cursor: pointer;
+    box-shadow: var(--app-filter-select-shadow);
+    transition:
+      border-color 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+      background 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .form-select:hover:not(:disabled) {
+    border-color: rgba(48, 126, 243, 0.5);
+    background:
+      var(--app-filter-select-icon) no-repeat right 0.78rem center / 0.76rem,
+      var(--app-filter-select-bg-hover);
+    box-shadow: var(--app-filter-select-shadow-hover);
+    transform: translateY(-1px) scale(1.005);
+  }
+
+  .form-select:disabled {
+    cursor: not-allowed;
+    opacity: 0.74;
+  }
+
+  .form-select option {
+    color: var(--app-filter-option-color);
+    background: var(--app-filter-option-bg);
+  }
+
   .form-select:focus,
   .form-control:focus {
     border-color: rgba(59, 130, 246, 0.5);
-    box-shadow: 0 0 0 0.18rem rgba(59, 130, 246, 0.14);
+    box-shadow:
+      0 0 0 0.16rem rgba(59, 130, 246, 0.16),
+      var(--app-filter-select-shadow-hover);
+  }
+
+  .form-control:focus {
     background-color: rgba(59, 130, 246, 0.05);
+  }
+
+  .form-select:focus {
+    background:
+      var(--app-filter-select-icon) no-repeat right 0.78rem center / 0.76rem,
+      var(--app-filter-select-bg-hover);
   }
 }
 
@@ -661,6 +778,14 @@ html[dir='rtl'] select,
 html[dir='rtl'] th,
 html[dir='rtl'] td {
   text-align: right;
+}
+
+html[dir='rtl'] .app-filter-field .form-select {
+  background-position:
+    left 0.78rem center,
+    0 0;
+  padding-inline-start: 2.3rem;
+  padding-inline-end: 0.85rem;
 }
 
 html[dir='ltr'] .form-control,

@@ -10,6 +10,7 @@ import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
+import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 import { Booking, BookingStatus } from '../../../models';
 import { BookingService } from '../../../services/booking/booking.service';
@@ -25,6 +26,7 @@ import { BookingService } from '../../../services/booking/booking.service';
     PageHeaderComponent,
     PaginationBarComponent,
     EmptyStateComponent,
+    SmoothSelectComponent,
     StatusBadgeComponent,
   ],
   templateUrl: './booking-list.component.html',
@@ -45,6 +47,14 @@ export class BookingListComponent implements OnInit {
   status = signal<BookingStatus | ''>('');
   dateFrom = signal('');
   dateTo = signal('');
+  readonly statusFilterOptions: SmoothSelectOption[] = [
+    { label: 'All statuses', value: '' },
+    { label: 'Draft', value: 'Draft' },
+    { label: 'Confirmed', value: 'Confirmed' },
+    { label: 'Active', value: 'Active' },
+    { label: 'Completed', value: 'Completed' },
+    { label: 'Cancelled', value: 'Cancelled' },
+  ];
 
   ngOnInit(): void {
     this.load();

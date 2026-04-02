@@ -13,6 +13,7 @@ import { FieldValueStateDirective } from '../../../../../shared/directives/field
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-upload.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 import { CustomerUpsertRequest } from '../../../models';
 import { CustomerSubscription } from '../../../models/subscriptions/customer-subscription.model';
@@ -31,6 +32,7 @@ import { CustomerSubscriptionService } from '../../../services/subscriptions/cus
     FieldValueStateDirective,
     FileUploadComponent,
     PageHeaderComponent,
+    SmoothSelectComponent,
   ],
   templateUrl: './customer-form.component.html',
   styleUrl: './customer-form.component.scss',
@@ -577,6 +579,16 @@ export class CustomerFormComponent implements OnInit {
           Number(left.subscriptionApprovedAfter ?? 0) -
           Number(right.subscriptionApprovedAfter ?? 0),
       );
+  }
+
+  getManualSubscriptionOptions(): SmoothSelectOption[] {
+    return [
+      { label: 'Select category', value: 0 },
+      ...this.getSelectableSubscriptions().map(subscription => ({
+        label: this.getSubscriptionName(subscription),
+        value: Number(subscription.id),
+      })),
+    ];
   }
 
   getSubscriptionName(subscription?: CustomerSubscription | null): string {

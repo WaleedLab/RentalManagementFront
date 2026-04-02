@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -9,6 +9,7 @@ import { forkJoin } from 'rxjs';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { BookingUpsertRequest, Customer, Vehicle } from '../../../models';
 import { BookingService } from '../../../services/booking/booking.service';
 import { CustomerService } from '../../../services/customers/customer.service';
@@ -17,7 +18,7 @@ import { VehicleService } from '../../../services/vehicles/vehicle.service';
 @Component({
   selector: 'app-booking-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, PageHeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, PageHeaderComponent, SmoothSelectComponent],
   templateUrl: './booking-form.component.html',
   styleUrl: './booking-form.component.scss',
 })
@@ -39,6 +40,20 @@ export class BookingFormComponent implements OnInit {
   customers = signal<Customer[]>([]);
   vehicles = signal<Vehicle[]>([]);
   loading = signal(false);
+  customerSelectOptions = computed<SmoothSelectOption[]>(() => [
+    { label: 'Select customer', value: '' },
+    ...this.customers().map(customer => ({
+      label: customer.fullName || customer.nameAr || customer.nameEn || '-',
+      value: String(customer.id),
+    })),
+  ]);
+  vehicleSelectOptions = computed<SmoothSelectOption[]>(() => [
+    { label: 'Select vehicle', value: '' },
+    ...this.vehicles().map(vehicle => ({
+      label: vehicle.plateNumber || vehicle.serialNumber || vehicle.make || '-',
+      value: String(vehicle.id),
+    })),
+  ]);
 
   private readonly customerBasicFields: Array<{
     label: string;

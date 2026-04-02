@@ -14,12 +14,13 @@
             <div class="row g-3">
               <div class="col-md-4">
                 <label class="form-label">{{ 'Branch' | translate }}</label>
-                <select class="form-select" formControlName="branchId" [disabled]="isViewMode()">
-                  <option [ngValue]="null">{{ 'Select branch' | translate }}</option>
-                  @for (branch of branches(); track branch.id) {
-                    <option [ngValue]="branch.id">{{ getBranchLabel(branch) }}</option>
-                  }
-                </select>
+                <app-smooth-select
+                  formControlName="branchId"
+                  [ariaLabel]="'Branch' | translate"
+                  [placeholder]="'Select branch'"
+                  [options]="branchSelectOptions()"
+                  [disabled]="isViewMode()"
+                />
                 <div class="form-text">{{ 'Hint Vehicle Branch' | translate }}</div>
                 @if (!isViewMode() && form.controls.branchId.invalid && form.controls.branchId.touched) {
                   <div class="text-danger small mt-1">{{ 'Branch is required.' | translate }}</div>
@@ -27,12 +28,13 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label">{{ 'Vehicle Category' | translate }}</label>
-                <select class="form-select" formControlName="idCategoryVehicle" [disabled]="isViewMode()">
-                  <option [ngValue]="null">{{ 'Select category' | translate }}</option>
-                  @for (category of categories(); track category.id) {
-                    <option [ngValue]="+category.id">{{ getCategoryLabel(category) }}</option>
-                  }
-                </select>
+                <app-smooth-select
+                  formControlName="idCategoryVehicle"
+                  [ariaLabel]="'Vehicle Category' | translate"
+                  [placeholder]="'Select category'"
+                  [options]="categorySelectOptions()"
+                  [disabled]="isViewMode()"
+                />
                 <div class="form-text">{{ 'Hint Vehicle Category' | translate }}</div>
                 @if (!isViewMode() && form.controls.idCategoryVehicle.invalid && form.controls.idCategoryVehicle.touched) {
                   <div class="text-danger small mt-1">{{ 'Vehicle category is required.' | translate }}</div>
@@ -136,12 +138,12 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label">{{ 'Status' | translate }}</label>
-                <select class="form-select" formControlName="status" [disabled]="isViewMode()">
-                  <option value="Available">{{ 'Available' | translate }}</option>
-                  <option value="Booked">{{ 'Booked' | translate }}</option>
-                  <option value="Maintenance">{{ 'Maintenance' | translate }}</option>
-                  <option value="Inactive">{{ 'Inactive' | translate }}</option>
-                </select>
+                <app-smooth-select
+                  formControlName="status"
+                  [ariaLabel]="'Status' | translate"
+                  [options]="statusSelectOptions"
+                  [disabled]="isViewMode()"
+                />
               </div>
               <div class="col-md-4 d-flex align-items-end">
                 <div class="form-check form-switch">

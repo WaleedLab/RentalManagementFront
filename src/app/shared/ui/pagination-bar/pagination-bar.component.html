@@ -17,16 +17,13 @@
   @if (showPageSize) {
     <div class="app-pagination-bar__size">
       <label class="app-pagination-bar__size-label">{{ 'Page Size' | translate }}</label>
-      <select
-        class="form-select form-select-sm app-pagination-bar__size-select"
-        [ngModel]="pageSize"
-        (ngModelChange)="onPageSizeChange($event)"
-      >
-        @for (sizeOption of pageSizeOptions; track sizeOption) {
-          <option [ngValue]="sizeOption">{{ sizeOption }}</option>
-        }
-      </select>
+      <app-smooth-select
+        class="app-pagination-bar__size-select"
+        [ariaLabel]="'Page Size' | translate"
+        [options]="pageSizeSelectOptions"
+        [value]="pageSize"
+        (valueChange)="onPageSizeChange($any($event))"
+      />
     </div>
   }
 </div>
-

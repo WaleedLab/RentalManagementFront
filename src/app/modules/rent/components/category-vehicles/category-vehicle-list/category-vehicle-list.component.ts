@@ -11,6 +11,7 @@ import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
+import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 
 @Component({
@@ -24,6 +25,7 @@ import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/stat
     EmptyStateComponent,
     PageHeaderComponent,
     PaginationBarComponent,
+    SmoothSelectComponent,
     StatusBadgeComponent,
   ],
   templateUrl: './category-vehicle-list.component.html',
@@ -42,6 +44,11 @@ export class CategoryVehicleListComponent implements OnInit {
   pageNumber = signal(1);
   pageSize = signal(10);
   search = signal('');
+  readonly pageSizeFilterOptions: SmoothSelectOption[] = [
+    { label: '5', value: 5 },
+    { label: '10', value: 10 },
+    { label: '25', value: 25 },
+  ];
 
   pageNumbers = computed(() => Array.from({ length: this.totalPages() }, (_, index) => index + 1));
 
