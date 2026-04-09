@@ -1,0 +1,145 @@
+<div class="container-fluid">
+  <app-page-header
+    [title]="'Settings' | translate"
+    [subtitle]="'Configure contract limits, booking restrictions, and tax behavior in one place.' | translate"
+    [icon]="'assets/images/rent_icon/Settings.png'"
+  />
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card settings-card">
+        <div class="card-body">
+          @if (loading()) {
+            <div class="settings-loading text-center py-5">
+              <div class="spinner-border text-primary"></div>
+              <p class="mt-3 mb-0">{{ 'Loading settings...' | translate }}</p>
+            </div>
+          } @else {
+            <form [formGroup]="form" (ngSubmit)="onSubmit()" class="settings-form">
+              <section class="settings-section">
+                <div class="settings-section__head">
+                  <h5 class="settings-section-title">{{ 'Contract Timing' | translate }}</h5>
+                  <p class="settings-section-subtitle mb-0">
+                    {{ 'Control grace periods, delays, and contract closure thresholds.' | translate }}
+                  </p>
+                </div>
+
+                <div class="row g-3">
+                  <div class="col-md-4">
+                  <label class="form-label">{{ 'Number of free late hours' | translate }}</label>
+                  <input type="number" min="0" class="form-control settings-input" formControlName="number_hour_latefree" />
+                  </div>
+
+                  <div class="col-md-4">
+                  <label class="form-label">{{ 'Allowed late minutes after contract end' | translate }}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    class="form-control settings-input"
+                    formControlName="number_mints_late_forr_finshcontract"
+                  />
+                  </div>
+
+                  <div class="col-md-4">
+                  <label class="form-label">{{ 'Late hours counted per day' | translate }}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    class="form-control settings-input"
+                    formControlName="number_hour_late_forr_finshinday"
+                  />
+                  </div>
+
+                  <div class="col-md-4">
+                  <label class="form-label">{{ 'Allowed extra kilometers at contract close' | translate }}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    class="form-control settings-input"
+                    formControlName="number_incres_km_for_finshcontract"
+                  />
+                  </div>
+
+                  <div class="col-md-4">
+                  <label class="form-label">{{ 'Minimum delay value' | translate }}</label>
+                  <input type="number" min="0" class="form-control settings-input" formControlName="minValue" />
+                  </div>
+
+                  <div class="col-md-4">
+                  <label class="form-label">{{ 'Tax (%)' | translate }}</label>
+                  <input type="number" min="0" step="0.01" class="form-control settings-input" formControlName="tax" />
+                  </div>
+                </div>
+              </section>
+
+              <section class="settings-section settings-section--restrictions">
+                <div class="settings-section__head">
+                  <h5 class="settings-section-title">{{ 'Booking Restrictions' | translate }}</h5>
+                  <p class="settings-section-subtitle mb-0">
+                    {{ 'Define who can still book under special conditions.' | translate }}
+                  </p>
+                </div>
+
+                <div class="row g-3">
+                  <div class="col-lg-6">
+                  <div class="settings-switches">
+                    <label class="form-check form-switch settings-switch-item">
+                      <input class="form-check-input" type="checkbox" formControlName="dateOfExp" />
+                      <span class="form-check-label">{{ 'Allow booking if driving license is expired' | translate }}</span>
+                    </label>
+                    <label class="form-check form-switch settings-switch-item">
+                      <input class="form-check-input" type="checkbox" formControlName="dateOfExpWithNation" />
+                      <span class="form-check-label">{{
+                        'Allow booking if license and nationality documents are expired' | translate
+                      }}</span>
+                    </label>
+                    <label class="form-check form-switch settings-switch-item">
+                      <input class="form-check-input" type="checkbox" formControlName="expDateAndInsuranceExp" />
+                      <span class="form-check-label">{{
+                        'Allow booking if vehicle registration and insurance are expired' | translate
+                      }}</span>
+                    </label>
+                    <label class="form-check form-switch settings-switch-item">
+                      <input class="form-check-input" type="checkbox" formControlName="showBookingDistanceGps" />
+                      <span class="form-check-label">{{ 'Show interrupted GPS distance in contract' | translate }}</span>
+                    </label>
+                  </div>
+                  </div>
+
+                  <div class="col-lg-6">
+                  <div class="settings-switches">
+                    <label class="form-check form-switch settings-switch-item">
+                      <input class="form-check-input" type="checkbox" formControlName="oneBookingOrMore" />
+                      <span class="form-check-label">{{ 'Allow booking more than one contract' | translate }}</span>
+                    </label>
+                    <label class="form-check form-switch settings-switch-item">
+                      <input class="form-check-input" type="checkbox" formControlName="bookingdebts" />
+                      <span class="form-check-label">{{ 'Allow booking for customer with debt' | translate }}</span>
+                    </label>
+                    <label class="form-check form-switch settings-switch-item">
+                      <input class="form-check-input" type="checkbox" formControlName="bookingissues" />
+                      <span class="form-check-label">{{
+                        'Allow booking for customer with government issues' | translate
+                      }}</span>
+                    </label>
+                  </div>
+                  </div>
+                </div>
+              </section>
+
+              <div class="settings-actions mt-4 d-flex justify-content-end">
+                <button class="btn btn-primary" type="submit" [disabled]="form.invalid || saving()">
+                  @if (saving()) {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                  }
+                  {{ 'Save' | translate }}
+                </button>
+              </div>
+            </form>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

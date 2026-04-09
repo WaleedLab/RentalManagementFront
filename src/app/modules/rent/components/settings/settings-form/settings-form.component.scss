@@ -1,0 +1,113 @@
+.settings-card {
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(148, 163, 184, 0.03));
+  box-shadow:
+    0 18px 36px -28px rgba(15, 23, 42, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.settings-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.settings-section {
+  padding: 0.9rem;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.03), rgba(148, 163, 184, 0.02));
+}
+
+.settings-section__head {
+  margin-bottom: 0.75rem;
+}
+
+.settings-section-title {
+  margin-bottom: 0.15rem;
+  font-weight: 700;
+}
+
+.settings-section-subtitle {
+  font-size: 0.82rem;
+  opacity: 0.78;
+}
+
+.settings-switches {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.settings-switch-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.62rem 0.74rem;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.03);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.settings-switch-item:hover {
+  border-color: rgba(59, 130, 246, 0.38);
+  box-shadow: 0 14px 24px -22px rgba(37, 99, 235, 0.55);
+  transform: translateY(-1px);
+}
+
+.settings-switch-item .form-check-input {
+  position: static;
+  margin: 0;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+
+.settings-switch-item .form-check-label {
+  margin: 0;
+  flex: 1 1 auto;
+  line-height: 1.35;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+html[dir='rtl'] .settings-switch-item .form-check-label {
+  padding-inline-start: 0.25rem;
+  text-align: right;
+}
+
+html[dir='ltr'] .settings-switch-item .form-check-label {
+  padding-inline-end: 0.25rem;
+  text-align: left;
+}
+
+.settings-input {
+  min-height: 46px;
+  border-radius: 14px;
+}
+
+.settings-actions .btn {
+  min-width: 132px;
+  min-height: 44px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.settings-loading p {
+  opacity: 0.75;
+}
+
+@media (max-width: 767.98px) {
+  .settings-section {
+    padding: 0.72rem;
+  }
+
+  .settings-switch-item {
+    padding: 0.52rem 0.58rem;
+  }
+}
+

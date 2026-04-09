@@ -35,6 +35,7 @@ export class PageHeaderComponent {
     if (url.includes('/fleet')) return 'assets/images/rent_icon/Fleet.png';
     if (url.includes('/branches')) return 'assets/images/rent_icon/Branches.png';
     if (url.includes('/category-vehicles')) return 'assets/images/rent_icon/Vehicle_Category.png';
+    if (url.includes('/settings')) return 'assets/images/rent_icon/Settings.png';
 
     if (url.includes('/banks')) return 'assets/images/Finance/bank.png';
     if (url.includes('/cash')) return 'assets/images/Finance/Cash Accounts.png';

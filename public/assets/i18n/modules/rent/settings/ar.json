@@ -1,0 +1,26 @@
+{
+  "Settings": "الإعدادات",
+  "Configure contract limits, booking restrictions, and tax behavior in one place.": "تهيئة حدود العقد وقيود الحجز والضريبة في صفحة واحدة.",
+  "Loading settings...": "جارٍ تحميل الإعدادات...",
+  "Contract Timing": "إعدادات العقد",
+  "Control grace periods, delays, and contract closure thresholds.": "التحكم بفترات السماح والتأخير وحدود إغلاق العقد.",
+  "Booking Restrictions": "قيود الحجز",
+  "Define who can still book under special conditions.": "تحديد من يُسمح له بالحجز تحت الشروط الخاصة.",
+  "Number of free late hours": "عدد الساعات المجانية",
+  "Allowed late minutes after contract end": "عدد الدقائق المسموح بها لإغلاق العقد",
+  "Late hours counted per day": "عدد الساعات المتأخرة لليوم",
+  "Allowed extra kilometers at contract close": "عدد الكيلوات المسموح بها لإغلاق العقد",
+  "Minimum delay value": "القيمة المسموح بها عند التأخير",
+  "Tax (%)": "الضريبة (%)",
+  "Allow booking if driving license is expired": "السماح بتأجير إذا الرخصة منتهية",
+  "Allow booking if license and nationality documents are expired": "السماح بتأجير إذا الرخصة والجنسية منتهيان",
+  "Allow booking if vehicle registration and insurance are expired": "السماح بتأجير إذا استمارة المركبة والتأمين منتهيان",
+  "Show interrupted GPS distance in contract": "إظهار المسافة المقطوعة من GPS في العقد",
+  "Allow booking more than one contract": "السماح بتأجير بأكثر من عقد",
+  "Allow booking for customer with debt": "السماح بتأجير إذا كان عليه مديونية",
+  "Allow booking for customer with government issues": "السماح بتأجير إذا كان عليه قضايا حكومية",
+  "Settings saved successfully": "تم حفظ الإعدادات بنجاح",
+  "Failed to load settings": "فشل تحميل الإعدادات",
+  "Failed to save settings": "فشل حفظ الإعدادات"
+}
+

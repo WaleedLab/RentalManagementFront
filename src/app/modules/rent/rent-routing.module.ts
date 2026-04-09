@@ -231,6 +231,13 @@ const routes: Routes = [
     ],
   },
   {
+    path: 'settings',
+    data: { title: 'Settings', breadcrumb: 'Settings' },
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/settings/settings-form/settings-form.component').then(m => m.SettingsFormComponent),
+  },
+  {
     path: 'security',
     data: { title: 'Security', breadcrumb: 'Security' },
     canActivate: [authGuard, privilegeGuard],

@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { authGuard } from './shared/services/auth/auth.guard';
 
+
 /**
  * التوجيه الرئيسي (مطابق للدليل):
  * - مسار فارغ → redirect إلى dashboard

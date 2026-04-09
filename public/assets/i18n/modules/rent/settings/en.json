@@ -1,0 +1,26 @@
+{
+  "Settings": "Settings",
+  "Configure contract limits, booking restrictions, and tax behavior in one place.": "Configure contract limits, booking restrictions, and tax behavior in one place.",
+  "Loading settings...": "Loading settings...",
+  "Contract Timing": "Contract Timing",
+  "Control grace periods, delays, and contract closure thresholds.": "Control grace periods, delays, and contract closure thresholds.",
+  "Booking Restrictions": "Booking Restrictions",
+  "Define who can still book under special conditions.": "Define who can still book under special conditions.",
+  "Number of free late hours": "Number of free late hours",
+  "Allowed late minutes after contract end": "Allowed late minutes after contract end",
+  "Late hours counted per day": "Late hours counted per day",
+  "Allowed extra kilometers at contract close": "Allowed extra kilometers at contract close",
+  "Minimum delay value": "Minimum delay value",
+  "Tax (%)": "Tax (%)",
+  "Allow booking if driving license is expired": "Allow booking if driving license is expired",
+  "Allow booking if license and nationality documents are expired": "Allow booking if license and nationality documents are expired",
+  "Allow booking if vehicle registration and insurance are expired": "Allow booking if vehicle registration and insurance are expired",
+  "Show interrupted GPS distance in contract": "Show interrupted GPS distance in contract",
+  "Allow booking more than one contract": "Allow booking more than one contract",
+  "Allow booking for customer with debt": "Allow booking for customer with debt",
+  "Allow booking for customer with government issues": "Allow booking for customer with government issues",
+  "Settings saved successfully": "Settings saved successfully",
+  "Failed to load settings": "Failed to load settings",
+  "Failed to save settings": "Failed to save settings"
+}
+

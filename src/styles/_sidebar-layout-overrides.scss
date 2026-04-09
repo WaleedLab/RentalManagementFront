@@ -661,7 +661,7 @@ body.dark-only .page-wrapper.compact-wrapper .page-header .header-wrapper .toggl
         overflow-x: hidden;
         scrollbar-width: none;
         -ms-overflow-style: none;
-        z-index: 1000;
+        z-index: 1200;
         transition: width 0.25s ease;
 
         &::-webkit-scrollbar {
@@ -673,10 +673,20 @@ body.dark-only .page-wrapper.compact-wrapper .page-header .header-wrapper .toggl
 
       .sidebar-wrapper.close_icon {
         width: $sidebar-collapsed-width;
+        z-index: 1200;
+        overflow: visible;
       }
 
       .sidebar-wrapper.close_icon:hover {
         width: $sidebar-width;
+        z-index: 1300;
+        overflow: visible;
+      }
+
+      .sidebar-wrapper.close_icon:hover #sidebar-menu,
+      .sidebar-wrapper.close_icon:hover .sidebar-links,
+      .sidebar-wrapper.close_icon:hover .sidebar-main {
+        overflow: visible;
       }
 
       .page-body {

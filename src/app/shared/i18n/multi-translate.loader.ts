@@ -39,6 +39,7 @@ export class MultiTranslateLoader implements TranslateLoader {
       'subscriptions',
       'booking',
       'security',
+      'settings',
     ];
     const financeModules = [
       'common',

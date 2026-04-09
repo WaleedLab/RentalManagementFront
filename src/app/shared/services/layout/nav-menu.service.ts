@@ -166,6 +166,14 @@ export class NavMenuService {
       type: 'link',
       privileges: [APP_PRIVILEGES.vehicle],
     },
+    {
+      level: 1,
+      path: '/settings',
+      title: 'Settings',
+      icon: 'sample-page',
+      imageIcon: 'assets/images/rent_icon/Settings.png',
+      type: 'link',
+    },
     { headTitle1: 'Security' },
     {
       level: 1,
