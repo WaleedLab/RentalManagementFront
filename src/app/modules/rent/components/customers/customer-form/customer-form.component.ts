@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -15,6 +15,7 @@ import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-u
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 import { CustomerUpsertRequest } from '../../../models';
 import { CustomerSubscription } from '../../../models/subscriptions/customer-subscription.model';
 import { BookingService } from '../../../services/booking/booking.service';
@@ -38,6 +39,7 @@ import { CustomerSubscriptionService } from '../../../services/subscriptions/cus
   styleUrl: './customer-form.component.scss',
 })
 export class CustomerFormComponent implements OnInit {
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private static readonly ARABIC_NAME_REGEX = /^[\u0600-\u06FF\s.'-]{2,200}$/;
   private static readonly ENGLISH_NAME_REGEX = /^[A-Za-z\s.'-]{2,200}$/;
   private static readonly PHONE_REGEX = /^(?:(?:\+966|00966)(?:5\d{8}|1\d{8})|0(?:5\d{8}|1\d{8}))$/;
@@ -656,6 +658,7 @@ export class CustomerFormComponent implements OnInit {
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl(this.hostEl.nativeElement);
       return;
     }
 

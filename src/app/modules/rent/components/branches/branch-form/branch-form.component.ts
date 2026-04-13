@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -9,6 +9,7 @@ import type { Branch, BranchUpsertRequest } from '../../../models';
 import { BranchService } from '../../../services/branches/branch.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
 @Component({
   selector: 'app-branch-form',
@@ -18,6 +19,7 @@ import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-h
   styleUrl: './branch-form.component.scss',
 })
 export class BranchFormComponent implements OnInit {
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private static readonly ARABIC_NAME_REGEX = /^[\u0600-\u06FF0-9\s.'-]{2,255}$/;
   private static readonly ENGLISH_NAME_REGEX = /^[A-Za-z0-9\s.'-]{0,255}$/;
   private static readonly BRANCH_CODE_REGEX = /^[A-Za-z0-9-_]{0,100}$/;
@@ -86,6 +88,7 @@ export class BranchFormComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl(this.hostEl.nativeElement);
       return;
     }
 

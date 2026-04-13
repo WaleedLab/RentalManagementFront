@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -10,6 +10,7 @@ import { CategoryVehicleUpsertRequest } from '../../../models';
 import { CategoryVehicleService } from '../../../services/category-vehicles/category-vehicle.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
 @Component({
   selector: 'app-category-vehicle-form',
@@ -26,6 +27,7 @@ import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-h
   styleUrl: './category-vehicle-form.component.scss',
 })
 export class CategoryVehicleFormComponent implements OnInit {
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private static readonly ARABIC_NAME_REGEX = /^[\u0600-\u06FF0-9\s.'-]{2,255}$/;
   private static readonly ENGLISH_NAME_REGEX = /^[A-Za-z0-9\s.'-]{0,255}$/;
 
@@ -102,6 +104,7 @@ export class CategoryVehicleFormComponent implements OnInit {
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl(this.hostEl.nativeElement);
       return;
     }
 

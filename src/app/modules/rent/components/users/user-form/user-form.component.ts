@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, ElementRef, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
@@ -10,6 +10,7 @@ import { BranchService } from '../../../services/branches/branch.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { Branch, RoleLookup, UserCreateRequest } from '../../../models';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
 @Component({
   selector: 'app-user-form',
@@ -25,6 +26,7 @@ import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-h
   styleUrl: './user-form.component.scss',
 })
 export class UserFormComponent implements OnInit {
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private static readonly USERNAME_REGEX = /^[A-Za-z0-9._-]{3,255}$/;
   private static readonly ARABIC_NAME_REGEX = /^[\u0600-\u06FF\s.'-]{2,255}$/;
   private static readonly ENGLISH_NAME_REGEX = /^[A-Za-z\s.'-]{0,255}$/;
@@ -123,6 +125,7 @@ export class UserFormComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl(this.hostEl.nativeElement);
       return;
     }
     const raw = this.form.getRawValue();

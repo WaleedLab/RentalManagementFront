@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
+import { normalizeApiError } from '../../../../../core/api/api-response.utils';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
@@ -13,6 +15,7 @@ import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 import { Booking, BookingStatus } from '../../../models';
+import { bookingStatusTone, bookingStatusTranslationKey } from '../../../models/booking/booking-status.utils';
 import { BookingService } from '../../../services/booking/booking.service';
 
 @Component({
@@ -36,6 +39,7 @@ export class BookingListComponent implements OnInit {
   private bookingService = inject(BookingService);
   private authState = inject(AuthStateService);
   private toast = inject(ToastService);
+  private translate = inject(TranslateService);
 
   bookings = signal<Booking[]>([]);
   totalCount = signal(0);
@@ -47,14 +51,32 @@ export class BookingListComponent implements OnInit {
   status = signal<BookingStatus | ''>('');
   dateFrom = signal('');
   dateTo = signal('');
-  readonly statusFilterOptions: SmoothSelectOption[] = [
-    { label: 'All statuses', value: '' },
-    { label: 'Draft', value: 'Draft' },
-    { label: 'Confirmed', value: 'Confirmed' },
-    { label: 'Active', value: 'Active' },
-    { label: 'Completed', value: 'Completed' },
-    { label: 'Cancelled', value: 'Cancelled' },
-  ];
+  statusFilterOptions = computed<SmoothSelectOption[]>(() => {
+    const t = (key: string) => this.translate.instant(key);
+    const values: BookingStatus[] = [
+      'open',
+      'finsh',
+      'Suspended_due_to_accident',
+      'translate',
+      'close',
+      'extension',
+      'Suspended_due_to_sum_money',
+      'Payment_on_account',
+      'Unknown',
+    ];
+    return [
+      { label: t('All statuses'), value: '' },
+      ...values.map(status => ({ label: t(bookingStatusTranslationKey(status)), value: status })),
+    ];
+  });
+
+  statusBadgeTone(status: BookingStatus): 'success' | 'warning' | 'danger' | 'secondary' | 'info' {
+    return bookingStatusTone(status);
+  }
+
+  statusBadgeLabelKey(status: BookingStatus): string {
+    return bookingStatusTranslationKey(status);
+  }
 
   ngOnInit(): void {
     this.load();
@@ -82,9 +104,43 @@ export class BookingListComponent implements OnInit {
           this.pageNumber.set(page.pageNumber ?? this.pageNumber());
           this.pageSize.set(page.pageSize ?? this.pageSize());
         },
-        error: err => this.toast.error(err?.message ?? 'Failed to load bookings'),
+        error: err => {
+          this.toast.error(this.bookingListLoadErrorMessage(err));
+        },
         complete: () => this.loading.set(false),
       });
+  }
+
+  /** Paginated requests use `suppressErrorToast`; surface ProblemDetails / validation text here. */
+  private bookingListLoadErrorMessage(err: unknown): string {
+    if (err instanceof HttpErrorResponse) {
+      const normalized = normalizeApiError(err);
+      if (normalized.message && normalized.message !== err.message) {
+        return normalized.message;
+      }
+      const body = err.error;
+      if (body && typeof body === 'object') {
+        const o = body as Record<string, unknown>;
+        const title = typeof o['title'] === 'string' ? o['title'].trim() : '';
+        const detail = typeof o['detail'] === 'string' ? o['detail'].trim() : '';
+        if (title || detail) {
+          return `${title}${title && detail ? ': ' : ''}${detail}`.trim();
+        }
+        const errs = o['errors'];
+        if (errs && typeof errs === 'object' && !Array.isArray(errs)) {
+          const joined = Object.values(errs as Record<string, unknown[]>)
+            .flat()
+            .map(x => String(x))
+            .filter(Boolean)
+            .join(' ');
+          if (joined) {
+            return joined.slice(0, 800);
+          }
+        }
+      }
+      return normalized.message;
+    }
+    return err instanceof Error ? err.message : this.translate.instant('Failed to load bookings');
   }
 
   goToPage(page: number): void {

@@ -13,6 +13,9 @@ export interface CategoryVehicle {
   price_month_high?: number;
   priceHoureExtraLow?: number;
   priceHoureExtraHigh?: number;
+  /** Extra km price band (when defined on the category). */
+  priceKmExtraLow?: number;
+  priceKmExtraHigh?: number;
   countKMExtraLow?: number;
   countKMExtraHigh?: number;
   allowToLow?: number;

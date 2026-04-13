@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, inject, signal } from '@angular/core';
 import { FormArray, FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -9,6 +9,7 @@ import { PrivilegeTypeCreateRequest } from '../../../models';
 import { PrivilegeService } from '../../../services/privileges/privilege.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
 @Component({
   selector: 'app-privilege-form',
@@ -17,6 +18,7 @@ import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-h
   templateUrl: './privilege-form.component.html',
 })
 export class PrivilegeFormComponent implements OnInit {
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private static readonly ARABIC_NAME_REGEX = /^[\u0600-\u06FF\s.'-]{2,255}$/;
   private static readonly ENGLISH_NAME_REGEX = /^[A-Za-z\s.'-]{2,255}$/;
   private static readonly PRIVILEGE_CODE_REGEX = /^[A-Z0-9_]{3,500}$/;
@@ -135,6 +137,7 @@ export class PrivilegeFormComponent implements OnInit {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl(this.hostEl.nativeElement);
       return;
     }
 
@@ -164,6 +167,7 @@ export class PrivilegeFormComponent implements OnInit {
   private saveBulk(): void {
     if (this.bulkForm.invalid) {
       this.bulkForm.markAllAsTouched();
+      focusFirstInvalidControl(this.hostEl.nativeElement);
       return;
     }
 

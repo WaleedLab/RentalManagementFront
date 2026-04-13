@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -9,6 +9,7 @@ import { catchError, forkJoin, of, startWith } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import {
   SmoothSelectComponent,
@@ -54,6 +55,7 @@ import { BookingService } from '../../../../rent/services/booking/booking.servic
   styleUrls: ['./payment-count-form.component.scss'],
 })
 export class PaymentCountFormComponent implements OnInit {
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private fb = inject(NonNullableFormBuilder);
   private authState = inject(AuthStateService);
   private paymentCountService = inject(PaymentCountService);
@@ -358,6 +360,7 @@ export class PaymentCountFormComponent implements OnInit {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl(this.hostEl.nativeElement);
       return;
     }
 

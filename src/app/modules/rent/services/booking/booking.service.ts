@@ -6,7 +6,7 @@ import { PaginatedAggregatorResponse } from '../../../../core/interfaces';
 import { BaseService } from '../../../../shared/services/base/base.service';
 import { buildFleetQueryParams, normalizeFleetId } from '../../../../shared/utils/fleet-query.utils';
 import { normalizePaginatedResponse } from '../../../../shared/utils/paginated-response.normalizer';
-import { Booking, BookingFilters, BookingUpsertRequest } from '../../models';
+import { Booking, BookingCreateRequest, BookingFilters, BookingUpdateRequest } from '../../models';
 import { normalizeBooking } from '../../models/booking/booking.normalizer';
 
 @Injectable({
@@ -39,7 +39,7 @@ export class BookingService {
         {
           PageNumber: params.pageNumber,
           PageSize: params.pageSize,
-          ...buildFleetQueryParams(params.fleetId, 'both'),
+          ...buildFleetQueryParams(params.fleetId, 'fleet'),
           BRANCHID: params.branchId ?? undefined,
           Search: params.search,
           OrderByDirection: params.orderByDirection ?? 'DESC',
@@ -65,12 +65,79 @@ export class BookingService {
     );
   }
 
-  create(body: BookingUpsertRequest): Observable<unknown> {
-    return this.api.postData(this.base, body);
+  create(body: BookingCreateRequest): Observable<unknown> {
+    return this.api.postData(this.base, this.toCreateBookingPayload(body));
   }
 
-  update(body: BookingUpsertRequest): Observable<unknown> {
+  /**
+   * Backend model binder in this solution often expects PascalCase alongside camelCase
+   * (see `PaymentCountService` / `VehicleService`). Duplicate critical fields here to avoid 400.
+   */
+  private toCreateBookingPayload(body: BookingCreateRequest): Record<string, unknown> {
+    return {
+      ...body,
+      NameAr: body.nameAr,
+      FirstMobileNumber: body.firstMobileNumber,
+      Address: body.address,
+      IdNationality: body.idNationality,
+      DateDrivinglicense: body.dateDrivinglicense,
+      DateDrivingLicense: body.dateDrivinglicense,
+      Nationality: body.nationality,
+      IdVehicle: body.idVehicle,
+      CheckoutCounter: body.checkoutCounter,
+      Total: body.total,
+      StartDate: body.startDate,
+      EndDate: body.endDate,
+      CountOfDay: body.countOfDay,
+      DateReturnVehical: body.dateReturnVehical,
+      Stutus: body.stutus,
+      PriceInDay: body.priceInDay,
+      AllowTo: body.allowTo,
+      CountKMExtra: body.countKMExtra,
+      PriceHoureExtra: body.priceHoureExtra,
+      Paid: body.paid,
+      Note: body.note,
+      PlaceUSE: body.placeUSE,
+      IdBank: body.idBank,
+      IdCash: body.idCash,
+      PaidCash: body.paidCash,
+      PaidBank: body.paidBank,
+      PaymentType: body.paymentType,
+      IdCountingCustVehicle: body.idCountingCustVehicle ?? body.idCountingCust,
+      idCountingCustVehicle: body.idCountingCustVehicle ?? body.idCountingCust,
+      BirthDay: body.birthDay,
+      NumberBookingINBasame: body.numberBookingINBasame,
+      FleetId: body.fleetId,
+      IdBranch: body.idBranch,
+      BranchId: body.idBranch,
+      IdCustomer: body.idCustomer,
+      Distancetraveledgps: body.distancetraveledgps,
+      NumberOfHoursExcess: body.numberOfHoursExcess,
+      NumberKmExcess: body.numberKmExcess,
+      DayExcess: body.dayExcess,
+      Discount: body.discount,
+      CheckinCounter: body.checkinCounter,
+      PriceInMonth: body.priceInMonth,
+      PriceKmExtra: body.priceKmExtra,
+      OtherExpenses: body.otherExpenses,
+      TotalTrafic: body.totalTrafic,
+      TotalMaintance: body.totalMaintance,
+      TotalReceivedVehicle: body.totalReceivedVehicle,
+      TransportationFees: body.transportationFees,
+      Totaltax: body.totaltax,
+      TotalTax: body.totaltax,
+    };
+  }
+
+  update(body: BookingUpdateRequest): Observable<unknown> {
     return this.api.putData(`${this.base}/${body.id}`, body);
+  }
+
+  /**
+   * Soft delete — matches API: DELETE Booking with `[FromQuery] long id` (see BookingController.Delete).
+   */
+  delete(id: number | string): Observable<boolean> {
+    return this.api.deleteData<boolean>(this.base, { id: Number(id) });
   }
 
   private getPaginatedFromListFallback(
@@ -80,7 +147,7 @@ export class BookingService {
       .getData<unknown[]>(
         `${this.base}/List`,
         {
-          ...buildFleetQueryParams(params.fleetId, 'both'),
+          ...buildFleetQueryParams(params.fleetId, 'id'),
           BranchId: params.branchId ?? undefined,
         },
         { suppressErrorToast: true },
@@ -100,6 +167,10 @@ export class BookingService {
     const endDate = params.endDate ? new Date(params.endDate) : null;
 
     return items.filter(item => {
+      if (item.isDeleted === true) {
+        return false;
+      }
+
       if (status && String(item.status) !== status) {
         return false;
       }
@@ -192,7 +263,7 @@ export class BookingService {
       .getData<unknown[]>(
         `${this.base}/List`,
         {
-          ...buildFleetQueryParams(fleetId, 'both'),
+          ...buildFleetQueryParams(fleetId, 'id'),
         },
         { suppressErrorToast: true },
       )

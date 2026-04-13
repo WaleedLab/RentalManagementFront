@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -16,6 +16,7 @@ import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-upload.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -34,6 +35,7 @@ import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared
   styleUrl: './vehicle-form.component.scss',
 })
 export class VehicleFormComponent implements OnInit {
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private static readonly SERIAL_NUMBER_REGEX = /^[A-Za-z0-9-]{1,50}$/;
   private static readonly PLATE_NUMBER_REGEX = /^[A-Za-z0-9-\u0600-\u06FF\s]{1,20}$/;
   private static readonly VIN_REGEX = /^[A-HJ-NPR-Z0-9]{11,17}$/i;
@@ -244,6 +246,7 @@ export class VehicleFormComponent implements OnInit {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl(this.hostEl.nativeElement);
       return;
     }
 

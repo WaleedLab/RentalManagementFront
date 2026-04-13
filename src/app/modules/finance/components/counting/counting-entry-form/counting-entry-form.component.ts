@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -15,6 +15,7 @@ import {
 } from '../../../common/counting-account-ranges';
 import { CreateCountingEntryRequest } from '../../../models/counting/counting-entry.model';
 import { CountingEntryService } from '../../../services/counting/counting-entry.service';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
 @Component({
   selector: 'app-counting-entry-form',
@@ -23,6 +24,7 @@ import { CountingEntryService } from '../../../services/counting/counting-entry.
   templateUrl: './counting-entry-form.component.html',
 })
 export class CountingEntryFormComponent implements OnInit {
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private fb = inject(NonNullableFormBuilder);
   private authState = inject(AuthStateService);
   private countingService = inject(CountingEntryService);
@@ -58,6 +60,7 @@ export class CountingEntryFormComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl(this.hostEl.nativeElement);
       if (this.countingNumberRangeError()) {
         this.toast.error(this.countingNumberRangeMessage());
       }

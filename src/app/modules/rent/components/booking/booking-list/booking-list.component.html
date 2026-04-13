@@ -22,7 +22,7 @@
           <app-smooth-select
             [ariaLabel]="'Status' | translate"
             [placeholder]="'All statuses'"
-            [options]="statusFilterOptions"
+            [options]="statusFilterOptions()"
             [value]="status()"
             (valueChange)="status.set($any($event))"
           />
@@ -64,9 +64,26 @@
                   <td>{{ booking.bookingNumber || booking.id }}</td>
                   <td>{{ booking.customerName || booking.customerId }}</td>
                   <td>{{ booking.vehicleName || booking.vehicleId }}</td>
-                  <td>{{ booking.startDate | date:'shortDate' }} - {{ booking.endDate | date:'shortDate' }}</td>
+                  <td>
+                    @if (booking.startDate) {
+                      {{ booking.startDate | date: 'shortDate' }}
+                    } @else {
+                      —
+                    }
+                    <span class="text-muted"> — </span>
+                    @if (booking.endDate) {
+                      {{ booking.endDate | date: 'shortDate' }}
+                    } @else {
+                      —
+                    }
+                  </td>
                   <td>{{ booking.totalAmount ?? 0 }}</td>
-                  <td><app-status-badge [label]="booking.status" [tone]="booking.status === 'Completed' ? 'success' : booking.status === 'Active' ? 'warning' : booking.status === 'Cancelled' ? 'danger' : 'info'" /></td>
+                  <td>
+                    <app-status-badge
+                      [label]="statusBadgeLabelKey(booking.status) | translate"
+                      [tone]="statusBadgeTone(booking.status)"
+                    />
+                  </td>
                   <td class="text-end">
                     <div class="table-actions">
                       <a

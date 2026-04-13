@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
@@ -15,6 +15,7 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import {
   SmoothSelectComponent,
@@ -50,6 +51,7 @@ import { BranchService } from '../../../../rent/services/branches/branch.service
   styleUrl: './journal-entry-form.component.scss',
 })
 export class JournalEntryFormComponent implements OnInit {
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private fb = inject(NonNullableFormBuilder);
   private authState = inject(AuthStateService);
   private destroyRef = inject(DestroyRef);
@@ -286,6 +288,7 @@ export class JournalEntryFormComponent implements OnInit {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.detailsArray.controls.forEach(line => line.markAllAsTouched());
+      focusFirstInvalidControl(this.hostEl.nativeElement);
       return;
     }
 

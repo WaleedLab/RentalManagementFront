@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { Observable, catchError, from, map, switchMap, throwError } from 'rxjs';
+import { Observable, catchError, from, map, of, switchMap, throwError } from 'rxjs';
 
 import { PaginatedAggregatorResponse } from '../../../../core/interfaces';
 import { BaseService } from '../../../../shared/services/base/base.service';
@@ -49,6 +49,34 @@ export class CustomerService {
         map(normalizeCustomer),
         catchError(error => this.getByIdFromList(id, normalizedFleetId, error)),
       );
+  }
+
+  getByNationalId(nationalId: string, fleetId?: string | null): Observable<Customer | null> {
+    const id = String(nationalId ?? '').trim();
+    const normalizedFleetId = normalizeFleetId(fleetId);
+    if (!id || !normalizedFleetId) {
+      return throwError(() => new Error('Invalid nationalId or fleetId'));
+    }
+
+    const byPath = this.api
+      .getData<unknown>(`${this.base}/GetCustomerByNationalId/${id}/${normalizedFleetId}`, undefined, {
+        suppressErrorToast: true,
+      })
+      .pipe(map(normalizeCustomer));
+
+    const byQuery = this.api
+      .getData<unknown>(`${this.base}/GetCustomerByNationalId`, {
+        NationalId: id,
+        FleetId: normalizedFleetId,
+      }, {
+        suppressErrorToast: true,
+      })
+      .pipe(map(normalizeCustomer));
+
+    return byPath.pipe(
+      catchError(() => byQuery),
+      catchError(() => of(null)),
+    );
   }
 
   create(body: CustomerUpsertRequest): Observable<unknown> {

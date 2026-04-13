@@ -9,6 +9,7 @@ import { AuthService } from '../../shared/services/auth/auth.service';
 import { LayoutService } from '../../shared/services/layout/layout.service';
 import { TokenService } from '../../shared/services/storage/token.service';
 import { ToastService } from '../../shared/services/toast.service';
+import { focusFirstInvalidControl } from '../../shared/utils/focus-first-invalid-control.util';
 
 @Component({
   selector: 'app-login',
@@ -18,6 +19,7 @@ import { ToastService } from '../../shared/services/toast.service';
   styleUrl: './login.component.scss',
 })
 export class LoginComponent implements OnInit {
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private fb = inject(NonNullableFormBuilder);
   private auth = inject(AuthService);
   private authState = inject(AuthStateService);
@@ -51,7 +53,7 @@ export class LoginComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.usernameInput?.nativeElement.focus();
+      focusFirstInvalidControl(this.hostEl.nativeElement);
       return;
     }
     this.loading = true;

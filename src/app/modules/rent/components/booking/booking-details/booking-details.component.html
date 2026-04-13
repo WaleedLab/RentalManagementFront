@@ -10,13 +10,59 @@
       } @else if (booking(); as item) {
         <div class="row g-3">
           <div class="col-md-6"><strong>Booking #:</strong> {{ item.bookingNumber || item.id }}</div>
-          <div class="col-md-6"><strong>Status:</strong> <app-status-badge [label]="item.status" [tone]="item.status === 'Completed' ? 'success' : item.status === 'Cancelled' ? 'danger' : 'info'" /></div>
+          <div class="col-md-6">
+            <strong>Status:</strong>
+            <app-status-badge
+              [label]="statusBadgeLabelKey(item.status) | translate"
+              [tone]="statusBadgeTone(item.status)"
+            />
+          </div>
           <div class="col-md-6"><strong>Customer:</strong> {{ item.customerName || item.customerId }}</div>
           <div class="col-md-6"><strong>Vehicle:</strong> {{ item.vehicleName || item.vehicleId }}</div>
           <div class="col-md-6"><strong>Branch:</strong> {{ item.branchName || '-' }}</div>
-          <div class="col-md-6"><strong>Dates:</strong> {{ item.startDate | date:'mediumDate' }} - {{ item.endDate | date:'mediumDate' }}</div>
-          <div class="col-md-6"><strong>Total Amount:</strong> {{ item.totalAmount ?? 0 }}</div>
-          <div class="col-md-6"><strong>Paid Amount:</strong> {{ item.paidAmount ?? 0 }}</div>
+          <div class="col-md-6">
+            <strong>Dates:</strong>
+            @if (item.startDate) {
+              {{ item.startDate | date: 'mediumDate' }}
+            } @else {
+              —
+            }
+            <span class="text-muted"> — </span>
+            @if (item.endDate) {
+              {{ item.endDate | date: 'mediumDate' }}
+            } @else {
+              —
+            }
+          </div>
+          <div class="col-md-6"><strong>Total (TOTAL):</strong> {{ item.totalAmount ?? '—' }}</div>
+          <div class="col-md-6"><strong>Paid total:</strong> {{ item.paidtotal ?? item.paidAmount ?? '—' }}</div>
+          @if (item.returnDate) {
+            <div class="col-md-6"><strong>{{ 'Vehicle Return Date' | translate }}:</strong> {{ item.returnDate | date: 'medium' }}</div>
+          }
+          @if (item.placeUSE) {
+            <div class="col-md-6"><strong>{{ 'Usage Place' | translate }}:</strong> {{ item.placeUSE }}</div>
+          }
+          @if (item.countOfDay != null) {
+            <div class="col-md-6"><strong>{{ 'Count Of Days' | translate }}:</strong> {{ item.countOfDay }}</div>
+          }
+          @if (item.priceInDay != null) {
+            <div class="col-md-6"><strong>{{ 'Daily Price' | translate }}:</strong> {{ item.priceInDay }}</div>
+          }
+          @if (item.priceInMonth != null) {
+            <div class="col-md-6"><strong>{{ 'Monthly Price' | translate }}:</strong> {{ item.priceInMonth }}</div>
+          }
+          @if (item.discount != null) {
+            <div class="col-md-6"><strong>{{ 'Discount' | translate }}:</strong> {{ item.discount }}</div>
+          }
+          @if (item.totaltax != null) {
+            <div class="col-md-6"><strong>{{ 'Total Tax' | translate }}:</strong> {{ item.totaltax }}</div>
+          }
+          @if (item.checkoutCounter != null) {
+            <div class="col-md-6"><strong>{{ 'Checkout Counter' | translate }}:</strong> {{ item.checkoutCounter }}</div>
+          }
+          @if (item.checkinCounter != null) {
+            <div class="col-md-6"><strong>{{ 'Checkin Counter' | translate }}:</strong> {{ item.checkinCounter }}</div>
+          }
           <div class="col-md-12"><strong>Notes:</strong> {{ item.notes || '-' }}</div>
         </div>
       }

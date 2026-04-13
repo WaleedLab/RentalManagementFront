@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -25,6 +25,7 @@ import {
   UpdateCountingEntryRequest,
 } from '../../../models/counting/counting-entry.model';
 import { CountingEntryService } from '../../../services/counting/counting-entry.service';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
 interface CountingTreeNode {
   id: string;
@@ -80,6 +81,7 @@ export class CountingEntryListComponent implements OnInit {
    *    - buildTree(...) links countingMain with parent's countingNumber
    *    - Then renders nodes in hierarchical order (parent -> child)
    */
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private fb = inject(NonNullableFormBuilder);
   private authState = inject(AuthStateService);
   private countingService = inject(CountingEntryService);
@@ -519,6 +521,7 @@ export class CountingEntryListComponent implements OnInit {
   onSave(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl(this.hostEl.nativeElement);
       if (this.countingNumberRangeError()) {
         this.toast.error(this.countingNumberRangeMessage());
       }

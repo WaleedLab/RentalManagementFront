@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -17,6 +17,7 @@ import { CreateCashAccountRequest } from '../../../models/cash/cash-account.mode
 import { CountingEntry } from '../../../models/counting/counting-entry.model';
 import { CashAccountService } from '../../../services/cash/cash-account.service';
 import { CountingEntryService } from '../../../services/counting/counting-entry.service';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
 @Component({
   selector: 'app-cash-account-form',
@@ -32,6 +33,7 @@ import { CountingEntryService } from '../../../services/counting/counting-entry.
   templateUrl: './cash-account-form.component.html',
 })
 export class CashAccountFormComponent implements OnInit {
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private fb = inject(NonNullableFormBuilder);
   private authState = inject(AuthStateService);
   private cashService = inject(CashAccountService);
@@ -67,6 +69,7 @@ export class CashAccountFormComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl(this.hostEl.nativeElement);
       return;
     }
 

@@ -75,6 +75,11 @@ export function normalizeVehicle(raw: unknown): Vehicle {
   const engine = pick<string>(source, 'engine', 'Engine');
   const yearMake = pick<number>(source, 'yearMake', 'YearMake');
   const idCategoryVehicle = pick<number>(source, 'idCategoryVehicle', 'IdCategoryVehicle');
+  const categoryVehicleGuid = pick<string | number>(source, 'categoryVehicleId', 'CategoryVehicleId');
+  const categoryVehicleIdResolved =
+    categoryVehicleGuid != null && String(categoryVehicleGuid).trim() !== ''
+      ? categoryVehicleGuid
+      : pick<string | number>(source, 'idCategoryVehicle', 'IdCategoryVehicle');
 
   const rawImage = pick<string>(source, 'imageUrl', 'ImageUrl', 'url', 'Url');
   const imageUrl =
@@ -90,7 +95,7 @@ export function normalizeVehicle(raw: unknown): Vehicle {
       pick<string>(source, 'branchName', 'BranchName') ??
       pick<string>(source, 'branchNameAr', 'BranchNameAr') ??
       pick<string>(source, 'branchNameEn', 'BranchNameEn'),
-    categoryVehicleId: String(pick(source, 'categoryVehicleId', 'CategoryVehicleId', 'idCategoryVehicle', 'IdCategoryVehicle') ?? ''),
+    categoryVehicleId: String(categoryVehicleIdResolved ?? ''),
     idCategoryVehicle: idCategoryVehicle ?? null,
     categoryName: pick<string>(source, 'categoryName', 'CategoryName'),
     serialNumber: serialNumber,
