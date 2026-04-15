@@ -152,7 +152,6 @@ export class JournalEntryListComponent implements OnInit {
     this.journalService
       .getPaginated({
         fleetId,
-        branchId: Number(this.authState.branchId() ?? 0) || undefined,
         pageNumber: requestedPageNumber,
         pageSize: requestedPageSize,
         search: this.search(),

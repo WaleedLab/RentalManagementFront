@@ -99,6 +99,8 @@ export class PaymentCountService {
       PaidCash: payload.paidCash,
       paidBank: payload.paidBank,
       PaidBank: payload.paidBank,
+      expenseCategory: payload.expenseCategory,
+      ExpenseCategory: payload.expenseCategory,
       idBooking: payload.idBooking,
       IdBooking: payload.idBooking,
       stutusbooking: payload.stutusbooking,

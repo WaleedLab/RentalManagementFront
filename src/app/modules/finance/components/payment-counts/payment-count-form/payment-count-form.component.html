@@ -83,6 +83,19 @@
                   [ariaLabel]="'Payment Status' | translate"
                 />
               </div>
+              @if (showExpenseCategoryField()) {
+                <div class="col-md-4">
+                  <label class="form-label"
+                    >{{ 'Expense Category' | translate }} <span class="text-danger">*</span></label
+                  >
+                  <app-smooth-select
+                    formControlName="expenseCategory"
+                    [options]="expenseCategoryOptions"
+                    [placeholder]="'Select expense category' | translate"
+                    [ariaLabel]="'Expense Category' | translate"
+                  />
+                </div>
+              }
 
               <div class="col-md-4">
                 <label class="form-label">{{ 'Financial Year' | translate }} <span class="text-danger">*</span></label>
@@ -92,18 +105,6 @@
                   [placeholder]="'Select financial year' | translate"
                   [ariaLabel]="'Financial Year' | translate"
                   [disabled]="loadingFinancialYears()"
-                />
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label"
-                  >{{ 'Accounting Purpose' | translate }} <span class="text-danger">*</span></label
-                >
-                <app-smooth-select
-                  formControlName="accountingPurpose"
-                  [options]="accountingPurposeOptions"
-                  [placeholder]="'Accounting Purpose' | translate"
-                  [ariaLabel]="'Accounting Purpose' | translate"
                 />
               </div>
 

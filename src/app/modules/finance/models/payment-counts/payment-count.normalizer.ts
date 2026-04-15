@@ -21,6 +21,7 @@ export function normalizePaymentCount(raw: unknown): PaymentCount {
     idBank: pick<string>(source, 'idBank', 'IdBank'),
     paidCash: pick<number>(source, 'paidCash', 'PaidCash'),
     paidBank: pick<number>(source, 'paidBank', 'PaidBank'),
+    expenseCategory: pick<number>(source, 'expenseCategory', 'ExpenseCategory'),
     idBooking: pick<number>(source, 'idBooking', 'IdBooking'),
     idFinancialYear: pick<string | number>(source, 'idFinancialYear', 'IdFinancialYear'),
     createdAt: pick<string>(

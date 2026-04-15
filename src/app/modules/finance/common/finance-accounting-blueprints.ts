@@ -24,13 +24,14 @@ export interface CountingAccountCandidate {
   nameEn?: string;
 }
 
-export type VoucherAccountingPurpose =
-  | 'rental_revenue'
-  | 'booking_advance'
-  | 'security_deposit'
-  | 'security_refund'
-  | 'late_fee'
-  | 'damage_fee';
+export type VoucherFlowRule =
+  | 'RentalRevenueCollection'
+  | 'RentalExpensePayment'
+  | 'CustomerBookingAdvance'
+  | 'CustomerSecurityDepositReceived'
+  | 'CustomerSecurityDepositRefund'
+  | 'LateFeeRecognition'
+  | 'DamageFeeRecognition';
 
 export type VoucherCollectionChannel = 'cash' | 'bank';
 
@@ -229,38 +230,43 @@ export function getOperationalCountingAccountTemplates(): ReadonlyArray<CoreCoun
 }
 
 export function resolveVoucherFlow(
-  purpose: VoucherAccountingPurpose,
+  rule: VoucherFlowRule,
   channel: VoucherCollectionChannel,
 ): VoucherFlowPreview {
   const cashOrBankAccount = channel === 'bank' ? 'bank' : 'cash';
 
-  switch (purpose) {
-    case 'booking_advance':
+  switch (rule) {
+    case 'RentalExpensePayment':
+      return {
+        debit: requireTemplate('fuel_expense'),
+        credit: requireTemplate(cashOrBankAccount),
+      };
+    case 'CustomerBookingAdvance':
       return {
         debit: requireTemplate(cashOrBankAccount),
         credit: requireTemplate('booking_advance'),
       };
-    case 'security_deposit':
+    case 'CustomerSecurityDepositReceived':
       return {
         debit: requireTemplate(cashOrBankAccount),
         credit: requireTemplate('security_deposit'),
       };
-    case 'security_refund':
+    case 'CustomerSecurityDepositRefund':
       return {
         debit: requireTemplate('security_deposit'),
         credit: requireTemplate(cashOrBankAccount),
       };
-    case 'late_fee':
+    case 'LateFeeRecognition':
       return {
         debit: requireTemplate('customers'),
         credit: requireTemplate('late_fees_revenue'),
       };
-    case 'damage_fee':
+    case 'DamageFeeRecognition':
       return {
         debit: requireTemplate('customers'),
         credit: requireTemplate('damage_fees_revenue'),
       };
-    case 'rental_revenue':
+    case 'RentalRevenueCollection':
     default:
       return {
         debit: requireTemplate(cashOrBankAccount),

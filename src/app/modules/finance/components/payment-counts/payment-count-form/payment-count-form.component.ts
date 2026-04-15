@@ -17,7 +17,6 @@ import {
 } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import {
   CoreCountingAccountTemplate,
-  VoucherAccountingPurpose,
   VoucherCollectionChannel,
   resolveVoucherFlow,
 } from '../../../common/finance-accounting-blueprints';
@@ -181,31 +180,31 @@ export class PaymentCountFormComponent implements OnInit {
     { label: this.translate.instant('Pending'), value: 2 },
     { label: this.translate.instant('Cancelled'), value: 3 },
   ]);
-
-  readonly accountingPurposeOptions: SmoothSelectOption[] = [
-    { label: 'Rental Revenue Collection', value: 'rental_revenue' },
-    { label: 'Customer Booking Advance', value: 'booking_advance' },
-    { label: 'Customer Security Deposit Received', value: 'security_deposit' },
-    { label: 'Customer Security Deposit Refund', value: 'security_refund' },
-    { label: 'Late Fee Recognition', value: 'late_fee' },
-    { label: 'Damage Fee Recognition', value: 'damage_fee' },
+  readonly expenseCategoryOptions: SmoothSelectOption[] = [
+    { label: 'Select expense category', value: '' },
+    { label: 'Maintenance', value: 1 },
+    { label: 'Operations', value: 2 },
+    { label: 'Bank Charges', value: 3 },
+    { label: 'Fuel', value: 4 },
+    { label: 'Insurance', value: 5 },
+    { label: 'Other', value: 99 },
   ];
 
   form = this.fb.group({
     idCustomer: [''],
-    paid: [0, [Validators.required, Validators.min(0)]],
+    paid: [0, [Validators.required, Validators.min(0.01)]],
     dscription: ['', [Validators.required, Validators.maxLength(500)]],
     idVehicle: [''],
     idBranch: [Number(this.authState.branchId() ?? 0) as number | '', [Validators.required]],
     paymentType: [1, [Validators.required, Validators.min(1)]],
     bondType: [1, [Validators.required, Validators.min(1)]],
     status: [1, [Validators.required, Validators.min(1)]],
-    accountingPurpose: ['rental_revenue' as VoucherAccountingPurpose, [Validators.required]],
     idFinancialYear: ['', [Validators.required]],
     idCash: [''],
     idBank: [''],
     paidCash: [0, [Validators.required, Validators.min(0)]],
     paidBank: [0, [Validators.required, Validators.min(0)]],
+    expenseCategory: ['' as number | ''],
     idBooking: [''],
     stutusbooking: [1 as number | '', [Validators.required]],
     details: this.fb.array([this.createDetailLineForm()]),
@@ -215,9 +214,11 @@ export class PaymentCountFormComponent implements OnInit {
     Number(this.form.controls.paymentType.value) === 1 ? 'cash' : 'bank',
   );
 
-  readonly suggestedVoucherFlow = computed(() =>
-    resolveVoucherFlow(this.form.controls.accountingPurpose.value, this.selectedCollectionChannel()),
-  );
+  readonly suggestedVoucherFlow = computed(() => {
+    const bondType = Number(this.form.controls.bondType.value ?? 1);
+    const purpose = bondType === 1 ? 'RentalExpensePayment' : 'RentalRevenueCollection';
+    return resolveVoucherFlow(purpose, this.selectedCollectionChannel());
+  });
 
   get detailsArray() {
     return this.form.controls.details;
@@ -248,6 +249,9 @@ export class PaymentCountFormComponent implements OnInit {
     this.form.controls.idBooking.valueChanges
       .pipe(startWith(this.form.controls.idBooking.value), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.applyBookingStatusRules());
+    this.form.controls.bondType.valueChanges
+      .pipe(startWith(this.form.controls.bondType.value), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.applyExpenseCategoryRules());
 
     this.loadCustomers();
     this.loadVehicles();
@@ -258,6 +262,7 @@ export class PaymentCountFormComponent implements OnInit {
     this.loadChannels();
     this.applySplitAmountRules('type');
     this.applyBookingStatusRules();
+    this.applyExpenseCategoryRules();
   }
 
   addLine(): void {
@@ -369,6 +374,14 @@ export class PaymentCountFormComponent implements OnInit {
     const idVehicle = this.toOptionalPositiveInteger(raw.idVehicle);
     const idBranch = this.toRequiredPositiveInteger(raw.idBranch);
     const idBooking = this.toOptionalPositiveInteger(raw.idBooking);
+    const expenseCategory =
+      Number(raw.bondType) === 1 ? this.toOptionalPositiveInteger(raw.expenseCategory) : undefined;
+
+    if (Number(raw.bondType) === 1 && !expenseCategory) {
+      this.toast.error(this.translate.instant('Expense category is required for payment voucher'));
+      return;
+    }
+
     if (idBranch <= 0) {
       this.toast.error(this.translate.instant('Please choose valid branch'));
       return;
@@ -391,6 +404,7 @@ export class PaymentCountFormComponent implements OnInit {
       idBank: raw.idBank || undefined,
       paidCash: raw.paidCash,
       paidBank: raw.paidBank,
+      expenseCategory,
       idBooking,
       stutusbooking: idBooking ? Number(raw.stutusbooking) : undefined,
       idFinancialYear: raw.idFinancialYear,
@@ -788,6 +802,23 @@ export class PaymentCountFormComponent implements OnInit {
   private clearAccountValidators(): void {
     this.setControlRequired(this.form.controls.idCash, false);
     this.setControlRequired(this.form.controls.idBank, false);
+  }
+
+  showExpenseCategoryField(): boolean {
+    return Number(this.form.controls.bondType.value ?? 1) === 1;
+  }
+
+  private applyExpenseCategoryRules(): void {
+    const isPaymentVoucher = Number(this.form.controls.bondType.value ?? 1) === 1;
+    if (isPaymentVoucher) {
+      this.form.controls.expenseCategory.enable({ emitEvent: false });
+      this.form.controls.expenseCategory.setValidators([Validators.required]);
+    } else {
+      this.form.controls.expenseCategory.setValue('', { emitEvent: false });
+      this.form.controls.expenseCategory.clearValidators();
+      this.form.controls.expenseCategory.disable({ emitEvent: false });
+    }
+    this.form.controls.expenseCategory.updateValueAndValidity({ emitEvent: false });
   }
 
   private setControlRequired(control: (typeof this.form.controls)['idCash'], required: boolean): void {

@@ -135,20 +135,19 @@ export class PaymentCountListComponent implements OnInit {
 
   private loadLookups(): void {
     const fleetId = this.authState.fleetId() ?? undefined;
-    const branchId = Number(this.authState.branchId() ?? 0) || undefined;
 
     forkJoin({
       customers: this.customerService
         .getPaginated({ fleetId, pageNumber: 1, pageSize: 300, search: '', isActive: true })
         .pipe(catchError(() => of({ items: [] }))),
       vehicles: this.vehicleService
-        .getPaginated({ fleetId, branchId, pageNumber: 1, pageSize: 300, search: '', status: '' })
+        .getPaginated({ fleetId, pageNumber: 1, pageSize: 300, search: '', status: '' })
         .pipe(catchError(() => of({ items: [] }))),
       branches: this.branchService
         .getPaginated({ fleetId, pageNumber: 1, pageSize: 300, search: '' })
         .pipe(catchError(() => of({ items: [] }))),
       bookings: this.bookingService
-        .getPaginated({ fleetId, branchId, pageNumber: 1, pageSize: 300, search: '' })
+        .getPaginated({ fleetId, pageNumber: 1, pageSize: 300, search: '' })
         .pipe(catchError(() => of({ items: [] }))),
       banks: this.bankService.getList(fleetId).pipe(catchError(() => of([]))),
       cash: this.cashAccountService.getList(fleetId).pipe(catchError(() => of([]))),
@@ -220,7 +219,6 @@ export class PaymentCountListComponent implements OnInit {
 
   private load(): void {
     const fleetId = this.authState.fleetId();
-    const branchId = Number(this.authState.branchId() ?? 0) || undefined;
     const requestedPageNumber = this.pageNumber();
     const requestedPageSize = this.pageSize();
 
@@ -230,7 +228,6 @@ export class PaymentCountListComponent implements OnInit {
     this.paymentCountService
       .getPaginated({
         fleetId,
-        branchId,
         pageNumber: requestedPageNumber,
         pageSize: requestedPageSize,
         search: this.search(),
@@ -338,5 +335,6 @@ export class PaymentCountListComponent implements OnInit {
     if (!key) return '-';
     return this.bookingNames()[key] || '-';
   }
+
 }
 

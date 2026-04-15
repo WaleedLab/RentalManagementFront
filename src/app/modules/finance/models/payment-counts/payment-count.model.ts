@@ -16,6 +16,7 @@ export interface PaymentCount {
   idBank?: string;
   paidCash?: number;
   paidBank?: number;
+  expenseCategory?: number;
   idBooking?: number;
   idFinancialYear?: string | number;
   createdAt?: string;
@@ -34,6 +35,7 @@ export interface CreatePaymentCountRequest {
   idBank?: string;
   paidCash: number;
   paidBank: number;
+  expenseCategory?: number;
   idBooking?: number;
   stutusbooking?: number;
   idFinancialYear?: string;
