@@ -172,6 +172,37 @@
           <div class="col-12 mt-2">
             <h6 class="mb-2 booking-section-title">{{ 'Booking Information' | translate }}</h6>
           </div>
+          <div class="col-12">
+            @if (bookingSettings()) {
+              <div class="booking-smart-hint booking-restrictions-hint">
+                <div class="booking-restrictions-hint__title">{{ 'Booking Restrictions' | translate }}</div>
+                <div class="booking-restrictions-hint__items">
+                  @if (bookingSettings()?.dateOfExp) {
+                    <span class="booking-restrictions-hint__item">• {{ 'Allow booking if driving license is expired' | translate }}</span>
+                  }
+                  @if (bookingSettings()?.dateOfExpWithNation) {
+                    <span class="booking-restrictions-hint__item">• {{ 'Allow booking if license and nationality documents are expired' | translate }}</span>
+                  }
+                  @if (bookingSettings()?.expDateAndInsuranceExp) {
+                    <span class="booking-restrictions-hint__item">
+                      • {{ 'Allow booking if vehicle registration and insurance are expired' | translate }}
+                    </span>
+                  }
+                  @if (bookingSettings()?.showBookingDistanceGps) {
+                    <span class="booking-restrictions-hint__item">• {{ 'Show interrupted GPS distance in contract' | translate }}</span>
+                  }
+                </div>
+              </div>
+            }
+            @if (contractLimitWarnings().length > 0) {
+              <div class="booking-smart-hint booking-limits-alert">
+                <div class="booking-limits-alert__title">{{ 'Booking contract limits exceeded title' | translate }}</div>
+                @for (warning of contractLimitWarnings(); track warning) {
+                  <div class="booking-limits-alert__item">• {{ warning }}</div>
+                }
+              </div>
+            }
+          </div>
           <input type="hidden" formControlName="branchId" />
           <div class="col-12">
             <div class="booking-subsection-title">{{ 'Pricing And Discount' | translate }}</div>
@@ -188,6 +219,16 @@
             <label class="form-label">{{ 'Count Of Days' | translate }} <span class="text-danger">*</span></label>
             <input class="form-control" type="number" min="1" formControlName="countOfDay" />
           </div>
+          @if (showBookingDistanceGpsEnabled()) {
+            <div class="col-md-3">
+              <label class="form-label">{{ 'Travelled Distance GPS' | translate }}</label>
+              <input
+                class="form-control"
+                formControlName="distancetraveledgps"
+                [placeholder]="'Example GPS Distance' | translate"
+              />
+            </div>
+          }
           <div class="col-md-3">
             <label class="form-label">{{ 'Discount' | translate }}</label>
             <input class="form-control" type="number" min="0" step="0.01" formControlName="discount" />
@@ -204,6 +245,11 @@
           <div class="col-md-3">
             <label class="form-label">{{ 'Total Tax' | translate }}</label>
             <input class="form-control" type="number" min="0" step="0.01" formControlName="totaltax" />
+            @if (bookingSettings() && bookingSettings()!.id > 0) {
+              <div class="form-text">
+                {{ 'Booking tax auto hint' | translate: { rate: bookingSettings()?.tax ?? 0 } }}
+              </div>
+            }
           </div>
           <div class="col-md-3">
             <label class="form-label">{{ 'Applied Discount Value' | translate }}</label>
@@ -244,6 +290,9 @@
           <div class="col-md-3 booking-key-field">
             <label class="form-label">{{ 'Paid Amount' | translate }}</label>
             <input class="form-control" type="number" min="0" step="0.01" formControlName="paid" />
+            @if (minimumPaidAtCreateWarning(); as paidWarning) {
+              <div class="form-text text-danger fw-semibold">{{ paidWarning }}</div>
+            }
           </div>
           <div class="col-md-3">
             <label class="form-label">{{ 'Paid Cash' | translate }}</label>

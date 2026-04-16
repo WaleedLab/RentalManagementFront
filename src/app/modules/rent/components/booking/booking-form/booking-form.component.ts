@@ -36,6 +36,9 @@ import { BookingService } from '../../../services/booking/booking.service';
 import { CategoryVehicleService } from '../../../services/category-vehicles/category-vehicle.service';
 import { CustomerService } from '../../../services/customers/customer.service';
 import { VehicleService } from '../../../services/vehicles/vehicle.service';
+import { SettingService } from '../../../services/settings/setting.service';
+import { Setting } from '../../../models/settings/setting.model';
+import { normalizeSetting } from '../../../models/settings/setting.normalizer';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
 @Component({
@@ -64,9 +67,16 @@ export class BookingFormComponent implements OnInit {
   private bankService = inject(BankService);
   private cashAccountService = inject(CashAccountService);
   private countingEntryService = inject(CountingEntryService);
+  private settingsApi = inject(SettingService);
   private destroyRef = inject(DestroyRef);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
+
+  bookingSettings = signal<Setting | null>(null);
+  showBookingDistanceGpsEnabled = computed(() => this.bookingSettings()?.showBookingDistanceGps ?? true);
+  contractLimitWarnings = signal<string[]>([]);
+  private taxManuallyEdited = false;
+  private suppressTaxManualTracking = false;
 
   customers = signal<Customer[]>([]);
   vehicles = signal<Vehicle[]>([]);
@@ -271,14 +281,29 @@ export class BookingFormComponent implements OnInit {
       banks: this.bankService.getList(fleetId).pipe(catchError(() => of([]))),
       cashAccounts: this.cashAccountService.getList(fleetId).pipe(catchError(() => of([]))),
       countingEntries: this.countingEntryService.getList(fleetId).pipe(catchError(() => of([]))),
+      settings: this.settingsApi
+        .getCurrent(fleetId)
+        .pipe(
+          catchError(() =>
+            of(
+              normalizeSetting({
+                fleetId,
+                showBookingDistanceGps: true,
+              }),
+            ),
+          ),
+        ),
     }).subscribe({
-      next: ({ customers, vehicles, categories, banks, cashAccounts, countingEntries }) => {
+      next: ({ customers, vehicles, categories, banks, cashAccounts, countingEntries, settings }) => {
         this.customers.set(customers.items ?? []);
         this.vehicles.set(vehicles.items ?? []);
         this.categories.set(categories.items ?? []);
         this.banks.set(banks ?? []);
         this.cashAccounts.set(cashAccounts ?? []);
         this.countingEntries.set(countingEntries ?? []);
+        this.bookingSettings.set(settings);
+        this.applyAutoTaxFromSettings(true);
+        this.refreshContractLimitWarnings();
         this.applyDefaultCustomerVehicleCounting();
         this.vehicleCategoryHintsTrigger$.next();
       },
@@ -307,11 +332,27 @@ export class BookingFormComponent implements OnInit {
       this.form.controls.countOfDay.valueChanges,
       this.form.controls.priceInDay.valueChanges,
       this.form.controls.discount.valueChanges,
-      this.form.controls.totaltax.valueChanges,
       this.form.controls.discountType.valueChanges,
+      this.form.controls.numberOfHoursExcess.valueChanges,
+      this.form.controls.numberKmExcess.valueChanges,
+      this.form.controls.dayExcess.valueChanges,
     )
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.syncBookingTotals());
+      .subscribe(() => {
+        this.applyAutoTaxFromSettings();
+        this.syncBookingTotals();
+        this.refreshContractLimitWarnings();
+      });
+
+    this.form.controls.totaltax.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (!this.suppressTaxManualTracking) {
+          this.taxManuallyEdited = true;
+        }
+        this.syncBookingTotals();
+        this.refreshContractLimitWarnings();
+      });
 
     this.form.controls.customerIqama.valueChanges
       .pipe(
@@ -345,7 +386,9 @@ export class BookingFormComponent implements OnInit {
       });
 
     this.applyPaymentTypeRules(this.form.controls.paymentType.value);
+    this.applyAutoTaxFromSettings(true);
     this.syncBookingTotals();
+    this.refreshContractLimitWarnings();
   }
 
   save(): void {
@@ -389,6 +432,28 @@ export class BookingFormComponent implements OnInit {
       return;
     }
 
+    const settings = this.bookingSettings();
+    if (settings && settings.id > 0) {
+      const minPaidAtBooking = Math.max(0, Number(settings.minValue) || 0);
+      const paidAtBooking = Math.max(0, Number(raw.paid) || 0);
+      if (paidAtBooking < minPaidAtBooking) {
+        this.toast.error(
+          this.translate.instant('Booking minimum paid at create not met', {
+            min: minPaidAtBooking,
+            paid: paidAtBooking,
+          }),
+        );
+        return;
+      }
+    }
+
+    const contractWarnings = this.buildContractLimitWarnings();
+    if (contractWarnings.length > 0) {
+      const title = this.translate.instant('Booking contract limits exceeded title');
+      this.toast.error(`${title}: ${contractWarnings[0]}`);
+      return;
+    }
+
     let nameArOut = '';
     let firstMobileNumberOut = '';
     let addressOut = '';
@@ -396,6 +461,8 @@ export class BookingFormComponent implements OnInit {
     let drivingLicenseApi = '';
     let birthDayOut = '';
     let idCustomerOut = 0;
+    let customerLicenseExpired = false;
+    let customerNationalityExpired = false;
 
     if (selectedCustomer) {
       const missingCustomerBasics = this.getMissingCustomerBasicFields(selectedCustomer);
@@ -434,6 +501,13 @@ export class BookingFormComponent implements OnInit {
       addressOut = (selectedCustomer.address || '').trim();
       nationalityOut = (selectedCustomer.nationality || '').trim();
       drivingLicenseApi = licenseResult.api;
+      customerLicenseExpired = this.isIsoDateExpired(drivingLicenseApi);
+      {
+        const nationalityExpiryIsoPrimary = this.customerDateFieldToApi(selectedCustomer.dateIdNationality ?? '');
+        const nationalityExpiryIsoFallback = this.customerDateFieldToApi(nationalityOut);
+        const nationalityExpiryIso = nationalityExpiryIsoPrimary || nationalityExpiryIsoFallback;
+        customerNationalityExpired = this.isIsoDateExpired(nationalityExpiryIso);
+      }
       idCustomerOut = this.parseFormNumber(raw.customerId);
     } else {
       const manualNameAr = raw.customerNameAr.trim();
@@ -450,6 +524,8 @@ export class BookingFormComponent implements OnInit {
       addressOut = raw.customerAddress.trim();
       nationalityOut = manualNationality;
       drivingLicenseApi = manualLicense;
+      customerLicenseExpired = this.isIsoDateExpired(drivingLicenseApi);
+      customerNationalityExpired = this.isIsoDateExpired(this.customerDateFieldToApi(nationalityOut));
       birthDayOut = manualBirth;
       idCustomerOut = 0;
     }
@@ -469,6 +545,36 @@ export class BookingFormComponent implements OnInit {
     if (!Number.isFinite(idBranch) || idBranch <= 0) {
       this.toast.error(this.translate.instant('Booking invalid branch id'));
       return;
+    }
+
+    const settingsForRestrictions = this.bookingSettings();
+    const selectedVehicle = this.selectedVehicle();
+    const vehicleRegistrationIso = this.customerDateFieldToApi(
+      selectedVehicle?.validityCarRegistration ??
+        selectedVehicle?.operatinCard ??
+        selectedVehicle?.licenseExpirationDate ??
+        '',
+    );
+    const vehicleInsuranceIso = this.customerDateFieldToApi(selectedVehicle?.insuranceExpires ?? '');
+    const vehicleRegistrationExpired = this.isIsoDateExpired(vehicleRegistrationIso);
+    const vehicleInsuranceExpired = this.isIsoDateExpired(vehicleInsuranceIso);
+    const vehicleRegistrationAndInsuranceExpired = vehicleRegistrationExpired && vehicleInsuranceExpired;
+
+    if (settingsForRestrictions && settingsForRestrictions.id > 0) {
+      if (customerLicenseExpired && customerNationalityExpired && !settingsForRestrictions.dateOfExpWithNation) {
+        this.toast.error(this.translate.instant('Booking restriction license and nationality expired not allowed'));
+        return;
+      }
+      if (customerLicenseExpired && !customerNationalityExpired && !settingsForRestrictions.dateOfExp) {
+        this.toast.error(this.translate.instant('Booking restriction license expired not allowed'));
+        return;
+      }
+      if (vehicleRegistrationAndInsuranceExpired && !settingsForRestrictions.expDateAndInsuranceExp) {
+        this.toast.error(
+          this.translate.instant('Booking restriction vehicle registration and insurance expired not allowed'),
+        );
+        return;
+      }
     }
 
     const body: BookingCreateRequest = {
@@ -502,7 +608,9 @@ export class BookingFormComponent implements OnInit {
       fleetId,
       idBranch,
       idCustomer,
-      distancetraveledgps: raw.distancetraveledgps.trim() || undefined,
+      distancetraveledgps: this.showBookingDistanceGpsEnabled()
+        ? raw.distancetraveledgps.trim() || undefined
+        : undefined,
       numberOfHoursExcess: raw.numberOfHoursExcess,
       numberKmExcess: raw.numberKmExcess,
       dayExcess: raw.dayExcess,
@@ -573,6 +681,18 @@ export class BookingFormComponent implements OnInit {
       return 'حساب الإيراد 4101 غير موجود في دليل الحسابات';
     }
     return null;
+  }
+
+  private isIsoDateExpired(value: string | null | undefined): boolean {
+    const iso = value ?? '';
+    if (!iso) {
+      return false;
+    }
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) {
+      return false;
+    }
+    return d.getTime() < Date.now();
   }
 
   selectedCustomer(): Customer | null {
@@ -931,6 +1051,84 @@ export class BookingFormComponent implements OnInit {
 
   private syncBookingTotals(): void {
     this.form.patchValue({ total: this.amountAfterTaxAndDiscount() }, { emitEvent: false });
+  }
+
+  private applyAutoTaxFromSettings(force = false): void {
+    const settings = this.bookingSettings();
+    if (!settings || settings.id <= 0) {
+      return;
+    }
+    if (!force && this.taxManuallyEdited) {
+      return;
+    }
+    const rate = Math.max(0, Number(settings.tax) || 0);
+    const taxableBase = Math.max(0, this.expectedAmount() - this.discountAppliedValue());
+    const taxValue = Math.round(((taxableBase * rate) / 100) * 100) / 100;
+    this.suppressTaxManualTracking = true;
+    this.form.patchValue({ totaltax: taxValue }, { emitEvent: false });
+    this.suppressTaxManualTracking = false;
+  }
+
+  private refreshContractLimitWarnings(): void {
+    this.contractLimitWarnings.set(this.buildContractLimitWarnings());
+  }
+
+  minimumPaidAtCreateWarning(): string | null {
+    const settings = this.bookingSettings();
+    if (!settings || settings.id <= 0) {
+      return null;
+    }
+    const minPaidAtBooking = Math.max(0, Number(settings.minValue) || 0);
+    const paidAtBooking = Math.max(0, Number(this.form.controls.paid.value) || 0);
+    if (paidAtBooking >= minPaidAtBooking) {
+      return null;
+    }
+    return this.translate.instant('Booking minimum paid at create not met', {
+      min: minPaidAtBooking,
+      paid: paidAtBooking,
+    });
+  }
+
+  private buildContractLimitWarnings(): string[] {
+    const settings = this.bookingSettings();
+    if (!settings || settings.id <= 0) {
+      return [];
+    }
+    const raw = this.form.getRawValue();
+    const warnings: string[] = [];
+    const lateHours = Math.max(0, Number(raw.numberOfHoursExcess) || 0);
+    const lateHoursLimit = Math.max(0, Number(settings.number_hour_latefree) || 0);
+    if (lateHours > lateHoursLimit) {
+      warnings.push(
+        this.translate.instant('Booking contract limit free late hours exceeded', {
+          current: lateHours,
+          allowed: lateHoursLimit,
+        }),
+      );
+    }
+
+    const latePerDay = Math.max(0, Number(raw.dayExcess) || 0);
+    const latePerDayLimit = Math.max(0, Number(settings.number_hour_late_forr_finshinday) || 0);
+    if (latePerDay > latePerDayLimit) {
+      warnings.push(
+        this.translate.instant('Booking contract limit late per day exceeded', {
+          current: latePerDay,
+          allowed: latePerDayLimit,
+        }),
+      );
+    }
+
+    const extraKm = Math.max(0, Number(raw.numberKmExcess) || 0);
+    const extraKmLimit = Math.max(0, Number(settings.number_incres_km_for_finshcontract) || 0);
+    if (extraKm > extraKmLimit) {
+      warnings.push(
+        this.translate.instant('Booking contract limit extra km exceeded', {
+          current: extraKm,
+          allowed: extraKmLimit,
+        }),
+      );
+    }
+    return warnings;
   }
 
   vehicleInfoValue(

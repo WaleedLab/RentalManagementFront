@@ -174,5 +174,19 @@
   "Booking status.extension": "تمديد",
   "Booking status.Suspended_due_to_sum_money": "معلق — مبالغ مستحقة",
   "Booking status.Payment_on_account": "دفعة على الحساب",
-  "Booking status.Unknown": "حالة غير معروفة"
+  "Booking status.Unknown": "حالة غير معروفة",
+  "Booking Restrictions": "قيود الحجز",
+  "Allow booking if driving license is expired": "السماح بتأجير إذا الرخصة منتهية",
+  "Allow booking if license and nationality documents are expired": "السماح بتأجير إذا الرخصة والجنسية منتهيان",
+  "Allow booking if vehicle registration and insurance are expired": "السماح بتأجير إذا استمارة المركبة والتأمين منتهيان",
+  "Show interrupted GPS distance in contract": "إظهار المسافة المقطوعة من GPS في العقد",
+  "Booking restriction license expired not allowed": "لا يمكن إنشاء الحجز لأن رخصة القيادة منتهية، وقيود الحجز الحالية لا تسمح بذلك.",
+  "Booking restriction license and nationality expired not allowed": "لا يمكن إنشاء الحجز لأن الرخصة والجنسية منتهيان، وقيود الحجز الحالية لا تسمح بذلك.",
+  "Booking restriction vehicle registration and insurance expired not allowed": "لا يمكن إنشاء الحجز لأن استمارة المركبة والتأمين منتهيان، وقيود الحجز الحالية لا تسمح بذلك.",
+  "Booking tax auto hint": "تم احتساب الضريبة تلقائياً بنسبة {{rate}}% من المبلغ بعد الخصم، ويمكنك تعديلها يدوياً.",
+  "Booking contract limits exceeded title": "تجاوزت قيم العقد الحدود المسموح بها",
+  "Booking contract limit free late hours exceeded": "الساعات المتأخرة ({{current}}) أكبر من الساعات المجانية المسموح بها ({{allowed}}).",
+  "Booking contract limit late per day exceeded": "تأخير الأيام/الساعات ({{current}}) أكبر من الحد اليومي المسموح ({{allowed}}).",
+  "Booking contract limit extra km exceeded": "الكيلومترات الإضافية ({{current}}) أكبر من الحد المسموح عند الإغلاق ({{allowed}}).",
+  "Booking minimum paid at create not met": "لا يمكن إنشاء الحجز لأن المبلغ المدفوع ({{paid}}) أقل من الحد الأدنى المطلوب عند التأجير ({{min}})."
 }

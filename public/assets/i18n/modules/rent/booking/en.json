@@ -174,5 +174,19 @@
   "Booking status.extension": "Extension",
   "Booking status.Suspended_due_to_sum_money": "Suspended (amount due)",
   "Booking status.Payment_on_account": "Payment on account",
-  "Booking status.Unknown": "Unknown status"
+  "Booking status.Unknown": "Unknown status",
+  "Booking Restrictions": "Booking Restrictions",
+  "Allow booking if driving license is expired": "Allow booking if driving license is expired",
+  "Allow booking if license and nationality documents are expired": "Allow booking if license and nationality documents are expired",
+  "Allow booking if vehicle registration and insurance are expired": "Allow booking if vehicle registration and insurance are expired",
+  "Show interrupted GPS distance in contract": "Show interrupted GPS distance in contract",
+  "Booking restriction license expired not allowed": "Cannot create this booking because the driving licence is expired, and current booking restrictions do not allow it.",
+  "Booking restriction license and nationality expired not allowed": "Cannot create this booking because the licence and nationality documents are expired, and current booking restrictions do not allow it.",
+  "Booking restriction vehicle registration and insurance expired not allowed": "Cannot create this booking because the vehicle registration and insurance are expired, and current booking restrictions do not allow it.",
+  "Booking tax auto hint": "Tax is auto-calculated at {{rate}}% on the discounted amount, and you can still edit it manually.",
+  "Booking contract limits exceeded title": "Contract values exceed allowed limits",
+  "Booking contract limit free late hours exceeded": "Late hours ({{current}}) are above allowed free hours ({{allowed}}).",
+  "Booking contract limit late per day exceeded": "Late day/hour value ({{current}}) is above the allowed daily limit ({{allowed}}).",
+  "Booking contract limit extra km exceeded": "Extra kilometers ({{current}}) are above the allowed closing limit ({{allowed}}).",
+  "Booking minimum paid at create not met": "Cannot create booking because paid amount ({{paid}}) is below the minimum required at booking time ({{min}})."
 }
