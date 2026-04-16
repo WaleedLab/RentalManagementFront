@@ -1,20 +1,28 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, NonNullableFormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { AuthStateService } from '../../core/auth/auth-state.service';
 import { AuthService } from '../../shared/services/auth/auth.service';
-import { LayoutService } from '../../shared/services/layout/layout.service';
 import { TokenService } from '../../shared/services/storage/token.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { focusFirstInvalidControl } from '../../shared/utils/focus-first-invalid-control.util';
 
+function noWhitespaceValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  return value.trim().length > 0 ? null : { whitespace: true };
+}
+
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -26,18 +34,20 @@ export class LoginComponent implements OnInit {
   private router = inject(Router);
   private tokenService = inject(TokenService);
   private toast = inject(ToastService);
-  private layout = inject(LayoutService);
   private translate = inject(TranslateService);
 
   loading = false;
   loginDisabled = false;
   errorMessage: string | null = null;
+  currentYear = new Date().getFullYear();
+  parallaxX = 0;
+  parallaxY = 0;
 
   @ViewChild('usernameInput') usernameInput?: ElementRef<HTMLInputElement>;
 
   form = this.fb.group({
-    username: ['', [Validators.required]],
-    password: ['', [Validators.required]],
+    username: ['', [Validators.required, noWhitespaceValidator]],
+    password: ['', [Validators.required, noWhitespaceValidator]],
   });
 
   ngOnInit(): void {
@@ -46,8 +56,6 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    // Login screen should always start in dark mode.
-    this.layout.applyTheme('dark-only');
   }
 
   onSubmit(): void {
@@ -59,7 +67,9 @@ export class LoginComponent implements OnInit {
     this.loading = true;
     this.errorMessage = null;
     const value = this.form.getRawValue();
-    this.auth.login({ username: value.username, password: value.password }).subscribe({
+    const username = value.username.trim();
+    const password = value.password.trim();
+    this.auth.login({ username, password }).subscribe({
       next: result => {
         this.loading = false;
         if (result.success) {
@@ -73,7 +83,7 @@ export class LoginComponent implements OnInit {
           this.toast.success(this.translate.instant('Login successful'));
           this.router.navigate(['/dashboard']);
         } else {
-          const msg = result.message ?? this.translate.instant('Login failed. Check username and password.');
+          const msg = this.resolveLoginError(result.message);
           this.errorMessage = msg;
           this.toast.error(msg);
           this.loginDisabled = true;
@@ -85,10 +95,7 @@ export class LoginComponent implements OnInit {
       },
       error: err => {
         this.loading = false;
-        const message =
-          err?.error?.errors?.length > 0
-            ? err.error.errors.join(' ')
-            : err?.message ?? this.translate.instant('Login failed. Check username and password.');
+        const message = this.resolveLoginError(err);
         this.errorMessage = message;
         this.toast.error(message);
       },
@@ -96,5 +103,61 @@ export class LoginComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  onShellMouseMove(event: MouseEvent): void {
+    const target = event.currentTarget as HTMLElement | null;
+    if (!target) {
+      return;
+    }
+    const rect = target.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width - 0.5;
+    const y = (event.clientY - rect.top) / rect.height - 0.5;
+    this.parallaxX = Math.max(-1, Math.min(1, x)) * 8;
+    this.parallaxY = Math.max(-1, Math.min(1, y)) * 8;
+  }
+
+  onShellMouseLeave(): void {
+    this.parallaxX = 0;
+    this.parallaxY = 0;
+  }
+
+  private resolveLoginError(source: unknown): string {
+    const fallback = this.translate.instant('Login failed. Check username and password.');
+
+    const possibleMessages: string[] = [];
+    if (typeof source === 'string') {
+      possibleMessages.push(source);
+    }
+
+    const payload = source as
+      | {
+          message?: unknown;
+          error?: { message?: unknown; errors?: unknown };
+        }
+      | undefined;
+
+    if (typeof payload?.message === 'string') {
+      possibleMessages.push(payload.message);
+    }
+
+    if (typeof payload?.error?.message === 'string') {
+      possibleMessages.push(payload.error.message);
+    }
+
+    if (Array.isArray(payload?.error?.errors)) {
+      for (const entry of payload.error.errors) {
+        if (typeof entry === 'string') {
+          possibleMessages.push(entry);
+        }
+      }
+    }
+
+    const cleaned = possibleMessages
+      .map(msg => msg.trim())
+      .filter(Boolean)
+      .find(msg => !/(^http|localhost|404|500|api\/|http failure response)/i.test(msg));
+
+    return cleaned ?? fallback;
   }
 }

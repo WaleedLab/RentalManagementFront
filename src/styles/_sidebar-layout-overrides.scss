@@ -693,6 +693,17 @@ body.dark-only .page-wrapper.compact-wrapper .page-header .header-wrapper .toggl
         width: 100% !important;
       }
 
+      /* Keep top logo stable while collapsed, even on hover */
+      .sidebar-wrapper.close_icon .logo-wrapper,
+      .sidebar-wrapper.close_icon:hover .logo-wrapper {
+        display: none !important;
+      }
+
+      .sidebar-wrapper.close_icon .logo-icon-wrapper,
+      .sidebar-wrapper.close_icon:hover .logo-icon-wrapper {
+        display: flex !important;
+      }
+
       .page-body {
         margin-inline: 0;
         margin-inline-start: $sidebar-width;

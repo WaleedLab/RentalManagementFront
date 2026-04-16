@@ -1,54 +1,46 @@
 <div class="auth-shell">
-  <div class="auth-panel">
-    <div class="brand-block">
-      <div class="brand-logos">
-        <img class="brand-logo" src="assets/images/logo/logo-icon.png" alt="Vehicle Rental Management" />
-        <img
-          class="brand-logo brand-logo--secondary"
-          src="assets/images/rent_icon/LOGIN_ICON_2.png"
-          alt="Car Renter"
-        />
+  <div class="auth-panel auth-panel--luxury-auto">
+    <div class="auth-hero-glass">
+      <div class="auth-hero-copy">
+        <p class="auth-kicker">{{ 'Login Brand Kicker' | translate }}</p>
+        <h1 class="auth-title">{{ 'Login Title' | translate }}</h1>
+        <p class="auth-subtitle">{{ 'Login Subtitle' | translate }}</p>
       </div>
-      <div class="brand-copy">
-        <p class="brand-kicker">EWE Car Rental</p>
-        <h1>تسجيل الدخول</h1>
-        <p class="brand-subtitle">
-          منصة حديثة لإدارة الأسطول والعملاء والحجوزات بسرعة وتجربة أكثر احترافية.
-        </p>
+      <div class="auth-hero-logos">
+        <img class="auth-logo" src="assets/images/logo/logo-icon.png" alt="Engineer Guarantee" />
+        <img class="auth-logo auth-logo--secondary" src="assets/images/logo/rent%20app%20icon.png" alt="EWE Car Rental" />
       </div>
     </div>
 
     <form class="auth-form" [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="field-group">
-        <label class="form-label" for="username">اسم المستخدم</label>
         <input
           id="username"
           type="text"
           class="form-control"
           #usernameInput
           formControlName="username"
-          placeholder="مثال: admin"
+          [placeholder]="'Login Username Placeholder' | translate"
           [class.is-invalid]="form.get('username')?.invalid && form.get('username')?.touched"
           autocomplete="username"
         />
         @if (form.get('username')?.invalid && form.get('username')?.touched) {
-          <div class="invalid-feedback">اسم المستخدم مطلوب</div>
+          <div class="invalid-feedback">{{ 'Login Username Required' | translate }}</div>
         }
       </div>
 
       <div class="field-group">
-        <label class="form-label" for="password">كلمة المرور</label>
         <input
           id="password"
           type="password"
           class="form-control"
           formControlName="password"
-          placeholder="ادخل كلمة المرور"
+          [placeholder]="'Login Password Placeholder' | translate"
           [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
           autocomplete="current-password"
         />
         @if (form.get('password')?.invalid && form.get('password')?.touched) {
-          <div class="invalid-feedback">كلمة المرور مطلوبة</div>
+          <div class="invalid-feedback">{{ 'Login Password Required' | translate }}</div>
         }
       </div>
 
@@ -62,13 +54,13 @@
         @if (loading) {
           <span class="spinner-border spinner-border-sm me-2" role="status"></span>
         }
-        دخول
+        {{ 'Login Submit' | translate }}
       </button>
     </form>
 
     <div class="auth-note">
-      <span>بيئة إدارة داخلية</span>
-      <strong>استخدم بيانات الدخول المصرح بها فقط</strong>
+      <strong>© {{ 'Login Footnote Environment' | translate }}</strong>
+      <span>{{ 'Login Footnote Security' | translate }} · {{ currentYear }}</span>
     </div>
   </div>
 </div>

@@ -11,7 +11,7 @@
           <div class="col-12">
             <h6 class="mb-2 booking-section-title">{{ 'Customer Information' | translate }}</h6>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-4 booking-identity-field">
             <label class="form-label">{{ 'Identity Number' | translate }} <span class="text-danger">*</span></label>
             <div class="customer-iqama-search">
               <input
@@ -46,16 +46,6 @@
               }
             </div>
           </div>
-          <div class="col-md-8">
-            <label class="form-label">{{ 'Rental Contract Number' | translate }} <span class="text-danger">*</span></label>
-            <input
-              class="form-control"
-              formControlName="numberBookingINBasame"
-              maxlength="10"
-              [placeholder]="'Example Basame Booking Number' | translate"
-            />
-          </div>
-
           @if (selectedCustomer()) {
             <div class="col-md-4">
               <label class="form-label">{{ 'Arabic Name' | translate }}</label>
@@ -80,6 +70,15 @@
             <div class="col-md-4">
               <label class="form-label">{{ 'Date of Birth' | translate }}</label>
               <input class="form-control" [value]="customerBasicFieldValue('Date of Birth')" readonly />
+            </div>
+            <div class="col-md-4 booking-key-field">
+              <label class="form-label">{{ 'Rental Contract Number' | translate }} <span class="text-danger">*</span></label>
+              <input
+                class="form-control"
+                formControlName="numberBookingINBasame"
+                maxlength="10"
+                [placeholder]="'Example Basame Booking Number' | translate"
+              />
             </div>
             <div class="col-md-12">
               <label class="form-label">{{ 'Address' | translate }}</label>
@@ -114,6 +113,15 @@
               <label class="form-label">{{ 'Driving License Number' | translate }}</label>
               <input class="form-control" formControlName="customerDrivingLicenseNumber" />
             </div>
+            <div class="col-md-4 booking-key-field">
+              <label class="form-label">{{ 'Rental Contract Number' | translate }} <span class="text-danger">*</span></label>
+              <input
+                class="form-control"
+                formControlName="numberBookingINBasame"
+                maxlength="10"
+                [placeholder]="'Example Basame Booking Number' | translate"
+              />
+            </div>
           }
 
           <div class="col-12 mt-2">
@@ -137,10 +145,6 @@
             <input class="form-control" [value]="vehicleInfoValue('year')" readonly />
           </div>
           <div class="col-md-3">
-            <label class="form-label">{{ 'Plate Number' | translate }}</label>
-            <input class="form-control" [value]="vehicleInfoValue('plateNumber')" readonly />
-          </div>
-          <div class="col-md-3">
             <label class="form-label">{{ 'Color' | translate }}</label>
             <input class="form-control" [value]="vehicleInfoValue('color')" readonly />
           </div>
@@ -160,7 +164,7 @@
             <label class="form-label">{{ 'Registration Expiry Date' | translate }}</label>
             <input class="form-control" [value]="vehicleInfoValue('validityCarRegistration')" readonly />
           </div>
-          <div class="col-md-3">
+          <div class="col-md-3 booking-key-field">
             <label class="form-label">{{ 'Checkout Counter' | translate }}</label>
             <input class="form-control" type="number" min="0" formControlName="checkoutCounter" />
           </div>
@@ -172,7 +176,7 @@
           <div class="col-12">
             <div class="booking-subsection-title">{{ 'Pricing And Discount' | translate }}</div>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-3 booking-key-field">
             <label class="form-label">{{ 'Start Date' | translate }} <span class="text-danger">*</span></label>
             <input class="form-control" type="datetime-local" formControlName="startDate" />
           </div>
@@ -183,10 +187,6 @@
           <div class="col-md-3 booking-key-field">
             <label class="form-label">{{ 'Count Of Days' | translate }} <span class="text-danger">*</span></label>
             <input class="form-control" type="number" min="1" formControlName="countOfDay" />
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Expected Amount' | translate }}</label>
-            <input class="form-control" [value]="expectedAmount()" readonly />
           </div>
           <div class="col-md-3">
             <label class="form-label">{{ 'Discount' | translate }}</label>
@@ -204,10 +204,6 @@
           <div class="col-md-3">
             <label class="form-label">{{ 'Total Tax' | translate }}</label>
             <input class="form-control" type="number" min="0" step="0.01" formControlName="totaltax" />
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Amount After Tax And Discount' | translate }}</label>
-            <input class="form-control" [value]="amountAfterTaxAndDiscount()" readonly />
           </div>
           <div class="col-md-3">
             <label class="form-label">{{ 'Applied Discount Value' | translate }}</label>
