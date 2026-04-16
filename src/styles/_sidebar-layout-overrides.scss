@@ -678,15 +678,19 @@ body.dark-only .page-wrapper.compact-wrapper .page-header .header-wrapper .toggl
       }
 
       .sidebar-wrapper.close_icon:hover {
-        width: $sidebar-width;
-        z-index: 1300;
-        overflow: visible;
+        width: $sidebar-collapsed-width !important;
+        min-width: $sidebar-collapsed-width !important;
+        max-width: $sidebar-collapsed-width !important;
+        z-index: 1200 !important;
+        overflow: visible !important;
       }
 
+      /* Prevent any theme rule from auto-expanding collapsed sidebar on hover */
+      .sidebar-wrapper.close_icon:hover .logo-wrapper,
+      .sidebar-wrapper.close_icon:hover .logo-icon-wrapper,
       .sidebar-wrapper.close_icon:hover #sidebar-menu,
-      .sidebar-wrapper.close_icon:hover .sidebar-links,
       .sidebar-wrapper.close_icon:hover .sidebar-main {
-        overflow: visible;
+        width: 100% !important;
       }
 
       .page-body {

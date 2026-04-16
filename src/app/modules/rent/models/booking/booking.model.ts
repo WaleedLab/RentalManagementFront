@@ -99,8 +99,8 @@ export interface BookingCreateRequest {
   endDate: string;
   countOfDay: number;
   dateReturnVehical: string;
-  /** Same as DB: `bookingEnum` name string (e.g. `open`), not a numeric enum code. */
-  stutus: number | string;
+  /** Legacy optional field; backend now sets booking status server-side on create. */
+  stutus?: number | string;
   priceInDay: number;
   allowTo: number;
   countKMExtra: number;
@@ -117,12 +117,12 @@ export interface BookingCreateRequest {
   idCountingCustVehicle?: string;
   /** @deprecated Prefer `idCountingCustVehicle`; kept for older payloads. */
   idCountingCust?: string;
-  /** Required by backend `CreateBookingCommand.BirthDay` (non-nullable); form always sends when customer has DOB. */
-  birthDay?: string;
+  /** Required by backend `CreateBookingCommand.BirthDay` (non-nullable). */
+  birthDay: string;
   numberBookingINBasame: string;
   fleetId: string;
-  /** Optional: not in published OpenAPI; sent when present for backends that accept extended contracts. */
-  idBranch?: number;
+  /** Required by backend `CreateBookingCommand.IdBranch` (non-nullable long). */
+  idBranch: number;
   idCustomer?: number;
   distancetraveledgps?: string;
   numberOfHoursExcess?: number;

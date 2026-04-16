@@ -231,6 +231,7 @@ export class CustomerFormComponent implements OnInit {
   autoAssignedSubscriptionId = signal<number | null>(null);
   nationalitySuggestions = signal<string[]>([]);
   issuePlaceSuggestions = signal<string[]>([]);
+  returnTo = signal('/customers');
 
   form = this.fb.group({
     nameAr: [
@@ -301,6 +302,11 @@ export class CustomerFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    const returnToRaw = this.route.snapshot.queryParamMap.get('returnTo')?.trim() ?? '';
+    if (returnToRaw.startsWith('/')) {
+      this.returnTo.set(returnToRaw);
+    }
+
     this.loadCustomerSubscriptions();
     this.rentalCount.set(0);
     this.initializeNationalitySuggestions();
@@ -719,7 +725,7 @@ export class CustomerFormComponent implements OnInit {
         this.toast.success(
           this.translate.instant(this.isEdit() ? 'Customer updated' : 'Customer created'),
         );
-        this.router.navigate(['/customers']);
+        this.router.navigateByUrl(this.returnTo());
       },
       error: () => this.loading.set(false),
       complete: () => this.loading.set(false),

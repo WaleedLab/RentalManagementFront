@@ -1,11 +1,36 @@
 import { PaymentCount } from './payment-count.model';
 import { pick } from '../shared/finance-normalizer.utils';
 
+function toNumberOrUndefined(value: unknown): number | undefined {
+  if (value === null || value === undefined || value === '') {
+    return undefined;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 export function normalizePaymentCount(raw: unknown): PaymentCount {
   const source = (raw ?? {}) as Record<string, unknown>;
+  const paymentNumber = toNumberOrUndefined(
+    pick(
+      source,
+      'paymentNumber',
+      'PaymentNumber',
+      'paymentnumber',
+      'Paymentnumber',
+      'voucherNumber',
+      'VoucherNumber',
+      'paymentNo',
+      'PaymentNo',
+      'paymentCountNumber',
+      'PaymentCountNumber',
+      'number',
+      'Number',
+    ),
+  );
   return {
     id: String(pick(source, 'id', 'Id') ?? ''),
-    paymentNumber: pick<number>(source, 'paymentNumber', 'PaymentNumber', 'voucherNumber', 'VoucherNumber'),
+    paymentNumber,
     name: pick<string>(source, 'name', 'Name', 'title', 'Title'),
     description: pick<string>(source, 'description', 'Description', 'dscription', 'Dscription', 'note', 'Note'),
     idCustomer: pick<number>(source, 'idCustomer', 'IdCustomer'),

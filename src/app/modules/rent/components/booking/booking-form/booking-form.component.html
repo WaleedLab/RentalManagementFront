@@ -1,15 +1,17 @@
 <div class="container-fluid">
-  <app-page-header [title]="'Create Booking' | translate" [subtitle]="'Select customer and vehicle, validate dates, then confirm the reservation.' | translate">
-    <a class="btn btn-outline-primary" routerLink="/customers/create">{{ 'Create Customer' | translate }}</a>
-    <a class="btn btn-outline-primary" routerLink="/vehicles/create">{{ 'Create Vehicle' | translate }}</a>
-    <a class="btn btn-outline-secondary" routerLink="/booking">{{ 'Back to Bookings' | translate }}</a>
-  </app-page-header>
+  <app-page-header
+    [title]="'Create Booking' | translate"
+    [subtitle]="'Quick booking entry with essential fields only.' | translate"
+  />
 
   <div class="card">
     <div class="card-body">
       <form [formGroup]="form" (ngSubmit)="save()">
-        <div class="row g-3">
-          <div class="col-md-6">
+        <div class="row g-3 booking-form-grid">
+          <div class="col-12">
+            <h6 class="mb-2 booking-section-title">{{ 'Customer Information' | translate }}</h6>
+          </div>
+          <div class="col-md-4">
             <label class="form-label">{{ 'Identity Number' | translate }} <span class="text-danger">*</span></label>
             <div class="customer-iqama-search">
               <input
@@ -22,379 +24,240 @@
                 aria-autocomplete="list"
                 [attr.aria-expanded]="customerIqamaSuggestions().length > 0"
               />
-            @if (customerIqamaSuggestions().length > 0) {
-              <div class="customer-iqama-suggestions app-soft-select__menu">
-                @for (customer of customerIqamaSuggestions(); track customer.id; let idx = $index) {
-                  @let parts = customerSuggestionIqamaParts(customer);
-                  <button
-                    type="button"
-                    class="customer-iqama-suggestion-item app-soft-select__option"
-                    [class.is-active]="idx === activeCustomerSuggestionIndex()"
-                    (mousedown)="pickCustomerSuggestion(customer)"
-                    (mouseenter)="setActiveCustomerSuggestion(idx)"
-                  >
-                    <span class="customer-iqama-main">
-                      {{ parts.before }}<mark class="customer-iqama-highlight">{{ parts.match }}</mark>{{ parts.after }}
-                    </span>
-                    <span class="customer-iqama-sep"> - </span>
-                    <span class="customer-iqama-name">{{ parts.name }}</span>
-                  </button>
-                }
-              </div>
-            }
-            </div>
-            <div class="form-text">{{ 'Hint Booking Customer' | translate }}</div>
-          </div>
-          <div class="col-md-6 d-flex align-items-end">
-            <button class="btn btn-outline-secondary" type="button" (click)="customerLookupByIqama()">
-              {{ 'Search' | translate }}
-            </button>
-          </div>
-
-          <div class="col-12">
-            <div class="border rounded-3 p-3">
-              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                <h6 class="mb-0">{{ 'Customer Information' | translate }}</h6>
-                <a class="btn btn-sm btn-outline-primary" routerLink="/customers/create">
-                  {{ 'Create Customer' | translate }}
-                </a>
-              </div>
-
-              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                @if (missingCustomerBasicFields().length) {
-                  <span class="badge text-bg-warning">
-                    {{ 'Missing required fields' | translate }}: {{ missingCustomerBasicFields().length }}
-                  </span>
-                } @else {
-                  <span class="badge text-bg-success">{{ 'Ready for booking' | translate }}</span>
-                }
-              </div>
-
-              <div class="row g-3">
-                @if (selectedCustomer()) {
-                  <div class="col-md-4">
-                    <label class="form-label">{{ 'Identity Number' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" [value]="customerBasicFieldValue('Identity Number')" readonly />
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">{{ 'Arabic Name' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" [value]="customerBasicFieldValue('Arabic Name')" readonly />
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">{{ 'Nationality' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" [value]="customerBasicFieldValue('Nationality')" readonly />
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">{{ 'Primary Mobile Number' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" [value]="customerBasicFieldValue('Primary Mobile Number')" readonly />
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">{{ 'Driving License Expiry Date' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" [value]="customerBasicFieldValue('Driving License Expiry Date')" readonly />
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">{{ 'Driving License Number' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" [value]="customerBasicFieldValue('Driving License Number')" readonly />
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">{{ 'Address' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" [value]="customerBasicFieldValue('Address')" readonly />
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">{{ 'Date of Birth' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" [value]="customerBasicFieldValue('Date of Birth')" readonly />
-                  </div>
-                } @else {
-                  <div class="col-md-4">
-                    <label class="form-label">{{ 'Arabic Name' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" formControlName="customerNameAr" />
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">{{ 'Primary Mobile Number' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" formControlName="customerFirstMobileNumber" />
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">{{ 'Nationality' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" formControlName="customerNationality" />
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">{{ 'Driving License Expiry Date' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" type="date" formControlName="customerDateDrivinglicense" />
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">{{ 'Date of Birth' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" type="date" formControlName="customerBirthDay" />
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">{{ 'Address' | translate }}</label>
-                    <input class="form-control" formControlName="customerAddress" />
-                  </div>
-                }
-                <div class="col-md-3">
-                  <label class="form-label">{{ 'Rental Contract Number' | translate }} <span class="text-danger">*</span></label>
-                  <input class="form-control" formControlName="numberBookingINBasame" maxlength="10" [placeholder]="'Example Basame Booking Number' | translate" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12">
-            <div class="border rounded-3 p-3">
-              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                <h6 class="mb-0">{{ 'Vehicle Information' | translate }}</h6>
-                <a class="btn btn-sm btn-outline-primary" routerLink="/vehicles/create">
-                  {{ 'Create Vehicle' | translate }}
-                </a>
-              </div>
-
-              <div class="row g-3">
-                <div class="col-md-3">
-                  <label class="form-label">{{ 'Plate Number' | translate }} <span class="text-danger">*</span></label>
-                  <app-smooth-select
-                    formControlName="vehicleId"
-                    [ariaLabel]="'Plate Number' | translate"
-                    [placeholder]="'Select vehicle'"
-                    [options]="vehicleSelectOptions()"
-                  />
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label">{{ 'Vehicle Type' | translate }}</label>
-                  <input class="form-control" [value]="vehicleInfoValue('type')" readonly />
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label">{{ 'Model' | translate }}</label>
-                  <input class="form-control" [value]="vehicleInfoValue('model')" readonly />
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label">{{ 'Color' | translate }}</label>
-                  <input class="form-control" [value]="vehicleInfoValue('color')" readonly />
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label">{{ 'Usage Place' | translate }}</label>
-                  <input class="form-control" formControlName="placeUSE" maxlength="200" [placeholder]="'Example Usage Place' | translate" />
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label">{{ 'Checkout Counter' | translate }}</label>
-                  <input class="form-control" type="number" min="0" formControlName="checkoutCounter" [placeholder]="'Example Distance Zero' | translate" />
-                </div>
-                <div class="col-md-2">
-                  <label class="form-label">{{ 'Daily Price' | translate }}</label>
-                  <input class="form-control" type="number" min="0" step="0.01" formControlName="priceInDay" [placeholder]="'Example Amount Zero' | translate" />
-                  <div class="form-text">{{ 'Hint Booking Daily Price' | translate }}</div>
-                  @if (selectedCategory(); as cat) {
-                    <div class="form-text booking-smart-hint">
-                      {{
-                        'Booking smart hint daily'
-                          | translate: { range: formatRange(cat.price_day_low, cat.price_day_high) }
-                      }}
-                    </div>
+              @if (customerIqamaSuggestions().length > 0) {
+                <div class="customer-iqama-suggestions app-soft-select__menu">
+                  @for (customer of customerIqamaSuggestions(); track customer.id; let idx = $index) {
+                    @let parts = customerSuggestionIqamaParts(customer);
+                    <button
+                      type="button"
+                      class="customer-iqama-suggestion-item app-soft-select__option"
+                      [class.is-active]="idx === activeCustomerSuggestionIndex()"
+                      (mousedown)="pickCustomerSuggestion(customer)"
+                      (mouseenter)="setActiveCustomerSuggestion(idx)"
+                    >
+                      <span class="customer-iqama-main">
+                        {{ parts.before }}<mark class="customer-iqama-highlight">{{ parts.match }}</mark>{{ parts.after }}
+                      </span>
+                      <span class="customer-iqama-sep"> - </span>
+                      <span class="customer-iqama-name">{{ parts.name }}</span>
+                    </button>
                   }
-                </div>
-                <div class="col-md-2">
-                  <label class="form-label">{{ 'Allowed Distance' | translate }}</label>
-                  <input class="form-control" type="number" min="0" formControlName="allowTo" [placeholder]="'Example Distance Zero' | translate" />
-                  @if (selectedCategory(); as cat) {
-                    <div class="form-text booking-smart-hint">
-                      {{
-                        'Booking smart hint allowTo'
-                          | translate: { range: formatIntRange(cat.allowToLow, cat.allowToHigh) }
-                      }}
-                    </div>
-                  }
-                </div>
-                <div class="col-md-2">
-                  <label class="form-label">{{ 'Extra KM Price' | translate }}</label>
-                  <input class="form-control" type="number" min="0" step="0.01" formControlName="priceKmExtra" [placeholder]="'Example Amount Zero' | translate" />
-                  @if (selectedCategory(); as cat) {
-                    <div class="form-text booking-smart-hint">
-                      @if (categoryKmPriceBandDefined(cat)) {
-                        {{
-                          'Booking smart hint kmPriceRange'
-                            | translate: { range: formatRange(cat.priceKmExtraLow, cat.priceKmExtraHigh) }
-                        }}
-                      } @else {
-                        {{ 'Booking smart hint kmPrice' | translate }}
-                      }
-                    </div>
-                  }
-                </div>
-                <div class="col-md-2">
-                  <label class="form-label">{{ 'Extra Hour Price' | translate }}</label>
-                  <input class="form-control" type="number" min="0" step="0.01" formControlName="priceHoureExtra" [placeholder]="'Example Amount Zero' | translate" />
-                  @if (selectedCategory(); as cat) {
-                    <div class="form-text booking-smart-hint">
-                      {{
-                        'Booking smart hint hourExtra'
-                          | translate: { range: formatRange(cat.priceHoureExtraLow, cat.priceHoureExtraHigh) }
-                      }}
-                    </div>
-                  }
-                </div>
-              </div>
-              <div class="row g-3 mt-1">
-                <div class="col-md-4">
-                  <label class="form-label">{{ 'Monthly Price' | translate }}</label>
-                  <input class="form-control" type="number" min="0" step="0.01" formControlName="priceInMonth" [placeholder]="'Example Amount Zero' | translate" />
-                  <div class="form-text">{{ 'Hint Booking Monthly Price' | translate }}</div>
-                  @if (selectedCategory(); as cat) {
-                    <div class="form-text booking-smart-hint">
-                      {{
-                        'Booking smart hint monthly'
-                          | translate: { range: formatRange(cat.price_month_low, cat.price_month_high) }
-                      }}
-                    </div>
-                  }
-                </div>
-              </div>
-              @if (selectedVehicle() && categoryHintUnavailable()) {
-                <div class="alert alert-light border small mt-3 mb-0" role="status">
-                  {{ 'Booking category hints unavailable' | translate }}
-                </div>
-              }
-              @if (selectedCategory(); as cat) {
-                <div class="booking-category-smart-hint mt-3" role="status">
-                  <div class="fw-semibold text-body-secondary">
-                    {{ 'Booking smart banner title' | translate: { name: categoryDisplayName(cat) } }}
-                  </div>
-                  <ul class="small mb-0 mt-2 ps-3 text-body-secondary">
-                    <li>
-                      {{ 'Booking smart banner daily' | translate: { range: formatRange(cat.price_day_low, cat.price_day_high) } }}
-                    </li>
-                    <li>
-                      {{ 'Booking smart banner monthly' | translate: { range: formatRange(cat.price_month_low, cat.price_month_high) } }}
-                    </li>
-                    <li>
-                      {{ 'Booking smart banner allowTo' | translate: { range: formatIntRange(cat.allowToLow, cat.allowToHigh) } }}
-                    </li>
-                    <li>
-                      {{ 'Booking smart banner kmExtra' | translate: { range: formatIntRange(cat.countKMExtraLow, cat.countKMExtraHigh) } }}
-                    </li>
-                    <li>
-                      {{ 'Booking smart banner hourExtra' | translate: { range: formatRange(cat.priceHoureExtraLow, cat.priceHoureExtraHigh) } }}
-                    </li>
-                    @if (categoryKmPriceBandDefined(cat)) {
-                      <li>
-                        {{
-                          'Booking smart banner kmPrice'
-                            | translate: { range: formatRange(cat.priceKmExtraLow, cat.priceKmExtraHigh) }
-                        }}
-                      </li>
-                    }
-                    <li>{{ 'Booking smart banner formula' | translate }}</li>
-                  </ul>
                 </div>
               }
             </div>
           </div>
-
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Branch ID' | translate }} <span class="text-danger">*</span></label>
-            <input class="form-control" type="number" min="1" formControlName="branchId" />
-            <div class="form-text">{{ 'Hint Booking Branch' | translate }}</div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Start Date' | translate }} <span class="text-danger">*</span></label>
-            <input class="form-control" type="date" formControlName="startDate" />
-            <div class="form-text">{{ 'Hint Booking Start Date' | translate }}</div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'End Date' | translate }} <span class="text-danger">*</span></label>
-            <input class="form-control" type="date" formControlName="endDate" />
-            <div class="form-text">{{ 'Hint Booking End Date' | translate }}</div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Vehicle Return Date' | translate }} <span class="text-danger">*</span></label>
-            <input class="form-control" type="date" formControlName="dateReturnVehical" />
-            <div class="form-text">{{ 'Hint Booking Return Date' | translate }}</div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Total Amount' | translate }}</label>
-            <div class="input-group">
-              <input class="form-control" type="number" min="0" step="0.01" formControlName="total" [placeholder]="'Example Amount Zero' | translate" />
-              <button class="btn btn-outline-secondary" type="button" (click)="applySuggestedTotal()">
-                {{ 'Apply suggested total' | translate }}
-              </button>
-            </div>
-            <div class="form-text">{{ 'Hint Booking Total' | translate }}</div>
-            <div class="form-text booking-smart-hint">
-              {{ 'Booking smart subtotal' | translate: { amount: formatMoney(suggestedRentalSubtotal()) } }}
-            </div>
-            <div class="form-text booking-smart-hint">
-              {{ 'Booking smart grand total' | translate: { amount: formatMoney(suggestedContractTotal()) } }}
-            </div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Discount' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="discount" [placeholder]="'Example Amount Zero' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Extra KM Count' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="countKMExtra" [placeholder]="'Example Distance Zero' | translate" />
-            @if (selectedCategory(); as cat) {
-              <div class="form-text booking-smart-hint">
-                {{
-                  'Booking smart hint kmExtra'
-                    | translate: { range: formatIntRange(cat.countKMExtraLow, cat.countKMExtraHigh) }
-                }}
-              </div>
-            }
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Other Expenses' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="otherExpenses" [placeholder]="'Example Amount Zero' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Traffic Total' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="totalTrafic" [placeholder]="'Example Amount Zero' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Maintenance Total' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="totalMaintance" [placeholder]="'Example Amount Zero' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Received Vehicle Total' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="totalReceivedVehicle" [placeholder]="'Example Amount Zero' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Transportation Fees' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="transportationFees" [placeholder]="'Example Amount Zero' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Total Tax' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="totaltax" [placeholder]="'Example Amount Zero' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Paid Amount' | translate }}</label>
-            <input class="form-control" type="number" min="0" step="0.01" formControlName="paid" [placeholder]="'Example Amount Zero' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Payment Type' | translate }}</label>
-            <select class="form-select" formControlName="paymentType">
-              <option [ngValue]="1">{{ 'Cash' | translate }}</option>
-              <option [ngValue]="2">{{ 'Network/POS' | translate }}</option>
-              <option [ngValue]="3">{{ 'Cheque' | translate }}</option>
-              <option [ngValue]="4">{{ 'Bank Transfer' | translate }}</option>
-              <option [ngValue]="5">{{ 'Bank/Cash' | translate }}</option>
-            </select>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Paid Cash' | translate }}</label>
-            <input class="form-control" type="number" min="0" step="0.01" formControlName="paidCash" [placeholder]="'Example Amount Zero' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Paid Bank' | translate }}</label>
-            <input class="form-control" type="number" min="0" step="0.01" formControlName="paidBank" [placeholder]="'Example Amount Zero' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Bank Account' | translate }}</label>
-            <app-smooth-select
-              formControlName="idBank"
-              [ariaLabel]="'Bank Account' | translate"
-              [placeholder]="'Select bank'"
-              [options]="bankSelectOptions()"
+          <div class="col-md-8">
+            <label class="form-label">{{ 'Rental Contract Number' | translate }} <span class="text-danger">*</span></label>
+            <input
+              class="form-control"
+              formControlName="numberBookingINBasame"
+              maxlength="10"
+              [placeholder]="'Example Basame Booking Number' | translate"
             />
           </div>
-          <div class="col-md-4">
+
+          @if (selectedCustomer()) {
+            <div class="col-md-4">
+              <label class="form-label">{{ 'Arabic Name' | translate }}</label>
+              <input class="form-control" [value]="customerBasicFieldValue('Arabic Name')" readonly />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ 'Primary Mobile Number' | translate }}</label>
+              <input class="form-control" [value]="customerBasicFieldValue('Primary Mobile Number')" readonly />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ 'Nationality' | translate }}</label>
+              <input class="form-control" [value]="customerBasicFieldValue('Nationality')" readonly />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ 'Driving License Expiry Date' | translate }}</label>
+              <input class="form-control" [value]="customerBasicFieldValue('Driving License Expiry Date')" readonly />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ 'Driving License Number' | translate }}</label>
+              <input class="form-control" [value]="customerBasicFieldValue('Driving License Number')" readonly />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ 'Date of Birth' | translate }}</label>
+              <input class="form-control" [value]="customerBasicFieldValue('Date of Birth')" readonly />
+            </div>
+            <div class="col-md-12">
+              <label class="form-label">{{ 'Address' | translate }}</label>
+              <input class="form-control" [value]="customerBasicFieldValue('Address')" readonly />
+            </div>
+          } @else {
+            <div class="col-md-4">
+              <label class="form-label">{{ 'Arabic Name' | translate }} <span class="text-danger">*</span></label>
+              <input class="form-control" formControlName="customerNameAr" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ 'Primary Mobile Number' | translate }} <span class="text-danger">*</span></label>
+              <input class="form-control" formControlName="customerFirstMobileNumber" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ 'Nationality' | translate }} <span class="text-danger">*</span></label>
+              <input class="form-control" formControlName="customerNationality" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ 'Driving License Expiry Date' | translate }} <span class="text-danger">*</span></label>
+              <input class="form-control" type="date" formControlName="customerDateDrivinglicense" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ 'Date of Birth' | translate }} <span class="text-danger">*</span></label>
+              <input class="form-control" type="date" formControlName="customerBirthDay" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ 'Address' | translate }}</label>
+              <input class="form-control" formControlName="customerAddress" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ 'Driving License Number' | translate }}</label>
+              <input class="form-control" formControlName="customerDrivingLicenseNumber" />
+            </div>
+          }
+
+          <div class="col-12 mt-2">
+            <h6 class="mb-2 booking-section-title">{{ 'Vehicle Information' | translate }}</h6>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Plate Number' | translate }} <span class="text-danger">*</span></label>
+            <app-smooth-select
+              formControlName="vehicleId"
+              [ariaLabel]="'Plate Number' | translate"
+              [placeholder]="'Select vehicle'"
+              [options]="vehicleSelectOptions()"
+            />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Vehicle Type' | translate }}</label>
+            <input class="form-control" [value]="vehicleInfoValue('type')" readonly />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Year' | translate }}</label>
+            <input class="form-control" [value]="vehicleInfoValue('year')" readonly />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Plate Number' | translate }}</label>
+            <input class="form-control" [value]="vehicleInfoValue('plateNumber')" readonly />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Color' | translate }}</label>
+            <input class="form-control" [value]="vehicleInfoValue('color')" readonly />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Insurance Expiry Date' | translate }}</label>
+            <input class="form-control" [value]="vehicleInfoValue('insuranceExpires')" readonly />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Driving License Expiry Date' | translate }}</label>
+            <input class="form-control" [value]="vehicleInfoValue('licenseExpirationDate')" readonly />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Insurance Policy Number' | translate }}</label>
+            <input class="form-control" [value]="vehicleInfoValue('insurancePolicyNumber')" readonly />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Registration Expiry Date' | translate }}</label>
+            <input class="form-control" [value]="vehicleInfoValue('validityCarRegistration')" readonly />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Checkout Counter' | translate }}</label>
+            <input class="form-control" type="number" min="0" formControlName="checkoutCounter" />
+          </div>
+
+          <div class="col-12 mt-2">
+            <h6 class="mb-2 booking-section-title">{{ 'Booking Information' | translate }}</h6>
+          </div>
+          <input type="hidden" formControlName="branchId" />
+          <div class="col-12">
+            <div class="booking-subsection-title">{{ 'Pricing And Discount' | translate }}</div>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Start Date' | translate }} <span class="text-danger">*</span></label>
+            <input class="form-control" type="datetime-local" formControlName="startDate" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Vehicle Return Date' | translate }} <span class="text-danger">*</span></label>
+            <input class="form-control" type="datetime-local" formControlName="dateReturnVehical" readonly />
+          </div>
+          <div class="col-md-3 booking-key-field">
+            <label class="form-label">{{ 'Count Of Days' | translate }} <span class="text-danger">*</span></label>
+            <input class="form-control" type="number" min="1" formControlName="countOfDay" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Expected Amount' | translate }}</label>
+            <input class="form-control" [value]="expectedAmount()" readonly />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Discount' | translate }}</label>
+            <input class="form-control" type="number" min="0" step="0.01" formControlName="discount" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Discount Type' | translate }}</label>
+            <app-smooth-select
+              formControlName="discountType"
+              [ariaLabel]="'Discount Type' | translate"
+              [placeholder]="'Discount Type' | translate"
+              [options]="discountTypeSelectOptions()"
+            />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Total Tax' | translate }}</label>
+            <input class="form-control" type="number" min="0" step="0.01" formControlName="totaltax" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Amount After Tax And Discount' | translate }}</label>
+            <input class="form-control" [value]="amountAfterTaxAndDiscount()" readonly />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Applied Discount Value' | translate }}</label>
+            <input class="form-control" [value]="discountAppliedValue()" readonly />
+          </div>
+          <div class="col-12">
+            <div class="decision-summary">
+              <div class="decision-summary__item">
+                <span class="decision-summary__label">{{ 'Expected Amount' | translate }}</span>
+                <strong class="decision-summary__value">{{ expectedAmount() }}</strong>
+              </div>
+              <div class="decision-summary__item">
+                <span class="decision-summary__label">{{ 'Amount After Tax And Discount' | translate }}</span>
+                <strong class="decision-summary__value">{{ amountAfterTaxAndDiscount() }}</strong>
+              </div>
+              <div class="decision-summary__item">
+                <span class="decision-summary__label">{{ 'Remaining Amount' | translate }}</span>
+                <strong class="decision-summary__value">{{ remainingAmount() }}</strong>
+              </div>
+              <div class="decision-summary__item">
+                <span class="decision-summary__label">{{ 'Overpaid Amount' | translate }}</span>
+                <strong class="decision-summary__value">{{ overpaidAmount() }}</strong>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="booking-subsection-title">{{ 'Payment Arrangement' | translate }}</div>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Payment Type' | translate }}</label>
+            <app-smooth-select
+              formControlName="paymentType"
+              [ariaLabel]="'Payment Type' | translate"
+              [placeholder]="'Payment Type' | translate"
+              [options]="paymentTypeSelectOptions()"
+            />
+          </div>
+          <div class="col-md-3 booking-key-field">
+            <label class="form-label">{{ 'Paid Amount' | translate }}</label>
+            <input class="form-control" type="number" min="0" step="0.01" formControlName="paid" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Paid Cash' | translate }}</label>
+            <input class="form-control" type="number" min="0" step="0.01" formControlName="paidCash" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Paid Bank' | translate }}</label>
+            <input class="form-control" type="number" min="0" step="0.01" formControlName="paidBank" />
+          </div>
+          <div class="col-md-3">
             <label class="form-label">{{ 'Cash Account' | translate }}</label>
             <app-smooth-select
               formControlName="idCash"
@@ -403,43 +266,19 @@
               [options]="cashSelectOptions()"
             />
           </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Customer Vehicle Counting' | translate }}</label>
+          <div class="col-md-3">
+            <label class="form-label">{{ 'Bank Account' | translate }}</label>
             <app-smooth-select
-              formControlName="idCountingCustVehicle"
-              [ariaLabel]="'Customer Vehicle Counting' | translate"
-              [placeholder]="'Select customer vehicle counting'"
-              [options]="countingSelectOptions()"
+              formControlName="idBank"
+              [ariaLabel]="'Bank Account' | translate"
+              [placeholder]="'Select bank'"
+              [options]="bankSelectOptions()"
             />
           </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Travelled Distance GPS' | translate }}</label>
-            <input class="form-control" formControlName="distancetraveledgps" maxlength="100" [placeholder]="'Example GPS Distance' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Checkin Counter' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="checkinCounter" [placeholder]="'Example Distance Zero' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Count Of Days' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="countOfDay" [placeholder]="'Example Count Zero' | translate" />
-            <div class="form-text booking-smart-hint">{{ 'Booking smart days synced' | translate }}</div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Excess Hours Count' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="numberOfHoursExcess" [placeholder]="'Example Count Zero' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Excess KM Count' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="numberKmExcess" [placeholder]="'Example Count Zero' | translate" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Excess Days Count' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="dayExcess" [placeholder]="'Example Count Zero' | translate" />
-          </div>
+
           <div class="col-12">
             <label class="form-label">{{ 'Notes' | translate }}</label>
-            <textarea class="form-control" rows="4" formControlName="note" [placeholder]="'Example Booking Notes' | translate"></textarea>
+            <textarea class="form-control" rows="2" formControlName="note"></textarea>
           </div>
         </div>
 

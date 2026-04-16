@@ -47,6 +47,8 @@ import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-firs
 })
 export class BookingFormComponent implements OnInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
+  /** Default revenue counting used for booking customer vehicle ledger. */
+  private static readonly DEFAULT_CUSTOMER_VEHICLE_COUNTING_NUMBER = 4101;
   private static readonly GPS_DISTANCE_REGEX = /^[A-Za-z0-9\s.,/-]{0,100}$/;
   private static readonly PLACE_USE_REGEX = /^[\u0600-\u06FFA-Za-z0-9\s.,'-]{0,200}$/;
   private static readonly NOTE_REGEX = /^[\u0600-\u06FFA-Za-z0-9\s.,!?'"\-_/()]{0,500}$/;
@@ -107,6 +109,17 @@ export class BookingFormComponent implements OnInit {
       label: cash.name || '-',
       value: String(cash.id),
     })),
+  ]);
+  paymentTypeSelectOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('Cash'), value: 1 },
+    { label: this.translate.instant('Network/POS'), value: 2 },
+    { label: this.translate.instant('Cheque'), value: 3 },
+    { label: this.translate.instant('Bank Transfer'), value: 4 },
+    { label: this.translate.instant('Bank/Cash'), value: 5 },
+  ]);
+  discountTypeSelectOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('Fixed Amount'), value: 'amount' },
+    { label: this.translate.instant('Percentage'), value: 'percent' },
   ]);
   countingSelectOptions = computed<SmoothSelectOption[]>(() => [
     { label: 'Select customer vehicle counting', value: '' },
@@ -171,6 +184,7 @@ export class BookingFormComponent implements OnInit {
     customerFirstMobileNumber: ['', [Validators.maxLength(20)]],
     customerAddress: ['', [Validators.maxLength(500)]],
     customerNationality: ['', [Validators.maxLength(100)]],
+    customerDrivingLicenseNumber: ['', [Validators.maxLength(50)]],
     customerDateDrivinglicense: [''],
     customerBirthDay: [''],
     vehicleId: ['', [Validators.required]],
@@ -184,6 +198,7 @@ export class BookingFormComponent implements OnInit {
     numberOfHoursExcess: [0, [Validators.required, Validators.min(0)]],
     numberKmExcess: [0, [Validators.required, Validators.min(0)]],
     dayExcess: [0, [Validators.required, Validators.min(0)]],
+    discountType: ['amount' as 'amount' | 'percent'],
     discount: [0, [Validators.required, Validators.min(0)]],
     checkoutCounter: [0, [Validators.required, Validators.min(0)]],
     checkinCounter: [0, [Validators.required, Validators.min(0)]],
@@ -264,6 +279,7 @@ export class BookingFormComponent implements OnInit {
         this.banks.set(banks ?? []);
         this.cashAccounts.set(cashAccounts ?? []);
         this.countingEntries.set(countingEntries ?? []);
+        this.applyDefaultCustomerVehicleCounting();
         this.vehicleCategoryHintsTrigger$.next();
       },
       error: () => this.toast.error(this.translate.instant('Failed to load booking references')),
@@ -283,9 +299,19 @@ export class BookingFormComponent implements OnInit {
         this.patchFormFromVehicleAndCategory(vehicle, cat ?? undefined);
       });
 
-    merge(this.form.controls.startDate.valueChanges, this.form.controls.endDate.valueChanges)
+    merge(this.form.controls.startDate.valueChanges, this.form.controls.countOfDay.valueChanges)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.syncCountOfDayFromDates());
+      .subscribe(() => this.syncDatesFromStartAndDays());
+
+    merge(
+      this.form.controls.countOfDay.valueChanges,
+      this.form.controls.priceInDay.valueChanges,
+      this.form.controls.discount.valueChanges,
+      this.form.controls.totaltax.valueChanges,
+      this.form.controls.discountType.valueChanges,
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.syncBookingTotals());
 
     this.form.controls.customerIqama.valueChanges
       .pipe(
@@ -319,6 +345,7 @@ export class BookingFormComponent implements OnInit {
       });
 
     this.applyPaymentTypeRules(this.form.controls.paymentType.value);
+    this.syncBookingTotals();
   }
 
   save(): void {
@@ -340,15 +367,20 @@ export class BookingFormComponent implements OnInit {
 
     const selectedCustomer = this.selectedCustomer();
     const iqamaValue = this.normalizeAsciiDigits(raw.customerIqama.trim());
+    const fleetId = this.normalizeGuidOrUndefined(this.normalizeAsciiDigits(raw.fleetId.trim())) ?? '';
     if (!iqamaValue) {
       this.toast.error(this.translate.instant('Identity Number'));
       return;
     }
+    if (!fleetId) {
+      this.toast.error(this.translate.instant('Booking invalid fleet id'));
+      return;
+    }
 
     const startApi = this.bookingCalendarDateToApi(raw.startDate);
-    const endApi = this.bookingCalendarDateToApi(raw.endDate);
     const returnApi = this.bookingCalendarDateToApi(raw.dateReturnVehical);
-    if (!startApi || !endApi || !returnApi) {
+    const endApi = returnApi;
+    if (!startApi || !returnApi) {
       this.toast.error(this.translate.instant('Booking invalid contract dates'));
       return;
     }
@@ -425,6 +457,11 @@ export class BookingFormComponent implements OnInit {
     const idVehicle = this.parseFormNumber(raw.vehicleId);
     const idCustomer = idCustomerOut;
     const idBranch = this.parseFormNumber(raw.branchId);
+    const idBank = this.normalizeGuidOrUndefined(raw.idBank.trim());
+    const idCash = this.normalizeGuidOrUndefined(raw.idCash.trim());
+    const idCountingCustVehicle =
+      this.normalizeGuidOrUndefined(raw.idCountingCustVehicle.trim()) ??
+      this.defaultCustomerVehicleCountingId();
     if (!Number.isFinite(idVehicle) || idVehicle <= 0) {
       this.toast.error(this.translate.instant('Booking invalid vehicle selection'));
       return;
@@ -448,22 +485,21 @@ export class BookingFormComponent implements OnInit {
       endDate: endApi,
       countOfDay: raw.countOfDay,
       dateReturnVehical: returnApi,
-      stutus: BOOKING_CREATE_DEFAULT_STUTUS,
       priceInDay: raw.priceInDay,
       allowTo: raw.allowTo,
       countKMExtra: raw.countKMExtra,
       priceHoureExtra: raw.priceHoureExtra,
-      idBank: raw.idBank.trim() || undefined,
-      idCash: raw.idCash.trim() || undefined,
+      idBank,
+      idCash,
       note: raw.note.trim() || undefined,
       placeUSE: raw.placeUSE.trim() || undefined,
       paidCash: raw.paidCash,
       paidBank: raw.paidBank,
       paymentType: raw.paymentType,
-      idCountingCustVehicle: raw.idCountingCustVehicle.trim() || undefined,
+      idCountingCustVehicle,
       birthDay: birthDayOut,
       numberBookingINBasame: raw.numberBookingINBasame.trim(),
-      fleetId: this.normalizeAsciiDigits(raw.fleetId.trim()),
+      fleetId,
       idBranch,
       idCustomer,
       distancetraveledgps: raw.distancetraveledgps.trim() || undefined,
@@ -492,6 +528,11 @@ export class BookingFormComponent implements OnInit {
       error: (err: unknown) => {
         this.loading.set(false);
         if (err instanceof HttpErrorResponse) {
+          const apiMessage =
+            this.valueOf((err.error as { message?: string } | null)?.message) ||
+            this.valueOf((err.error as { title?: string } | null)?.title) ||
+            this.valueOf(err.message);
+          this.toast.error(apiMessage || this.translate.instant('Booking create failed'));
           return;
         }
         this.toast.error(this.bookingCreateErrorMessage(err));
@@ -504,12 +545,34 @@ export class BookingFormComponent implements OnInit {
   private bookingCreateErrorMessage(err: unknown): string {
     if (err instanceof Error) {
       const raw = err.message.replace(/^Booking:\s*/i, '').trim();
+      const hinted = this.bookingCreateErrorHint(raw);
+      if (hinted) {
+        return hinted;
+      }
       if (/error occurred while creating the booking/i.test(raw)) {
         return `${raw} — ${this.translate.instant('Booking create server hint after generic')}`;
       }
       return raw || this.translate.instant('Booking create failed');
     }
     return this.translate.instant('Booking create failed');
+  }
+
+  /** Frontend-only hints for known backend payment/booking errors. */
+  private bookingCreateErrorHint(message: string): string | null {
+    const normalized = message.trim().toLowerCase();
+    if (!normalized) {
+      return null;
+    }
+    if (normalized.includes('idcash is required')) {
+      return 'يجب اختيار الصندوق النقدي لنوع الدفع النقدي';
+    }
+    if (normalized.includes('current financial year is closed')) {
+      return 'السنة المالية الحالية مغلقة ولا يمكن الترحيل';
+    }
+    if (normalized.includes('revenue account (4101) was not found')) {
+      return 'حساب الإيراد 4101 غير موجود في دليل الحسابات';
+    }
+    return null;
   }
 
   selectedCustomer(): Customer | null {
@@ -524,6 +587,16 @@ export class BookingFormComponent implements OnInit {
     const iqama = this.normalizeAsciiDigits(this.form.controls.customerIqama.value.trim());
     if (!iqama) {
       this.form.patchValue({ customerId: '' }, { emitEvent: false });
+      return;
+    }
+    const localMatch = this.customers().find(customer => {
+      const candidate = this.normalizeAsciiDigits(
+        this.valueOf(customer.idNationality ?? customer.identityNumber),
+      );
+      return candidate === iqama;
+    });
+    if (localMatch) {
+      this.form.patchValue({ customerId: String(localMatch.id) }, { emitEvent: false });
       return;
     }
     const fleetId =
@@ -546,6 +619,7 @@ export class BookingFormComponent implements OnInit {
                 customerFirstMobileNumber: '',
                 customerAddress: '',
                 customerNationality: '',
+                customerDrivingLicenseNumber: '',
                 customerDateDrivinglicense: '',
                 customerBirthDay: '',
               },
@@ -553,12 +627,17 @@ export class BookingFormComponent implements OnInit {
             );
             return;
           }
-
-          this.form.patchValue({ customerId: '' }, { emitEvent: false });
+          const currentSelected = this.selectedCustomer();
+          const currentSelectedIqama = currentSelected
+            ? this.normalizeAsciiDigits(
+                this.valueOf(currentSelected.idNationality ?? currentSelected.identityNumber),
+              )
+            : '';
+          if (currentSelectedIqama !== iqama) {
+            this.form.patchValue({ customerId: '' }, { emitEvent: false });
+          }
         },
-        error: () => {
-          this.form.patchValue({ customerId: '' }, { emitEvent: false });
-        },
+        error: () => {},
       });
   }
 
@@ -611,6 +690,10 @@ export class BookingFormComponent implements OnInit {
 
   pickCustomerSuggestion(customer: Customer): void {
     const iqama = this.normalizeAsciiDigits(this.valueOf(customer.idNationality ?? customer.identityNumber));
+    const exists = this.customers().some(item => String(item.id) === String(customer.id));
+    if (!exists) {
+      this.customers.set([...this.customers(), customer]);
+    }
     this.form.patchValue(
       {
         customerIqama: iqama,
@@ -619,6 +702,7 @@ export class BookingFormComponent implements OnInit {
         customerFirstMobileNumber: '',
         customerAddress: '',
         customerNationality: '',
+        customerDrivingLicenseNumber: '',
         customerDateDrivinglicense: '',
         customerBirthDay: '',
       },
@@ -803,27 +887,107 @@ export class BookingFormComponent implements OnInit {
     this.form.patchValue({ total: this.suggestedContractTotal() }, { emitEvent: false });
   }
 
-  vehicleInfoValue(field: 'plateNumber' | 'type' | 'model' | 'color'): string {
+  expectedAmount(): number {
+    const r = this.form.getRawValue();
+    const days = Math.max(0, Number(r.countOfDay) || 0);
+    const daily = Math.max(0, Number(r.priceInDay) || 0);
+    return Math.round(days * daily * 100) / 100;
+  }
+
+  amountAfterTaxAndDiscount(): number {
+    const r = this.form.getRawValue();
+    const expected = this.expectedAmount();
+    const discountInput = Math.max(0, Number(r.discount) || 0);
+    const discountType = r.discountType;
+    const tax = Math.max(0, Number(r.totaltax) || 0);
+    const discountValue =
+      discountType === 'percent'
+        ? Math.round((expected * Math.min(100, discountInput)) * 100) / 10000
+        : discountInput;
+    return Math.max(0, Math.round((expected - discountValue + tax) * 100) / 100);
+  }
+
+  discountAppliedValue(): number {
+    const r = this.form.getRawValue();
+    const expected = this.expectedAmount();
+    const discountInput = Math.max(0, Number(r.discount) || 0);
+    if (r.discountType === 'percent') {
+      return Math.round((expected * Math.min(100, discountInput)) * 100) / 10000;
+    }
+    return Math.min(expected, discountInput);
+  }
+
+  remainingAmount(): number {
+    const net = this.amountAfterTaxAndDiscount();
+    const paid = Math.max(0, Number(this.form.controls.paid.value) || 0);
+    return Math.max(0, Math.round((net - paid) * 100) / 100);
+  }
+
+  overpaidAmount(): number {
+    const net = this.amountAfterTaxAndDiscount();
+    const paid = Math.max(0, Number(this.form.controls.paid.value) || 0);
+    return Math.max(0, Math.round((paid - net) * 100) / 100);
+  }
+
+  private syncBookingTotals(): void {
+    this.form.patchValue({ total: this.amountAfterTaxAndDiscount() }, { emitEvent: false });
+  }
+
+  vehicleInfoValue(
+    field:
+      | 'branch'
+      | 'type'
+      | 'serialNumber'
+      | 'engine'
+      | 'year'
+      | 'plateNumber'
+      | 'vin'
+      | 'color'
+      | 'insuranceNumber'
+      | 'insuranceType'
+      | 'insuranceExpires'
+      | 'licenseExpirationDate'
+      | 'insurancePolicyNumber'
+      | 'operatinCard'
+      | 'validityCarRegistration'
+      | 'mileage'
+      | 'seats',
+  ): string {
     const vehicle = this.selectedVehicle();
     if (!vehicle) {
       return '-';
     }
 
-    if (field === 'plateNumber') {
-      return this.valueOf(vehicle.plateNumber) || '-';
-    }
+    if (field === 'branch') return this.valueOf(vehicle.branchName) || '-';
+    if (field === 'type') return this.valueOf(vehicle.categoryName ?? vehicle.make) || '-';
+    if (field === 'serialNumber') return this.valueOf(vehicle.serialNumber) || '-';
+    if (field === 'engine') return this.valueOf(vehicle.engine) || '-';
+    if (field === 'year') return vehicle.year ? String(vehicle.year) : '-';
+    if (field === 'plateNumber') return this.valueOf(vehicle.plateNumber) || '-';
+    if (field === 'vin') return this.valueOf(vehicle.vin) || '-';
+    if (field === 'color') return this.valueOf(vehicle.color) || '-';
+    if (field === 'insuranceNumber') return this.valueOf(vehicle.insuranceNumber) || '-';
+    if (field === 'insuranceType') return vehicle.insuranceType != null ? String(vehicle.insuranceType) : '-';
+    if (field === 'insuranceExpires') return this.formatVehicleDateValue(vehicle.insuranceExpires);
+    if (field === 'licenseExpirationDate') return this.formatVehicleDateValue(vehicle.licenseExpirationDate);
+    if (field === 'insurancePolicyNumber') return this.valueOf(vehicle.insurancePolicyNumber) || '-';
+    if (field === 'operatinCard') return this.formatVehicleDateValue(vehicle.operatinCard);
+    if (field === 'validityCarRegistration') return this.formatVehicleDateValue(vehicle.validityCarRegistration);
+    if (field === 'mileage') return String(vehicle.countKm ?? vehicle.mileage ?? '-');
+    if (field === 'seats') return String(vehicle.capacitOil ?? vehicle.seats ?? '-');
+    return '-';
+  }
 
-    if (field === 'type') {
-      return this.valueOf(vehicle.categoryName ?? vehicle.make) || '-';
+  private formatVehicleDateValue(value: string | undefined): string {
+    const text = this.valueOf(value);
+    if (!text) {
+      return '-';
     }
-
-    if (field === 'model') {
-      const model = this.valueOf(vehicle.model);
-      const year = vehicle.year ? ` (${vehicle.year})` : '';
-      return `${model}${year}`.trim() || '-';
+    const date = new Date(text);
+    if (Number.isNaN(date.getTime())) {
+      return text;
     }
-
-    return this.valueOf(vehicle.color) || '-';
+    return date.toLocaleDateString();
   }
 
   private loadCategoryForSelectedVehicle$(): Observable<{
@@ -900,7 +1064,7 @@ export class BookingFormComponent implements OnInit {
       },
       { emitEvent: false },
     );
-    this.syncCountOfDayFromDates();
+    this.syncDatesFromStartAndDays();
   }
 
   /** Prefer GUID/string id; fall back to numeric category id when `categoryVehicleId` is empty. */
@@ -978,23 +1142,26 @@ export class BookingFormComponent implements OnInit {
     return a ?? b;
   }
 
-  /** Inclusive rental days from date-only start/end (noon anchor avoids DST edge cases). */
-  private syncCountOfDayFromDates(): void {
+  /** Auto-calculate end/return dates from start date and number of days. */
+  private syncDatesFromStartAndDays(): void {
     const start = this.form.controls.startDate.value?.trim();
-    const end = this.form.controls.endDate.value?.trim();
-    if (!start || !end) {
+    const daysRaw = Number(this.form.controls.countOfDay.value ?? 0);
+    const days = Math.max(0, Number.isFinite(daysRaw) ? Math.floor(daysRaw) : 0);
+    if (!start || days <= 0) {
       return;
     }
-    const d0 = new Date(`${start}T12:00:00`);
-    const d1 = new Date(`${end}T12:00:00`);
-    if (Number.isNaN(d0.getTime()) || Number.isNaN(d1.getTime()) || d1 < d0) {
+    const startDate = new Date(start);
+    if (Number.isNaN(startDate.getTime())) {
       return;
     }
-    const diffMs = d1.getTime() - d0.getTime();
-    const days = Math.floor(diffMs / 86400000) + 1;
-    if (days > 0) {
-      this.form.patchValue({ countOfDay: days }, { emitEvent: false });
+    const endDate = new Date(startDate);
+    // Day-based rental follows 24-hour periods: +N days from start date.
+    endDate.setDate(endDate.getDate() + days);
+    const computed = this.toDateTimeLocalValue(endDate);
+    if (!computed) {
+      return;
     }
+    this.form.patchValue({ endDate: computed, dateReturnVehical: computed }, { emitEvent: false });
   }
 
   private pickNumeric(currentValue: number, incoming: number | null | undefined): number {
@@ -1104,6 +1271,40 @@ export class BookingFormComponent implements OnInit {
     return Number.isFinite(n) ? n : NaN;
   }
 
+  private isGuid(value: string): boolean {
+    const normalized = value.trim().replace(/^\{|\}$/g, '');
+    return /^[0-9a-fA-F]{8}(-?[0-9a-fA-F]{4}){3}-?[0-9a-fA-F]{12}$/.test(normalized);
+  }
+
+  /** Normalize GUID text for API binder; returns undefined for empty/invalid values. */
+  private normalizeGuidOrUndefined(value: string): string | undefined {
+    const normalized = value.trim().replace(/^\{|\}$/g, '');
+    if (!normalized) {
+      return undefined;
+    }
+    return this.isGuid(normalized) ? normalized : undefined;
+  }
+
+  private applyDefaultCustomerVehicleCounting(): void {
+    const current = this.normalizeGuidOrUndefined(String(this.form.controls.idCountingCustVehicle.value ?? '').trim());
+    if (current) {
+      return;
+    }
+    const fallback = this.defaultCustomerVehicleCountingId();
+    if (!fallback) {
+      return;
+    }
+    this.form.patchValue({ idCountingCustVehicle: fallback }, { emitEvent: false });
+  }
+
+  private defaultCustomerVehicleCountingId(): string | undefined {
+    const byNumber = this.countingEntries().find(
+      entry => Number(entry.countingNumber) === BookingFormComponent.DEFAULT_CUSTOMER_VEHICLE_COUNTING_NUMBER,
+    );
+    const fallback = byNumber ?? this.countingEntries().find(entry => Boolean(entry.id));
+    return fallback?.id ? String(fallback.id).trim() : undefined;
+  }
+
   private customerIqamaSuggestions$(iqama: string): Observable<Customer[]> {
     if (!iqama) {
       return of([]);
@@ -1136,6 +1337,19 @@ export class BookingFormComponent implements OnInit {
         map(response => (response.items ?? []).slice(0, 8)),
         catchError(() => of([])),
       );
+  }
+
+  paymentTypeIsCash(): boolean {
+    return Number(this.form.controls.paymentType.value ?? 1) === 1;
+  }
+
+  paymentTypeIsBankOnly(): boolean {
+    const type = Number(this.form.controls.paymentType.value ?? 1);
+    return [2, 3, 4].includes(type);
+  }
+
+  paymentTypeIsMixed(): boolean {
+    return Number(this.form.controls.paymentType.value ?? 1) === 5;
   }
 
   private applyPaymentTypeRules(type: number): void {
@@ -1281,11 +1495,29 @@ export class BookingFormComponent implements OnInit {
     if (!t) {
       return '';
     }
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(t)) {
+      return `${t}:00`;
+    }
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(t)) {
+      return t;
+    }
     if (/^\d{4}-\d{2}-\d{2}$/.test(t)) {
       return `${t}T00:00:00`;
     }
     const d = new Date(t);
     return Number.isNaN(d.getTime()) ? '' : d.toISOString();
+  }
+
+  private toDateTimeLocalValue(date: Date): string {
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
   }
 
   /**

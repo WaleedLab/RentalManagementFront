@@ -9,7 +9,7 @@
           {{ 'Subscription Offers' | translate }}
         </a>
       }
-      <a class="btn btn-outline-secondary" routerLink="/customers">{{ 'Back to Customers' | translate }}</a>
+      <a class="btn btn-outline-secondary" [routerLink]="returnTo()">{{ 'Back to Customers' | translate }}</a>
     </div>
   </app-page-header>
 
@@ -251,7 +251,7 @@
               <button class="btn btn-primary" type="submit" [disabled]="loading()">
                 {{ (isEdit() ? 'Update Customer' : 'Create Customer') | translate }}
               </button>
-              <a class="btn btn-cancel" routerLink="/customers">{{ 'Cancel' | translate }}</a>
+              <a class="btn btn-cancel" [routerLink]="returnTo()">{{ 'Cancel' | translate }}</a>
             </div>
 
             <datalist id="customer-nationalities-list">

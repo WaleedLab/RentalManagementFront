@@ -74,6 +74,7 @@ export class PaymentCountService {
   }
 
   private toCreateApiPayload(payload: CreatePaymentCountRequest): Record<string, unknown> {
+    const mappedDetails = payload.details?.map((line, index) => this.toCreateDetailPayload(line, index));
     return {
       idCustomer: payload.idCustomer,
       IdCustomer: payload.idCustomer,
@@ -81,6 +82,8 @@ export class PaymentCountService {
       Paid: payload.paid,
       dscription: payload.dscription,
       Dscription: payload.dscription,
+      description: payload.dscription,
+      Description: payload.dscription,
       idVehicle: payload.idVehicle,
       IdVehicle: payload.idVehicle,
       idBranch: payload.idBranch,
@@ -105,13 +108,18 @@ export class PaymentCountService {
       IdBooking: payload.idBooking,
       stutusbooking: payload.stutusbooking,
       Stutusbooking: payload.stutusbooking,
+      statusBooking: payload.stutusbooking,
+      StatusBooking: payload.stutusbooking,
       idFinancialYear: payload.idFinancialYear,
       IdFinancialYear: payload.idFinancialYear,
       fleetId: payload.fleetId,
       FleetId: payload.fleetId,
-      details: payload.details?.map((line, index) => this.toCreateDetailPayload(line, index)),
-      paymentCountDetails: payload.details?.map((line, index) => this.toCreateDetailPayload(line, index)),
-      PaymentCountDetails: payload.details?.map((line, index) => this.toCreateDetailPayload(line, index)),
+      details: mappedDetails,
+      Details: mappedDetails,
+      paymentCountDetails: mappedDetails,
+      PaymentCountDetails: mappedDetails,
+      detailLines: mappedDetails,
+      DetailLines: mappedDetails,
     };
   }
 

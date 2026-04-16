@@ -425,11 +425,24 @@ export class PaymentCountFormComponent implements OnInit {
         this.router.navigate(['/payment-counts']);
       },
       error: err => {
-        this.toast.error(err?.message ?? this.translate.instant('Failed to save payment count'));
+        this.toast.error(this.paymentCountCreateErrorMessage(err));
         this.loading.set(false);
       },
       complete: () => this.loading.set(false),
     });
+  }
+
+  private paymentCountCreateErrorMessage(err: unknown): string {
+    if (err instanceof Error) {
+      const raw = err.message.replace(/^Paymentcount:\s*/i, '').trim();
+      if (/error occurred while creating the paymentcount/i.test(raw)) {
+        return this.translate.instant(
+          'Failed to save payment count. Verify financial year, branch, payment account, and details lines.',
+        );
+      }
+      return raw || this.translate.instant('Failed to save payment count');
+    }
+    return this.translate.instant('Failed to save payment count');
   }
 
   private loadChannels(): void {
