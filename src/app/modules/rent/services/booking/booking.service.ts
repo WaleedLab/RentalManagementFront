@@ -130,7 +130,50 @@ export class BookingService {
   }
 
   update(body: BookingUpdateRequest): Observable<unknown> {
-    return this.api.putData(`${this.base}/${body.id}`, body);
+    return this.api.putData(`${this.base}/${body.id}`, this.toUpdateBookingPayload(body));
+  }
+
+  /**
+   * Mirrors `toCreateBookingPayload`: duplicate PascalCase for ASP.NET binders.
+   * When `paid` is `undefined`, `Paid` is omitted (JSON.stringify drops undefined) so the server
+   * treats the amount as unchanged; `paid: null` sends explicit null for the same semantics.
+   */
+  private toUpdateBookingPayload(body: BookingUpdateRequest): Record<string, unknown> {
+    const out: Record<string, unknown> = {
+      id: body.id,
+      Id: body.id,
+      idCustomer: body.idCustomer,
+      IdCustomer: body.idCustomer,
+      dscription: body.dscription,
+      Dscription: body.dscription,
+      idVehicle: body.idVehicle,
+      IdVehicle: body.idVehicle,
+      paymentType: body.paymentType,
+      PaymentType: body.paymentType,
+      bondType: body.bondType,
+      BondType: body.bondType,
+      status: body.status,
+      Status: body.status,
+      idCash: body.idCash,
+      IdCash: body.idCash,
+      idBank: body.idBank,
+      IdBank: body.idBank,
+      paidCash: body.paidCash,
+      PaidCash: body.paidCash,
+      paidBank: body.paidBank,
+      PaidBank: body.paidBank,
+      idBooking: body.idBooking,
+      IdBooking: body.idBooking,
+      stutusbooking: body.stutusbooking,
+      Stutusbooking: body.stutusbooking,
+    };
+
+    if (body.paid !== undefined) {
+      out['paid'] = body.paid;
+      out['Paid'] = body.paid;
+    }
+
+    return out;
   }
 
   /**

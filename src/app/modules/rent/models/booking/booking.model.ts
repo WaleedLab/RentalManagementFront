@@ -140,11 +140,18 @@ export interface BookingCreateRequest {
   totaltax?: number;
 }
 
-/** PUT /Booking/{id} — payment / bond fields per OpenAPI. */
+/**
+ * PUT `/Booking/{id}` — payment / bond fields.
+ * Backend (`UpdateBookingCommandHandler` / `SyncBookingReceiptPaymentAsync`): `Paid` as `decimal?` —
+ * use **`null`** or **omit** `paid` to leave the booking receipt / bond line amount unchanged while still
+ * allowing cash/bank account changes via other fields. Send an explicit number (with `paymentType` when
+ * first creating a receipt) to set or change the amount.
+ */
 export interface BookingUpdateRequest {
   id: number | string;
   idCustomer: number;
-  paid: number;
+  /** Omit or `null` = do not change receipt amount; otherwise new paid-at-booking total. */
+  paid?: number | null;
   dscription?: string;
   idVehicle: number;
   paymentType: number;
@@ -156,6 +163,30 @@ export interface BookingUpdateRequest {
   paidBank: number;
   idBooking: number;
   stutusbooking: number;
+}
+
+const BOOKING_MONEY_EPS = 1e-6;
+
+/**
+ * Value for `BookingUpdateRequest.paid` when mapping from a form.
+ * - If `snapshotPaid` is **omitted** (`undefined`), returns `undefined` so the PUT body omits `paid`
+ *   (server keeps the current receipt amount).
+ * - If `snapshotPaid` is provided and equals `editedPaid`, returns **`null`** (explicit “no change”).
+ * - Otherwise returns the new non‑negative amount.
+ */
+export function paidForBookingUpdateRequest(
+  editedPaid: number,
+  snapshotPaid?: number | null,
+): number | null | undefined {
+  if (snapshotPaid === undefined) {
+    return undefined;
+  }
+  const e = Math.max(0, Number(editedPaid) || 0);
+  const p = Math.max(0, Number(snapshotPaid) || 0);
+  if (Math.abs(e - p) < BOOKING_MONEY_EPS) {
+    return null;
+  }
+  return e;
 }
 
 /** Legacy full-contract shape (not used for POST after API alignment). */
