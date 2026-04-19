@@ -192,6 +192,13 @@
   border-color: rgba(148, 163, 184, 0.55);
 }
 
+.booking-band-block .form-control.booking-band-boundary {
+  cursor: default;
+  background: rgba(241, 245, 249, 0.98);
+  color: #334155;
+  -webkit-text-fill-color: #334155;
+}
+
 .booking-key-field {
   position: relative;
   border: 1px solid rgba(37, 99, 235, 0.24);
@@ -488,6 +495,13 @@
   -webkit-text-fill-color: #f8fafc;
   background: rgba(15, 23, 42, 0.92);
   border-color: rgba(148, 163, 184, 0.55);
+}
+
+:host-context([data-bs-theme='dark']) .booking-band-block .form-control.booking-band-boundary,
+:host-context(body.dark-only) .booking-band-block .form-control.booking-band-boundary {
+  background: rgba(30, 41, 59, 0.88);
+  color: #cbd5e1;
+  -webkit-text-fill-color: #cbd5e1;
 }
 
 :host-context([data-bs-theme='dark']) .booking-key-field,
