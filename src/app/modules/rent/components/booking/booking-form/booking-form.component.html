@@ -170,6 +170,233 @@
           </div>
 
           <div class="col-12 mt-2">
+            <div class="booking-subsection-title">{{ 'Booking category pricing bands' | translate }}</div>
+            <div class="form-text mb-2">{{ 'Booking band smart hint' | translate }}</div>
+          </div>
+
+          <div class="col-12">
+            <div class="booking-band-block">
+              <div class="booking-band-block__title">{{ 'Booking band daily block title' | translate }}</div>
+              <div class="row g-2 align-items-end">
+                <div class="col-6 col-md-2">
+                  <label class="form-label">{{ 'Booking band daily min' | translate }}</label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    formControlName="priceDayBandLow"
+                  />
+                </div>
+                <div class="col-6 col-md-2">
+                  <label class="form-label">{{ 'Booking band daily max' | translate }}</label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    formControlName="priceDayBandHigh"
+                  />
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label">{{ 'Booking band contract value daily' | translate }}</label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    formControlName="priceInDay"
+                    [attr.min]="bandSliderHasRange('day') ? bandSliderEndpoints('day').min : null"
+                    [attr.max]="bandSliderHasRange('day') ? bandSliderEndpoints('day').max : null"
+                  />
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="booking-band-block__preset-label">{{ 'Booking band preset label' | translate }}</div>
+                  <div class="d-flex flex-wrap gap-1">
+                    <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('day', 'min')">
+                      {{ 'Booking band use min' | translate }}
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('day', 'mid')">
+                      {{ 'Booking band use mid' | translate }}
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('day', 'max')">
+                      {{ 'Booking band use max' | translate }}
+                    </button>
+                  </div>
+                </div>
+                @if (bandSliderHasRange('day')) {
+                  <div class="col-12">
+                    <label class="booking-band-block__slider-label">{{ 'Booking band slider label' | translate }}</label>
+                    <input
+                      type="range"
+                      class="form-range booking-band-block__range"
+                      min="0"
+                      [max]="bandSliderSteps"
+                      step="1"
+                      [value]="bandSliderIndex('day')"
+                      (input)="onBandSlider('day', $any($event.target).value)"
+                    />
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="booking-band-block">
+              <div class="booking-band-block__title">{{ 'Booking band hour block title' | translate }}</div>
+              <div class="row g-2 align-items-end">
+                <div class="col-6 col-md-2">
+                  <label class="form-label">{{ 'Booking band hour extra min' | translate }}</label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    formControlName="priceHourExtraBandLow"
+                  />
+                </div>
+                <div class="col-6 col-md-2">
+                  <label class="form-label">{{ 'Booking band hour extra max' | translate }}</label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    formControlName="priceHourExtraBandHigh"
+                  />
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label">{{ 'Booking band contract value hour' | translate }}</label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    formControlName="priceHoureExtra"
+                    [attr.min]="bandSliderHasRange('hour') ? bandSliderEndpoints('hour').min : null"
+                    [attr.max]="bandSliderHasRange('hour') ? bandSliderEndpoints('hour').max : null"
+                  />
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="booking-band-block__preset-label">{{ 'Booking band preset label' | translate }}</div>
+                  <div class="d-flex flex-wrap gap-1">
+                    <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('hour', 'min')">
+                      {{ 'Booking band use min' | translate }}
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('hour', 'mid')">
+                      {{ 'Booking band use mid' | translate }}
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('hour', 'max')">
+                      {{ 'Booking band use max' | translate }}
+                    </button>
+                  </div>
+                </div>
+                @if (bandSliderHasRange('hour')) {
+                  <div class="col-12">
+                    <label class="booking-band-block__slider-label">{{ 'Booking band slider label' | translate }}</label>
+                    <input
+                      type="range"
+                      class="form-range booking-band-block__range"
+                      min="0"
+                      [max]="bandSliderSteps"
+                      step="1"
+                      [value]="bandSliderIndex('hour')"
+                      (input)="onBandSlider('hour', $any($event.target).value)"
+                    />
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="booking-band-block">
+              <div class="booking-band-block__title">{{ 'Booking band km block title' | translate }}</div>
+              <div class="row g-2 align-items-end">
+                <div class="col-6 col-md-2">
+                  <label class="form-label">{{ 'Booking band km extra min' | translate }}</label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    formControlName="priceKmExtraBandLow"
+                  />
+                </div>
+                <div class="col-6 col-md-2">
+                  <label class="form-label">{{ 'Booking band km extra max' | translate }}</label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    formControlName="priceKmExtraBandHigh"
+                  />
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label">{{ 'Booking band contract value km' | translate }}</label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    formControlName="priceKmExtra"
+                    [attr.min]="bandSliderHasRange('km') ? bandSliderEndpoints('km').min : null"
+                    [attr.max]="bandSliderHasRange('km') ? bandSliderEndpoints('km').max : null"
+                  />
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="booking-band-block__preset-label">{{ 'Booking band preset label' | translate }}</div>
+                  <div class="d-flex flex-wrap gap-1">
+                    <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('km', 'min')">
+                      {{ 'Booking band use min' | translate }}
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('km', 'mid')">
+                      {{ 'Booking band use mid' | translate }}
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('km', 'max')">
+                      {{ 'Booking band use max' | translate }}
+                    </button>
+                  </div>
+                </div>
+                @if (bandSliderHasRange('km')) {
+                  <div class="col-12">
+                    <label class="booking-band-block__slider-label">{{ 'Booking band slider label' | translate }}</label>
+                    <input
+                      type="range"
+                      class="form-range booking-band-block__range"
+                      min="0"
+                      [max]="bandSliderSteps"
+                      step="1"
+                      [value]="bandSliderIndex('km')"
+                      (input)="onBandSlider('km', $any($event.target).value)"
+                    />
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 mt-2">
             <h6 class="mb-2 booking-section-title">{{ 'Booking Information' | translate }}</h6>
           </div>
           <div class="col-12">

@@ -13,9 +13,13 @@ export interface CategoryVehicle {
   price_month_high?: number;
   priceHoureExtraLow?: number;
   priceHoureExtraHigh?: number;
-  /** Extra km price band (when defined on the category). */
+  /** Extra km price band (when API sends dedicated fields). */
   priceKmExtraLow?: number;
   priceKmExtraHigh?: number;
+  /**
+   * Extra km **price** band — persisted name in API/forms is `CountKMExtra*`
+   * (see category vehicle form: labels say price, controls use these keys).
+   */
   countKMExtraLow?: number;
   countKMExtraHigh?: number;
   allowToLow?: number;

@@ -1,13 +1,14 @@
-.booking-smart-hint {
-  color: var(--bs-info-text-emphasis, #055160);
-}
-
 .booking-restrictions-hint {
+  --booking-restrictions-title: #1d4ed8;
+  --booking-restrictions-body: #0f172a;
+  --booking-restrictions-muted: #475569;
+
   margin: 0.2rem 0 0.7rem;
   padding: 0.65rem 0.85rem;
   border-radius: 14px;
   border: 1px solid rgba(37, 99, 235, 0.22);
   background: linear-gradient(180deg, rgba(59, 130, 246, 0.08), rgba(248, 250, 252, 0.6));
+  color: var(--booking-restrictions-body);
 }
 
 .booking-restrictions-hint__title {
@@ -16,6 +17,7 @@
   margin-bottom: 0.35rem;
   text-transform: uppercase;
   letter-spacing: 0.22px;
+  color: var(--booking-restrictions-title);
 }
 
 .booking-restrictions-hint__items {
@@ -26,7 +28,7 @@
 
 .booking-restrictions-hint__item {
   font-size: 0.8rem;
-  color: #334155;
+  color: var(--booking-restrictions-muted);
 }
 
 .booking-limits-alert {
@@ -140,6 +142,54 @@
   font-weight: 700;
   background: rgba(239, 246, 255, 0.55);
   border-radius: 8px;
+}
+
+.booking-band-block {
+  margin-bottom: 1.1rem;
+  padding: 0.75rem 0.9rem 0.85rem;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(248, 250, 252, 0.85);
+}
+
+.booking-band-block__title {
+  font-weight: 800;
+  font-size: 0.82rem;
+  margin-bottom: 0.45rem;
+  color: #0f172a;
+}
+
+.booking-band-block__preset-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.25rem;
+}
+
+.booking-band-block__slider-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #475569;
+  margin: 0.35rem 0 0.2rem;
+}
+
+.booking-band-block__range {
+  width: 100%;
+  max-width: 640px;
+}
+
+.booking-band-block .form-label {
+  color: #334155;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.booking-band-block .form-control {
+  color: #0f172a;
+  -webkit-text-fill-color: #0f172a;
+  background: #fff;
+  border-color: rgba(148, 163, 184, 0.55);
 }
 
 .booking-key-field {
@@ -341,6 +391,29 @@
   color: #e2e8f0;
 }
 
+:host-context([data-bs-theme='dark']) .booking-restrictions-hint,
+:host-context(body.dark-only) .booking-restrictions-hint {
+  --booking-restrictions-title: #7dd3fc;
+  --booking-restrictions-body: #e2e8f0;
+  /* Softer than the title so «قيود الحجز» stays the visual anchor */
+  --booking-restrictions-muted: #cbd5e1;
+
+  border-color: rgba(96, 165, 250, 0.42);
+  background: linear-gradient(180deg, rgba(30, 58, 138, 0.28), rgba(15, 23, 42, 0.88));
+  color: var(--booking-restrictions-body);
+}
+
+:host-context([data-bs-theme='dark']) .booking-restrictions-hint__title,
+:host-context(body.dark-only) .booking-restrictions-hint__title {
+  color: var(--booking-restrictions-title);
+  text-shadow: 0 0 20px rgba(56, 189, 248, 0.18);
+}
+
+:host-context([data-bs-theme='dark']) .booking-restrictions-hint__item,
+:host-context(body.dark-only) .booking-restrictions-hint__item {
+  color: var(--booking-restrictions-muted);
+}
+
 :host-context([data-bs-theme='dark']) .booking-form-grid {
   --field-bg: rgba(30, 41, 59, 0.7);
   --field-border: rgba(100, 116, 139, 0.62);
@@ -381,6 +454,40 @@
   color: #bfdbfe;
   background: rgba(30, 58, 138, 0.2);
   border-inline-start-color: rgba(96, 165, 250, 0.8);
+}
+
+:host-context([data-bs-theme='dark']) .booking-band-block,
+:host-context(body.dark-only) .booking-band-block {
+  border-color: rgba(100, 116, 139, 0.55);
+  background: rgba(30, 41, 59, 0.55);
+}
+
+:host-context([data-bs-theme='dark']) .booking-band-block__title,
+:host-context(body.dark-only) .booking-band-block__title {
+  color: #f1f5f9;
+}
+
+:host-context([data-bs-theme='dark']) .booking-band-block__preset-label,
+:host-context(body.dark-only) .booking-band-block__preset-label {
+  color: #cbd5e1;
+}
+
+:host-context([data-bs-theme='dark']) .booking-band-block__slider-label,
+:host-context(body.dark-only) .booking-band-block__slider-label {
+  color: #cbd5e1;
+}
+
+:host-context([data-bs-theme='dark']) .booking-band-block .form-label,
+:host-context(body.dark-only) .booking-band-block .form-label {
+  color: #cbd5e1;
+}
+
+:host-context([data-bs-theme='dark']) .booking-band-block .form-control,
+:host-context(body.dark-only) .booking-band-block .form-control {
+  color: #f8fafc;
+  -webkit-text-fill-color: #f8fafc;
+  background: rgba(15, 23, 42, 0.92);
+  border-color: rgba(148, 163, 184, 0.55);
 }
 
 :host-context([data-bs-theme='dark']) .booking-key-field,
@@ -519,5 +626,16 @@
 :host-context(body.dark-only) .booking-limits-alert {
   border-color: rgba(248, 113, 113, 0.35);
   background: linear-gradient(180deg, rgba(127, 29, 29, 0.35), rgba(69, 10, 10, 0.35));
+  color: #fecaca;
+}
+
+:host-context([data-bs-theme='dark']) .booking-limits-alert {
+  border-color: rgba(248, 113, 113, 0.35);
+  background: linear-gradient(180deg, rgba(127, 29, 29, 0.35), rgba(69, 10, 10, 0.35));
+  color: #fecaca;
+}
+
+:host-context([data-bs-theme='dark']) .booking-limits-alert__title,
+:host-context(body.dark-only) .booking-limits-alert__title {
   color: #fecaca;
 }
