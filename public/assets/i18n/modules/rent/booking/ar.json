@@ -77,6 +77,7 @@
   "Hint Booking Total": "أدخل إجمالي قيمة الحجز قبل التسويات النهائية.",
   "Hint Booking Vehicle": "اختر المركبة المتاحة وربطها بهذا الحجز.",
   "Identity Number": "رقم الهوية",
+  "Identity Number must be 10 digits": "رقم الهوية يجب أن يكون 10 أرقام بالضبط",
   "Maintenance Total": "إجمالي الصيانة",
   "Missing required fields": "حقول إلزامية ناقصة",
   "Model": "الموديل",

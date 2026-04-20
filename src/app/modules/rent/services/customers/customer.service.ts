@@ -62,7 +62,7 @@ export class CustomerService {
       .getData<unknown>(`${this.base}/GetCustomerByNationalId/${id}/${normalizedFleetId}`, undefined, {
         suppressErrorToast: true,
       })
-      .pipe(map(normalizeCustomer));
+      .pipe(map(raw => this.normalizeCustomerLookupResponse(raw)));
 
     const byQuery = this.api
       .getData<unknown>(`${this.base}/GetCustomerByNationalId`, {
@@ -71,10 +71,11 @@ export class CustomerService {
       }, {
         suppressErrorToast: true,
       })
-      .pipe(map(normalizeCustomer));
+      .pipe(map(raw => this.normalizeCustomerLookupResponse(raw)));
 
     return byPath.pipe(
       catchError(() => byQuery),
+      catchError(() => this.getByNationalIdFromList(id, normalizedFleetId)),
       catchError(() => of(null)),
     );
   }
@@ -152,5 +153,50 @@ export class CustomerService {
         }),
         catchError(() => throwError(() => sourceError ?? new Error('Customer not found'))),
       );
+  }
+
+  private getByNationalIdFromList(nationalId: string, fleetId?: string): Observable<Customer | null> {
+    const normalizedNationalId = String(nationalId ?? '').trim();
+    if (!normalizedNationalId) {
+      return of(null);
+    }
+
+    return this.api
+      .getData<unknown[]>(`${this.base}/List`, buildFleetQueryParams(fleetId, 'both'), {
+        suppressErrorToast: true,
+      })
+      .pipe(
+        map(items => (items ?? []).map(normalizeCustomer)),
+        map(items =>
+          items.find(customer => {
+            const candidate = String(customer.idNationality ?? customer.identityNumber ?? '').trim();
+            return candidate === normalizedNationalId;
+          }) ?? null,
+        ),
+      );
+  }
+
+  /**
+   * Backend lookup may return full customer object OR only customer id.
+   * Keep both shapes valid so booking flow can always continue to getById.
+   */
+  private normalizeCustomerLookupResponse(raw: unknown): Customer | null {
+    if (raw === null || raw === undefined) {
+      return null;
+    }
+
+    if (typeof raw === 'number' || typeof raw === 'string') {
+      const id = String(raw).trim();
+      if (!id) {
+        return null;
+      }
+      return {
+        id,
+        fullName: '',
+        isActive: true,
+      };
+    }
+
+    return normalizeCustomer(raw);
   }
 }

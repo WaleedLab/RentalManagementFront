@@ -17,33 +17,14 @@
               <input
                 class="form-control customer-iqama-input"
                 formControlName="customerIqama"
-                maxlength="30"
+                maxlength="10"
+                inputmode="numeric"
                 [placeholder]="'Identity Number' | translate"
-                (keydown)="onCustomerIqamaKeydown($event)"
-                (blur)="hideCustomerSuggestions(); customerLookupByIqama()"
+                (paste)="onCustomerIqamaPaste($event)"
+                (blur)="customerLookupByIqama()"
                 aria-autocomplete="list"
-                [attr.aria-expanded]="customerIqamaSuggestions().length > 0"
+                [attr.aria-expanded]="false"
               />
-              @if (customerIqamaSuggestions().length > 0) {
-                <div class="customer-iqama-suggestions app-soft-select__menu">
-                  @for (customer of customerIqamaSuggestions(); track customer.id; let idx = $index) {
-                    @let parts = customerSuggestionIqamaParts(customer);
-                    <button
-                      type="button"
-                      class="customer-iqama-suggestion-item app-soft-select__option"
-                      [class.is-active]="idx === activeCustomerSuggestionIndex()"
-                      (mousedown)="pickCustomerSuggestion(customer)"
-                      (mouseenter)="setActiveCustomerSuggestion(idx)"
-                    >
-                      <span class="customer-iqama-main">
-                        {{ parts.before }}<mark class="customer-iqama-highlight">{{ parts.match }}</mark>{{ parts.after }}
-                      </span>
-                      <span class="customer-iqama-sep"> - </span>
-                      <span class="customer-iqama-name">{{ parts.name }}</span>
-                    </button>
-                  }
-                </div>
-              }
             </div>
           </div>
           @if (selectedCustomer()) {

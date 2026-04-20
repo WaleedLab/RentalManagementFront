@@ -10,7 +10,6 @@ import {
   Observable,
   Subject,
   catchError,
-  debounceTime,
   distinctUntilChanged,
   forkJoin,
   map,
@@ -52,6 +51,8 @@ export class BookingFormComponent implements OnInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
   /** Default revenue counting used for booking customer vehicle ledger. */
   private static readonly DEFAULT_CUSTOMER_VEHICLE_COUNTING_NUMBER = 4101;
+  private static readonly NATIONAL_ID_LENGTH = 10;
+  private static readonly NATIONAL_ID_REGEX = /^\d{10}$/;
   private static readonly GPS_DISTANCE_REGEX = /^[A-Za-z0-9\s.,/-]{0,100}$/;
   private static readonly PLACE_USE_REGEX = /^[\u0600-\u06FFA-Za-z0-9\s.,'-]{0,200}$/;
   private static readonly NOTE_REGEX = /^[\u0600-\u06FFA-Za-z0-9\s.,!?'"\-_/()]{0,500}$/;
@@ -86,8 +87,8 @@ export class BookingFormComponent implements OnInit {
   banks = signal<Bank[]>([]);
   cashAccounts = signal<CashAccount[]>([]);
   countingEntries = signal<CountingEntry[]>([]);
-  customerIqamaSuggestions = signal<Customer[]>([]);
-  activeCustomerSuggestionIndex = signal(-1);
+  // customerIqamaSuggestions = signal<Customer[]>([]);
+  // activeCustomerSuggestionIndex = signal(-1);
   /** Category matched to the selected vehicle (pricing bands). */
   selectedCategory = signal<CategoryVehicle | null>(null);
   /** True when a vehicle is selected but no category row could be loaded (for hints). */
@@ -191,7 +192,15 @@ export class BookingFormComponent implements OnInit {
     fleetId: [this.authState.fleetId() || '', [Validators.required]],
     branchId: [Number(this.authState.branchId() || 0), [Validators.required, Validators.min(1)]],
     customerId: [''],
-    customerIqama: ['', [Validators.required, Validators.maxLength(30)]],
+    customerIqama: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(BookingFormComponent.NATIONAL_ID_LENGTH),
+        Validators.maxLength(BookingFormComponent.NATIONAL_ID_LENGTH),
+        Validators.pattern(BookingFormComponent.NATIONAL_ID_REGEX),
+      ],
+    ],
     customerNameAr: ['', [Validators.maxLength(200)]],
     customerFirstMobileNumber: ['', [Validators.maxLength(20)]],
     customerAddress: ['', [Validators.maxLength(500)]],
@@ -267,12 +276,12 @@ export class BookingFormComponent implements OnInit {
       totalPages: 0,
     };
     forkJoin({
-      customers: this.customerService.getPaginated({
-        fleetId,
-        pageNumber: 1,
-        pageSize: 100,
-        isActive: true,
-      }),
+      // customers: this.customerService.getPaginated({
+      //   fleetId,
+      //   pageNumber: 1,
+      //   pageSize: 100,
+      //   isActive: true,
+      // }),
       vehicles: this.vehicleService.getPaginated({
         fleetId,
         pageNumber: 1,
@@ -303,8 +312,8 @@ export class BookingFormComponent implements OnInit {
           ),
         ),
     }).subscribe({
-      next: ({ customers, vehicles, categories, banks, cashAccounts, countingEntries, settings }) => {
-        this.customers.set(customers.items ?? []);
+      next: ({ vehicles, categories, banks, cashAccounts, countingEntries, settings }) => {
+        // this.customers.set(customers.items ?? []);
         this.vehicles.set(vehicles.items ?? []);
         this.categories.set(categories.items ?? []);
         this.banks.set(banks ?? []);
@@ -415,14 +424,27 @@ export class BookingFormComponent implements OnInit {
     this.form.controls.customerIqama.valueChanges
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        map(value => this.normalizeAsciiDigits((value ?? '').trim())),
-        debounceTime(150),
+        map(value => this.normalizeNationalId((value ?? '').trim())),
         distinctUntilChanged(),
-        switchMap(iqama => this.customerIqamaSuggestions$(iqama)),
+        switchMap(iqama => {
+          if (!iqama) {
+            this.form.patchValue({ customerId: '' }, { emitEvent: false });
+            return of<Customer[]>([]);
+          }
+          if (iqama.length < BookingFormComponent.NATIONAL_ID_LENGTH) {
+            this.form.patchValue({ customerId: '' }, { emitEvent: false });
+            return of<Customer[]>([]);
+          }
+          if (iqama.length > BookingFormComponent.NATIONAL_ID_LENGTH) {
+            return of<Customer[]>([]);
+          }
+          this.customerLookupByIqama(iqama);
+          return of<Customer[]>([]);
+        }),
       )
-      .subscribe(suggestions => {
-        this.customerIqamaSuggestions.set(suggestions);
-        this.activeCustomerSuggestionIndex.set(suggestions.length > 0 ? 0 : -1);
+      .subscribe(() => {
+        // this.customerIqamaSuggestions.set([]);
+        // this.activeCustomerSuggestionIndex.set(-1);
       });
 
     this.form.controls.paymentType.valueChanges
@@ -467,10 +489,14 @@ export class BookingFormComponent implements OnInit {
     }
 
     const selectedCustomer = this.selectedCustomer();
-    const iqamaValue = this.normalizeAsciiDigits(raw.customerIqama.trim());
+    const iqamaValue = this.normalizeNationalId(raw.customerIqama.trim());
     const fleetId = this.normalizeGuidOrUndefined(this.normalizeAsciiDigits(raw.fleetId.trim())) ?? '';
     if (!iqamaValue) {
       this.toast.error(this.translate.instant('Identity Number'));
+      return;
+    }
+    if (!BookingFormComponent.NATIONAL_ID_REGEX.test(iqamaValue)) {
+      this.toast.error(this.translate.instant('Identity Number must be 10 digits'));
       return;
     }
     if (!fleetId) {
@@ -761,14 +787,22 @@ export class BookingFormComponent implements OnInit {
     return this.customers().find(customer => String(customer.id) === String(customerId)) ?? null;
   }
 
-  customerLookupByIqama(): void {
-    const iqama = this.normalizeAsciiDigits(this.form.controls.customerIqama.value.trim());
+  // customerIqamaSuggestionsEnabled(): boolean {
+  //   return false;
+  // }
+
+  customerLookupByIqama(iqamaInput?: string): void {
+    const iqama = this.normalizeNationalId(iqamaInput ?? this.form.controls.customerIqama.value.trim());
     if (!iqama) {
       this.form.patchValue({ customerId: '' }, { emitEvent: false });
       return;
     }
+    if (iqama.length !== BookingFormComponent.NATIONAL_ID_LENGTH) {
+      this.form.patchValue({ customerId: '' }, { emitEvent: false });
+      return;
+    }
     const localMatch = this.customers().find(customer => {
-      const candidate = this.normalizeAsciiDigits(
+      const candidate = this.normalizeNationalId(
         this.valueOf(customer.idNationality ?? customer.identityNumber),
       );
       return candidate === iqama;
@@ -782,17 +816,25 @@ export class BookingFormComponent implements OnInit {
 
     this.customerService
       .getByNationalId(iqama, fleetId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        switchMap(match => {
+          if (!match?.id) {
+            return of(null);
+          }
+          return this.customerService.getById(String(match.id), fleetId).pipe(catchError(() => of(match)));
+        }),
+      )
       .subscribe({
-        next: match => {
-          if (match) {
-            const exists = this.customers().some(customer => String(customer.id) === String(match.id));
+        next: customer => {
+          if (customer) {
+            const exists = this.customers().some(item => String(item.id) === String(customer.id));
             if (!exists) {
-              this.customers.set([...this.customers(), match]);
+              this.customers.set([...this.customers(), customer]);
             }
             this.form.patchValue(
               {
-                customerId: String(match.id),
+                customerId: String(customer.id),
                 customerNameAr: '',
                 customerFirstMobileNumber: '',
                 customerAddress: '',
@@ -819,109 +861,113 @@ export class BookingFormComponent implements OnInit {
       });
   }
 
-  onCustomerIqamaKeydown(event: KeyboardEvent): void {
-    const suggestions = this.customerIqamaSuggestions();
-    if (suggestions.length === 0) {
+  onCustomerIqamaPaste(event: ClipboardEvent): void {
+    const pastedText = event.clipboardData?.getData('text') ?? '';
+    const iqama = this.normalizeNationalId(pastedText);
+    if (!iqama) {
       return;
     }
-
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      const next = (this.activeCustomerSuggestionIndex() + 1) % suggestions.length;
-      this.activeCustomerSuggestionIndex.set(next);
-      return;
-    }
-
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      const next =
-        (this.activeCustomerSuggestionIndex() - 1 + suggestions.length) % suggestions.length;
-      this.activeCustomerSuggestionIndex.set(next);
-      return;
-    }
-
-    if (event.key === 'Enter') {
-      const idx = this.activeCustomerSuggestionIndex();
-      if (idx >= 0 && idx < suggestions.length) {
-        event.preventDefault();
-        this.pickCustomerSuggestion(suggestions[idx]);
-      }
-      return;
-    }
-
-    if (event.key === 'Escape') {
-      this.customerIqamaSuggestions.set([]);
-      this.activeCustomerSuggestionIndex.set(-1);
-    }
+    this.form.patchValue({ customerIqama: iqama }, { emitEvent: true });
+    this.customerLookupByIqama(iqama);
   }
 
-  hideCustomerSuggestions(): void {
-    setTimeout(() => {
-      this.customerIqamaSuggestions.set([]);
-      this.activeCustomerSuggestionIndex.set(-1);
-    }, 120);
-  }
+  // onCustomerIqamaKeydown(event: KeyboardEvent): void {
+  //   const suggestions = this.customerIqamaSuggestions();
+  //   if (suggestions.length === 0) {
+  //     return;
+  //   }
+  //   if (event.key === 'ArrowDown') {
+  //     event.preventDefault();
+  //     const next = (this.activeCustomerSuggestionIndex() + 1) % suggestions.length;
+  //     this.activeCustomerSuggestionIndex.set(next);
+  //     return;
+  //   }
+  //   if (event.key === 'ArrowUp') {
+  //     event.preventDefault();
+  //     const next =
+  //       (this.activeCustomerSuggestionIndex() - 1 + suggestions.length) % suggestions.length;
+  //     this.activeCustomerSuggestionIndex.set(next);
+  //     return;
+  //   }
+  //   if (event.key === 'Enter') {
+  //     const idx = this.activeCustomerSuggestionIndex();
+  //     if (idx >= 0 && idx < suggestions.length) {
+  //       event.preventDefault();
+  //       this.pickCustomerSuggestion(suggestions[idx]);
+  //     }
+  //     return;
+  //   }
+  //   if (event.key === 'Escape') {
+  //     this.customerIqamaSuggestions.set([]);
+  //     this.activeCustomerSuggestionIndex.set(-1);
+  //   }
+  // }
 
-  setActiveCustomerSuggestion(index: number): void {
-    this.activeCustomerSuggestionIndex.set(index);
-  }
+  // hideCustomerSuggestions(): void {
+  //   setTimeout(() => {
+  //     this.customerIqamaSuggestions.set([]);
+  //     this.activeCustomerSuggestionIndex.set(-1);
+  //   }, 120);
+  // }
 
-  pickCustomerSuggestion(customer: Customer): void {
-    const iqama = this.normalizeAsciiDigits(this.valueOf(customer.idNationality ?? customer.identityNumber));
-    const exists = this.customers().some(item => String(item.id) === String(customer.id));
-    if (!exists) {
-      this.customers.set([...this.customers(), customer]);
-    }
-    this.form.patchValue(
-      {
-        customerIqama: iqama,
-        customerId: String(customer.id),
-        customerNameAr: '',
-        customerFirstMobileNumber: '',
-        customerAddress: '',
-        customerNationality: '',
-        customerDrivingLicenseNumber: '',
-        customerDateDrivinglicense: '',
-        customerBirthDay: '',
-      },
-      { emitEvent: false },
-    );
-    this.customerIqamaSuggestions.set([]);
-    this.activeCustomerSuggestionIndex.set(-1);
-  }
+  // setActiveCustomerSuggestion(index: number): void {
+  //   this.activeCustomerSuggestionIndex.set(index);
+  // }
 
-  customerSuggestionLabel(customer: Customer): string {
-    const iqama = this.valueOf(customer.idNationality ?? customer.identityNumber) || '-';
-    const name = this.valueOf(customer.nameAr ?? customer.fullName ?? customer.nameEn) || '-';
-    return `${iqama} - ${name}`;
-  }
+  // pickCustomerSuggestion(customer: Customer): void {
+  //   const iqama = this.normalizeNationalId(this.valueOf(customer.idNationality ?? customer.identityNumber));
+  //   const exists = this.customers().some(item => String(item.id) === String(customer.id));
+  //   if (!exists) {
+  //     this.customers.set([...this.customers(), customer]);
+  //   }
+  //   this.form.patchValue(
+  //     {
+  //       customerIqama: iqama,
+  //       customerId: String(customer.id),
+  //       customerNameAr: '',
+  //       customerFirstMobileNumber: '',
+  //       customerAddress: '',
+  //       customerNationality: '',
+  //       customerDrivingLicenseNumber: '',
+  //       customerDateDrivinglicense: '',
+  //       customerBirthDay: '',
+  //     },
+  //     { emitEvent: false },
+  //   );
+  //   this.customerIqamaSuggestions.set([]);
+  //   this.activeCustomerSuggestionIndex.set(-1);
+  // }
 
-  customerSuggestionIqamaParts(customer: Customer): {
-    before: string;
-    match: string;
-    after: string;
-    name: string;
-  } {
-    const iqamaRaw = this.valueOf(customer.idNationality ?? customer.identityNumber) || '-';
-    const name = this.valueOf(customer.nameAr ?? customer.fullName ?? customer.nameEn) || '-';
-    const query = this.normalizeAsciiDigits(this.form.controls.customerIqama.value.trim());
-    if (!query || iqamaRaw === '-') {
-      return { before: iqamaRaw, match: '', after: '', name };
-    }
+  // customerSuggestionLabel(customer: Customer): string {
+  //   const iqama = this.valueOf(customer.idNationality ?? customer.identityNumber) || '-';
+  //   const name = this.valueOf(customer.nameAr ?? customer.fullName ?? customer.nameEn) || '-';
+  //   return `${iqama} - ${name}`;
+  // }
 
-    const iqamaNormalized = this.normalizeAsciiDigits(iqamaRaw);
-    const idx = iqamaNormalized.indexOf(query);
-    if (idx < 0) {
-      return { before: iqamaRaw, match: '', after: '', name };
-    }
-
-    return {
-      before: iqamaRaw.slice(0, idx),
-      match: iqamaRaw.slice(idx, idx + query.length),
-      after: iqamaRaw.slice(idx + query.length),
-      name,
-    };
-  }
+  // customerSuggestionIqamaParts(customer: Customer): {
+  //   before: string;
+  //   match: string;
+  //   after: string;
+  //   name: string;
+  // } {
+  //   const iqamaRaw = this.valueOf(customer.idNationality ?? customer.identityNumber) || '-';
+  //   const name = this.valueOf(customer.nameAr ?? customer.fullName ?? customer.nameEn) || '-';
+  //   const query = this.normalizeNationalId(this.form.controls.customerIqama.value.trim());
+  //   if (!query || iqamaRaw === '-') {
+  //     return { before: iqamaRaw, match: '', after: '', name };
+  //   }
+  //   const iqamaNormalized = this.normalizeNationalId(iqamaRaw);
+  //   const idx = iqamaNormalized.indexOf(query);
+  //   if (idx < 0) {
+  //     return { before: iqamaRaw, match: '', after: '', name };
+  //   }
+  //   return {
+  //     before: iqamaRaw.slice(0, idx),
+  //     match: iqamaRaw.slice(idx, idx + query.length),
+  //     after: iqamaRaw.slice(idx + query.length),
+  //     name,
+  //   };
+  // }
 
   customerContractNumber(): string {
     return this.valueOf(this.form.controls.numberBookingINBasame.value);
@@ -1669,6 +1715,11 @@ export class BookingFormComponent implements OnInit {
     return value.replace(/[٠-٩]/g, ch => map[ch] ?? ch);
   }
 
+  /** Normalize national id to ASCII digits only (max 10). */
+  private normalizeNationalId(value: string): string {
+    return this.normalizeAsciiDigits(value).replace(/\D/g, '').slice(0, BookingFormComponent.NATIONAL_ID_LENGTH);
+  }
+
   /**
    * Gregorian/ISO expiry for `DateDrivinglicense` on create. Hijri-only profiles are incomplete
    * even if `dateDrivinglicenseHajri` is filled (UI may still show Hijri via `resolver`).
@@ -1779,39 +1830,36 @@ export class BookingFormComponent implements OnInit {
     return fallback?.id ? String(fallback.id).trim() : undefined;
   }
 
-  private customerIqamaSuggestions$(iqama: string): Observable<Customer[]> {
-    if (!iqama) {
-      return of([]);
-    }
-
-    const local = this.customers()
-      .filter(customer => {
-        const candidate = this.normalizeAsciiDigits(
-          this.valueOf(customer.idNationality ?? customer.identityNumber),
-        );
-        return candidate.startsWith(iqama);
-      })
-      .slice(0, 8);
-
-    if (local.length > 0) {
-      return of(local);
-    }
-
-    const fleetId =
-      String(this.form.controls.fleetId.value ?? '').trim() || this.authState.fleetId() || undefined;
-    return this.customerService
-      .getPaginated({
-        fleetId,
-        pageNumber: 1,
-        pageSize: 8,
-        isActive: true,
-        search: iqama,
-      })
-      .pipe(
-        map(response => (response.items ?? []).slice(0, 8)),
-        catchError(() => of([])),
-      );
-  }
+  // private customerIqamaSuggestions$(iqama: string): Observable<Customer[]> {
+  //   if (!iqama || iqama.length >= BookingFormComponent.NATIONAL_ID_LENGTH) {
+  //     return of([]);
+  //   }
+  //   const local = this.customers()
+  //     .filter(customer => {
+  //       const candidate = this.normalizeNationalId(
+  //         this.valueOf(customer.idNationality ?? customer.identityNumber),
+  //       );
+  //       return candidate.startsWith(iqama);
+  //     })
+  //     .slice(0, 8);
+  //   if (local.length > 0) {
+  //     return of(local);
+  //   }
+  //   const fleetId =
+  //     String(this.form.controls.fleetId.value ?? '').trim() || this.authState.fleetId() || undefined;
+  //   return this.customerService
+  //     .getPaginated({
+  //       fleetId,
+  //       pageNumber: 1,
+  //       pageSize: 8,
+  //       isActive: true,
+  //       search: iqama,
+  //     })
+  //     .pipe(
+  //       map(response => (response.items ?? []).slice(0, 8)),
+  //       catchError(() => of([])),
+  //     );
+  // }
 
   paymentTypeIsCash(): boolean {
     return Number(this.form.controls.paymentType.value ?? 1) === 1;
