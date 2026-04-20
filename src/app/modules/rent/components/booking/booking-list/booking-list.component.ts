@@ -14,9 +14,10 @@ import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-h
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
-import { Booking, BookingStatus } from '../../../models';
+import { Booking, BookingStatus, Branch } from '../../../models';
 import { bookingStatusTone, bookingStatusTranslationKey } from '../../../models/booking/booking-status.utils';
 import { BookingService } from '../../../services/booking/booking.service';
+import { BranchService } from '../../../services/branches/branch.service';
 
 @Component({
   selector: 'app-booking-list',
@@ -37,6 +38,7 @@ import { BookingService } from '../../../services/booking/booking.service';
 })
 export class BookingListComponent implements OnInit {
   private bookingService = inject(BookingService);
+  private branchService = inject(BranchService);
   private authState = inject(AuthStateService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
@@ -49,8 +51,8 @@ export class BookingListComponent implements OnInit {
   loading = signal(false);
   search = signal('');
   status = signal<BookingStatus | ''>('');
-  dateFrom = signal('');
-  dateTo = signal('');
+  branches = signal<Branch[]>([]);
+  branchId = signal<number | ''>('');
   statusFilterOptions = computed<SmoothSelectOption[]>(() => {
     const t = (key: string) => this.translate.instant(key);
     const values: BookingStatus[] = [
@@ -69,6 +71,13 @@ export class BookingListComponent implements OnInit {
       ...values.map(status => ({ label: t(bookingStatusTranslationKey(status)), value: status })),
     ];
   });
+  branchFilterOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('All branches'), value: '' },
+    ...this.branches().map(branch => ({
+      label: this.getBranchOptionLabel(branch),
+      value: Number(branch.id),
+    })),
+  ]);
 
   statusBadgeTone(status: BookingStatus): 'success' | 'warning' | 'danger' | 'secondary' | 'info' {
     return bookingStatusTone(status);
@@ -78,30 +87,128 @@ export class BookingListComponent implements OnInit {
     return bookingStatusTranslationKey(status);
   }
 
+  statusBadgeLabel(booking: Booking): string {
+    const fromApi = (booking.statusDisplayName ?? '').trim();
+    if (fromApi) {
+      return fromApi;
+    }
+    return this.translate.instant(this.statusBadgeLabelKey(booking.status));
+  }
+
+  customerCardLabel(booking: Booking): string {
+    const name = (booking.customerName ?? '').trim();
+    if (name) {
+      return name;
+    }
+    return booking.customerId ? `#${booking.customerId}` : '—';
+  }
+
+  vehicleCardLabel(booking: Booking): string {
+    const name = (booking.vehicleName ?? '').trim();
+    const plate = (booking.vehiclePlateNumber ?? '').trim();
+    const serial = (booking.vehicleSerialNumber ?? '').trim();
+    if (name && plate && name.toLowerCase() === plate.toLowerCase() && serial) {
+      return serial;
+    }
+    if (name) {
+      return name;
+    }
+    if (plate) {
+      return plate;
+    }
+    if (serial) {
+      return serial;
+    }
+    return booking.vehicleId ? `#${booking.vehicleId}` : '—';
+  }
+
+  vehicleSerialLabel(booking: Booking): string {
+    const serial = (booking.vehicleSerialNumber ?? '').trim();
+    if (serial) {
+      return serial;
+    }
+    return booking.vehicleId ? `#${booking.vehicleId}` : '—';
+  }
+
+  branchCardLabel(booking: Booking): string {
+    const branch = (booking.branchName ?? '').trim();
+    if (branch) {
+      return branch;
+    }
+    return booking.branchId ? `#${booking.branchId}` : '—';
+  }
+
+  bookingCardStatusClass(status: BookingStatus): string {
+    if (status === 'finsh' || status === 'close') {
+      return 'booking-card--status-success';
+    }
+    if (status === 'Suspended_due_to_accident' || status === 'Suspended_due_to_sum_money') {
+      return 'booking-card--status-warning';
+    }
+    if (status === 'open' || status === 'extension' || status === 'translate') {
+      return 'booking-card--status-info';
+    }
+    return 'booking-card--status-neutral';
+  }
+
+  onBookingImageError(event: Event): void {
+    const img = event.target as HTMLImageElement | null;
+    if (!img) {
+      return;
+    }
+    img.style.display = 'none';
+    const fallback = img.nextElementSibling as HTMLElement | null;
+    if (fallback) {
+      fallback.classList.remove('booking-card__media-not-found--hidden');
+    }
+  }
+
   getBookingTitle(booking: Booking): string {
     const n = (booking.bookingNumber ?? '').trim();
     return n || String(booking.id);
   }
 
-  bookingDateRangeLabel(booking: Booking): string {
-    const fmt = (iso: string | undefined) => {
-      if (!iso?.trim()) {
-        return '—';
-      }
-      const d = new Date(iso);
-      if (Number.isNaN(d.getTime())) {
-        return iso;
-      }
-      return d.toLocaleDateString(this.translate.currentLang || this.translate.getDefaultLang() || 'en', {
-        year: '2-digit',
-        month: 'numeric',
-        day: 'numeric',
-      });
-    };
-    return `${fmt(booking.startDate)} — ${fmt(booking.endDate)}`;
+  bookingNumberLabel(booking: Booking): string {
+    const number = (booking.bookingNumber ?? '').trim();
+    if (number) {
+      return number;
+    }
+    return String(booking.id ?? '').trim() || '—';
+  }
+
+  bookingBasameNumberLabel(booking: Booking): string {
+    const basameNumber = (booking.numberBookingINBasame ?? '').trim();
+    if (basameNumber) {
+      return basameNumber;
+    }
+    return '—';
+  }
+
+  expectedStartDateLabel(booking: Booking): string {
+    return this.formatBookingDate(booking.startDate);
+  }
+
+  expectedEndDateLabel(booking: Booking): string {
+    return this.formatBookingDate(booking.endDate);
+  }
+
+  private formatBookingDate(iso: string | undefined): string {
+    if (!iso?.trim()) {
+      return '—';
+    }
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) {
+      return iso;
+    }
+    return d.toLocaleDateString(this.translate.currentLang || this.translate.getDefaultLang() || 'en', {
+      year: '2-digit',
+      month: 'numeric',
+      day: 'numeric',
+    });
   }
 
   ngOnInit(): void {
+    this.loadBranches();
     this.load();
   }
 
@@ -115,13 +222,8 @@ export class BookingListComponent implements OnInit {
     this.onSearchSubmit();
   }
 
-  onDateFromChange(value: string): void {
-    this.dateFrom.set(value);
-    this.onSearchSubmit();
-  }
-
-  onDateToChange(value: string): void {
-    this.dateTo.set(value);
+  onBranchFilterChange(value: number | ''): void {
+    this.branchId.set(value);
     this.onSearchSubmit();
   }
 
@@ -134,15 +236,15 @@ export class BookingListComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    const fleetId = this.authState.fleetId() || undefined;
     this.bookingService
       .getPaginated({
-        fleetId: this.authState.fleetId() || undefined,
+        fleetId,
+        branchId: Number(this.branchId() || 0) || undefined,
         pageNumber: this.pageNumber(),
         pageSize: this.pageSize(),
         search: this.search() || undefined,
         status: this.status(),
-        startDate: this.dateFrom() || undefined,
-        endDate: this.dateTo() || undefined,
         orderBy: 'CreatedAt',
         orderByDirection: 'DESC',
       })
@@ -210,5 +312,31 @@ export class BookingListComponent implements OnInit {
     this.pageSize.set(size);
     this.pageNumber.set(1);
     this.load();
+  }
+
+  private loadBranches(): void {
+    const fleetId = this.authState.fleetId() || undefined;
+    this.branchService
+      .getPaginated({
+        fleetId,
+        pageNumber: 1,
+        pageSize: 500,
+        search: undefined,
+      })
+      .subscribe({
+        next: page => this.branches.set(page.items ?? []),
+        error: () => this.branches.set([]),
+      });
+  }
+
+  private getBranchOptionLabel(branch: Branch): string {
+    return this.isArabicUi()
+      ? branch.nameAr || branch.nameEn || '-'
+      : branch.nameEn || branch.nameAr || '-';
+  }
+
+  private isArabicUi(): boolean {
+    const lang = (this.translate.currentLang || this.translate.getDefaultLang() || 'en').toLowerCase();
+    return lang.startsWith('ar');
   }
 }

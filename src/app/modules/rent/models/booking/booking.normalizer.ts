@@ -116,12 +116,48 @@ export function normalizeBooking(raw: unknown): Booking {
     trimText(pick(source, 'customerName', 'CustomerName', 'nameAr', 'NameAr', 'fullName', 'FullName')) ??
     trimText(customer ? pick(customer, 'nameAr', 'NameAr', 'fullName', 'FullName', 'nameEn', 'NameEn') : undefined);
 
+  const customerIqama =
+    trimText(
+      pick(
+        source,
+        'idNationality',
+        'IdNationality',
+        'identityNumber',
+        'IdentityNumber',
+        'customerNationalId',
+        'CustomerNationalId',
+      ),
+    ) ??
+    trimText(
+      customer
+        ? pick(
+            customer,
+            'idNationality',
+            'IdNationality',
+            'identityNumber',
+            'IdentityNumber',
+            'nationalId',
+            'NationalId',
+          )
+        : undefined,
+    );
+
   const vehiclePlate =
     trimText(pick(source, 'plateNumber', 'PlateNumber', 'vehiclePlateNumber', 'VehiclePlateNumber')) ??
     trimText(vehicle ? pick(vehicle, 'plateNumber', 'PlateNumber') : undefined);
 
+  const vehicleSerialNumber =
+    trimText(pick(source, 'vehicleSerialNumber', 'VehicleSerialNumber', 'serialNumber', 'SerialNumber')) ??
+    trimText(vehicle ? pick(vehicle, 'serialNumber', 'SerialNumber') : undefined);
+
+  const vehicleImageUrl =
+    trimText(
+      pick(source, 'url', 'Url', 'vehicleImageUrl', 'VehicleImageUrl', 'imageUrl', 'ImageUrl'),
+    ) ??
+    trimText(vehicle ? pick(vehicle, 'url', 'Url', 'imageUrl', 'ImageUrl') : undefined);
+
   const vehicleName =
-    trimText(pick(source, 'vehicleName', 'VehicleName')) ??
+    trimText(pick(source, 'vehicleDisplayName', 'VehicleDisplayName', 'vehicleName', 'VehicleName')) ??
     trimText(
       vehicle
         ? [
@@ -140,6 +176,10 @@ export function normalizeBooking(raw: unknown): Booking {
       pick(source, 'branchName', 'BranchName', 'branchNameAr', 'BranchNameAr'),
     ) ??
     trimText(pick(source, 'placeUSE', 'PlaceUSE', 'placeUse', 'PlaceUse'));
+
+  const statusDisplayName = trimText(
+    pick(source, 'statusDisplayName', 'StatusDisplayName'),
+  );
 
   const startDate = toDateString(
     pickPresent(source, 'startDate', 'StartDate', 'dateFrom', 'DateFrom', 'rentStartDate', 'RentStartDate'),
@@ -204,19 +244,21 @@ export function normalizeBooking(raw: unknown): Booking {
 
   return {
     id,
-    bookingNumber:
-      trimText(
-        pick(source, 'bookingNumber', 'BookingNumber', 'numberBookingINBasame', 'NumberBookingINBasame'),
-      ) ?? undefined,
+    bookingNumber: trimText(pick(source, 'bookingNumber', 'BookingNumber')) ?? undefined,
+    numberBookingINBasame:
+      trimText(pick(source, 'numberBookingINBasame', 'NumberBookingINBasame')) ?? undefined,
     fleetId: String(pick(source, 'fleetId', 'FleetId') ?? ''),
     fleetName,
     branchId: pick<number>(source, 'branchId', 'BranchId', 'idBranch', 'IdBranch') ?? null,
     branchName,
     customerId,
     customerName,
+    customerIqama,
     vehicleId,
+    vehicleImageUrl: vehicleImageUrl || undefined,
     vehicleName,
     vehiclePlateNumber: vehiclePlate,
+    vehicleSerialNumber,
     startDate,
     endDate,
     pickupDate: pickupDate || undefined,
@@ -228,6 +270,7 @@ export function normalizeBooking(raw: unknown): Booking {
     depositAmount: toNumber(pick(source, 'depositAmount', 'DepositAmount')),
     paidAmount: toNumber(pick(source, 'paidAmount', 'PaidAmount', 'paid', 'Paid', 'paidCash', 'PaidCash')),
     status: normalizeBookingStatus(statusRaw),
+    statusDisplayName,
     notes,
     createdBy,
     createdAt: createdAt || undefined,

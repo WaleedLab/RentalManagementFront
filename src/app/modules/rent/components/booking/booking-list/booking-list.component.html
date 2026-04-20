@@ -36,13 +36,14 @@
         </div>
 
         <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Date From' | translate }}</label>
-          <input class="form-control" type="date" [ngModel]="dateFrom()" (ngModelChange)="onDateFromChange($event)" />
-        </div>
-
-        <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Date To' | translate }}</label>
-          <input class="form-control" type="date" [ngModel]="dateTo()" (ngModelChange)="onDateToChange($event)" />
+          <label class="app-filter-label">{{ 'Branch' | translate }}</label>
+          <app-smooth-select
+            [ariaLabel]="'Branch' | translate"
+            [placeholder]="'All branches'"
+            [options]="branchFilterOptions()"
+            [value]="branchId()"
+            (valueChange)="onBranchFilterChange($any($event))"
+          />
         </div>
       </div>
 
@@ -53,42 +54,71 @@
       } @else {
         <div class="booking-cards-grid">
           @for (booking of bookings(); track booking.id; let cardIndex = $index) {
-            <article class="booking-card">
+            <article class="booking-card" [ngClass]="bookingCardStatusClass(booking.status)">
               <div class="booking-card__media">
                 <div class="booking-card__media-overlay"></div>
-                <div class="booking-card__media-inner" aria-hidden="true">
-                  <i class="fa-solid fa-file-contract"></i>
-                </div>
+                @if (booking.vehicleImageUrl) {
+                  <img
+                    class="booking-card__media-image"
+                    [src]="booking.vehicleImageUrl"
+                    [alt]="vehicleCardLabel(booking)"
+                    (error)="onBookingImageError($event)"
+                  />
+                  <div class="booking-card__media-not-found booking-card__media-not-found--hidden" aria-label="image not found">
+                    NOT FOUND
+                  </div>
+                } @else {
+                  <div class="booking-card__media-not-found" aria-label="image not found">
+                    NOT FOUND
+                  </div>
+                }
                 <div class="booking-card__status">
                   <app-status-badge
-                    [label]="statusBadgeLabelKey(booking.status) | translate"
+                    [label]="statusBadgeLabel(booking)"
                     [tone]="statusBadgeTone(booking.status)"
                   />
                 </div>
                 <div class="booking-card__quick-meta">
                   <span class="booking-chip">{{ formatBookingTotal(booking.totalAmount) }}</span>
-                  <span class="booking-chip booking-chip--ghost">{{ bookingDateRangeLabel(booking) }}</span>
                 </div>
               </div>
 
               <div class="booking-card__body">
                 <div class="booking-card__head">
-                  <h6 class="booking-card__title">{{ getBookingTitle(booking) }}</h6>
-                  <span class="booking-card__plate">{{ booking.vehiclePlateNumber || '—' }}</span>
+                  <div class="booking-card__identity">
+                    <div class="booking-card__identity-list">
+                      <span class="booking-card__identity-item" [attr.title]="bookingNumberLabel(booking)">
+                        <span class="booking-card__identity-label">{{ 'Rental Contract Number' | translate }}</span>
+                        <span class="booking-card__identity-value">{{ bookingNumberLabel(booking) }}</span>
+                      </span>
+                      <span class="booking-card__identity-item" [attr.title]="bookingBasameNumberLabel(booking)">
+                        <span class="booking-card__identity-label">{{ 'Basame Booking Number' | translate }}</span>
+                        <span class="booking-card__identity-value">{{ bookingBasameNumberLabel(booking) }}</span>
+                      </span>
+                    </div>
+                  </div>
+                  <span class="booking-card__plate" [attr.title]="booking.vehiclePlateNumber || '—'">
+                    <span class="booking-card__plate-label">{{ 'Plate Number' | translate }}</span>
+                    <span class="booking-card__plate-value">{{ booking.vehiclePlateNumber || '—' }}</span>
+                  </span>
                 </div>
 
                 <div class="booking-card__meta">
                   <div class="booking-meta">
                     <span class="booking-meta__label">{{ 'Customer' | translate }}</span>
-                    <span class="booking-meta__value">{{ booking.customerName || booking.customerId }}</span>
+                    <span class="booking-meta__value">{{ customerCardLabel(booking) }}</span>
                   </div>
                   <div class="booking-meta">
-                    <span class="booking-meta__label">{{ 'Vehicle' | translate }}</span>
-                    <span class="booking-meta__value">{{ booking.vehicleName || booking.vehicleId }}</span>
+                    <span class="booking-meta__label">{{ 'Branch' | translate }}</span>
+                    <span class="booking-meta__value">{{ branchCardLabel(booking) }}</span>
                   </div>
                   <div class="booking-meta">
-                    <span class="booking-meta__label">{{ 'Dates' | translate }}</span>
-                    <span class="booking-meta__value">{{ bookingDateRangeLabel(booking) }}</span>
+                    <span class="booking-meta__label">{{ 'Expected Start Date' | translate }}</span>
+                    <span class="booking-meta__value">{{ expectedStartDateLabel(booking) }}</span>
+                  </div>
+                  <div class="booking-meta">
+                    <span class="booking-meta__label">{{ 'Expected End Date' | translate }}</span>
+                    <span class="booking-meta__value">{{ expectedEndDateLabel(booking) }}</span>
                   </div>
                 </div>
 

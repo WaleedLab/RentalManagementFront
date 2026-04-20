@@ -20,15 +20,20 @@ export type BookingStatus =
 export interface Booking {
   id: string;
   bookingNumber?: string;
+  numberBookingINBasame?: string;
   fleetId: string;
   fleetName?: string;
   branchId?: number | null;
   branchName?: string;
   customerId: string;
   customerName?: string;
+  customerIqama?: string;
   vehicleId: string;
+  vehicleImageUrl?: string;
   vehicleName?: string;
   vehiclePlateNumber?: string;
+  vehicleSerialNumber?: string;
+  statusDisplayName?: string;
   startDate: string;
   endDate: string;
   pickupDate?: string;

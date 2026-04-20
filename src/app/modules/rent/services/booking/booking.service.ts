@@ -42,15 +42,14 @@ export class BookingService {
           ...buildFleetQueryParams(params.fleetId, 'fleet'),
           BRANCHID: params.branchId ?? undefined,
           Search: params.search,
+          Stutus: this.toBackendBookingStatusEnumName(params.status),
+          status: params.status || undefined,
           OrderByDirection: params.orderByDirection ?? 'DESC',
           OrderBy: params.orderBy ?? 'CreatedAt',
         },
         { suppressErrorToast: true },
       )
-      .pipe(
-        map(response => normalizePaginatedResponse(response, normalizeBooking)),
-        catchError(() => this.getPaginatedFromListFallback(params)),
-      );
+      .pipe(map(response => normalizePaginatedResponse(response, normalizeBooking)));
   }
 
   getById(id: string, fleetId?: string | null): Observable<Booking> {
@@ -295,6 +294,13 @@ export class BookingService {
       totalCount: 0,
       totalPages: 1,
     };
+  }
+
+  private toBackendBookingStatusEnumName(status?: BookingFilters['status']): string | undefined {
+    if (!status || status === 'Unknown') {
+      return undefined;
+    }
+    return status;
   }
 
   private getByIdFromList(
