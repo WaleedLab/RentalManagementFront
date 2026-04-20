@@ -20,6 +20,30 @@ export class VehicleService {
   private api = inject(BaseService);
   private readonly base = 'Vehicle';
 
+  getList(params: { fleetId?: string | null; branchId?: number | null; status?: Vehicle['status'] | '' } = {}): Observable<Vehicle[]> {
+    const normalizedFleetId = normalizeFleetId(params.fleetId);
+    const branchId = params.branchId ?? undefined;
+    const status = params.status || undefined;
+
+    return this.api
+      .getData<unknown[]>(
+        `${this.base}/List`,
+        {
+          // Keep both naming styles to match backend binders.
+          ...buildFleetQueryParams(normalizedFleetId, 'both'),
+          Fleetid: normalizedFleetId,
+          FleetId: normalizedFleetId,
+          Branchid: branchId,
+          BranchId: branchId,
+          Stutus: status ? this.toBackendVehicleStatusEnumName(status) : undefined,
+          Status: status,
+          status,
+        },
+        { suppressErrorToast: true },
+      )
+      .pipe(map(items => (items ?? []).map(normalizeVehicle)));
+  }
+
   getPaginated(
     params: VehicleFilters,
     options?: BaseRequestOptions,

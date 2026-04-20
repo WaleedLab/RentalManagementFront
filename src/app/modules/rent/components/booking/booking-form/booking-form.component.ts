@@ -22,7 +22,11 @@ import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { PaginatedAggregatorResponse } from '../../../../../core/interfaces';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
-import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
+import {
+  SmoothSelectComponent,
+  SmoothSelectOption,
+} from '../../../../../shared/ui/smooth-select/smooth-select.component';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 import { Bank } from '../../../../finance/models/banks/bank.model';
 import { CashAccount } from '../../../../finance/models/cash/cash-account.model';
 import { CountingEntry } from '../../../../finance/models/counting/counting-entry.model';
@@ -30,20 +34,25 @@ import { BankService } from '../../../../finance/services/banks/bank.service';
 import { CashAccountService } from '../../../../finance/services/cash/cash-account.service';
 import { CountingEntryService } from '../../../../finance/services/counting/counting-entry.service';
 import { BookingCreateRequest, CategoryVehicle, Customer, Vehicle } from '../../../models';
-import { BOOKING_CREATE_DEFAULT_STUTUS } from '../../../models/booking/booking-status.utils';
+import { Setting } from '../../../models/settings/setting.model';
+import { normalizeSetting } from '../../../models/settings/setting.normalizer';
 import { BookingService } from '../../../services/booking/booking.service';
 import { CategoryVehicleService } from '../../../services/category-vehicles/category-vehicle.service';
 import { CustomerService } from '../../../services/customers/customer.service';
-import { VehicleService } from '../../../services/vehicles/vehicle.service';
 import { SettingService } from '../../../services/settings/setting.service';
-import { Setting } from '../../../models/settings/setting.model';
-import { normalizeSetting } from '../../../models/settings/setting.normalizer';
-import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
+import { VehicleService } from '../../../services/vehicles/vehicle.service';
 
 @Component({
   selector: 'app-booking-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, PageHeaderComponent, SmoothSelectComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    TranslateModule,
+    PageHeaderComponent,
+    SmoothSelectComponent,
+  ],
   templateUrl: './booking-form.component.html',
   styleUrl: './booking-form.component.scss',
 })
@@ -74,7 +83,9 @@ export class BookingFormComponent implements OnInit {
   private translate = inject(TranslateService);
 
   bookingSettings = signal<Setting | null>(null);
-  showBookingDistanceGpsEnabled = computed(() => this.bookingSettings()?.showBookingDistanceGps ?? true);
+  showBookingDistanceGpsEnabled = computed(
+    () => this.bookingSettings()?.showBookingDistanceGps ?? true,
+  );
   contractLimitWarnings = signal<string[]>([]);
   /** Shown under contract price fields when the value is outside the category band (no auto-clamp). */
   contractPriceBandHintDaily = signal<string | null>(null);
@@ -268,6 +279,7 @@ export class BookingFormComponent implements OnInit {
 
   ngOnInit(): void {
     const fleetId = this.authState.fleetId() || undefined;
+    const branchId = Number(this.authState.branchId() || 0) || undefined;
     const emptyCategories: PaginatedAggregatorResponse<CategoryVehicle> = {
       items: [],
       pageNumber: 1,
@@ -282,10 +294,9 @@ export class BookingFormComponent implements OnInit {
       //   pageSize: 100,
       //   isActive: true,
       // }),
-      vehicles: this.vehicleService.getPaginated({
+      vehicles: this.vehicleService.getList({
         fleetId,
-        pageNumber: 1,
-        pageSize: 100,
+        branchId,
         status: 'Available',
       }),
       categories: this.categoryVehicleService
@@ -299,22 +310,20 @@ export class BookingFormComponent implements OnInit {
       banks: this.bankService.getList(fleetId).pipe(catchError(() => of([]))),
       cashAccounts: this.cashAccountService.getList(fleetId).pipe(catchError(() => of([]))),
       countingEntries: this.countingEntryService.getList(fleetId).pipe(catchError(() => of([]))),
-      settings: this.settingsApi
-        .getCurrent(fleetId)
-        .pipe(
-          catchError(() =>
-            of(
-              normalizeSetting({
-                fleetId,
-                showBookingDistanceGps: true,
-              }),
-            ),
+      settings: this.settingsApi.getCurrent(fleetId).pipe(
+        catchError(() =>
+          of(
+            normalizeSetting({
+              fleetId,
+              showBookingDistanceGps: true,
+            }),
           ),
         ),
+      ),
     }).subscribe({
       next: ({ vehicles, categories, banks, cashAccounts, countingEntries, settings }) => {
         // this.customers.set(customers.items ?? []);
-        this.vehicles.set(vehicles.items ?? []);
+        this.vehicles.set(vehicles ?? []);
         this.categories.set(categories.items ?? []);
         this.banks.set(banks ?? []);
         this.cashAccounts.set(cashAccounts ?? []);
@@ -383,7 +392,10 @@ export class BookingFormComponent implements OnInit {
         this.refreshContractBandPriceHints();
       });
 
-    merge(this.form.controls.priceDayBandLow.valueChanges, this.form.controls.priceDayBandHigh.valueChanges)
+    merge(
+      this.form.controls.priceDayBandLow.valueChanges,
+      this.form.controls.priceDayBandHigh.valueChanges,
+    )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.normalizeBandPair('priceDayBandLow', 'priceDayBandHigh');
@@ -406,7 +418,10 @@ export class BookingFormComponent implements OnInit {
         this.refreshContractBandPriceHints();
       });
 
-    merge(this.form.controls.priceKmExtraBandLow.valueChanges, this.form.controls.priceKmExtraBandHigh.valueChanges)
+    merge(
+      this.form.controls.priceKmExtraBandLow.valueChanges,
+      this.form.controls.priceKmExtraBandHigh.valueChanges,
+    )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.normalizeBandPair('priceKmExtraBandLow', 'priceKmExtraBandHigh');
@@ -416,10 +431,12 @@ export class BookingFormComponent implements OnInit {
         this.refreshContractBandPriceHints();
       });
 
-    this.form.controls.totaltax.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.syncBookingTotals();
-      this.refreshContractLimitWarnings();
-    });
+    this.form.controls.totaltax.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.syncBookingTotals();
+        this.refreshContractLimitWarnings();
+      });
 
     this.form.controls.customerIqama.valueChanges
       .pipe(
@@ -461,7 +478,10 @@ export class BookingFormComponent implements OnInit {
         if (this.form.controls.paymentType.value === 5) {
           const cash = Math.max(0, Number(this.form.controls.paidCash.value) || 0);
           const bank = Math.max(0, Number(this.form.controls.paidBank.value) || 0);
-          this.form.patchValue({ paid: Math.round((cash + bank) * 100) / 100 }, { emitEvent: false });
+          this.form.patchValue(
+            { paid: Math.round((cash + bank) * 100) / 100 },
+            { emitEvent: false },
+          );
         }
       });
 
@@ -490,7 +510,8 @@ export class BookingFormComponent implements OnInit {
 
     const selectedCustomer = this.selectedCustomer();
     const iqamaValue = this.normalizeNationalId(raw.customerIqama.trim());
-    const fleetId = this.normalizeGuidOrUndefined(this.normalizeAsciiDigits(raw.fleetId.trim())) ?? '';
+    const fleetId =
+      this.normalizeGuidOrUndefined(this.normalizeAsciiDigits(raw.fleetId.trim())) ?? '';
     if (!iqamaValue) {
       this.toast.error(this.translate.instant('Identity Number'));
       return;
@@ -551,7 +572,9 @@ export class BookingFormComponent implements OnInit {
     if (selectedCustomer) {
       const missingCustomerBasics = this.getMissingCustomerBasicFields(selectedCustomer);
       if (missingCustomerBasics.length > 0) {
-        const message = this.translate.instant('Complete customer basic information before booking');
+        const message = this.translate.instant(
+          'Complete customer basic information before booking',
+        );
         this.toast.error(`${message}: ${missingCustomerBasics.join('، ')}`);
         return;
       }
@@ -580,14 +603,18 @@ export class BookingFormComponent implements OnInit {
 
       nameArOut = (selectedCustomer.nameAr || selectedCustomer.fullName || '').trim();
       firstMobileNumberOut = this.normalizeSaudiMobile(
-        this.normalizeAsciiDigits((selectedCustomer.firstMobileNumber || selectedCustomer.phoneNumber || '').trim()),
+        this.normalizeAsciiDigits(
+          (selectedCustomer.firstMobileNumber || selectedCustomer.phoneNumber || '').trim(),
+        ),
       );
       addressOut = (selectedCustomer.address || '').trim();
       nationalityOut = (selectedCustomer.nationality || '').trim();
       drivingLicenseApi = licenseResult.api;
       customerLicenseExpired = this.isIsoDateExpired(drivingLicenseApi);
       {
-        const nationalityExpiryIsoPrimary = this.customerDateFieldToApi(selectedCustomer.dateIdNationality ?? '');
+        const nationalityExpiryIsoPrimary = this.customerDateFieldToApi(
+          selectedCustomer.dateIdNationality ?? '',
+        );
         const nationalityExpiryIsoFallback = this.customerDateFieldToApi(nationalityOut);
         const nationalityExpiryIso = nationalityExpiryIsoPrimary || nationalityExpiryIsoFallback;
         customerNationalityExpired = this.isIsoDateExpired(nationalityExpiryIso);
@@ -595,12 +622,16 @@ export class BookingFormComponent implements OnInit {
       idCustomerOut = this.parseFormNumber(raw.customerId);
     } else {
       const manualNameAr = raw.customerNameAr.trim();
-      const manualMobile = this.normalizeSaudiMobile(this.normalizeAsciiDigits(raw.customerFirstMobileNumber.trim()));
+      const manualMobile = this.normalizeSaudiMobile(
+        this.normalizeAsciiDigits(raw.customerFirstMobileNumber.trim()),
+      );
       const manualNationality = raw.customerNationality.trim();
       const manualLicense = this.bookingCalendarDateToApi(raw.customerDateDrivinglicense);
       const manualBirth = this.bookingCalendarDateToApi(raw.customerBirthDay);
       if (!manualNameAr || !manualMobile || !manualNationality || !manualLicense || !manualBirth) {
-        this.toast.error(this.translate.instant('Complete customer basic information before booking'));
+        this.toast.error(
+          this.translate.instant('Complete customer basic information before booking'),
+        );
         return;
       }
       nameArOut = manualNameAr;
@@ -609,7 +640,9 @@ export class BookingFormComponent implements OnInit {
       nationalityOut = manualNationality;
       drivingLicenseApi = manualLicense;
       customerLicenseExpired = this.isIsoDateExpired(drivingLicenseApi);
-      customerNationalityExpired = this.isIsoDateExpired(this.customerDateFieldToApi(nationalityOut));
+      customerNationalityExpired = this.isIsoDateExpired(
+        this.customerDateFieldToApi(nationalityOut),
+      );
       birthDayOut = manualBirth;
       idCustomerOut = 0;
     }
@@ -639,23 +672,41 @@ export class BookingFormComponent implements OnInit {
         selectedVehicle?.licenseExpirationDate ??
         '',
     );
-    const vehicleInsuranceIso = this.customerDateFieldToApi(selectedVehicle?.insuranceExpires ?? '');
+    const vehicleInsuranceIso = this.customerDateFieldToApi(
+      selectedVehicle?.insuranceExpires ?? '',
+    );
     const vehicleRegistrationExpired = this.isIsoDateExpired(vehicleRegistrationIso);
     const vehicleInsuranceExpired = this.isIsoDateExpired(vehicleInsuranceIso);
-    const vehicleRegistrationAndInsuranceExpired = vehicleRegistrationExpired && vehicleInsuranceExpired;
+    const vehicleRegistrationAndInsuranceExpired =
+      vehicleRegistrationExpired && vehicleInsuranceExpired;
 
     if (settingsForRestrictions && settingsForRestrictions.id > 0) {
-      if (customerLicenseExpired && customerNationalityExpired && !settingsForRestrictions.dateOfExpWithNation) {
-        this.toast.error(this.translate.instant('Booking restriction license and nationality expired not allowed'));
+      if (
+        customerLicenseExpired &&
+        customerNationalityExpired &&
+        !settingsForRestrictions.dateOfExpWithNation
+      ) {
+        this.toast.error(
+          this.translate.instant('Booking restriction license and nationality expired not allowed'),
+        );
         return;
       }
-      if (customerLicenseExpired && !customerNationalityExpired && !settingsForRestrictions.dateOfExp) {
+      if (
+        customerLicenseExpired &&
+        !customerNationalityExpired &&
+        !settingsForRestrictions.dateOfExp
+      ) {
         this.toast.error(this.translate.instant('Booking restriction license expired not allowed'));
         return;
       }
-      if (vehicleRegistrationAndInsuranceExpired && !settingsForRestrictions.expDateAndInsuranceExp) {
+      if (
+        vehicleRegistrationAndInsuranceExpired &&
+        !settingsForRestrictions.expDateAndInsuranceExp
+      ) {
         this.toast.error(
-          this.translate.instant('Booking restriction vehicle registration and insurance expired not allowed'),
+          this.translate.instant(
+            'Booking restriction vehicle registration and insurance expired not allowed',
+          ),
         );
         return;
       }
@@ -792,7 +843,9 @@ export class BookingFormComponent implements OnInit {
   // }
 
   customerLookupByIqama(iqamaInput?: string): void {
-    const iqama = this.normalizeNationalId(iqamaInput ?? this.form.controls.customerIqama.value.trim());
+    const iqama = this.normalizeNationalId(
+      iqamaInput ?? this.form.controls.customerIqama.value.trim(),
+    );
     if (!iqama) {
       this.form.patchValue({ customerId: '' }, { emitEvent: false });
       return;
@@ -812,7 +865,9 @@ export class BookingFormComponent implements OnInit {
       return;
     }
     const fleetId =
-      String(this.form.controls.fleetId.value ?? '').trim() || this.authState.fleetId() || undefined;
+      String(this.form.controls.fleetId.value ?? '').trim() ||
+      this.authState.fleetId() ||
+      undefined;
 
     this.customerService
       .getByNationalId(iqama, fleetId)
@@ -822,7 +877,9 @@ export class BookingFormComponent implements OnInit {
           if (!match?.id) {
             return of(null);
           }
-          return this.customerService.getById(String(match.id), fleetId).pipe(catchError(() => of(match)));
+          return this.customerService
+            .getById(String(match.id), fleetId)
+            .pipe(catchError(() => of(match)));
         }),
       )
       .subscribe({
@@ -1156,7 +1213,7 @@ export class BookingFormComponent implements OnInit {
     const tax = Math.max(0, Number(r.totaltax) || 0);
     const discountValue =
       discountType === 'percent'
-        ? Math.round((expected * Math.min(100, discountInput)) * 100) / 10000
+        ? Math.round(expected * Math.min(100, discountInput) * 100) / 10000
         : discountInput;
     return Math.max(0, Math.round((expected - discountValue + tax) * 100) / 100);
   }
@@ -1166,7 +1223,7 @@ export class BookingFormComponent implements OnInit {
     const expected = this.expectedAmount();
     const discountInput = Math.max(0, Number(r.discount) || 0);
     if (r.discountType === 'percent') {
-      return Math.round((expected * Math.min(100, discountInput)) * 100) / 10000;
+      return Math.round(expected * Math.min(100, discountInput) * 100) / 10000;
     }
     return Math.min(expected, discountInput);
   }
@@ -1374,12 +1431,16 @@ export class BookingFormComponent implements OnInit {
     if (field === 'vin') return this.valueOf(vehicle.vin) || '-';
     if (field === 'color') return this.valueOf(vehicle.color) || '-';
     if (field === 'insuranceNumber') return this.valueOf(vehicle.insuranceNumber) || '-';
-    if (field === 'insuranceType') return vehicle.insuranceType != null ? String(vehicle.insuranceType) : '-';
+    if (field === 'insuranceType')
+      return vehicle.insuranceType != null ? String(vehicle.insuranceType) : '-';
     if (field === 'insuranceExpires') return this.formatVehicleDateValue(vehicle.insuranceExpires);
-    if (field === 'licenseExpirationDate') return this.formatVehicleDateValue(vehicle.licenseExpirationDate);
-    if (field === 'insurancePolicyNumber') return this.valueOf(vehicle.insurancePolicyNumber) || '-';
+    if (field === 'licenseExpirationDate')
+      return this.formatVehicleDateValue(vehicle.licenseExpirationDate);
+    if (field === 'insurancePolicyNumber')
+      return this.valueOf(vehicle.insurancePolicyNumber) || '-';
     if (field === 'operatinCard') return this.formatVehicleDateValue(vehicle.operatinCard);
-    if (field === 'validityCarRegistration') return this.formatVehicleDateValue(vehicle.validityCarRegistration);
+    if (field === 'validityCarRegistration')
+      return this.formatVehicleDateValue(vehicle.validityCarRegistration);
     if (field === 'mileage') return String(vehicle.countKm ?? vehicle.mileage ?? '-');
     if (field === 'seats') return String(vehicle.capacitOil ?? vehicle.seats ?? '-');
     return '-';
@@ -1409,7 +1470,9 @@ export class BookingFormComponent implements OnInit {
     const fromList = this.resolveCategoryForVehicle(vehicle);
     const catId = this.resolveCategoryIdFromVehicle(vehicle);
     const fleetId =
-      String(this.form.controls.fleetId.value ?? '').trim() || this.authState.fleetId() || undefined;
+      String(this.form.controls.fleetId.value ?? '').trim() ||
+      this.authState.fleetId() ||
+      undefined;
 
     if (!catId || !fleetId) {
       return of({ vehicle, cat: fromList ?? null });
@@ -1467,7 +1530,11 @@ export class BookingFormComponent implements OnInit {
     this.form.patchValue({ priceKmExtra: v }, { emitEvent: true });
   }
 
-  private bandPresetValue(lo: number, hi: number, preset: 'min' | 'mid' | 'max'): number | undefined {
+  private bandPresetValue(
+    lo: number,
+    hi: number,
+    preset: 'min' | 'mid' | 'max',
+  ): number | undefined {
     const a = Math.max(0, lo);
     const b = Math.max(0, hi);
     if (a <= 0 && b <= 0) {
@@ -1495,7 +1562,10 @@ export class BookingFormComponent implements OnInit {
 
     const suggestedDaily = this.resolveSuggestedDailyRate(vehicle, cat);
     const suggestedMonthly = this.resolveSuggestedMonthlyRate(vehicle, cat);
-    const suggestedHourExtra = this.higherBandValue(cat?.priceHoureExtraLow, cat?.priceHoureExtraHigh);
+    const suggestedHourExtra = this.higherBandValue(
+      cat?.priceHoureExtraLow,
+      cat?.priceHoureExtraHigh,
+    );
     const suggestedKmExtra = this.higherBandValue(
       this.categoryKmPriceLow(cat),
       this.categoryKmPriceHigh(cat),
@@ -1518,9 +1588,12 @@ export class BookingFormComponent implements OnInit {
 
     const branchId = vehicle.branchId && vehicle.branchId > 0 ? vehicle.branchId : raw.branchId;
     const checkoutCounter = this.pickNumeric(raw.checkoutCounter, vehicle.mileage);
-    const priceInDay = suggestedDaily > 0 ? suggestedDaily : this.pickNumeric(raw.priceInDay, vehicle.dailyRate);
+    const priceInDay =
+      suggestedDaily > 0 ? suggestedDaily : this.pickNumeric(raw.priceInDay, vehicle.dailyRate);
     const priceInMonth =
-      suggestedMonthly > 0 ? suggestedMonthly : this.pickNumeric(raw.priceInMonth, vehicle.monthlyRate);
+      suggestedMonthly > 0
+        ? suggestedMonthly
+        : this.pickNumeric(raw.priceInMonth, vehicle.monthlyRate);
 
     let allowTo = raw.allowTo;
     let countKMExtra = raw.countKMExtra;
@@ -1658,7 +1731,9 @@ export class BookingFormComponent implements OnInit {
     const low = Math.min(lo, hi);
     const high = Math.max(lo, hi);
     if (lo !== low || hi !== high) {
-      this.form.patchValue({ [lowKey]: low, [highKey]: high } as Record<string, number>, { emitEvent: false });
+      this.form.patchValue({ [lowKey]: low, [highKey]: high } as Record<string, number>, {
+        emitEvent: false,
+      });
     }
   }
 
@@ -1717,7 +1792,9 @@ export class BookingFormComponent implements OnInit {
 
   /** Normalize national id to ASCII digits only (max 10). */
   private normalizeNationalId(value: string): string {
-    return this.normalizeAsciiDigits(value).replace(/\D/g, '').slice(0, BookingFormComponent.NATIONAL_ID_LENGTH);
+    return this.normalizeAsciiDigits(value)
+      .replace(/\D/g, '')
+      .slice(0, BookingFormComponent.NATIONAL_ID_LENGTH);
   }
 
   /**
@@ -1811,7 +1888,9 @@ export class BookingFormComponent implements OnInit {
   }
 
   private applyDefaultCustomerVehicleCounting(): void {
-    const current = this.normalizeGuidOrUndefined(String(this.form.controls.idCountingCustVehicle.value ?? '').trim());
+    const current = this.normalizeGuidOrUndefined(
+      String(this.form.controls.idCountingCustVehicle.value ?? '').trim(),
+    );
     if (current) {
       return;
     }
@@ -1824,7 +1903,9 @@ export class BookingFormComponent implements OnInit {
 
   private defaultCustomerVehicleCountingId(): string | undefined {
     const byNumber = this.countingEntries().find(
-      entry => Number(entry.countingNumber) === BookingFormComponent.DEFAULT_CUSTOMER_VEHICLE_COUNTING_NUMBER,
+      entry =>
+        Number(entry.countingNumber) ===
+        BookingFormComponent.DEFAULT_CUSTOMER_VEHICLE_COUNTING_NUMBER,
     );
     const fallback = byNumber ?? this.countingEntries().find(entry => Boolean(entry.id));
     return fallback?.id ? String(fallback.id).trim() : undefined;
