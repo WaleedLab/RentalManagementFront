@@ -32,13 +32,13 @@ export class PaymentCountService {
     fleetId?: string | null;
     branchId?: number | null;
     status?: number | null;
-    bondType?: number | null;
-    paymentType?: number | null;
+    bondTypePaymentcount?: number | null;
+    paymentTypePaymentcount?: number | null;
     pageSize?: number;
     pageNumber?: number;
     search?: string;
     orderByDirection?: 'ASC' | 'DESC';
-    orderBy?: string;
+    orderBy?: 'CreatedAt' | 'Paid' | 'UpdatedAt';
   }): Observable<PaginatedAggregatorResponse<PaymentCount>> {
     const fleetId = params.fleetId?.trim();
     const normalizedDirection = params.orderByDirection?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
@@ -50,10 +50,14 @@ export class PaymentCountService {
         BranchId: params.branchId ?? undefined,
         Status: params.status ?? undefined,
         status: params.status ?? undefined,
-        BondType: params.bondType ?? undefined,
-        bondType: params.bondType ?? undefined,
-        PaymentType: params.paymentType ?? undefined,
-        paymentType: params.paymentType ?? undefined,
+        BondTypePaymentcount: params.bondTypePaymentcount ?? undefined,
+        bondTypePaymentcount: params.bondTypePaymentcount ?? undefined,
+        BondType: params.bondTypePaymentcount ?? undefined,
+        bondType: params.bondTypePaymentcount ?? undefined,
+        PaymentTypePaymentcount: params.paymentTypePaymentcount ?? undefined,
+        paymentTypePaymentcount: params.paymentTypePaymentcount ?? undefined,
+        PaymentType: params.paymentTypePaymentcount ?? undefined,
+        paymentType: params.paymentTypePaymentcount ?? undefined,
         PageSize: params.pageSize,
         PageNumber: params.pageNumber,
         Search: params.search?.trim() || undefined,
@@ -64,8 +68,8 @@ export class PaymentCountService {
         fleetId: fleetId || undefined,
         branchId: params.branchId ?? undefined,
         statusId: params.status ?? undefined,
-        bondTypeId: params.bondType ?? undefined,
-        paymentTypeId: params.paymentType ?? undefined,
+        bondTypeId: params.bondTypePaymentcount ?? undefined,
+        paymentTypeId: params.paymentTypePaymentcount ?? undefined,
         search: params.search?.trim() || undefined,
         orderByDirection: params.orderByDirection ? normalizedDirection.toLowerCase() : undefined,
         orderBy: params.orderBy,

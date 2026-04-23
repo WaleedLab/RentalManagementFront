@@ -26,17 +26,6 @@
   [createLabel]="'Create Payment Count'"
 >
   <div finance-extra-filters class="app-filter-field app-filter-field--narrow">
-    <label class="app-filter-label">{{ 'Status' | translate }}</label>
-    <app-smooth-select
-      [ariaLabel]="'Status' | translate"
-      [placeholder]="'All statuses' | translate"
-      [options]="statusFilterOptions"
-      [value]="statusFilter()"
-      (valueChange)="onStatusFilterChange($any($event))"
-    />
-  </div>
-
-  <div finance-extra-filters class="app-filter-field app-filter-field--narrow">
     <label class="app-filter-label">{{ 'Bond Type' | translate }}</label>
     <app-smooth-select
       [ariaLabel]="'Bond Type' | translate"

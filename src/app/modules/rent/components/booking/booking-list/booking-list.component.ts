@@ -13,9 +13,12 @@ import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
-import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 import { Booking, BookingStatus, Branch } from '../../../models';
-import { bookingStatusTone, bookingStatusTranslationKey } from '../../../models/booking/booking-status.utils';
+import {
+  bookingStatusCode,
+  bookingStatusTranslationKey,
+  getBookingStatusTheme,
+} from '../../../models/booking/booking-status.utils';
 import { BookingService } from '../../../services/booking/booking.service';
 import { BranchService } from '../../../services/branches/branch.service';
 
@@ -31,7 +34,6 @@ import { BranchService } from '../../../services/branches/branch.service';
     PaginationBarComponent,
     EmptyStateComponent,
     SmoothSelectComponent,
-    StatusBadgeComponent,
   ],
   templateUrl: './booking-list.component.html',
   styleUrl: './booking-list.component.scss',
@@ -56,21 +58,21 @@ export class BookingListComponent implements OnInit {
   status = signal<BookingStatus | ''>('');
   branches = signal<Branch[]>([]);
   branchId = signal<number | ''>('');
+  private readonly statusValues: BookingStatus[] = [
+    'open',
+    'finsh',
+    'Suspended_due_to_accident',
+    'translate',
+    'close',
+    'extension',
+    'Suspended_due_to_sum_money',
+    'Unknown',
+  ];
   statusFilterOptions = computed<SmoothSelectOption[]>(() => {
     const t = (key: string) => this.translate.instant(key);
-    const values: BookingStatus[] = [
-      'open',
-      'finsh',
-      'Suspended_due_to_accident',
-      'translate',
-      'close',
-      'extension',
-      'Suspended_due_to_sum_money',
-      'Unknown',
-    ];
     return [
       { label: t('All statuses'), value: '' },
-      ...values.map(status => ({ label: t(bookingStatusTranslationKey(status)), value: status })),
+      ...this.statusValues.map(status => ({ label: t(bookingStatusTranslationKey(status)), value: status })),
     ];
   });
   branchFilterOptions = computed<SmoothSelectOption[]>(() => [
@@ -80,9 +82,51 @@ export class BookingListComponent implements OnInit {
       value: Number(branch.id),
     })),
   ]);
+  readonly bookingLegendItems = computed(() =>
+    this.statusValues.map(status => {
+      const theme = getBookingStatusTheme(status);
+      return {
+        key: status,
+        code: bookingStatusCode(status),
+        labelAr: theme.labelAr,
+        labelEn: theme.labelEn,
+        color: theme.chartColor,
+        iconClass: theme.iconClass,
+      };
+    }),
+  );
 
-  statusBadgeTone(status: BookingStatus): 'success' | 'warning' | 'danger' | 'secondary' | 'info' {
-    return bookingStatusTone(status);
+  getBookingStatusIconClass(status: BookingStatus): string {
+    return getBookingStatusTheme(status).iconClass;
+  }
+
+  getBookingLegendLabel(item: { labelAr: string; labelEn: string }): string {
+    return this.isArabicUi() ? item.labelAr : item.labelEn;
+  }
+
+  getBookingLegendCode(item: { code: number | null }): string {
+    return item.code === null ? '—' : String(item.code);
+  }
+
+  getBookingStatusBadgeStyle(status: BookingStatus): Record<string, string> {
+    const theme = getBookingStatusTheme(status);
+    return {
+      background: theme.gradient,
+      color: theme.textColor,
+      borderColor: theme.borderLight,
+    };
+  }
+
+  getBookingCardStyle(status: BookingStatus): Record<string, string> {
+    const theme = getBookingStatusTheme(status);
+    return {
+      '--booking-status-bg-light': theme.bgLight,
+      '--booking-status-bg-dark': theme.bgDark,
+      '--booking-status-border-light': theme.borderLight,
+      '--booking-status-border-dark': theme.borderDark,
+      '--booking-status-accent': theme.color,
+      '--booking-status-gradient': theme.gradient,
+    };
   }
 
   statusBadgeLabelKey(status: BookingStatus): string {
@@ -138,19 +182,6 @@ export class BookingListComponent implements OnInit {
       return branch;
     }
     return booking.branchId ? `#${booking.branchId}` : '—';
-  }
-
-  bookingCardStatusClass(status: BookingStatus): string {
-    if (status === 'finsh' || status === 'close') {
-      return 'booking-card--status-success';
-    }
-    if (status === 'Suspended_due_to_accident' || status === 'Suspended_due_to_sum_money') {
-      return 'booking-card--status-warning';
-    }
-    if (status === 'open' || status === 'extension' || status === 'translate') {
-      return 'booking-card--status-info';
-    }
-    return 'booking-card--status-neutral';
   }
 
   canFinishBooking(booking: Booking): boolean {

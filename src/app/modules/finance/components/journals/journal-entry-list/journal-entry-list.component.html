@@ -28,4 +28,48 @@
   (pageSizeChange)="onPageSizeChange($event)"
   [createLink]="'/journals/create'"
   [createLabel]="'Create Journal Entry'"
-/>
+>
+  <div finance-extra-filters class="app-filter-field app-filter-field--narrow journal-extra-filter">
+    <label class="app-filter-label">{{ 'Status' | translate }}</label>
+    <app-smooth-select
+      [ariaLabel]="'Status' | translate"
+      [placeholder]="'All statuses' | translate"
+      [options]="statusFilterOptions"
+      [value]="statusFilter()"
+      (valueChange)="onStatusFilterChange($any($event))"
+    />
+  </div>
+
+  <div finance-extra-filters class="app-filter-field app-filter-field--narrow journal-extra-filter">
+    <label class="app-filter-label">{{ 'Journal Type' | translate }}</label>
+    <app-smooth-select
+      [ariaLabel]="'Journal Type' | translate"
+      [placeholder]="'All journal types' | translate"
+      [options]="journalTypeFilterOptions"
+      [value]="journalTypeFilter()"
+      (valueChange)="onJournalTypeFilterChange($any($event))"
+    />
+  </div>
+
+  <div finance-extra-filters class="app-filter-field app-filter-field--narrow journal-extra-filter">
+    <label class="app-filter-label">{{ 'Operation Type' | translate }}</label>
+    <app-smooth-select
+      [ariaLabel]="'Operation Type' | translate"
+      [placeholder]="'All operation types' | translate"
+      [options]="operationTypeFilterOptions"
+      [value]="operationTypeFilter()"
+      (valueChange)="onOperationTypeFilterChange($any($event))"
+    />
+  </div>
+
+  <div finance-extra-filters class="app-filter-field app-filter-field--narrow journal-extra-filter">
+    <label class="app-filter-label">{{ 'Branch' | translate }}</label>
+    <app-smooth-select
+      [ariaLabel]="'Branch' | translate"
+      [placeholder]="'All branches' | translate"
+      [options]="branchFilterOptions()"
+      [value]="branchFilter()"
+      (valueChange)="onBranchFilterChange($any($event))"
+    />
+  </div>
+</app-finance-list-shell>

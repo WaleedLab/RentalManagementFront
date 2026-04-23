@@ -1,6 +1,7 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
@@ -13,11 +14,12 @@ import { FinancialYearService } from '../../../services/financial-years/financia
 import { JournalEntryService } from '../../../services/journals/journal-entry.service';
 import { FinanceListShellComponent } from '../../shared/finance-list-shell/finance-list-shell.component';
 import { formatFinanceDate, formatFinanceNumber } from '../../shared/finance-list-formatters';
+import { SmoothSelectComponent } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 
 @Component({
   selector: 'app-journal-entry-list',
   standalone: true,
-  imports: [FinanceListShellComponent],
+  imports: [FinanceListShellComponent, SmoothSelectComponent, TranslateModule],
   templateUrl: './journal-entry-list.component.html',
   styleUrl: './journal-entry-list.component.scss',
 })
@@ -40,6 +42,10 @@ export class JournalEntryListComponent implements OnInit {
   totalPages = signal(1);
   totalCount = signal(0);
   search = signal('');
+  statusFilter = signal<number | ''>('');
+  journalTypeFilter = signal<'true' | 'false' | ''>('');
+  operationTypeFilter = signal<number | ''>('');
+  branchFilter = signal<number | ''>('');
   dateFrom = signal('');
   dateTo = signal('');
   orderBy = signal('CreatedAt');
@@ -51,6 +57,32 @@ export class JournalEntryListComponent implements OnInit {
     { label: 'Created At', value: 'CreatedAt' },
     { label: 'Name', value: 'Name' },
   ];
+  readonly statusFilterOptions: SmoothSelectOption[] = [
+    { label: 'All statuses', value: '' },
+    { label: 'Closed', value: 1 },
+    { label: 'Editable', value: 2 },
+  ];
+  readonly journalTypeFilterOptions: SmoothSelectOption[] = [
+    { label: 'All journal types', value: '' },
+    { label: 'General Journal', value: 'true' },
+    { label: 'Adjustment Journal', value: 'false' },
+  ];
+  readonly operationTypeFilterOptions: SmoothSelectOption[] = [
+    { label: 'All operation types', value: '' },
+    { label: 'Accounting Entry', value: 1 },
+    { label: 'Receipt', value: 2 },
+    { label: 'Payment Voucher', value: 3 },
+    { label: 'Opening', value: 4 },
+    { label: 'Expense Entry', value: 5 },
+    { label: 'Accidents Recorded', value: 6 },
+  ];
+  readonly branchFilterOptions = computed<SmoothSelectOption[]>(() => {
+    const options: SmoothSelectOption[] = [{ label: 'All branches', value: '' }];
+    for (const [id, label] of Object.entries(this.branchNames())) {
+      options.push({ label: label || '-', value: Number(id) });
+    }
+    return options;
+  });
 
   readonly columns: FinanceListColumn[] = [
     { key: 'number', label: 'Journal Number', align: 'end' },
@@ -152,6 +184,13 @@ export class JournalEntryListComponent implements OnInit {
     this.journalService
       .getPaginated({
         fleetId,
+        branchId: Number(this.branchFilter() || 0) || undefined,
+        status: Number(this.statusFilter() || 0) || undefined,
+        journalType:
+          this.journalTypeFilter() === ''
+            ? undefined
+            : this.journalTypeFilter() === 'true',
+        operationType: Number(this.operationTypeFilter() || 0) || undefined,
         pageNumber: requestedPageNumber,
         pageSize: requestedPageSize,
         search: this.search(),
@@ -187,6 +226,30 @@ export class JournalEntryListComponent implements OnInit {
       return;
     }
     this.orderBy.set(normalized);
+    this.pageNumber.set(1);
+    this.load();
+  }
+
+  onStatusFilterChange(value: number | ''): void {
+    this.statusFilter.set(value);
+    this.pageNumber.set(1);
+    this.load();
+  }
+
+  onJournalTypeFilterChange(value: 'true' | 'false' | ''): void {
+    this.journalTypeFilter.set(value);
+    this.pageNumber.set(1);
+    this.load();
+  }
+
+  onOperationTypeFilterChange(value: number | ''): void {
+    this.operationTypeFilter.set(value);
+    this.pageNumber.set(1);
+    this.load();
+  }
+
+  onBranchFilterChange(value: number | ''): void {
+    this.branchFilter.set(value);
     this.pageNumber.set(1);
     this.load();
   }
@@ -233,13 +296,10 @@ export class JournalEntryListComponent implements OnInit {
 
   private formatStatus(status?: number): string {
     if (status === 1) {
-      return this.translate.instant('Confirmed');
+      return this.translate.instant('Closed');
     }
     if (status === 2) {
-      return this.translate.instant('Pending');
-    }
-    if (status === 3) {
-      return this.translate.instant('Cancelled');
+      return this.translate.instant('Editable');
     }
     return formatFinanceNumber(status, this.translate);
   }
@@ -257,15 +317,17 @@ export class JournalEntryListComponent implements OnInit {
   private formatOperationType(operationType?: number): string {
     switch (operationType) {
       case 1:
-        return this.translate.instant('Rental Operation');
+        return this.translate.instant('Accounting Entry');
       case 2:
-        return this.translate.instant('Payment Operation');
+        return this.translate.instant('Receipt');
       case 3:
-        return this.translate.instant('Adjustment Operation');
+        return this.translate.instant('Payment Voucher');
       case 4:
-        return this.translate.instant('Opening Balance Operation');
+        return this.translate.instant('Opening');
       case 5:
-        return this.translate.instant('Other Operation');
+        return this.translate.instant('Expense Entry');
+      case 6:
+        return this.translate.instant('Accidents Recorded');
       default:
         return formatFinanceNumber(operationType, this.translate);
     }

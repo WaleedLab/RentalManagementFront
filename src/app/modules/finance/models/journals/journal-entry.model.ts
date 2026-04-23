@@ -23,6 +23,9 @@ export interface JournalEntryPaginatedRequest {
   pageSize: number;
   fleetId?: string | null;
   branchId?: number | null;
+  status?: number | null;
+  journalType?: boolean | null;
+  operationType?: number | null;
   search?: string;
   dateFrom?: string;
   dateTo?: string;

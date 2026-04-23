@@ -54,7 +54,6 @@ export class PaymentCountListComponent implements OnInit {
   totalPages = signal(1);
   totalCount = signal(0);
   search = signal('');
-  statusFilter = signal<number | ''>('');
   bondTypeFilter = signal<number | ''>('');
   paymentTypeFilter = signal<number | ''>('');
   branchFilter = signal<number | ''>('');
@@ -82,11 +81,6 @@ export class PaymentCountListComponent implements OnInit {
     { label: 'Created At', value: 'CreatedAt' },
     { label: 'Paid', value: 'Paid' },
     { label: 'Updated At', value: 'UpdatedAt' },
-  ];
-  readonly statusFilterOptions: SmoothSelectOption[] = [
-    { label: 'All statuses', value: '' },
-    { label: 'Confirmed', value: 1 },
-    { label: 'Pending', value: 2 },
   ];
   readonly bondTypeFilterOptions: SmoothSelectOption[] = [
     { label: 'All bond types', value: '' },
@@ -263,9 +257,8 @@ export class PaymentCountListComponent implements OnInit {
       .getPaginated({
         fleetId,
         branchId: Number(this.branchFilter() || 0) || undefined,
-        status: Number(this.statusFilter() || 0) || undefined,
-        bondType: Number(this.bondTypeFilter() || 0) || undefined,
-        paymentType: Number(this.paymentTypeFilter() || 0) || undefined,
+        bondTypePaymentcount: Number(this.bondTypeFilter() || 0) || undefined,
+        paymentTypePaymentcount: Number(this.paymentTypeFilter() || 0) || undefined,
         pageNumber: requestedPageNumber,
         pageSize: requestedPageSize,
         search: this.search(),
@@ -291,12 +284,6 @@ export class PaymentCountListComponent implements OnInit {
 
   onSearchChange(value: string): void {
     this.searchInput$.next(value ?? '');
-  }
-
-  onStatusFilterChange(value: number | ''): void {
-    this.statusFilter.set(value);
-    this.pageNumber.set(1);
-    this.load();
   }
 
   onBondTypeFilterChange(value: number | ''): void {
