@@ -1,377 +1,143 @@
-<div class="container-fluid">
-  <app-page-header [title]="'Dashboard' | translate"></app-page-header>
+<div class="container-fluid enterprise-dashboard">
+  <app-page-header [title]="'Enterprise Dashboard' | translate"></app-page-header>
 
-  <div class="row g-3 mb-4 dashboard-stats">
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="card h-100 stat-card">
-        <div class="card-body">
-          <div class="stat-card__eyebrow">{{ 'Users' | translate }}</div>
-          <div class="stat-card__value">{{ counts().users }}</div>
-          <div class="stat-card__caption">{{ 'Latest Users' | translate }}</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="card h-100 stat-card">
-        <div class="card-body">
-          <div class="stat-card__eyebrow">{{ 'Roles' | translate }}</div>
-          <div class="stat-card__value">{{ counts().roles }}</div>
-          <div class="stat-card__caption">{{ 'Security' | translate }}</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="card h-100 stat-card">
-        <div class="card-body">
-          <div class="stat-card__eyebrow">{{ 'Privileges' | translate }}</div>
-          <div class="stat-card__value">{{ counts().privileges }}</div>
-          <div class="stat-card__caption">{{ 'Access Matrix' | translate }}</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="card h-100 stat-card">
-        <div class="card-body">
-          <div class="stat-card__eyebrow">{{ 'Fleets' | translate }}</div>
-          <div class="stat-card__value">{{ counts().fleets }}</div>
-          <div class="stat-card__caption">{{ 'Operational Units' | translate }}</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="card h-100 stat-card">
-        <div class="card-body">
-          <div class="stat-card__eyebrow">{{ 'Branches' | translate }}</div>
-          <div class="stat-card__value">{{ counts().branches }}</div>
-          <div class="stat-card__caption">{{ 'Service Points' | translate }}</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="card h-100 stat-card stat-card--accent">
-        <div class="card-body">
-          <div class="stat-card__eyebrow">{{ 'Vehicles' | translate }}</div>
-          <div class="stat-card__value">{{ totalVehicles() }}</div>
-          <div class="stat-card__caption">{{ 'Live Inventory' | translate }}</div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <form class="dashboard-filters" [formGroup]="filtersForm">
+    <div class="dashboard-filters__grid">
+      <label>
+        <span>{{ 'Date From' | translate }}</span>
+        <input type="date" class="form-control" formControlName="startDate" />
+      </label>
 
-  <div class="row g-3 mb-4">
-    <div class="col-lg-4">
-      <div class="card h-100 dashboard-panel dashboard-chart-card">
-        <div class="card-header pb-0 dashboard-panel__header">
-          <h4>{{ 'User Activity Chart' | translate }}</h4>
-          <span>{{ 'Visual split of active and inactive users.' | translate }}</span>
-        </div>
-        <div class="card-body dashboard-chart-card__body">
-          <div class="dashboard-donut">
-            <div class="dashboard-donut__ring" [style.background]="userDistributionChart().style">
-              <div class="dashboard-donut__center">
-                <strong>{{ userDistributionChart().activePercent }}%</strong>
-                <small>{{ 'Active' | translate }}</small>
-              </div>
-            </div>
-            <div class="dashboard-donut__legend">
-              <div class="dashboard-donut__legend-item">
-                <span class="dashboard-donut__dot dashboard-donut__dot--active"></span>
-                <span>{{ 'Active Users' | translate }}: {{ userDistributionChart().active }}</span>
-              </div>
-              <div class="dashboard-donut__legend-item">
-                <span class="dashboard-donut__dot dashboard-donut__dot--inactive"></span>
-                <span>{{ 'Inactive Users' | translate }}: {{ userDistributionChart().inactive }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-8">
-      <div class="card h-100 dashboard-panel dashboard-chart-card">
-        <div class="card-header pb-0 dashboard-panel__header">
-          <h4>{{ 'Vehicle Categories Chart' | translate }}</h4>
-          <span>{{ 'Category volume to support allocation decisions.' | translate }}</span>
-        </div>
-        <div class="card-body dashboard-bars">
-          @for (bar of vehicleCategoryChart(); track bar.label) {
-            <div class="dashboard-bars__row">
-              <div class="dashboard-bars__meta">
-                <span class="dashboard-bars__label">{{ bar.label }}</span>
-                <strong class="dashboard-bars__value">{{ bar.value }}</strong>
-              </div>
-              <div class="dashboard-bars__track">
-                <span class="dashboard-bars__fill" [style.width.%]="bar.percent"></span>
-              </div>
-            </div>
-          } @empty {
-            <p class="mb-0 text-muted">{{ 'No active groups found.' | translate }}</p>
+      <label>
+        <span>{{ 'Date To' | translate }}</span>
+        <input type="date" class="form-control" formControlName="endDate" />
+      </label>
+
+      <label>
+        <span>{{ 'Fleet' | translate }}</span>
+        <select class="form-select" formControlName="fleet">
+          @for (fleet of (summary()?.fleets ?? []); track fleet.value) {
+            <option [value]="fleet.value">{{ fleet.label | translate }}</option>
           }
-        </div>
-      </div>
-    </div>
-  </div>
+        </select>
+      </label>
 
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="card dashboard-panel dashboard-persona">
-        <div class="card-body">
-          @for (persona of visiblePersonas(); track persona.key) {
-            <section class="dashboard-persona__section" [attr.data-persona]="persona.key">
-              <div class="dashboard-panel__header dashboard-persona__section-header">
-                <h3>{{ persona.title | translate }}</h3>
-                <span>{{ persona.subtitle | translate }}</span>
-              </div>
-              <div class="dashboard-persona__head">
-                <span class="dashboard-persona__badge">{{ persona.badge | translate }}</span>
-                <p class="dashboard-persona__focus mb-0">{{ persona.focus | translate }}</p>
-              </div>
-              <div class="dashboard-persona__signals">
-                @for (signal of persona.decisions; track signal.title) {
-                  <article class="dashboard-persona__signal" [attr.data-tone]="signal.tone">
-                    <div class="dashboard-persona__signal-title">{{ signal.title | translate }}</div>
-                    <div class="dashboard-persona__signal-value">{{ signal.value }}</div>
-                    <div class="dashboard-persona__signal-hint">{{ signal.hint | translate }}</div>
-                  </article>
-                }
-              </div>
-              <div class="dashboard-persona__chart">
-                @for (bar of getPersonaDecisionBars(persona); track bar.label) {
-                  <div class="dashboard-persona__chart-row">
-                    <span class="dashboard-persona__chart-label">{{ bar.label | translate }}</span>
-                    <div class="dashboard-persona__chart-track">
-                      <span class="dashboard-persona__chart-fill" [style.width.%]="bar.percent"></span>
-                    </div>
-                    <span class="dashboard-persona__chart-value">{{ bar.value }}</span>
-                  </div>
-                }
-              </div>
-              <div class="dashboard-persona__actions">
-                @for (action of visibleActionsForPersona(persona); track action.path) {
-                  <a class="dashboard-persona__action" [routerLink]="action.path">
-                    <span class="dashboard-persona__action-title">{{ action.title | translate }}</span>
-                    <small class="dashboard-persona__action-hint">{{ action.hint | translate }}</small>
-                  </a>
-                } @empty {
-                  <div class="text-muted">{{ 'No records found' | translate }}</div>
-                }
-              </div>
-            </section>
-          } @empty {
-            <div class="text-muted">{{ 'No records found' | translate }}</div>
+      <label>
+        <span>{{ 'Branch' | translate }}</span>
+        <select class="form-select" formControlName="branch">
+          @for (branch of (summary()?.branches ?? []); track branch.value) {
+            <option [value]="branch.value">{{ branch.label | translate }}</option>
           }
-        </div>
-      </div>
+        </select>
+      </label>
     </div>
-  </div>
 
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="card dashboard-panel dashboard-navigation">
-        <div class="card-header pb-0 dashboard-panel__header">
-          <h3>{{ 'Explore Pages' | translate }}</h3>
-          <span>{{ 'Jump to every page from one place.' | translate }}</span>
-        </div>
-        <div class="card-body">
-          <div class="dashboard-navigation__sections">
-            @for (section of navigationSections(); track section.title) {
-              <section class="dashboard-navigation__section">
-                <div class="dashboard-navigation__section-head">
-                  <h4 class="dashboard-navigation__section-title">{{ section.title | translate }}</h4>
-                </div>
-                <div class="dashboard-navigation__items">
-                  @for (item of section.items; track item.path) {
-                    <a class="dashboard-navigation__item" [routerLink]="item.path">
-                      <span class="dashboard-navigation__icon">
-                        <img [src]="item.imageIcon" [alt]="item.title | translate" />
-                      </span>
-                      <span class="dashboard-navigation__content">
-                        <span class="dashboard-navigation__item-title">{{ item.title | translate }}</span>
-                      </span>
-                    </a>
-                  }
-                </div>
-              </section>
+    <div class="dashboard-filters__actions">
+      <button type="button" class="btn btn-primary" (click)="applyFilters()">{{ 'Apply Filters' | translate }}</button>
+      <button type="button" class="btn btn-outline-secondary" (click)="resetFilters()">{{ 'Reset' | translate }}</button>
+    </div>
+  </form>
+
+  @if (loadError()) {
+    <section class="dashboard-state dashboard-state--error" role="alert">
+      <h4>{{ 'Dashboard summary failed to load' | translate }}</h4>
+      <p>{{ 'Please try again or change filters.' | translate }}</p>
+    </section>
+  }
+
+  @if (!loading() && !loadError() && hasNoData()) {
+    <section class="dashboard-state dashboard-state--empty">
+      <h4>{{ 'No dashboard data for selected filters' | translate }}</h4>
+      <p>{{ 'Try adjusting date range, fleet, or branch filters.' | translate }}</p>
+    </section>
+  }
+
+  <section class="kpi-grid">
+    @for (kpi of kpis(); track kpi.key) {
+      <dashboard-card [label]="kpi.label" [value]="kpi.value" [format]="kpi.format" [tone]="kpi.tone" [loading]="loading()" />
+    } @empty {
+      @for (item of [1, 2, 3, 4, 5]; track $index) {
+        <dashboard-card [loading]="true" />
+      }
+    }
+  </section>
+
+  <section class="dashboard-grid">
+    <dashboard-chart
+      class="dashboard-grid__revenue"
+      [title]="'Revenue over time'"
+      [subtitle]="'Monthly revenue trend'"
+      [type]="'line'"
+      [labels]="revenueLabels()"
+      [values]="revenueValues()"
+      [loading]="loading()"
+    />
+
+    <dashboard-chart
+      class="dashboard-grid__utilization"
+      [title]="'Utilization per vehicle'"
+      [subtitle]="'Top vehicles utilization %'"
+      [type]="'bar'"
+      [labels]="utilizationLabels()"
+      [values]="utilizationValues()"
+      [loading]="loading()"
+    />
+
+    <dashboard-table
+      class="dashboard-grid__vehicles"
+      [title]="'Top 10 Vehicles'"
+      [subtitle]="'Revenue and efficiency leaders'"
+      [columns]="vehicleColumns"
+      [rows]="topVehicles()"
+      [loading]="loading()"
+    />
+
+    <dashboard-table
+      class="dashboard-grid__customers"
+      [title]="'Top Customers'"
+      [subtitle]="'Most valuable customers and debt exposure'"
+      [columns]="customerColumns"
+      [rows]="topCustomers()"
+      [loading]="loading()"
+    />
+
+    <alerts-panel
+      class="dashboard-grid__alerts"
+      [title]="'Alerts Panel'"
+      [subtitle]="'Operational risk monitoring'"
+      [alerts]="alerts()"
+      [loading]="loading()"
+    />
+
+    <section class="dashboard-widget dashboard-grid__heatmap">
+      <header class="dashboard-widget__header">
+        <h3>{{ 'Booking Heatmap' | translate }}</h3>
+        <p>{{ 'Bookings per day/week' | translate }}</p>
+      </header>
+
+      @if (loading()) {
+        <div class="heatmap-skeleton"></div>
+      } @else {
+        <div class="heatmap">
+          <div class="heatmap__head">
+            <span></span>
+            @for (week of heatmapWeeks(); track week) {
+              <span>{{ week }}</span>
             }
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="row g-3 mb-4">
-    <div class="col-lg-4">
-      <div class="card h-100 dashboard-panel">
-        <div class="card-header pb-0 dashboard-panel__header">
-          <h4>{{ 'Latest Users' | translate }}</h4>
-          <span>{{ 'Recent user records from the seeded environment' | translate }}</span>
-        </div>
-        <div class="card-body latest-users-card">
-          @if (loading()) {
-            <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
-          } @else {
-            <div class="list-group list-group-flush">
-              @for (user of latestUsers(); track user.id) {
-                <a class="list-group-item list-group-item-action px-0 latest-users-card__item" [routerLink]="['/users/edit', user.id]">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div class="latest-users-card__meta">
-                      <div class="fw-semibold latest-users-card__name">{{ user.userName }}</div>
-                      <div class="text-muted small latest-users-card__subline">{{ user.email || user.nameAr || '-' }}</div>
-                    </div>
-                    <app-status-badge [label]="(user.isActive ? 'Active' : 'Inactive') | translate" [tone]="user.isActive ? 'success' : 'secondary'" />
-                  </div>
-                </a>
-              } @empty {
-                <div class="text-muted">{{ 'No users available.' | translate }}</div>
+          @for (day of heatmapDays(); track day) {
+            <div class="heatmap__row">
+              <span class="heatmap__day">{{ day | translate }}</span>
+              @for (week of heatmapWeeks(); track week) {
+                <span class="heatmap__cell" [style.opacity]="getHeatmapOpacity(day, week)">
+                  {{ getHeatmapValue(day, week) }}
+                </span>
               }
             </div>
           }
         </div>
-      </div>
-    </div>
-
-    <div class="col-lg-4">
-      <div class="card h-100 dashboard-panel">
-        <div class="card-header pb-0 dashboard-panel__header">
-          <h4>{{ 'User Distribution' | translate }}</h4>
-          <span>{{ 'Active versus inactive users in the current dataset' | translate }}</span>
-        </div>
-        <div class="card-body distribution-card">
-          <div class="distribution-card__row mb-3">
-            <div>
-              <span class="distribution-card__label">{{ 'Active Users' | translate }}</span>
-              <div class="distribution-card__hint">{{ 'Currently available for operations' | translate }}</div>
-            </div>
-            <strong class="distribution-card__value">{{ userDistribution().active }}</strong>
-          </div>
-          <div class="distribution-card__row">
-            <div>
-              <span class="distribution-card__label">{{ 'Inactive Users' | translate }}</span>
-              <div class="distribution-card__hint">{{ 'Require review or activation' | translate }}</div>
-            </div>
-            <strong class="distribution-card__value">{{ userDistribution().inactive }}</strong>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-4">
-      <div class="card h-100 dashboard-panel">
-        <div class="card-header pb-0 dashboard-panel__header">
-          <h4>{{ 'Quick Actions' | translate }}</h4>
-          <span>{{ 'Common operational shortcuts' | translate }}</span>
-        </div>
-        <div class="card-body quick-actions-card d-grid gap-2">
-          @if (canAccessPath('/users/create')) {
-            <a class="btn btn-outline-primary text-start quick-actions-card__action" routerLink="/users/create">
-              <span class="quick-actions-card__title">{{ 'Create user' | translate }}</span>
-              <small class="quick-actions-card__meta">{{ 'Add a new employee or admin account' | translate }}</small>
-            </a>
-          }
-          @if (canAccessPath('/roles/create')) {
-            <a class="btn btn-outline-primary text-start quick-actions-card__action" routerLink="/roles/create">
-              <span class="quick-actions-card__title">{{ 'Create role' | translate }}</span>
-              <small class="quick-actions-card__meta">{{ 'Define permissions for a new responsibility' | translate }}</small>
-            </a>
-          }
-          @if (canAccessPath('/privileges')) {
-            <a class="btn btn-outline-primary text-start quick-actions-card__action" routerLink="/privileges">
-              <span class="quick-actions-card__title">{{ 'Manage privileges' | translate }}</span>
-              <small class="quick-actions-card__meta">{{ 'Review and update access matrix' | translate }}</small>
-            </a>
-          }
-          @if (canAccessPath('/fleet/create')) {
-            <a class="btn btn-outline-primary text-start quick-actions-card__action" routerLink="/fleet/create">
-              <span class="quick-actions-card__title">{{ 'Add fleet' | translate }}</span>
-              <small class="quick-actions-card__meta">{{ 'Create a new operational fleet unit' | translate }}</small>
-            </a>
-          }
-          @if (canAccessPath('/vehicles/create')) {
-            <a class="btn btn-outline-primary text-start quick-actions-card__action" routerLink="/vehicles/create">
-              <span class="quick-actions-card__title">{{ 'Add vehicle' | translate }}</span>
-              <small class="quick-actions-card__meta">{{ 'Register a vehicle in the active fleet' | translate }}</small>
-            </a>
-          }
-          @if (canAccessPath('/customers/create')) {
-            <a class="btn btn-outline-primary text-start quick-actions-card__action" routerLink="/customers/create">
-              <span class="quick-actions-card__title">{{ 'Add customer' | translate }}</span>
-              <small class="quick-actions-card__meta">{{ 'Create a customer profile for reservations' | translate }}</small>
-            </a>
-          }
-          @if (canAccessPath('/booking/create')) {
-            <a class="btn btn-outline-primary text-start quick-actions-card__action" routerLink="/booking/create">
-              <span class="quick-actions-card__title">{{ 'Create booking' | translate }}</span>
-              <small class="quick-actions-card__meta">{{ 'Start a fresh rental booking workflow' | translate }}</small>
-            </a>
-          }
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="row mb-3">
-    <div class="col-12">
-      <div class="card dashboard-panel dashboard-summary">
-        <div class="card-header pb-0 dashboard-panel__header">
-          <h3>{{ 'Fleet Snapshot' | translate }}</h3>
-          <span>{{ 'Vehicle group summary' | translate }}</span>
-        </div>
-        <div class="card-body">
-          @if (loading()) {
-            <p class="mb-0">{{ 'Loading summary...' | translate }}</p>
-          } @else {
-            <div class="row g-3 mb-3">
-              <div class="col-md-6">
-                <div class="summary-tile h-100">
-                  <div class="summary-tile__label">{{ 'Active Groups' | translate }}</div>
-                  <div class="summary-tile__value">{{ totalGroups() }}</div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="summary-tile h-100">
-                  <div class="summary-tile__label">{{ 'Total Vehicles' | translate }}</div>
-                  <div class="summary-tile__value">{{ totalVehicles() }}</div>
-                </div>
-              </div>
-            </div>
-
-            @if (groups().length === 0) {
-              <p class="mb-0">{{ 'No active groups found.' | translate }}</p>
-            } @else {
-              <div class="table-responsive">
-                <table class="table table-striped mb-0">
-                  <thead>
-                    <tr>
-                      <th>{{ 'Group' | translate }}</th>
-                      <th>{{ 'Category' | translate }}</th>
-                      <th class="text-end">{{ 'Count' | translate }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (group of groups(); track group.groupName) {
-                      @if (group.categories.length === 0) {
-                        <tr>
-                          <td>{{ group.groupName || '-' }}</td>
-                          <td>-</td>
-                          <td class="text-end">0</td>
-                        </tr>
-                      } @else {
-                        @for (category of group.categories; track category.categoryName) {
-                          <tr>
-                            <td>{{ group.groupName || '-' }}</td>
-                            <td>{{ category.categoryName || ('Uncategorized' | translate) }}</td>
-                            <td class="text-end">{{ category.vehicleCount || 0 }}</td>
-                          </tr>
-                        }
-                      }
-                    }
-                  </tbody>
-                </table>
-              </div>
-            }
-          }
-        </div>
-      </div>
-    </div>
-  </div>
+      }
+    </section>
+  </section>
 </div>

@@ -25,6 +25,7 @@ export interface BranchPaginatedRequest {
 }
 
 export interface BranchUpsertRequest {
+  id?: number;
   nameAr: string;
   fleetId: string;
   nameEn?: string;

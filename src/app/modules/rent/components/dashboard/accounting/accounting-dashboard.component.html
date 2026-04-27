@@ -1,0 +1,70 @@
+<div class="container-fluid accounting-dashboard">
+  <app-page-header [title]="'Accounting Dashboard' | translate"></app-page-header>
+
+  <form class="accounting-filters" [formGroup]="filtersForm">
+    <div class="accounting-filters__grid">
+      <label>
+        <span>{{ 'Financial Year' | translate }}</span>
+        <select class="form-select" formControlName="financialYearId">
+          @for (year of (summary()?.filters?.financialYears ?? []); track year.value) {
+            <option [value]="year.value">{{ year.label | translate }}</option>
+          }
+        </select>
+      </label>
+      <label><span>{{ 'Date From' | translate }}</span><input type="date" class="form-control" formControlName="startDate" [attr.placeholder]="'Day/Month/Year' | translate" /></label>
+      <label><span>{{ 'Date To' | translate }}</span><input type="date" class="form-control" formControlName="endDate" [attr.placeholder]="'Day/Month/Year' | translate" /></label>
+      <label>
+        <span>{{ 'Fleet' | translate }}</span>
+        <select class="form-select" formControlName="fleet">
+          @for (fleet of (summary()?.filters?.fleets ?? []); track fleet.value) {
+            <option [value]="fleet.value">{{ fleet.label | translate }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>{{ 'Branch' | translate }}</span>
+        <select class="form-select" formControlName="branch">
+          @for (branch of (summary()?.filters?.branches ?? []); track branch.value) {
+            <option [value]="branch.value">{{ branch.label | translate }}</option>
+          }
+        </select>
+      </label>
+    </div>
+    <div class="accounting-filters__actions">
+      <button type="button" class="btn btn-primary" (click)="applyFilters()">{{ 'Apply Filters' | translate }}</button>
+      <button type="button" class="btn btn-outline-secondary" (click)="resetFilters()">{{ 'Reset' | translate }}</button>
+    </div>
+  </form>
+
+  @if (loadError()) {
+    <section class="accounting-state accounting-state--error" role="alert">
+      <h4>{{ 'Accounting summary failed to load' | translate }}</h4>
+      <p>{{ 'Please try again or change filters.' | translate }}</p>
+    </section>
+  }
+
+  @if (!loading() && !loadError() && hasNoData()) {
+    <section class="accounting-state accounting-state--empty">
+      <h4>{{ 'No accounting data for selected filters' | translate }}</h4>
+      <p>{{ 'Try adjusting date range, fleet, branch, or financial year.' | translate }}</p>
+    </section>
+  }
+
+  <section class="accounting-kpi-grid">
+    <accounting-card [label]="'Total Revenue'" [value]="summary()?.kpis?.totalRevenue ?? 0" [tone]="'good'" [loading]="loading()" />
+    <accounting-card [label]="'Total Expenses'" [value]="summary()?.kpis?.totalExpenses ?? 0" [tone]="'warning'" [loading]="loading()" />
+    <accounting-card [label]="'Net Profit'" [value]="summary()?.kpis?.netProfit ?? 0" [tone]="(summary()?.kpis?.netProfit ?? 0) >= 0 ? 'good' : 'risk'" [loading]="loading()" />
+    <accounting-card [label]="'Cash Balance'" [value]="summary()?.kpis?.cashBalance ?? 0" [tone]="(summary()?.kpis?.cashBalance ?? 0) >= 0 ? 'good' : 'risk'" [loading]="loading()" />
+    <accounting-card [label]="'Bank Balance'" [value]="summary()?.kpis?.bankBalance ?? 0" [tone]="'good'" [loading]="loading()" />
+    <accounting-card [label]="'Outstanding Receivables'" [value]="summary()?.kpis?.receivables ?? 0" [tone]="'risk'" [loading]="loading()" />
+  </section>
+
+  <section class="accounting-grid">
+    <accounting-chart class="accounting-grid__cashflow" [title]="'Cash Flow'" [subtitle]="'Daily inflow vs outflow'" [type]="'line'" [labels]="cashFlowLabels()" [series]="cashFlowSeries()" [loading]="loading()" />
+    <accounting-chart class="accounting-grid__revexp" [title]="'Revenue vs Expenses'" [subtitle]="'Period comparison'" [type]="'bar'" [labels]="revenueExpenseLabels()" [series]="revenueExpenseSeries()" [loading]="loading()" />
+    <accounting-chart class="accounting-grid__profit" [title]="'Monthly Profit Trend'" [subtitle]="'Net trend by month'" [type]="'line'" [labels]="profitTrendLabels()" [series]="profitTrendSeries()" [loading]="loading()" />
+    <accounting-table class="accounting-grid__debtors" [title]="'Top Debtors'" [subtitle]="'Customers with highest receivables'" [columns]="topDebtorsColumns" [rows]="topDebtors()" [loading]="loading()" />
+    <accounting-table class="accounting-grid__journals" [title]="'Recent Journals'" [subtitle]="'Latest journal activity'" [columns]="recentJournalColumns" [rows]="recentJournals()" [loading]="loading()" />
+    <accounting-alerts class="accounting-grid__alerts" [title]="'Alerts Panel'" [subtitle]="'Financial compliance monitoring'" [alerts]="alerts()" [loading]="loading()" />
+  </section>
+</div>

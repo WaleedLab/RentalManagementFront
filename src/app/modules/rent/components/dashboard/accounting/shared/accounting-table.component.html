@@ -1,0 +1,50 @@
+<section class="accounting-widget">
+  <header class="accounting-widget__header">
+    <h3>{{ title | translate }}</h3>
+    <p>{{ subtitle | translate }}</p>
+  </header>
+
+  @if (loading) {
+    <div class="skeleton skeleton--table"></div>
+  } @else {
+    <div class="table-responsive accounting-table">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            @for (column of columns; track column.key) {
+              <th>{{ column.label | translate }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows; track $index) {
+            @let record = asRecord(row);
+            <tr>
+              @for (column of columns; track column.key) {
+                <td>
+                  @if (column.format === 'currency') {
+                    {{ asNumber(record[column.key]) | currency: 'SAR' : 'symbol-narrow' : '1.0-0' }}
+                  } @else if (column.format === 'number') {
+                    {{ asNumber(record[column.key]) | number: '1.0-0' }}
+                  } @else if (column.format === 'date') {
+                    {{ asDate(record[column.key]) | date: 'yyyy-MM-dd' }}
+                  } @else if (column.format === 'balance') {
+                    <span [class.text-danger]="!record[column.key]" [class.text-success]="record[column.key]">
+                      {{ (record[column.key] ? 'Balanced' : 'Unbalanced') | translate }}
+                    </span>
+                  } @else {
+                    {{ record[column.key] }}
+                  }
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td class="text-center text-muted py-4" [attr.colspan]="columns.length">{{ 'No records found' | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -3,6 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
@@ -11,12 +12,13 @@ import { BranchService } from '../../../services/branches/branch.service';
 import { CategoryVehicleService } from '../../../services/category-vehicles/category-vehicle.service';
 import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
-import { VehicleService } from '../../../services/vehicles/vehicle.service';
+import { VehicleService, VehicleStatusCountItem } from '../../../services/vehicles/vehicle.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 import { SmoothSelectOption, SmoothSelectComponent } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
+import { VehicleStatusDialogComponent } from '../../../../../shared/component/vehicle-status-dialog/vehicle-status-dialog.component';
 
 @Component({
   selector: 'app-vehicle-list',
@@ -33,6 +35,7 @@ export class VehicleListComponent implements OnInit {
   private categoryVehicleService = inject(CategoryVehicleService);
   private authState = inject(AuthStateService);
   private confirm = inject(ConfirmService);
+  private modal = inject(NgbModal);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
   private readonly vehicleFallbackImage = 'assets/images/rent_icon/car_defulte.png';
@@ -52,6 +55,16 @@ export class VehicleListComponent implements OnInit {
   orderByDirection = signal<VehicleOrderDirection>('DESC');
   loading = signal(false);
   deletingIds = signal<Array<string | number>>([]);
+  changingStatusIds = signal<Array<string | number>>([]);
+  vehicleStatusCounts = signal<VehicleStatusCountItem[]>([]);
+  vehicleStatusTotalCount = signal(0);
+  private readonly vehicleStatusLegendConfig = [
+    { key: 'IsAvalible', labelAr: 'متاحة', labelEn: 'Available', iconClass: 'fa-solid fa-circle-check', iconColor: '#16A34A' },
+    { key: 'IsBooking', labelAr: 'محجوزة', labelEn: 'Booked', iconClass: 'fa-solid fa-calendar-check', iconColor: '#F59E0B' },
+    { key: 'IsMaintanes', labelAr: 'صيانة', labelEn: 'Maintenance', iconClass: 'fa-solid fa-screwdriver-wrench', iconColor: '#DC2626' },
+    { key: 'IsMangament', labelAr: 'إدارة', labelEn: 'Management', iconClass: 'fa-solid fa-briefcase', iconColor: '#6366F1' },
+    { key: 'IsSold', labelAr: 'مباعة', labelEn: 'Sold', iconClass: 'fa-solid fa-tags', iconColor: '#374151' },
+  ] as const;
   readonly statusFilterOptions: SmoothSelectOption[] = [
     { label: 'All statuses', value: '' },
     { label: 'Available', value: 'Available' },
@@ -83,9 +96,50 @@ export class VehicleListComponent implements OnInit {
       value: String(category.id),
     })),
   ]);
+  vehicleLegendItems = computed(() => {
+    const counts = this.vehicleStatusCounts();
+    const items = this.vehicleStatusLegendConfig.map(item => ({
+      key: item.key,
+      label: this.isArabicUi() ? item.labelAr : item.labelEn,
+      iconClass: item.iconClass,
+      iconColor: item.iconColor,
+      count:
+        counts.find(x =>
+          (x.status ?? '').toLowerCase() === item.key.toLowerCase() ||
+          (x.includedStatuses ?? []).some(s => s.toLowerCase() === item.key.toLowerCase()),
+        )?.count ?? 0,
+    }));
+    const unknownCount = counts
+      .filter(item =>
+        !this.vehicleStatusLegendConfig.some(cfg =>
+          (item.status ?? '').toLowerCase() === cfg.key.toLowerCase() ||
+          (item.includedStatuses ?? []).some(s => s.toLowerCase() === cfg.key.toLowerCase()),
+        ),
+      )
+      .reduce((sum, item) => sum + (item.count ?? 0), 0);
+
+    return [
+      {
+        key: 'total',
+        label: this.translate.instant('Total Vehicles'),
+        iconClass: 'fa-solid fa-list-check',
+        iconColor: '#2563EB',
+        count: this.vehicleStatusTotalCount(),
+      },
+      ...items,
+      {
+        key: 'unknown',
+        label: this.translate.instant('Unknown'),
+        iconClass: 'fa-solid fa-circle-question',
+        iconColor: '#64748B',
+        count: unknownCount,
+      },
+    ];
+  });
 
   ngOnInit(): void {
     this.loadReferenceData();
+    this.loadStatusCounts();
     this.load();
   }
 
@@ -201,6 +255,7 @@ export class VehicleListComponent implements OnInit {
     } else {
       this.pageNumber.set(1);
     }
+    this.loadStatusCounts();
     this.load();
   }
 
@@ -213,6 +268,7 @@ export class VehicleListComponent implements OnInit {
     } else {
       this.pageNumber.set(1);
     }
+    this.loadStatusCounts();
     this.load();
   }
 
@@ -267,6 +323,27 @@ export class VehicleListComponent implements OnInit {
       });
   }
 
+  private loadStatusCounts(): void {
+    this.vehicleService
+      .getStatusCounts({
+        fleetId: this.authState.fleetId() || undefined,
+        branchId: Number(this.branchId() || 0) || undefined,
+      })
+      .subscribe({
+        next: response => {
+          this.vehicleStatusCounts.set(response.statusCounts ?? []);
+          this.vehicleStatusTotalCount.set(response.totalCount ?? 0);
+          if (!this.search().trim() && !this.status()) {
+            this.totalCount.set(response.totalCount ?? 0);
+          }
+        },
+        error: () => {
+          this.vehicleStatusCounts.set([]);
+          this.vehicleStatusTotalCount.set(0);
+        },
+      });
+  }
+
   goToPage(page: number): void {
     if (page < 1 || page === this.pageNumber()) {
       return;
@@ -289,6 +366,49 @@ export class VehicleListComponent implements OnInit {
   isDeleting(id: string | number): boolean {
     const target = String(id);
     return this.deletingIds().some(currentId => String(currentId) === target);
+  }
+
+  isChangingStatus(id: string | number): boolean {
+    const target = String(id);
+    return this.changingStatusIds().some(currentId => String(currentId) === target);
+  }
+
+  openChangeStatusDialog(vehicle: Vehicle): void {
+    const modalRef = this.modal.open(VehicleStatusDialogComponent, {
+      centered: true,
+      windowClass: 'vehicle-status-modal',
+    });
+    const vehicleName = this.getVehicleTitle(vehicle);
+    const plate = vehicle.plateNumber || '-';
+    modalRef.componentInstance.title = this.translate.instant('Change Vehicle Status');
+    modalRef.componentInstance.message = this.translate.instant('Change status for {{vehicle}}', {
+      vehicle: vehicleName,
+    });
+    modalRef.componentInstance.currentStatus = vehicle.status;
+    modalRef.componentInstance.vehicleName = vehicleName;
+    modalRef.componentInstance.plateNumber = plate;
+
+    modalRef.componentInstance.result.subscribe((selectedStatus: VehicleStatus | null) => {
+      if (!selectedStatus || selectedStatus === vehicle.status) {
+        return;
+      }
+
+      this.changingStatusIds.update(ids => [...ids, vehicle.id]);
+      this.vehicleService.changeStatus(vehicle.id, selectedStatus).subscribe({
+        next: () => {
+          this.toast.success(this.translate.instant('Vehicle status updated successfully'));
+          this.vehicles.update(items =>
+            items.map(item =>
+              String(item.id) === String(vehicle.id) ? { ...item, status: selectedStatus } : item,
+            ),
+          );
+        },
+        error: err =>
+          this.toast.error(err?.message ?? this.translate.instant('Failed to update vehicle status')),
+        complete: () =>
+          this.changingStatusIds.update(ids => ids.filter(currentId => String(currentId) !== String(vehicle.id))),
+      });
+    });
   }
 
   deleteVehicle(vehicle: Vehicle): void {

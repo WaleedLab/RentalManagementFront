@@ -15,11 +15,14 @@ import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { Booking, BookingStatus, Branch } from '../../../models';
 import {
-  bookingStatusCode,
   bookingStatusTranslationKey,
   getBookingStatusTheme,
 } from '../../../models/booking/booking-status.utils';
-import { BookingService } from '../../../services/booking/booking.service';
+import {
+  BookingService,
+  BookingStatusCountItem,
+  BookingStatusCountsPeriod,
+} from '../../../services/booking/booking.service';
 import { BranchService } from '../../../services/branches/branch.service';
 
 @Component({
@@ -58,6 +61,9 @@ export class BookingListComponent implements OnInit {
   status = signal<BookingStatus | ''>('');
   branches = signal<Branch[]>([]);
   branchId = signal<number | ''>('');
+  countsPeriod = signal<BookingStatusCountsPeriod>('ThisMonth');
+  bookingStatusCounts = signal<BookingStatusCountItem[]>([]);
+  bookingStatusTotalCount = signal(0);
   private readonly statusValues: BookingStatus[] = [
     'open',
     'finsh',
@@ -82,19 +88,41 @@ export class BookingListComponent implements OnInit {
       value: Number(branch.id),
     })),
   ]);
-  readonly bookingLegendItems = computed(() =>
-    this.statusValues.map(status => {
+  countsPeriodOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('This Month'), value: 'ThisMonth' },
+    { label: this.translate.instant('Last 3 Months'), value: 'Last3Months' },
+    { label: this.translate.instant('This Year'), value: 'ThisYear' },
+  ]);
+  readonly bookingLegendItems = computed(() => {
+    const items = this.statusValues.map(status => {
       const theme = getBookingStatusTheme(status);
+      const matchedCount =
+        this.bookingStatusCounts().find(item =>
+          (item.status ?? '').toLowerCase() === status.toLowerCase() ||
+          (item.includedStatuses ?? []).some(included => included.toLowerCase() === status.toLowerCase()),
+        )?.count ?? 0;
       return {
         key: status,
-        code: bookingStatusCode(status),
+        count: matchedCount,
         labelAr: theme.labelAr,
         labelEn: theme.labelEn,
         color: theme.chartColor,
         iconClass: theme.iconClass,
       };
-    }),
-  );
+    });
+
+    return [
+      {
+        key: 'total',
+        count: this.bookingStatusTotalCount(),
+        labelAr: 'الإجمالي',
+        labelEn: 'Total',
+        color: '#2563EB',
+        iconClass: 'fa-solid fa-list-check',
+      },
+      ...items,
+    ];
+  });
 
   getBookingStatusIconClass(status: BookingStatus): string {
     return getBookingStatusTheme(status).iconClass;
@@ -102,10 +130,6 @@ export class BookingListComponent implements OnInit {
 
   getBookingLegendLabel(item: { labelAr: string; labelEn: string }): string {
     return this.isArabicUi() ? item.labelAr : item.labelEn;
-  }
-
-  getBookingLegendCode(item: { code: number | null }): string {
-    return item.code === null ? '—' : String(item.code);
   }
 
   getBookingStatusBadgeStyle(status: BookingStatus): Record<string, string> {
@@ -282,6 +306,7 @@ export class BookingListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadBranches();
+    this.loadStatusCounts();
     this.load();
   }
 
@@ -299,6 +324,7 @@ export class BookingListComponent implements OnInit {
     } else {
       this.pageNumber.set(1);
     }
+    this.loadStatusCounts();
     this.load();
   }
 
@@ -311,7 +337,13 @@ export class BookingListComponent implements OnInit {
     } else {
       this.pageNumber.set(1);
     }
+    this.loadStatusCounts();
     this.load();
+  }
+
+  onCountsPeriodChange(value: BookingStatusCountsPeriod): void {
+    this.countsPeriod.set(value);
+    this.loadStatusCounts();
   }
 
   formatBookingTotal(value: number | null | undefined): string {
@@ -346,6 +378,29 @@ export class BookingListComponent implements OnInit {
           this.toast.error(this.bookingListLoadErrorMessage(err));
         },
         complete: () => this.loading.set(false),
+      });
+  }
+
+  private loadStatusCounts(): void {
+    const fleetId = this.authState.fleetId() || undefined;
+    this.bookingService
+      .getStatusCounts({
+        fleetId,
+        branchId: Number(this.branchId() || 0) || undefined,
+        period: this.countsPeriod(),
+      })
+      .subscribe({
+        next: response => {
+          this.bookingStatusCounts.set(response.statusCounts ?? []);
+          this.bookingStatusTotalCount.set(response.totalCount ?? 0);
+          if (!this.search().trim() && !this.status()) {
+            this.totalCount.set(response.totalCount ?? 0);
+          }
+        },
+        error: () => {
+          this.bookingStatusCounts.set([]);
+          this.bookingStatusTotalCount.set(0);
+        },
       });
   }
 

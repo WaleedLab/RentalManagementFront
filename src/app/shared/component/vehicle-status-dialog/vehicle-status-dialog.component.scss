@@ -1,0 +1,143 @@
+.vehicle-status-dialog__header {
+  border-bottom-color: rgba(148, 163, 184, 0.24);
+}
+
+.vehicle-status-dialog__close {
+  margin: 0;
+  margin-inline-start: auto;
+}
+
+.vehicle-status-dialog__message {
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.vehicle-status-dialog__vehicle {
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+  margin-bottom: 0.9rem;
+  background: linear-gradient(145deg, rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.8));
+}
+
+.vehicle-status-dialog__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font-size: 0.84rem;
+}
+
+.vehicle-status-dialog__row + .vehicle-status-dialog__row {
+  margin-top: 0.35rem;
+}
+
+.vehicle-status-dialog__label {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.vehicle-status-dialog__value {
+  color: #0f172a;
+  font-weight: 700;
+  text-align: end;
+}
+
+.vehicle-status-dialog__status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.vehicle-status-dialog__status-btn {
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  background: #fff;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  transition: all 0.16s ease;
+}
+
+.vehicle-status-dialog__status-btn:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #1d4ed8;
+}
+
+.vehicle-status-dialog__status-btn.is-active {
+  border-color: rgba(37, 99, 235, 0.7);
+  background: linear-gradient(145deg, rgba(219, 234, 254, 0.9), rgba(191, 219, 254, 0.85));
+  color: #1e3a8a;
+  box-shadow: 0 10px 18px -14px rgba(37, 99, 235, 0.55);
+}
+
+.vehicle-status-dialog__footer {
+  border-top-color: rgba(148, 163, 184, 0.24);
+}
+
+.vehicle-status-dialog__footer .btn {
+  min-width: 92px;
+  font-weight: 700;
+}
+
+.vehicle-status-dialog[dir='rtl'] .vehicle-status-dialog__header {
+  text-align: right;
+}
+
+.vehicle-status-dialog[dir='rtl'] .vehicle-status-dialog__status-btn {
+  flex-direction: row-reverse;
+}
+
+:host-context([data-bs-theme='dark']),
+:host-context(body.dark-only) {
+  .vehicle-status-dialog__header {
+    border-bottom-color: rgba(100, 116, 139, 0.34);
+    background: linear-gradient(160deg, rgba(15, 23, 42, 0.94), rgba(30, 41, 59, 0.92));
+  }
+
+  .vehicle-status-dialog__message {
+    color: #cbd5e1;
+  }
+
+  .vehicle-status-dialog__vehicle {
+    border-color: rgba(100, 116, 139, 0.46);
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.88), rgba(15, 23, 42, 0.84));
+  }
+
+  .vehicle-status-dialog__label {
+    color: #94a3b8;
+  }
+
+  .vehicle-status-dialog__value {
+    color: #f8fafc;
+  }
+
+  .vehicle-status-dialog__status-btn {
+    border-color: rgba(100, 116, 139, 0.45);
+    background: rgba(15, 23, 42, 0.72);
+    color: #cbd5e1;
+  }
+
+  .vehicle-status-dialog__status-btn:hover {
+    border-color: rgba(96, 165, 250, 0.58);
+    color: #bfdbfe;
+  }
+
+  .vehicle-status-dialog__status-btn.is-active {
+    border-color: rgba(96, 165, 250, 0.78);
+    background: linear-gradient(145deg, rgba(37, 99, 235, 0.45), rgba(30, 64, 175, 0.38));
+    color: #e0e7ff;
+    box-shadow: 0 12px 24px -16px rgba(37, 99, 235, 0.68);
+  }
+
+  .vehicle-status-dialog__footer {
+    border-top-color: rgba(100, 116, 139, 0.34);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.4), rgba(2, 6, 23, 0.6));
+  }
+}

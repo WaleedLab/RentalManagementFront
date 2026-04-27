@@ -14,6 +14,15 @@ const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'dashboard/accounting',
+    loadComponent: () =>
+      import('./components/dashboard/accounting/accounting-dashboard.component').then(
+        m => m.AccountingDashboardComponent,
+      ),
+    data: { title: 'Accounting Dashboard', breadcrumb: 'Accounting Dashboard' },
+    canActivate: [authGuard],
+  },
+  {
     path: 'users',
     data: { title: 'Users', breadcrumb: 'Users', roles: ADMIN_ROLES },
     canActivate: [authGuard, privilegeGuard],

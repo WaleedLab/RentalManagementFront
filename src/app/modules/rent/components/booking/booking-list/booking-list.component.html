@@ -45,12 +45,22 @@
             (valueChange)="onBranchFilterChange($any($event))"
           />
         </div>
+
+        <div class="app-filter-field app-filter-field--narrow">
+          <label class="app-filter-label">{{ 'Counts Period' | translate }}</label>
+          <app-smooth-select
+            [ariaLabel]="'Counts Period' | translate"
+            [options]="countsPeriodOptions()"
+            [value]="countsPeriod()"
+            (valueChange)="onCountsPeriodChange($any($event))"
+          />
+        </div>
       </div>
 
       <div class="booking-legend" role="list" aria-label="Booking status legend">
         @for (item of bookingLegendItems(); track item.key) {
           <div class="booking-legend-item" role="listitem">
-            <span class="booking-legend-code">{{ getBookingLegendCode(item) }}</span>
+            <span class="booking-legend-code">{{ item.count }}</span>
             <span class="booking-legend-dot" [style.background]="item.color"></span>
             <i [class]="item.iconClass"></i>
             <span class="booking-legend-label">{{ getBookingLegendLabel(item) }}</span>

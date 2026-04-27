@@ -2,9 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { FINANCE_ROUTE_PATHS } from './common/finance.constants';
-import { APP_PRIVILEGES } from '../../core/auth/access.constants';
 import { authGuard } from '../../shared/services/auth/auth.guard';
-import { privilegeGuard } from '../../shared/services/auth/privilege.guard';
 
 const routes: Routes = [
   {
@@ -14,9 +12,8 @@ const routes: Routes = [
     data: {
       title: 'Create Bank',
       breadcrumb: 'Create Bank',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
-    canActivate: [authGuard, privilegeGuard],
+    canActivate: [authGuard],
   },
   {
     path: FINANCE_ROUTE_PATHS.banks,
@@ -25,9 +22,8 @@ const routes: Routes = [
     data: {
       title: 'Banks',
       breadcrumb: 'Banks',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
-    canActivate: [authGuard, privilegeGuard],
+    canActivate: [authGuard],
   },
   {
     path: `${FINANCE_ROUTE_PATHS.cash}/create`,
@@ -36,11 +32,10 @@ const routes: Routes = [
         m => m.CashAccountFormComponent,
       ),
     data: {
-      title: 'Create Cash Account',
-      breadcrumb: 'Create Cash Account',
-      privileges: [APP_PRIVILEGES.financialReports],
+      title: 'Create Cash Box',
+      breadcrumb: 'Create Cash Box',
     },
-    canActivate: [authGuard, privilegeGuard],
+    canActivate: [authGuard],
   },
   {
     path: FINANCE_ROUTE_PATHS.cash,
@@ -49,11 +44,10 @@ const routes: Routes = [
         m => m.CashAccountListComponent,
       ),
     data: {
-      title: 'Cash Accounts',
-      breadcrumb: 'Cash Accounts',
-      privileges: [APP_PRIVILEGES.financialReports],
+      title: 'Cash Boxes',
+      breadcrumb: 'Cash Boxes',
     },
-    canActivate: [authGuard, privilegeGuard],
+    canActivate: [authGuard],
   },
   {
     path: `${FINANCE_ROUTE_PATHS.counting}/create`,
@@ -64,9 +58,8 @@ const routes: Routes = [
     data: {
       title: 'Create Counting Entry',
       breadcrumb: 'Create Counting Entry',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
-    canActivate: [authGuard, privilegeGuard],
+    canActivate: [authGuard],
   },
   {
     path: FINANCE_ROUTE_PATHS.counting,
@@ -77,9 +70,8 @@ const routes: Routes = [
     data: {
       title: 'Chart of Accounts',
       breadcrumb: 'Chart of Accounts',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
-    canActivate: [authGuard, privilegeGuard],
+    canActivate: [authGuard],
   },
   {
     path: `${FINANCE_ROUTE_PATHS.financialYears}/create`,
@@ -90,9 +82,8 @@ const routes: Routes = [
     data: {
       title: 'Create Financial Year',
       breadcrumb: 'Create Financial Year',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
-    canActivate: [authGuard, privilegeGuard],
+    canActivate: [authGuard],
   },
   {
     path: FINANCE_ROUTE_PATHS.financialYears,
@@ -103,9 +94,8 @@ const routes: Routes = [
     data: {
       title: 'Financial Years',
       breadcrumb: 'Financial Years',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
-    canActivate: [authGuard, privilegeGuard],
+    canActivate: [authGuard],
   },
   {
     path: `${FINANCE_ROUTE_PATHS.journals}/create`,
@@ -116,9 +106,8 @@ const routes: Routes = [
     data: {
       title: 'Create Journal Entry',
       breadcrumb: 'Create Journal Entry',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
-    canActivate: [authGuard, privilegeGuard],
+    canActivate: [authGuard],
   },
   {
     path: FINANCE_ROUTE_PATHS.journals,
@@ -129,9 +118,8 @@ const routes: Routes = [
     data: {
       title: 'Journals',
       breadcrumb: 'Journals',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
-    canActivate: [authGuard, privilegeGuard],
+    canActivate: [authGuard],
   },
   {
     path: `${FINANCE_ROUTE_PATHS.paymentCounts}/create`,
@@ -142,9 +130,8 @@ const routes: Routes = [
     data: {
       title: 'Create Payment Count',
       breadcrumb: 'Create Payment Count',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
-    canActivate: [authGuard, privilegeGuard],
+    canActivate: [authGuard],
   },
   {
     path: FINANCE_ROUTE_PATHS.paymentCounts,
@@ -155,9 +142,8 @@ const routes: Routes = [
     data: {
       title: 'Payment Counts',
       breadcrumb: 'Payment Counts',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
-    canActivate: [authGuard, privilegeGuard],
+    canActivate: [authGuard],
   },
 ];
 

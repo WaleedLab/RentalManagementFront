@@ -1,0 +1,13 @@
+<section class="accounting-widget">
+  <header class="accounting-widget__header">
+    <h3>{{ title | translate }}</h3>
+    <p>{{ subtitle | translate }}</p>
+  </header>
+  @if (loading) {
+    <div class="skeleton skeleton--chart"></div>
+  } @else {
+    <div class="accounting-widget__chart">
+      <canvas #canvasRef></canvas>
+    </div>
+  }
+</section>

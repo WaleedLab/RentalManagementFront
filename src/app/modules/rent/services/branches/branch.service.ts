@@ -68,7 +68,11 @@ export class BranchService {
   }
 
   update(id: number, body: BranchUpsertRequest): Observable<Branch> {
-    return this.api.putData<Branch>(`${this.base}/${id}`, body);
+    return this.api.putData<Branch>(`${this.base}/${id}`, {
+      ...body,
+      id,
+      Id: id,
+    } as BranchUpsertRequest & { Id: number });
   }
 
   changeStatus(id: number, isActive: boolean): Observable<boolean> {

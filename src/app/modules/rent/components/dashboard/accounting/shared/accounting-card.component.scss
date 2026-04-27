@@ -1,0 +1,38 @@
+.accounting-card {
+  border-radius: 16px;
+  padding: 16px;
+  min-height: 118px;
+  background: var(--acc-surface);
+  box-shadow: var(--acc-shadow);
+  border: 1px solid var(--acc-border);
+}
+
+.accounting-card__label {
+  margin: 0;
+  color: var(--acc-text-muted);
+  font-size: 0.8rem;
+}
+
+.accounting-card__value {
+  margin: 14px 0 0;
+  font-size: 1.55rem;
+  font-weight: 700;
+}
+
+.accounting-card[data-tone='good'] { border-inline-start: 4px solid #22c55e; }
+.accounting-card[data-tone='warning'] { border-inline-start: 4px solid #f59e0b; }
+.accounting-card[data-tone='risk'] { border-inline-start: 4px solid #ef4444; }
+
+.skeleton {
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.16), rgba(148, 163, 184, 0.32), rgba(148, 163, 184, 0.16));
+  background-size: 200% 100%;
+  animation: shimmer 1.1s infinite;
+}
+.skeleton--title { width: 60%; height: 14px; }
+.skeleton--value { margin-top: 14px; width: 70%; height: 34px; }
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}

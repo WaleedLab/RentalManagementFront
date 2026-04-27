@@ -3,12 +3,12 @@
   "Cancel": "إلغاء",
   "Cash account created successfully": "تم إنشاء الصندوق بنجاح",
   "Create": "إنشاء",
-  "Create a cash drawer or collection point linked to the selected fleet.": "إنشاء صندوق نقدي أو نقطة تحصيل مرتبطة بالأسطول المحدد.",
+  "Create a cash drawer or collection point linked to the selected fleet.": "إنشاء صندوق أو نقطة تحصيل مرتبطة بالأسطول المحدد.",
   "Create Cash Account": "إضافة صندوق",
   "Current user is required": "المستخدم الحالي مطلوب",
   "Description": "الوصف",
   "Failed to save cash account": "فشل حفظ الصندوق",
   "FleetId": "معرف الأسطول",
   "Name": "الاسم",
-  "No dedicated cash account was detected. Showing all available accounts.": "لم يتم اكتشاف حساب صندوق مخصص، لذلك تم عرض جميع الحسابات المتاحة."
+  "No dedicated cash account was detected. Showing all available accounts.": "لم يتم اكتشاف صندوق مخصص، لذلك تم عرض جميع الصناديق المتاحة."
 }

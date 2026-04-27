@@ -1,0 +1,17 @@
+<article class="dashboard-card" [attr.data-tone]="tone">
+  @if (loading) {
+    <div class="skeleton skeleton--title"></div>
+    <div class="skeleton skeleton--value"></div>
+  } @else {
+    <p class="dashboard-card__label">{{ label | translate }}</p>
+    <p class="dashboard-card__value">
+      @if (format === 'currency') {
+        {{ value | currency: 'SAR' : 'symbol-narrow' : '1.0-0' }}
+      } @else if (format === 'percent') {
+        {{ value / 100 | percent: '1.0-1' }}
+      } @else {
+        {{ value | number: '1.0-0' }}
+      }
+    </p>
+  }
+</article>

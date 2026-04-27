@@ -100,6 +100,7 @@ export class BranchFormComponent implements OnInit {
     }
 
     const body: BranchUpsertRequest = {
+      id: this.branchId() ?? undefined,
       fleetId,
       nameAr: raw.nameAr.trim(),
       nameEn: raw.nameEn.trim() || undefined,

@@ -136,15 +136,17 @@
                 <input class="form-control" type="number" min="0" formControlName="capacitOil" [placeholder]="'Example Vehicle Capacity' | translate" [readonly]="isViewMode()" />
                 <div class="form-text">{{ 'Hint Vehicle Capacity' | translate }}</div>
               </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Status' | translate }}</label>
-                <app-smooth-select
-                  formControlName="status"
-                  [ariaLabel]="'Status' | translate"
-                  [options]="statusSelectOptions"
-                  [disabled]="isViewMode()"
-                />
-              </div>
+              @if (isEdit()) {
+                <div class="col-md-4">
+                  <label class="form-label">{{ 'Status' | translate }}</label>
+                  <app-smooth-select
+                    formControlName="status"
+                    [ariaLabel]="'Status' | translate"
+                    [options]="statusSelectOptions"
+                    [disabled]="isViewMode()"
+                  />
+                </div>
+              }
               <div class="col-md-4 d-flex align-items-end">
                 <div class="form-check form-switch">
                   <input class="form-check-input" type="checkbox" formControlName="isActive" [disabled]="isViewMode()" />

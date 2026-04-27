@@ -77,6 +77,16 @@
         </div>
       </div>
 
+      <div class="vehicle-legend" role="list" aria-label="Vehicle status counts">
+        @for (item of vehicleLegendItems(); track item.key) {
+          <div class="vehicle-legend-item" role="listitem">
+            <span class="vehicle-legend-code">{{ item.count }}</span>
+            <i [class]="item.iconClass" [style.color]="item.iconColor"></i>
+            <span class="vehicle-legend-label">{{ item.label }}</span>
+          </div>
+        }
+      </div>
+
       @if (loading()) {
         <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
       } @else if (!vehicles().length) {
@@ -127,6 +137,20 @@
 
                 <div class="table-actions vehicle-card__actions">
                   <button
+                    class="table-action-icon table-action-icon--warning vehicle-card__action"
+                    type="button"
+                    [disabled]="isChangingStatus(vehicle.id)"
+                    (click)="openChangeStatusDialog(vehicle)"
+                    [attr.aria-label]="'Change status for {{vehicle}}' | translate:{ vehicle: getVehicleTitle(vehicle) }"
+                    [title]="'Change status for {{vehicle}}' | translate:{ vehicle: getVehicleTitle(vehicle) }"
+                  >
+                    @if (isChangingStatus(vehicle.id)) {
+                      <span class="spinner-border spinner-border-sm" role="status"></span>
+                    } @else {
+                      <i class="fa-solid fa-rotate"></i>
+                    }
+                  </button>
+                  <button
                     class="table-action-icon table-action-icon--danger vehicle-card__action"
                     type="button"
                     [disabled]="isDeleting(vehicle.id)"
@@ -155,14 +179,6 @@
                     [title]="'Edit' | translate"
                   >
                     <i class="fa-solid fa-pen-to-square"></i>
-                  </a>
-                  <a
-                    class="table-action-icon table-action-icon--secondary vehicle-card__action"
-                    [routerLink]="['/vehicles', vehicle.id, 'gallery']"
-                    [attr.aria-label]="'Gallery' | translate"
-                    [title]="'Gallery' | translate"
-                  >
-                    <i class="fa-solid fa-images"></i>
                   </a>
                 </div>
               </div>

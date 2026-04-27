@@ -1,0 +1,20 @@
+.accounting-widget {
+  border-radius: 16px;
+  padding: 16px;
+  background: var(--acc-surface);
+  box-shadow: var(--acc-shadow);
+  border: 1px solid var(--acc-border);
+}
+.accounting-widget__header h3 { margin: 0; font-size: 1rem; }
+.accounting-widget__header p { margin: 6px 0 0; color: var(--acc-text-muted); font-size: 0.83rem; }
+.accounting-widget__chart { margin-top: 12px; height: 280px; }
+
+.skeleton--chart {
+  margin-top: 12px;
+  height: 280px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.16), rgba(148, 163, 184, 0.32), rgba(148, 163, 184, 0.16));
+  background-size: 200% 100%;
+  animation: shimmer 1.1s infinite;
+}
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }

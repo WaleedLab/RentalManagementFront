@@ -1,0 +1,81 @@
+:host {
+  --acc-bg: #f9f8fa;
+  --acc-surface: #ffffff;
+  --acc-border: rgba(71, 85, 105, 0.15);
+  --acc-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --acc-text-muted: #64748b;
+}
+
+.accounting-dashboard { background: var(--acc-bg); min-height: 100%; }
+.accounting-filters {
+  background: var(--acc-surface);
+  border: 1px solid var(--acc-border);
+  box-shadow: var(--acc-shadow);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.accounting-filters__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.accounting-filters label span { display: block; margin-bottom: 6px; font-size: 0.8rem; color: var(--acc-text-muted); }
+.accounting-filters__actions { margin-top: 14px; display: flex; gap: 8px; }
+
+.accounting-state {
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--acc-border);
+  background: var(--acc-surface);
+}
+.accounting-state h4 { margin: 0; font-size: 0.98rem; }
+.accounting-state p { margin: 6px 0 0; color: var(--acc-text-muted); font-size: 0.85rem; }
+.accounting-state--error { border-inline-start: 4px solid #ef4444; }
+.accounting-state--empty { border-inline-start: 4px solid #f59e0b; }
+
+.accounting-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.accounting-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+.accounting-grid__cashflow,
+.accounting-grid__revexp,
+.accounting-grid__profit,
+.accounting-grid__debtors,
+.accounting-grid__journals,
+.accounting-grid__alerts { display: block; }
+
+.accounting-grid__cashflow,
+.accounting-grid__revexp { grid-column: span 6; }
+.accounting-grid__profit { grid-column: span 12; }
+.accounting-grid__debtors { grid-column: span 4; }
+.accounting-grid__journals { grid-column: span 5; }
+.accounting-grid__alerts { grid-column: span 3; }
+
+:host-context(body.dark-only) {
+  --acc-bg: #0f172a;
+  --acc-surface: #182235;
+  --acc-border: rgba(148, 163, 184, 0.18);
+  --acc-shadow: 0 12px 26px rgba(2, 6, 23, 0.46);
+  --acc-text-muted: #cbd5e1;
+}
+
+html[dir='rtl'] {
+  .accounting-dashboard,
+  .accounting-filters,
+  .accounting-state { text-align: right; }
+}
+
+@media (max-width: 991.98px) {
+  .accounting-grid__cashflow,
+  .accounting-grid__revexp,
+  .accounting-grid__profit,
+  .accounting-grid__debtors,
+  .accounting-grid__journals,
+  .accounting-grid__alerts { grid-column: span 12; }
+}

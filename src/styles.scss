@@ -1286,3 +1286,24 @@ html[dir='ltr'] td {
     width: 100%;
   }
 }
+
+/* Vehicle status modal: smooth open/close transition */
+.vehicle-status-modal {
+  .modal-dialog {
+    transform: translateY(10px) scale(0.97);
+    opacity: 0;
+    transition:
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 200ms ease;
+  }
+
+  &.show .modal-dialog {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  .modal-content {
+    overflow: hidden;
+    border-radius: 16px;
+  }
+}

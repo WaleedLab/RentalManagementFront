@@ -11,6 +11,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { forkJoin } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
@@ -515,10 +516,38 @@ export class JournalEntryFormComponent implements OnInit {
     this.loadingVehicles.set(true);
 
     this.vehicleService
-      .getList({ fleetId, branchId, status: '' })
+      .getList({ fleetId, branchId, status: '', includeEmptyStatus: true })
       .subscribe({
         next: vehicles => {
-          this.vehicles.set(vehicles ?? []);
+          const direct = vehicles ?? [];
+          if (direct.length > 0) {
+            this.vehicles.set(direct);
+            return;
+          }
+
+          // Fallback for backends that still force a status enum value.
+          const statuses: Vehicle['status'][] = ['Available', 'Booked', 'Maintenance', 'Inactive', 'Sold'];
+          forkJoin(
+            statuses.map(status =>
+              this.vehicleService.getList({ fleetId, branchId, status }).pipe(
+                takeUntilDestroyed(this.destroyRef),
+              ),
+            ),
+          ).subscribe({
+            next: groups => {
+              const merged = groups.flat();
+              const byId = new Map<string, Vehicle>();
+              for (const vehicle of merged) {
+                byId.set(String(vehicle.id), vehicle);
+              }
+              this.vehicles.set(Array.from(byId.values()));
+            },
+            error: err => {
+              this.toast.error(err?.message ?? this.translate.instant('Failed to load vehicles'));
+              this.loadingVehicles.set(false);
+            },
+            complete: () => this.loadingVehicles.set(false),
+          });
         },
         error: err => {
           this.toast.error(err?.message ?? this.translate.instant('Failed to load vehicles'));

@@ -46,6 +46,14 @@ export class NavMenuService {
       type: 'link',
       bookmark: true,
     },
+    {
+      level: 1,
+      path: '/dashboard/accounting',
+      title: 'Accounting Dashboard',
+      icon: 'sample-page',
+      imageIcon: 'assets/images/rent_icon/Payment_Counts.png',
+      type: 'link',
+    },
     { headTitle1: 'Operations' },
     {
       level: 1,
@@ -82,7 +90,6 @@ export class NavMenuService {
       icon: 'sample-page',
       imageIcon: FINANCE_MENU_ICONS.banks,
       type: 'link',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
     {
       level: 1,
@@ -91,7 +98,6 @@ export class NavMenuService {
       icon: 'sample-page',
       imageIcon: FINANCE_MENU_ICONS.cash,
       type: 'link',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
     {
       level: 1,
@@ -100,7 +106,6 @@ export class NavMenuService {
       icon: 'sample-page',
       imageIcon: FINANCE_MENU_ICONS.counting,
       type: 'link',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
     {
       level: 1,
@@ -109,7 +114,6 @@ export class NavMenuService {
       icon: 'sample-page',
       imageIcon: FINANCE_MENU_ICONS.financialYears,
       type: 'link',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
     {
       level: 1,
@@ -118,7 +122,6 @@ export class NavMenuService {
       icon: 'sample-page',
       imageIcon: FINANCE_MENU_ICONS.journals,
       type: 'link',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
     {
       level: 1,
@@ -127,7 +130,6 @@ export class NavMenuService {
       icon: 'sample-page',
       imageIcon: FINANCE_MENU_ICONS.paymentCounts,
       type: 'link',
-      privileges: [APP_PRIVILEGES.financialReports],
     },
     { headTitle1: 'Management' },
     {

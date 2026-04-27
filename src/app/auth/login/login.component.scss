@@ -1,10 +1,10 @@
 .auth-shell {
-  --brand-primary: #b03040;
-  --brand-soft: #a02030;
-  --brand-accent: #6b7280;
+  --brand-primary: #f28a3f;
+  --brand-soft: #2b3f73;
+  --brand-accent: #4a5f96;
   --brand-text-on-dark: #e5e7eb;
-  --brand-panel-dark: rgba(31, 24, 28, 0.42);
-  --brand-panel-dark-2: rgba(24, 24, 27, 0.56);
+  --brand-panel-dark: rgba(20, 32, 63, 0.44);
+  --brand-panel-dark-2: rgba(14, 24, 50, 0.58);
   min-height: 100vh;
   display: grid;
   place-items: center;
@@ -12,7 +12,7 @@
   position: relative;
   overflow: hidden;
   background:
-    linear-gradient(145deg, rgba(26, 18, 22, 0.72), rgba(20, 20, 24, 0.74)),
+    linear-gradient(145deg, rgba(17, 30, 60, 0.76), rgba(12, 22, 46, 0.78)),
     url('/assets/images/login/BG_login3.jpg');
   background-position: center;
   background-repeat: no-repeat;
@@ -40,7 +40,7 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(150deg, rgba(20, 20, 24, 0.34), rgba(73, 18, 42, 0.18));
+  background: linear-gradient(150deg, rgba(12, 22, 46, 0.42), rgba(42, 62, 110, 0.26));
   pointer-events: none;
 }
 
@@ -50,12 +50,12 @@
   border-radius: 18px;
   position: relative;
   background:
-    linear-gradient(145deg, rgba(73, 18, 42, 0.23), rgba(39, 18, 28, 0.19)),
-    rgba(24, 24, 27, 0.11);
+    linear-gradient(145deg, rgba(33, 51, 95, 0.28), rgba(20, 34, 68, 0.24)),
+    rgba(12, 22, 46, 0.14);
   border: 1px solid rgba(226, 232, 240, 0.3);
   box-shadow:
     0 34px 58px -34px rgba(2, 6, 23, 0.95),
-    0 22px 34px -26px rgba(127, 29, 63, 0.72),
+    0 22px 34px -26px rgba(242, 138, 63, 0.44),
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(22px) saturate(1.18);
   overflow: hidden;
@@ -86,12 +86,12 @@
 /* Auto mode: light -> minimal, dark -> bold */
 .auth-panel--luxury-auto {
   background:
-    linear-gradient(145deg, rgba(73, 18, 42, 0.22), rgba(39, 18, 28, 0.18)),
-    rgba(24, 24, 27, 0.1);
+    linear-gradient(145deg, rgba(33, 51, 95, 0.24), rgba(20, 34, 68, 0.2)),
+    rgba(12, 22, 46, 0.12);
   border-color: rgba(226, 232, 240, 0.3);
   box-shadow:
     0 30px 52px -34px rgba(2, 6, 23, 0.86),
-    0 18px 30px -24px rgba(127, 29, 63, 0.48),
+    0 18px 30px -24px rgba(242, 138, 63, 0.34),
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(22px) saturate(1.18);
 }
@@ -132,7 +132,7 @@
   font-weight: 800;
   letter-spacing: -0.01em;
   text-shadow:
-    0 14px 30px rgba(127, 29, 63, 0.46),
+    0 14px 30px rgba(242, 138, 63, 0.34),
     0 3px 12px rgba(51, 65, 85, 0.32),
     0 1px 0 rgba(255, 255, 255, 0.12);
 }
@@ -188,8 +188,8 @@
   padding-inline: 15px;
   border: 1px solid rgba(148, 163, 184, 0.44);
   background:
-    linear-gradient(180deg, rgba(63, 37, 50, 0.82), rgba(45, 31, 41, 0.82)),
-    rgba(30, 20, 28, 0.78);
+    linear-gradient(180deg, rgba(28, 44, 82, 0.9), rgba(20, 32, 63, 0.9)),
+    rgba(14, 24, 50, 0.84);
   color: #e2e8f0;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -207,10 +207,10 @@
 
   &:focus {
     transform: translateY(-1px);
-    border-color: rgba(159, 18, 57, 0.78);
+    border-color: rgba(242, 138, 63, 0.84);
     box-shadow:
-      0 0 0 3px rgba(159, 18, 57, 0.2),
-      0 12px 24px -18px rgba(51, 65, 85, 0.45);
+      0 0 0 3px rgba(242, 138, 63, 0.24),
+      0 12px 24px -18px rgba(52, 74, 126, 0.45);
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96)),
       #ffffff;
@@ -222,12 +222,12 @@
   }
 
   &:hover {
-    border-color: rgba(176, 96, 120, 0.66) !important;
-    box-shadow: 0 10px 22px -18px rgba(127, 29, 63, 0.42) !important;
+    border-color: rgba(74, 95, 150, 0.72) !important;
+    box-shadow: 0 10px 22px -18px rgba(42, 62, 110, 0.48) !important;
   }
 
   &:focus-visible {
-    border-color: rgba(159, 18, 57, 0.9) !important;
+    border-color: rgba(242, 138, 63, 0.92) !important;
     outline: none;
   }
 }
@@ -252,12 +252,12 @@
   font-size: 1rem;
   font-weight: 700;
   border: 0;
-  background: linear-gradient(135deg, #5b3445, #4b2f3f 56%, #455466) !important;
-  border-color: #6b4a5d !important;
+  background: linear-gradient(135deg, #f28a3f, #dc7530 52%, #b85e28) !important;
+  border-color: #f3a060 !important;
   color: #ffffff;
   box-shadow:
-    0 16px 28px -20px rgba(91, 52, 69, 0.58),
-    0 6px 16px -14px rgba(69, 84, 102, 0.42),
+    0 16px 28px -20px rgba(242, 138, 63, 0.56),
+    0 6px 16px -14px rgba(184, 94, 40, 0.44),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition:
     background 0.2s ease,
@@ -266,11 +266,11 @@
 
   &:hover:not(:disabled) {
     transform: translateY(-1px);
-    background: linear-gradient(135deg, #694053, #563749 56%, #4d5f74) !important;
-    border-color: #7a5469 !important;
+    background: linear-gradient(135deg, #ff9a51, #e9823c 52%, #c9662f) !important;
+    border-color: #ffb176 !important;
     box-shadow:
-      0 20px 32px -20px rgba(105, 64, 83, 0.66),
-      0 8px 16px -14px rgba(77, 95, 116, 0.5),
+      0 20px 32px -20px rgba(255, 154, 81, 0.62),
+      0 8px 16px -14px rgba(201, 102, 47, 0.5),
       inset 0 1px 0 rgba(255, 255, 255, 0.28);
   }
 
@@ -282,12 +282,12 @@
   &.btn-primary:hover,
   &.btn-primary:not(:disabled):not(.disabled):hover,
   &.btn-primary:not(:disabled):not(.disabled):active {
-    background: linear-gradient(135deg, #5b3445, #4b2f3f 56%, #455466) !important;
-    border-color: #6b4a5d !important;
+    background: linear-gradient(135deg, #f28a3f, #dc7530 52%, #b85e28) !important;
+    border-color: #f3a060 !important;
     color: #ffffff !important;
     box-shadow:
-      0 16px 28px -20px rgba(91, 52, 69, 0.58),
-      0 6px 16px -14px rgba(69, 84, 102, 0.42),
+      0 16px 28px -20px rgba(242, 138, 63, 0.56),
+      0 6px 16px -14px rgba(184, 94, 40, 0.44),
       inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
   }
 }
@@ -330,17 +330,17 @@
   }
 
   .auth-shell::after {
-    background: linear-gradient(150deg, rgba(241, 245, 249, 0.28), rgba(73, 18, 42, 0.12));
+    background: linear-gradient(150deg, rgba(241, 245, 249, 0.28), rgba(42, 62, 110, 0.14));
   }
 
   .auth-panel {
     background:
-      linear-gradient(145deg, rgba(73, 18, 42, 0.19), rgba(39, 18, 28, 0.16)),
-      rgba(24, 24, 27, 0.07);
+      linear-gradient(145deg, rgba(33, 51, 95, 0.2), rgba(20, 34, 68, 0.17)),
+      rgba(12, 22, 46, 0.08);
     border-color: rgba(226, 232, 240, 0.32);
     box-shadow:
       0 30px 56px -38px rgba(15, 23, 42, 0.52),
-      0 16px 28px -24px rgba(127, 29, 63, 0.38),
+      0 16px 28px -24px rgba(242, 138, 63, 0.28),
       inset 0 1px 0 rgba(255, 255, 255, 0.28);
   }
 
@@ -354,7 +354,7 @@
   .auth-title {
     color: #f8fafc;
     text-shadow:
-      0 12px 28px rgba(127, 29, 63, 0.42),
+      0 12px 28px rgba(242, 138, 63, 0.3),
       0 1px 0 rgba(255, 255, 255, 0.18);
   }
 
@@ -393,7 +393,7 @@
 :host-context(body.dark-only) {
   .auth-shell {
     background:
-      linear-gradient(145deg, rgba(26, 18, 22, 0.76), rgba(20, 20, 24, 0.78)),
+      linear-gradient(145deg, rgba(17, 30, 60, 0.8), rgba(12, 22, 46, 0.82)),
       url('/assets/images/login/BG_login3.jpg');
     background-position: center;
     background-repeat: no-repeat;
@@ -406,13 +406,13 @@
   }
 
   .auth-shell::after {
-    background: linear-gradient(150deg, rgba(20, 20, 24, 0.42), rgba(73, 18, 42, 0.2));
+    background: linear-gradient(150deg, rgba(12, 22, 46, 0.48), rgba(42, 62, 110, 0.26));
   }
 
   .auth-panel {
     background:
-      linear-gradient(145deg, rgba(81, 16, 42, 0.24), rgba(39, 18, 28, 0.2)),
-      rgba(24, 24, 27, 0.12);
+      linear-gradient(145deg, rgba(33, 51, 95, 0.3), rgba(20, 34, 68, 0.24)),
+      rgba(12, 22, 46, 0.14);
     border-color: rgba(226, 232, 240, 0.32);
   }
 
@@ -420,7 +420,7 @@
     border-color: rgba(226, 232, 240, 0.32);
     box-shadow:
       0 32px 58px -36px rgba(2, 6, 23, 0.96),
-      0 22px 36px -30px rgba(127, 29, 63, 0.64),
+      0 22px 36px -30px rgba(242, 138, 63, 0.42),
       0 8px 24px -22px rgba(51, 65, 85, 0.46),
       inset 0 1px 0 rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(22px) saturate(1.18);
@@ -434,9 +434,9 @@
 
   .form-control {
     background:
-      linear-gradient(180deg, rgba(56, 32, 32, 0.94), rgba(48, 24, 24, 0.94)),
-      rgba(40, 16, 16, 0.92);
-    border-color: rgba(122, 74, 74, 0.58);
+      linear-gradient(180deg, rgba(28, 44, 82, 0.94), rgba(20, 32, 63, 0.94)),
+      rgba(14, 24, 50, 0.92);
+    border-color: rgba(74, 95, 150, 0.6);
     color: #e2e8f0;
 
     &::placeholder {

@@ -540,10 +540,17 @@ export class PaymentCountFormComponent implements OnInit {
     const fleetId = this.authState.fleetId() ?? undefined;
     const branchId = Number(this.authState.branchId() ?? 0) || undefined;
     this.loadingVehicles.set(true);
-    this.vehicleService
-      .getList({ fleetId, branchId, status: '' })
+    const statuses: Vehicle['status'][] = ['Available', 'Booked', 'Maintenance', 'Inactive', 'Sold'];
+    forkJoin(statuses.map(status => this.vehicleService.getList({ fleetId, branchId, status })))
       .subscribe({
-        next: vehicles => this.vehicles.set(vehicles ?? []),
+        next: groups => {
+          const merged = groups.flat();
+          const byId = new Map<string, Vehicle>();
+          for (const vehicle of merged) {
+            byId.set(String(vehicle.id), vehicle);
+          }
+          this.vehicles.set(Array.from(byId.values()));
+        },
         error: err => {
           this.toast.error(err?.message ?? this.translate.instant('Failed to load vehicles'));
           this.loadingVehicles.set(false);

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, of } from 'rxjs';
 
-import { VehicleGroupSummary } from '../../models';
+import { DashboardSummary, DashboardSummaryFilters, VehicleGroupSummary } from '../../models';
 import { BaseService } from '../../../../shared/services/base/base.service';
 
 @Injectable({
@@ -17,6 +17,17 @@ export class DashboardService {
       // بعض نسخ الباك إند الحالية لا توفر هذا endpoint بعد، لذا نجعل الـ widget اختيارية بدل كسر الصفحة.
       catchError(() => of([])),
     );
+  }
+
+  getSummary(filters: DashboardSummaryFilters): Observable<DashboardSummary> {
+    const params = {
+      StartDate: filters.startDate,
+      EndDate: filters.endDate,
+      Fleetid: filters.fleet,
+      BranchId: filters.branch,
+    };
+
+    return this.api.getData<DashboardSummary>(`${this.base}/Summary`, params);
   }
 }
 

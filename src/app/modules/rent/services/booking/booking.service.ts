@@ -52,6 +52,25 @@ export class BookingService {
       .pipe(map(response => normalizePaginatedResponse(response, normalizeBooking)));
   }
 
+  getStatusCounts(params: {
+    fleetId?: string | null;
+    branchId?: number | null;
+    period?: BookingStatusCountsPeriod;
+  } = {}): Observable<BookingStatusCountsResponse> {
+    const normalizedFleetId = normalizeFleetId(params.fleetId);
+    return this.api.getData<BookingStatusCountsResponse>(
+      `${this.base}/StatusCounts`,
+      {
+        FleetId: normalizedFleetId ?? undefined,
+        BranchId: params.branchId ?? undefined,
+        Period: params.period ?? 'ThisMonth',
+      },
+      { suppressErrorToast: true },
+    ).pipe(
+      catchError(() => of({ totalCount: 0, statusCounts: [] })),
+    );
+  }
+
   getById(id: string, fleetId?: string | null): Observable<Booking> {
     const normalizedFleetId = normalizeFleetId(fleetId);
     if (!normalizedFleetId) {
@@ -329,3 +348,17 @@ export class BookingService {
       );
   }
 }
+
+export interface BookingStatusCountsResponse {
+  totalCount: number;
+  statusCounts: BookingStatusCountItem[];
+}
+
+export interface BookingStatusCountItem {
+  status: string;
+  statusDisplayName: string;
+  count: number;
+  includedStatuses: string[];
+}
+
+export type BookingStatusCountsPeriod = 'ThisMonth' | 'Last3Months' | 'ThisYear';

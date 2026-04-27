@@ -1,0 +1,41 @@
+.dashboard-widget {
+  border-radius: 16px;
+  padding: 16px;
+  background: var(--dashboard-surface);
+  box-shadow: var(--dashboard-shadow);
+  border: 1px solid var(--dashboard-border);
+}
+
+.dashboard-widget__header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.dashboard-widget__header p {
+  margin: 6px 0 0;
+  color: var(--dashboard-text-muted);
+  font-size: 0.83rem;
+}
+
+.dashboard-widget__chart {
+  margin-top: 12px;
+  height: 280px;
+}
+
+.skeleton--chart {
+  margin-top: 12px;
+  height: 280px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.16), rgba(148, 163, 184, 0.32), rgba(148, 163, 184, 0.16));
+  background-size: 200% 100%;
+  animation: shimmer 1.1s infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { Observable, catchError, from, map, switchMap, throwError } from 'rxjs';
+import { Observable, catchError, from, map, of, switchMap, throwError } from 'rxjs';
 
 import { PaginatedAggregatorResponse } from '../../../../core/interfaces';
 import { BaseRequestOptions, BaseService } from '../../../../shared/services/base/base.service';
@@ -25,7 +25,12 @@ export class VehicleService {
     return params;
   }
 
-  getList(params: { fleetId?: string | null; branchId?: number | null; status?: Vehicle['status'] | '' } = {}): Observable<Vehicle[]> {
+  getList(params: {
+    fleetId?: string | null;
+    branchId?: number | null;
+    status?: Vehicle['status'] | '';
+    includeEmptyStatus?: boolean;
+  } = {}): Observable<Vehicle[]> {
     const normalizedFleetId = normalizeFleetId(params.fleetId);
     const branchId = params.branchId ?? undefined;
     const status = params.status || undefined;
@@ -33,6 +38,7 @@ export class VehicleService {
     const requestParams = this.typeSafeParams({
       Fleetid: normalizedFleetId ?? undefined,
       Branchid: branchId,
+      ...(params.includeEmptyStatus && !backendStatus ? { Stutus: '' } : {}),
       ...(backendStatus ? { Stutus: backendStatus } : {}),
     });
 
@@ -62,6 +68,32 @@ export class VehicleService {
         options,
       )
       .pipe(map(response => normalizePaginatedResponse(response, normalizeVehicle)));
+  }
+
+  getStatusCounts(params: {
+    fleetId?: string | null;
+    branchId?: number | null;
+  } = {}): Observable<VehicleStatusCountsResponse> {
+    const normalizedFleetId = normalizeFleetId(params.fleetId);
+    const requestParams = this.typeSafeParams({
+      FleetId: normalizedFleetId ?? undefined,
+      BranchId: params.branchId ?? undefined,
+    });
+
+    return this.api.getData<VehicleStatusCountsResponse>(
+      `${this.base}/StatusCounts`,
+      requestParams,
+      { suppressErrorToast: true },
+    ).pipe(
+      catchError(() =>
+        this.api.getData<VehicleStatusCountsResponse>(
+          `${this.base}/GetVehicleStatusCounts`,
+          requestParams,
+          { suppressErrorToast: true },
+        ),
+      ),
+      catchError(() => of({ totalCount: 0, statusCounts: [] })),
+    );
   }
 
   getById(id: string, fleetId?: string | null): Observable<Vehicle> {
@@ -277,4 +309,16 @@ export class VehicleService {
       ...(backendStatus ? { Stutus: backendStatus } : {}),
     });
   }
+}
+
+export interface VehicleStatusCountsResponse {
+  totalCount: number;
+  statusCounts: VehicleStatusCountItem[];
+}
+
+export interface VehicleStatusCountItem {
+  status: string;
+  statusDisplayName: string;
+  count: number;
+  includedStatuses: string[];
 }

@@ -5,6 +5,8 @@ export * from './branches/branch.model';
 export * from './category-vehicles/category-vehicle.model';
 export * from './customers/customer.model';
 export * from './dashboard/dashboard.model';
+export * from './dashboard/dashboard-summary.model';
+export * from './dashboard/accounting-summary.model';
 export * from './fleet/fleet.model';
 export * from './privileges/privilege.model';
 export * from './roles/role.model';

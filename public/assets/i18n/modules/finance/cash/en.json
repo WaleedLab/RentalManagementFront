@@ -3,12 +3,12 @@
   "Cancel": "Cancel",
   "Cash account created successfully": "Cash box created successfully",
   "Create": "Create",
-  "Create a cash drawer or collection point linked to the selected fleet.": "Create a cash drawer or collection point linked to the selected fleet.",
+  "Create a cash drawer or collection point linked to the selected fleet.": "Create a cash box or collection point linked to the selected fleet.",
   "Create Cash Account": "Create Cash Box",
   "Current user is required": "Current user is required",
   "Description": "Description",
   "Failed to save cash account": "Failed to save cash box",
   "FleetId": "FleetId",
   "Name": "Name",
-  "No dedicated cash account was detected. Showing all available accounts.": "No dedicated cash account was detected. Showing all available accounts."
+  "No dedicated cash account was detected. Showing all available accounts.": "No dedicated cash box was detected. Showing all available boxes."
 }

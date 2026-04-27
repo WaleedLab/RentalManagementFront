@@ -1,0 +1,39 @@
+<div class="vehicle-status-dialog" [attr.dir]="dialogDir">
+  <div class="modal-header vehicle-status-dialog__header">
+    <h5 class="modal-title">{{ title }}</h5>
+    <button type="button" class="btn-close vehicle-status-dialog__close" [attr.aria-label]="'Close' | translate" (click)="cancel()"></button>
+  </div>
+  <div class="modal-body">
+    <p class="vehicle-status-dialog__message">{{ message }}</p>
+
+    <div class="vehicle-status-dialog__vehicle">
+      <div class="vehicle-status-dialog__row">
+        <span class="vehicle-status-dialog__label">{{ 'Vehicle' | translate }}</span>
+        <span class="vehicle-status-dialog__value">{{ vehicleName || '-' }}</span>
+      </div>
+      <div class="vehicle-status-dialog__row">
+        <span class="vehicle-status-dialog__label">{{ 'Plate Number' | translate }}</span>
+        <span class="vehicle-status-dialog__value">{{ plateNumber || '-' }}</span>
+      </div>
+    </div>
+
+    <label class="form-label">{{ 'Status' | translate }}</label>
+    <div class="vehicle-status-dialog__status-grid">
+      @for (option of statusOptions; track option.value) {
+        <button
+          type="button"
+          class="vehicle-status-dialog__status-btn"
+          [class.is-active]="selectedStatus === option.value"
+          (click)="selectStatus(option.value)"
+        >
+          <i [class]="option.icon"></i>
+          <span>{{ option.label | translate }}</span>
+        </button>
+      }
+    </div>
+  </div>
+  <div class="modal-footer vehicle-status-dialog__footer">
+    <button type="button" class="btn btn-secondary" (click)="cancel()">{{ 'Cancel' | translate }}</button>
+    <button type="button" class="btn btn-primary" (click)="confirm()">{{ 'Save' | translate }}</button>
+  </div>
+</div>
