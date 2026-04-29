@@ -1,28 +1,30 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { TranslateService } from '@ngx-translate/core';
-import { TranslateModule } from '@ngx-translate/core';
-import { Subject, catchError, debounceTime, distinctUntilChanged, forkJoin, of } from 'rxjs';
+
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { Subject, catchError, debounceTime, distinctUntilChanged, forkJoin, map, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
-import { SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
-import { BankService } from '../../../services/banks/bank.service';
-import { CashAccountService } from '../../../services/cash/cash-account.service';
+import {
+  SmoothSelectOption,
+  SmoothSelectComponent,
+} from '../../../../../shared/ui/smooth-select/smooth-select.component';
+import { BookingService } from '../../../../rent/services/booking/booking.service';
+import { BranchService } from '../../../../rent/services/branches/branch.service';
+import { CustomerService } from '../../../../rent/services/customers/customer.service';
+import { VehicleService } from '../../../../rent/services/vehicles/vehicle.service';
 import { PaymentCount } from '../../../models/payment-counts/payment-count.model';
 import {
   FinanceListAction,
   FinanceListColumn,
   FinanceListRow,
 } from '../../../models/shared/finance-list.model';
+import { BankService } from '../../../services/banks/bank.service';
+import { CashAccountService } from '../../../services/cash/cash-account.service';
 import { PaymentCountService } from '../../../services/payment-counts/payment-count.service';
-import { FinanceListShellComponent } from '../../shared/finance-list-shell/finance-list-shell.component';
 import { formatFinanceNumber } from '../../shared/finance-list-formatters';
-import { SmoothSelectComponent } from '../../../../../shared/ui/smooth-select/smooth-select.component';
-import { BookingService } from '../../../../rent/services/booking/booking.service';
-import { BranchService } from '../../../../rent/services/branches/branch.service';
-import { CustomerService } from '../../../../rent/services/customers/customer.service';
-import { VehicleService } from '../../../../rent/services/vehicles/vehicle.service';
+import { FinanceListShellComponent } from '../../shared/finance-list-shell/finance-list-shell.component';
 
 @Component({
   selector: 'app-payment-count-list',
@@ -47,6 +49,9 @@ export class PaymentCountListComponent implements OnInit {
   items = signal<PaymentCount[]>([]);
   customerNames = signal<Record<string, string>>({});
   vehicleNames = signal<Record<string, string>>({});
+  vehicleDetails = signal<
+    Record<string, { name: string; plateNumber: string; yearMake: string; category: string }>
+  >({});
   branchNames = signal<Record<string, string>>({});
   bookingNames = signal<Record<string, string>>({});
   bankNames = signal<Record<string, string>>({});
@@ -83,7 +88,13 @@ export class PaymentCountListComponent implements OnInit {
   ];
   readonly rowActions: FinanceListAction[] = [
     { key: 'view', label: 'View', icon: 'fa-solid fa-eye', variant: 'info', iconOnly: true },
-    { key: 'print', label: 'Print', icon: 'fa-solid fa-print', variant: 'secondary', iconOnly: true },
+    {
+      key: 'print',
+      label: 'Print',
+      icon: 'fa-solid fa-print',
+      variant: 'secondary',
+      iconOnly: true,
+    },
   ];
   readonly orderByOptions: SmoothSelectOption[] = [
     { label: 'Created At', value: 'CreatedAt' },
@@ -92,8 +103,8 @@ export class PaymentCountListComponent implements OnInit {
   ];
   readonly bondTypeFilterOptions: SmoothSelectOption[] = [
     { label: 'All bond types', value: '' },
-    { label: 'Payment Voucher', value: 1 },
-    { label: 'Receipt Voucher', value: 2 },
+    { label: 'Payment Count', value: 1 },
+    { label: 'Receipt Count', value: 2 },
   ];
   readonly paymentTypeFilterOptions: SmoothSelectOption[] = [
     { label: 'All payment types', value: '' },
@@ -127,9 +138,9 @@ export class PaymentCountListComponent implements OnInit {
             : formatFinanceNumber(item.status, this.translate),
       bondType:
         item.bondType === 1
-            ? this.translate.instant('Payment Voucher')
+          ? this.translate.instant('Payment Count')
           : item.bondType === 2
-            ? this.translate.instant('Receipt Voucher')
+            ? this.translate.instant('Receipt Count')
             : this.translate.instant('Unknown'),
       paymentType:
         item.paymentType === 1
@@ -180,10 +191,12 @@ export class PaymentCountListComponent implements OnInit {
         .getPaginated({ fleetId, pageNumber: 1, pageSize: 300, search: '', status: '' })
         .pipe(catchError(() => of({ items: [] }))),
       branches: this.branchService
-        .getPaginated({ fleetId, pageNumber: 1, pageSize: 300, search: '' })
+        .getList(fleetId)
+        .pipe(map(items => ({ items })))
         .pipe(catchError(() => of({ items: [] }))),
       bookings: this.bookingService
-        .getPaginated({ fleetId, pageNumber: 1, pageSize: 300, search: '' })
+        .getList({ fleetId })
+        .pipe(map(items => ({ items })))
         .pipe(catchError(() => of({ items: [] }))),
       banks: this.bankService.getList(fleetId).pipe(catchError(() => of([]))),
       cash: this.cashAccountService.getList(fleetId).pipe(catchError(() => of([]))),
@@ -206,20 +219,32 @@ export class PaymentCountListComponent implements OnInit {
         this.customerNames.set(customerDict);
 
         const vehicleDict: Record<string, string> = {};
+        const vehicleDetailDict: Record<
+          string,
+          { name: string; plateNumber: string; yearMake: string; category: string }
+        > = {};
         for (const vehicle of vehicles.items ?? []) {
           const key = String(vehicle.id ?? '').trim();
           if (!key) continue;
           const title = [vehicle.make, vehicle.model].filter(Boolean).join(' ');
           const plate = vehicle.plateNumber?.trim() || '';
           vehicleDict[key] = [title, plate].filter(Boolean).join(' - ') || '-';
+          vehicleDetailDict[key] = {
+            name: title || '-',
+            plateNumber: plate || '-',
+            yearMake: String(vehicle.yearMake ?? vehicle.year ?? '-'),
+            category: String(vehicle.categoryName ?? '-').trim() || '-',
+          };
         }
         this.vehicleNames.set(vehicleDict);
+        this.vehicleDetails.set(vehicleDetailDict);
 
         const branchDict: Record<string, string> = {};
         for (const branch of branches.items ?? []) {
           const key = String(branch.id ?? '').trim();
           if (!key) continue;
-          const name = (isArabic ? branch.nameAr : branch.nameEn) || branch.nameAr || branch.nameEn || '';
+          const name =
+            (isArabic ? branch.nameAr : branch.nameEn) || branch.nameAr || branch.nameEn || '';
           branchDict[key] = name.trim() || '-';
         }
         this.branchNames.set(branchDict);
@@ -274,20 +299,20 @@ export class PaymentCountListComponent implements OnInit {
         orderByDirection: this.orderByDirection(),
       })
       .subscribe({
-      next: response => {
-        this.items.set(response.items ?? []);
-        this.pageNumber.set(response.pageNumber || 1);
-        this.totalPages.set(response.totalPages || 1);
-        this.totalCount.set(response.totalCount || 0);
-      },
-      error: err => {
-        const message = err?.message ?? this.translate.instant('No records found');
-        this.loadError.set(message);
-        this.toast.error(message);
-        this.loading.set(false);
-      },
-      complete: () => this.loading.set(false),
-    });
+        next: response => {
+          this.items.set(response.items ?? []);
+          this.pageNumber.set(response.pageNumber || 1);
+          this.totalPages.set(response.totalPages || 1);
+          this.totalCount.set(response.totalCount || 0);
+        },
+        error: err => {
+          const message = err?.message ?? this.translate.instant('No records found');
+          this.loadError.set(message);
+          this.toast.error(message);
+          this.loading.set(false);
+        },
+        complete: () => this.loading.set(false),
+      });
   }
 
   onSearchChange(value: string): void {
@@ -351,19 +376,59 @@ export class PaymentCountListComponent implements OnInit {
   }
 
   onRowAction(event: { actionKey: string; rowIndex: number }): void {
-    const item = this.items()[event.rowIndex];
-    if (!item) {
+    if (event.actionKey !== 'view' && event.actionKey !== 'print') {
+      return;
+    }
+    const rowItem = this.items()[event.rowIndex];
+    if (!rowItem) {
+      return;
+    }
+    const paymentCountId = String(rowItem.id ?? '').trim();
+    const previewWindow = window.open('', '_blank', 'width=980,height=760');
+    if (!previewWindow) {
+      this.toast.error(this.translate.instant('Unable to open print preview window'));
       return;
     }
 
-    const title = `${this.translate.instant('Payment Voucher')} #${item.paymentNumber ?? item.id}`;
+    const fleetId = this.authState.fleetId();
+    if (!fleetId || !paymentCountId) {
+      previewWindow.close();
+      this.toast.error(this.translate.instant('Unable to load voucher data from backend'));
+      return;
+    }
+
+    this.paymentCountService
+      .getById(paymentCountId, fleetId)
+      .pipe(
+        catchError(() => {
+          previewWindow.close();
+          this.toast.error(this.translate.instant('Unable to load voucher data from backend'));
+          return of(null);
+        }),
+      )
+      .subscribe(item => {
+        if (!item) {
+          return;
+        }
+        this.openVoucherPreview(item, event.actionKey === 'print', previewWindow);
+      });
+  }
+
+  private openVoucherPreview(
+    item: PaymentCount,
+    autoPrint: boolean,
+    previewWindow?: Window | null,
+  ): void {
+    const title = `${this.translate.instant('Payment Count')} #${item.paymentNumber ?? item.id}`;
     const body = this.buildVoucherPrintContent(item);
     this.openPrintWindow(
       title,
       body,
-      event.actionKey === 'print',
+      autoPrint,
       String(item.paymentNumber ?? item.id ?? '-'),
       this.resolveBranchName(item),
+      item,
+      previewWindow,
     );
   }
 
@@ -373,77 +438,92 @@ export class PaymentCountListComponent implements OnInit {
     autoPrint: boolean,
     documentNumber: string,
     branchName: string,
+    item?: PaymentCount,
+    previewWindow?: Window | null,
   ): void {
-    const win = window.open('', '_blank', 'width=900,height=700');
+    const isArabic = this.translate.currentLang?.startsWith('ar');
+    const apiItem = item ?? ({} as PaymentCount);
+    const vehicle = this.resolveVehiclePrintDetailsFromBackend(apiItem);
+    const payloadKey = `finance-print-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    const payload = {
+      template: 'voucher',
+      dir: isArabic ? 'rtl' : 'ltr',
+      companyName: this.translate.instant('Car Rental Management'),
+      companyNameAr: 'شركة الطريق المتين المحدودة',
+      companySubNameAr: 'لتأجير السيارات',
+      companyBrandArLine1: 'الطريق المتين',
+      companyBrandArLine2: 'لتأجير السيارات',
+      companyNameEn: 'Solidroad Co. Ltd',
+      companySubNameEn: 'Rent A Car',
+      documentKind: this.translate.instant('Official Voucher'),
+      title,
+      printDateLabel: this.translate.instant('Print Date'),
+      printDate: new Date().toLocaleString(),
+      branchLabel: this.translate.instant('Branch'),
+      branchName: this.readBackendText(apiItem, ['branchName', 'BranchName']),
+      docNoLabel: this.translate.instant('Document No.'),
+      documentNo: documentNumber || '',
+      content,
+      autoPrint: autoPrint ? '1' : '0',
+      taxRecord: this.readBackendText(apiItem, ['taxNumber', 'TaxNumber', 'taxRecord', 'TaxRecord']),
+      logoUrl: this.readBackendText(apiItem, ['urllogo', 'Urllogo', 'urlLogo', 'UrlLogo']),
+      paid: apiItem.paid ?? '',
+      bondType: apiItem.bondType ?? '',
+      date: this.readBackendText(apiItem, ['date', 'Date', 'createdAt', 'CreatedAt']),
+      customer: this.readBackendText(apiItem, ['customerName', 'CustomerName']),
+      paidString: this.numberToArabicWords(apiItem.paid),
+      paymentType: apiItem.paymentType ?? '',
+      operationNumber: this.readBackendText(apiItem, ['operationNumber', 'OperationNumber']),
+      bankName: this.readBackendText(apiItem, ['bankName', 'BankName']),
+      paidBank: apiItem.paidBank ?? '',
+      paidCash: apiItem.paidCash ?? '',
+      cashName: this.readBackendText(apiItem, ['cashName', 'CashName']),
+      vehicleName: vehicle.name,
+      vehicleCategory: vehicle.category,
+      plateNumber: vehicle.plateNumber,
+      bookingNumber: this.readBackendText(apiItem, [
+        'bookingNumber',
+        'BookingNumber',
+        'idBooking',
+        'IdBooking',
+      ]),
+      description: this.readBackendText(apiItem, [
+        'dscription',
+        'Dscription',
+        'description',
+        'Description',
+      ]),
+      voucherDetails: this.resolveVoucherDetailsFromBackend(apiItem),
+      status: apiItem.status ?? '',
+    };
+    localStorage.setItem(payloadKey, JSON.stringify(payload));
+    const page = autoPrint ? 'invoise-print.html' : 'invoise-view.html';
+    const url = `${window.location.origin}/assets/pyment/${page}?payloadKey=${encodeURIComponent(payloadKey)}`;
+    const win = previewWindow ?? window.open('', '_blank', 'width=980,height=760');
     if (!win) {
       this.toast.error(this.translate.instant('Unable to open print preview window'));
+      localStorage.removeItem(payloadKey);
       return;
     }
+    win.location.href = url;
+  }
 
-    const dir = this.translate.currentLang?.startsWith('ar') ? 'rtl' : 'ltr';
-    win.document.write(`
-      <html>
-        <head>
-          <title>${title}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; direction: ${dir}; color: #1f2937; }
-            .sheet { border: 1px solid #d1d5db; border-radius: 10px; padding: 20px; }
-            .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-            .brand-wrap { display: flex; align-items: center; gap: 10px; }
-            .logo { width: 44px; height: 44px; object-fit: contain; }
-            .brand { font-size: 18px; font-weight: 700; color: #111827; }
-            .meta { font-size: 12px; color: #6b7280; text-align: end; }
-            h2 { margin: 0 0 12px; font-size: 20px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-            td, th { border: 1px solid #e5e7eb; padding: 8px 10px; font-size: 13px; vertical-align: top; }
-            th { background: #f9fafb; text-align: start; font-weight: 600; }
-            .summary { margin-top: 12px; font-size: 14px; font-weight: 700; }
-            .signatures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 28px; }
-            .sig-box { border-top: 1px solid #9ca3af; padding-top: 8px; text-align: center; font-size: 12px; color: #4b5563; }
-            @media print { body { margin: 0; } .sheet { border: 0; border-radius: 0; } }
-          </style>
-        </head>
-        <body>
-          <div class="sheet">
-            <div class="header">
-              <div>
-                <div class="brand-wrap">
-                  <img class="logo" src="${window.location.origin}/assets/images/logo/logo-icon.png" alt="logo" />
-                  <div>
-                    <div class="brand">${this.translate.instant('Car Rental Management')}</div>
-                    <div>${this.translate.instant('Official Voucher')}</div>
-                  </div>
-                </div>
-              </div>
-              <div class="meta">
-                <div>${this.translate.instant('Print Date')}: ${new Date().toLocaleString()}</div>
-                <div>${this.translate.instant('Branch')}: ${branchName || '-'}</div>
-                <div>${this.translate.instant('Document No.')}: ${documentNumber || '-'}</div>
-              </div>
-            </div>
-            <h2>${title}</h2>
-            ${content}
-          </div>
-        </body>
-      </html>
-    `);
-    win.document.close();
-
-    if (autoPrint) {
-      win.focus();
-      win.print();
+  private numberToArabicWords(value?: number): string {
+    if (value === null || value === undefined || Number.isNaN(Number(value))) {
+      return '';
     }
+    return `${formatFinanceNumber(value, this.translate)} ريال`;
   }
 
   private buildVoucherPrintContent(item: PaymentCount): string {
-    const statusLabel = item.status === 1
-      ? this.translate.instant('Confirmed')
-      : this.translate.instant('Pending');
-    const bondTypeLabel = item.bondType === 1
-      ? this.translate.instant('Payment Voucher')
-      : item.bondType === 2
-        ? this.translate.instant('Receipt Voucher')
-        : '-';
+    const statusLabel =
+      item.status === 1 ? this.translate.instant('Confirmed') : this.translate.instant('Pending');
+    const bondTypeLabel =
+      item.bondType === 1
+        ? this.translate.instant('Payment Count')
+        : item.bondType === 2
+          ? this.translate.instant('Receipt Count')
+          : '-';
 
     return `
       <table>
@@ -490,11 +570,94 @@ export class PaymentCountListComponent implements OnInit {
   }
 
   private resolveVehicleName(item: PaymentCount): string {
-    const direct = String((item as { vehicleName?: string }).vehicleName ?? '').trim();
+    const direct = String(
+      (item as { vehicleName?: string; nameVehicle?: string; carName?: string }).vehicleName ??
+        (item as { nameVehicle?: string }).nameVehicle ??
+        (item as { carName?: string }).carName ??
+        '',
+    ).trim();
     if (direct) return direct;
     const key = String(item.idVehicle ?? '').trim();
     if (!key) return '-';
     return this.vehicleNames()[key] || '-';
+  }
+
+  private readBackendText(item: PaymentCount, keys: string[]): string {
+    const source = item as unknown as Record<string, unknown>;
+    for (const key of keys) {
+      const value = source[key];
+      if (value !== undefined && value !== null) {
+        return String(value).trim();
+      }
+    }
+    return '';
+  }
+
+  private resolveVehiclePrintDetailsFromBackend(item: PaymentCount): {
+    name: string;
+    plateNumber: string;
+    yearMake: string;
+    category: string;
+  } {
+    return {
+      name: this.readBackendText(item, [
+        'vehicleName',
+        'VehicleName',
+        'nameVehicle',
+        'NameVehicle',
+        'carName',
+        'CarName',
+      ]),
+      plateNumber: this.readBackendText(item, [
+        'plateNumber',
+        'PlateNumber',
+        'vehiclePlatnumber',
+        'VehiclePlatnumber',
+      ]),
+      yearMake: this.readBackendText(item, ['yearMake', 'YearMake', 'vehicleYear', 'VehicleYear']),
+      category: this.readBackendText(item, [
+        'vehicleCategory',
+        'VehicleCategory',
+        'categoryName',
+        'CategoryName',
+      ]),
+    };
+  }
+
+  private resolveVoucherDetailsFromBackend(item: PaymentCount): Array<{
+    account: string;
+    amount: string;
+    note: string;
+  }> {
+    const source = item as unknown as Record<string, unknown>;
+    const rawDetails = source['details'] ?? source['Details'];
+    if (!Array.isArray(rawDetails)) {
+      return [];
+    }
+
+    return rawDetails
+      .map(detail => {
+        const row = (detail ?? {}) as Record<string, unknown>;
+        const account = String(
+          row['countingName'] ??
+            row['CountingName'] ??
+            row['accountName'] ??
+            row['AccountName'] ??
+            row['nameAr'] ??
+            row['NameAr'] ??
+            row['nameEn'] ??
+            row['NameEn'] ??
+            '',
+        ).trim();
+        const amount = String(row['price'] ?? row['Price'] ?? '').trim();
+        const note = String(row['node'] ?? row['Node'] ?? '').trim();
+        return {
+          account: account || '.---.',
+          amount: amount || '.---.',
+          note: note || '.---.',
+        };
+      })
+      .filter(row => row.account !== '.---.' || row.amount !== '.---.' || row.note !== '.---.');
   }
 
   private resolveBranchName(item: PaymentCount): string {
@@ -522,6 +685,4 @@ export class PaymentCountListComponent implements OnInit {
     if (!key) return '-';
     return this.bookingNames()[key] || '-';
   }
-
 }
-

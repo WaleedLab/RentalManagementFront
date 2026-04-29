@@ -196,13 +196,15 @@
         <div class="card customer-details-card customer-details-card--side">
           <div class="card-body">
             <h6 class="mb-3">{{ 'Customer Image' | translate }}</h6>
-            @if (imageUrl()) {
-              <img class="img-fluid customer-details-image" [src]="imageUrl()" alt="customer" />
-            } @else {
-              <div class="customer-details-image-placeholder">
-                {{ 'Unknown' | translate }}
-              </div>
-            }
+            <div class="customer-details-image-frame">
+              @if (imageUrl()) {
+                <img class="customer-details-image" [src]="imageUrl()" alt="customer" />
+              } @else {
+                <div class="customer-details-image-placeholder">
+                  {{ 'Unknown' | translate }}
+                </div>
+              }
+            </div>
           </div>
         </div>
       </div>

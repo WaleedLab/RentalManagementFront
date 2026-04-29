@@ -18,11 +18,7 @@ import {
   bookingStatusTranslationKey,
   getBookingStatusTheme,
 } from '../../../models/booking/booking-status.utils';
-import {
-  BookingService,
-  BookingStatusCountItem,
-  BookingStatusCountsPeriod,
-} from '../../../services/booking/booking.service';
+import { BookingService } from '../../../services/booking/booking.service';
 import { BranchService } from '../../../services/branches/branch.service';
 
 @Component({
@@ -61,9 +57,8 @@ export class BookingListComponent implements OnInit {
   status = signal<BookingStatus | ''>('');
   branches = signal<Branch[]>([]);
   branchId = signal<number | ''>('');
-  countsPeriod = signal<BookingStatusCountsPeriod>('ThisMonth');
-  bookingStatusCounts = signal<BookingStatusCountItem[]>([]);
-  bookingStatusTotalCount = signal(0);
+  orderBy = signal('CreatedAt');
+  orderByDirection = signal<'ASC' | 'DESC'>('DESC');
   private readonly statusValues: BookingStatus[] = [
     'open',
     'finsh',
@@ -88,48 +83,19 @@ export class BookingListComponent implements OnInit {
       value: Number(branch.id),
     })),
   ]);
-  countsPeriodOptions = computed<SmoothSelectOption[]>(() => [
-    { label: this.translate.instant('This Month'), value: 'ThisMonth' },
-    { label: this.translate.instant('Last 3 Months'), value: 'Last3Months' },
-    { label: this.translate.instant('This Year'), value: 'ThisYear' },
+  orderByOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('Created Date'), value: 'CreatedAt' },
+    { label: this.translate.instant('Start Date'), value: 'StartDate' },
+    { label: this.translate.instant('End Date'), value: 'EndDate' },
+    { label: this.translate.instant('Total'), value: 'TOTAL' },
   ]);
-  readonly bookingLegendItems = computed(() => {
-    const items = this.statusValues.map(status => {
-      const theme = getBookingStatusTheme(status);
-      const matchedCount =
-        this.bookingStatusCounts().find(item =>
-          (item.status ?? '').toLowerCase() === status.toLowerCase() ||
-          (item.includedStatuses ?? []).some(included => included.toLowerCase() === status.toLowerCase()),
-        )?.count ?? 0;
-      return {
-        key: status,
-        count: matchedCount,
-        labelAr: theme.labelAr,
-        labelEn: theme.labelEn,
-        color: theme.chartColor,
-        iconClass: theme.iconClass,
-      };
-    });
-
-    return [
-      {
-        key: 'total',
-        count: this.bookingStatusTotalCount(),
-        labelAr: 'الإجمالي',
-        labelEn: 'Total',
-        color: '#2563EB',
-        iconClass: 'fa-solid fa-list-check',
-      },
-      ...items,
-    ];
-  });
+  orderDirectionOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('Descending'), value: 'DESC' },
+    { label: this.translate.instant('Ascending'), value: 'ASC' },
+  ]);
 
   getBookingStatusIconClass(status: BookingStatus): string {
     return getBookingStatusTheme(status).iconClass;
-  }
-
-  getBookingLegendLabel(item: { labelAr: string; labelEn: string }): string {
-    return this.isArabicUi() ? item.labelAr : item.labelEn;
   }
 
   getBookingStatusBadgeStyle(status: BookingStatus): Record<string, string> {
@@ -306,7 +272,6 @@ export class BookingListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadBranches();
-    this.loadStatusCounts();
     this.load();
   }
 
@@ -324,7 +289,6 @@ export class BookingListComponent implements OnInit {
     } else {
       this.pageNumber.set(1);
     }
-    this.loadStatusCounts();
     this.load();
   }
 
@@ -337,13 +301,27 @@ export class BookingListComponent implements OnInit {
     } else {
       this.pageNumber.set(1);
     }
-    this.loadStatusCounts();
     this.load();
   }
 
-  onCountsPeriodChange(value: BookingStatusCountsPeriod): void {
-    this.countsPeriod.set(value);
-    this.loadStatusCounts();
+  onOrderByChange(value: string): void {
+    const normalized = (value ?? '').trim() || 'CreatedAt';
+    if (this.orderBy() === normalized) {
+      return;
+    }
+    this.orderBy.set(normalized);
+    this.pageNumber.set(1);
+    this.load();
+  }
+
+  onOrderDirectionChange(value: 'ASC' | 'DESC'): void {
+    const normalized: 'ASC' | 'DESC' = value === 'ASC' ? 'ASC' : 'DESC';
+    if (this.orderByDirection() === normalized) {
+      return;
+    }
+    this.orderByDirection.set(normalized);
+    this.pageNumber.set(1);
+    this.load();
   }
 
   formatBookingTotal(value: number | null | undefined): string {
@@ -364,8 +342,8 @@ export class BookingListComponent implements OnInit {
         pageSize: this.pageSize(),
         search: this.search() || undefined,
         status: this.status(),
-        orderBy: 'CreatedAt',
-        orderByDirection: 'DESC',
+        orderBy: this.orderBy(),
+        orderByDirection: this.orderByDirection(),
       })
       .subscribe({
         next: page => {
@@ -378,29 +356,6 @@ export class BookingListComponent implements OnInit {
           this.toast.error(this.bookingListLoadErrorMessage(err));
         },
         complete: () => this.loading.set(false),
-      });
-  }
-
-  private loadStatusCounts(): void {
-    const fleetId = this.authState.fleetId() || undefined;
-    this.bookingService
-      .getStatusCounts({
-        fleetId,
-        branchId: Number(this.branchId() || 0) || undefined,
-        period: this.countsPeriod(),
-      })
-      .subscribe({
-        next: response => {
-          this.bookingStatusCounts.set(response.statusCounts ?? []);
-          this.bookingStatusTotalCount.set(response.totalCount ?? 0);
-          if (!this.search().trim() && !this.status()) {
-            this.totalCount.set(response.totalCount ?? 0);
-          }
-        },
-        error: () => {
-          this.bookingStatusCounts.set([]);
-          this.bookingStatusTotalCount.set(0);
-        },
       });
   }
 

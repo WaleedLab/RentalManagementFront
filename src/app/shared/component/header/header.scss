@@ -13,7 +13,8 @@
   justify-content: center;
   gap: 0.2rem;
   min-width: 290px;
-  max-width: min(48vw, 620px);
+  max-width: min(46vw, 620px);
+  width: 100%;
   padding: 0.45rem 0.9rem;
   border-radius: 12px;
   border: 1px solid rgba(148, 163, 184, 0.22);
@@ -24,11 +25,11 @@
 }
 
 .header-datetime-row {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0.45rem;
-  flex-wrap: nowrap;
-  white-space: nowrap;
+  flex-wrap: wrap;
+  white-space: normal;
   color: rgba(226, 232, 240, 0.92);
   line-height: 1.05;
   justify-content: flex-start;
@@ -38,6 +39,8 @@
   display: inline-flex;
   align-items: baseline;
   gap: 0.28rem;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 .header-datetime-label {
@@ -52,6 +55,7 @@
   font-size: 0.76rem;
   font-weight: 600;
   color: rgba(241, 245, 249, 0.95);
+  overflow-wrap: anywhere;
 }
 
 .header-datetime-value--numeric {
@@ -141,6 +145,10 @@
   .header-datetime-value--numeric {
     font-size: 0.66rem;
     padding-inline: 0.3rem;
+  }
+
+  .header-datetime-separator {
+    display: none;
   }
 }
 

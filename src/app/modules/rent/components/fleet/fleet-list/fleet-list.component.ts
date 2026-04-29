@@ -12,6 +12,7 @@ import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-h
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
+import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 
 @Component({
   selector: 'app-fleet-list',
@@ -89,6 +90,10 @@ export class FleetListComponent implements OnInit {
     this.pageSize.set(size);
     this.pageNumber.set(1);
     this.load();
+  }
+
+  fleetImageUrl(url?: string | null): string {
+    return resolveMediaUrl(url) || 'assets/images/logo/logo-icon.png';
   }
 }
 

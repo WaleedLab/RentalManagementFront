@@ -316,6 +316,7 @@ export class JournalEntryListComponent implements OnInit {
       event.actionKey === 'print',
       String(item.journalNumper ?? item.id ?? '-'),
       this.resolveBranchDisplay(item),
+      item,
     );
   }
 
@@ -325,65 +326,41 @@ export class JournalEntryListComponent implements OnInit {
     autoPrint: boolean,
     documentNumber: string,
     branchName: string,
+    item?: JournalEntry,
   ): void {
-    const win = window.open('', '_blank', 'width=900,height=700');
+    const isArabic = this.translate.currentLang?.startsWith('ar');
+    const payloadKey = `finance-print-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    const payload = {
+      template: 'journal',
+      dir: isArabic ? 'rtl' : 'ltr',
+      companyName: this.translate.instant('Car Rental Management'),
+      documentKind: this.translate.instant('Official Journal'),
+      title,
+      printDateLabel: this.translate.instant('Print Date'),
+      printDate: new Date().toLocaleString(),
+      branchLabel: this.translate.instant('Branch'),
+      branchName: branchName || '-',
+      docNoLabel: this.translate.instant('Document No.'),
+      documentNo: documentNumber || '-',
+      content,
+      autoPrint: autoPrint ? '1' : '0',
+      taxRecord: '-',
+      date: item?.date ?? '',
+      statusLabel: item ? this.formatStatus(item.status) : '-',
+      journalTypeLabel: item ? this.formatJournalType(item.journalType) : '-',
+      operationTypeLabel: item ? this.formatOperationType(item.operationType) : '-',
+      financialYear: item ? this.resolveFinancialYearDisplay(item) : '-',
+      debit: formatFinanceNumber(item?.debtir, this.translate),
+      credit: formatFinanceNumber(item?.credit, this.translate),
+      balance: formatFinanceNumber(item?.balannce, this.translate),
+    };
+    localStorage.setItem(payloadKey, JSON.stringify(payload));
+    const page = autoPrint ? 'invoise-print.html' : 'invoise-view.html';
+    const url = `${window.location.origin}/assets/pyment/${page}?payloadKey=${encodeURIComponent(payloadKey)}`;
+    const win = window.open(url, '_blank', 'width=980,height=760');
     if (!win) {
       this.toast.error(this.translate.instant('Unable to open print preview window'));
-      return;
-    }
-
-    const dir = this.translate.currentLang?.startsWith('ar') ? 'rtl' : 'ltr';
-    win.document.write(`
-      <html>
-        <head>
-          <title>${title}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; direction: ${dir}; color: #1f2937; }
-            .sheet { border: 1px solid #d1d5db; border-radius: 10px; padding: 20px; }
-            .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-            .brand-wrap { display: flex; align-items: center; gap: 10px; }
-            .logo { width: 44px; height: 44px; object-fit: contain; }
-            .brand { font-size: 18px; font-weight: 700; color: #111827; }
-            .meta { font-size: 12px; color: #6b7280; text-align: end; }
-            h2 { margin: 0 0 12px; font-size: 20px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-            td, th { border: 1px solid #e5e7eb; padding: 8px 10px; font-size: 13px; vertical-align: top; }
-            th { background: #f9fafb; text-align: start; font-weight: 600; }
-            .summary { margin-top: 12px; font-size: 14px; font-weight: 700; }
-            .signatures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 28px; }
-            .sig-box { border-top: 1px solid #9ca3af; padding-top: 8px; text-align: center; font-size: 12px; color: #4b5563; }
-            @media print { body { margin: 0; } .sheet { border: 0; border-radius: 0; } }
-          </style>
-        </head>
-        <body>
-          <div class="sheet">
-            <div class="header">
-              <div>
-                <div class="brand-wrap">
-                  <img class="logo" src="${window.location.origin}/assets/images/logo/logo-icon.png" alt="logo" />
-                  <div>
-                    <div class="brand">${this.translate.instant('Car Rental Management')}</div>
-                    <div>${this.translate.instant('Official Journal')}</div>
-                  </div>
-                </div>
-              </div>
-              <div class="meta">
-                <div>${this.translate.instant('Print Date')}: ${new Date().toLocaleString()}</div>
-                <div>${this.translate.instant('Branch')}: ${branchName || '-'}</div>
-                <div>${this.translate.instant('Document No.')}: ${documentNumber || '-'}</div>
-              </div>
-            </div>
-            <h2>${title}</h2>
-            ${content}
-          </div>
-        </body>
-      </html>
-    `);
-    win.document.close();
-
-    if (autoPrint) {
-      win.focus();
-      win.print();
+      localStorage.removeItem(payloadKey);
     }
   }
 

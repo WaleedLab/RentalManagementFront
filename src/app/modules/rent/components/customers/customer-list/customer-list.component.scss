@@ -1,4 +1,41 @@
 
+.app-filters-toolbar--customers {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+
+  .app-filter-field {
+    grid-column: span 1;
+    height: 100%;
+  }
+
+  .app-filter-field--narrow,
+  .app-filter-field--search {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 1199.98px) {
+  .app-filters-toolbar--customers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    .app-filter-field--narrow,
+    .app-filter-field--search {
+      grid-column: span 1;
+    }
+  }
+}
+
+@media (max-width: 767.98px) {
+  .app-filters-toolbar--customers {
+    grid-template-columns: 1fr;
+
+    .app-filter-field--narrow,
+    .app-filter-field--search {
+      grid-column: span 1;
+    }
+  }
+}
+
 .customer-search-btn {
   display: inline-flex;
   align-items: center;

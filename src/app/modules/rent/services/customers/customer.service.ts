@@ -46,6 +46,10 @@ export class CustomerService {
         PageSize: params.pageSize,
         pageNumber: params.pageNumber,
         pageSize: params.pageSize,
+        OrderByDirection: params.orderByDirection ?? 'DESC',
+        orderByDirection: params.orderByDirection ?? 'DESC',
+        OrderBy: params.orderBy ?? 'CreatedAt',
+        orderBy: params.orderBy ?? 'CreatedAt',
       })
       .pipe(map(response => normalizePaginatedResponse(response, normalizeCustomer)));
   }
@@ -53,17 +57,48 @@ export class CustomerService {
   getById(id: string, fleetId?: string | null): Observable<Customer> {
     const normalizedFleetId = normalizeFleetId(fleetId);
     if (!normalizedFleetId) {
-      return this.getByIdFromList(id);
+      return throwError(() => new Error('FleetId is required to load customer details'));
     }
 
+    const rawId = String(id);
+    const encodedId = encodeURIComponent(rawId);
+    const rawFleetId = normalizedFleetId;
+    const encodedFleetId = encodeURIComponent(rawFleetId);
     return this.api
-      .getData<unknown>(`${this.base}/${id}/${normalizedFleetId}`, undefined, {
+      .getData<unknown>(`${this.base}/${encodedId}/${encodedFleetId}`, undefined, {
         suppressErrorToast: true,
       })
       .pipe(
-        map(normalizeCustomer),
-        catchError(error => this.getByIdFromList(id, normalizedFleetId, error)),
+        map(raw => normalizeCustomer(this.unwrapResultPayload(raw))),
+        catchError(() =>
+          this.api.getData<unknown>(
+            `${this.base}/${encodedId}`,
+            {
+              fleetid: rawFleetId,
+              FleetId: rawFleetId,
+            },
+            { suppressErrorToast: true },
+          ),
+        ),
+        map(raw => normalizeCustomer(this.unwrapResultPayload(raw))),
+        catchError(() => throwError(() => new Error('Failed to load customer details from backend'))),
       );
+  }
+
+  private unwrapResultPayload(raw: unknown): unknown {
+    const source = (raw ?? {}) as Record<string, unknown>;
+    if (!source || typeof source !== 'object') {
+      return raw;
+    }
+    return (
+      source['data'] ??
+      source['Data'] ??
+      source['value'] ??
+      source['Value'] ??
+      source['result'] ??
+      source['Result'] ??
+      raw
+    );
   }
 
   getByNationalId(nationalId: string, fleetId?: string | null): Observable<Customer | null> {
@@ -74,15 +109,16 @@ export class CustomerService {
     }
 
     const byPath = this.api
-      .getData<unknown>(`${this.base}/GetCustomerByNationalId/${id}/${normalizedFleetId}`, undefined, {
+      .getData<unknown>(`${this.base}/ByNationalId/${id}/${normalizedFleetId}`, undefined, {
         suppressErrorToast: true,
       })
       .pipe(map(raw => this.normalizeCustomerLookupResponse(raw)));
 
     const byQuery = this.api
-      .getData<unknown>(`${this.base}/GetCustomerByNationalId`, {
+      .getData<unknown>(`${this.base}/ByNationalId`, {
         NationalId: id,
         FleetId: normalizedFleetId,
+        fleetid: normalizedFleetId,
       }, {
         suppressErrorToast: true,
       })
@@ -146,28 +182,6 @@ export class CustomerService {
       extension: imagePayload?.extension,
       Extension: imagePayload?.extension,
     };
-  }
-
-  private getByIdFromList(
-    id: string,
-    fleetId?: string,
-    sourceError?: unknown,
-  ): Observable<Customer> {
-    return this.api
-      .getData<unknown[]>(`${this.base}/List`, buildFleetQueryParams(fleetId, 'both'), {
-        suppressErrorToast: true,
-      })
-      .pipe(
-        map(items => (items ?? []).map(normalizeCustomer)),
-        map(items => items.find(customer => String(customer.id) === String(id)) ?? null),
-        map(customer => {
-          if (!customer) {
-            throw sourceError ?? new Error('Customer not found');
-          }
-          return customer;
-        }),
-        catchError(() => throwError(() => sourceError ?? new Error('Customer not found'))),
-      );
   }
 
   private getByNationalIdFromList(nationalId: string, fleetId?: string): Observable<Customer | null> {

@@ -47,25 +47,25 @@
         </div>
 
         <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Counts Period' | translate }}</label>
+          <label class="app-filter-label">{{ 'Sort by' | translate }}</label>
           <app-smooth-select
-            [ariaLabel]="'Counts Period' | translate"
-            [options]="countsPeriodOptions()"
-            [value]="countsPeriod()"
-            (valueChange)="onCountsPeriodChange($any($event))"
+            [ariaLabel]="'Sort by' | translate"
+            [options]="orderByOptions()"
+            [value]="orderBy()"
+            (valueChange)="onOrderByChange($any($event))"
           />
         </div>
-      </div>
 
-      <div class="booking-legend" role="list" aria-label="Booking status legend">
-        @for (item of bookingLegendItems(); track item.key) {
-          <div class="booking-legend-item" role="listitem">
-            <span class="booking-legend-code">{{ item.count }}</span>
-            <span class="booking-legend-dot" [style.background]="item.color"></span>
-            <i [class]="item.iconClass"></i>
-            <span class="booking-legend-label">{{ getBookingLegendLabel(item) }}</span>
-          </div>
-        }
+        <div class="app-filter-field app-filter-field--narrow">
+          <label class="app-filter-label">{{ 'Order direction' | translate }}</label>
+          <app-smooth-select
+            [ariaLabel]="'Order direction' | translate"
+            [options]="orderDirectionOptions()"
+            [value]="orderByDirection()"
+            (valueChange)="onOrderDirectionChange($any($event))"
+          />
+        </div>
+
       </div>
 
       @if (loading()) {

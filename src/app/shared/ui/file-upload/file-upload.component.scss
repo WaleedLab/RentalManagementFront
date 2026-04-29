@@ -1,4 +1,7 @@
 .upload-card {
+  --media-box-width: 300px;
+  --media-box-height: 220px;
+
   .upload-validation {
     color: #f97316;
     font-size: 0.8rem;
@@ -10,11 +13,15 @@
     overflow: hidden;
     border: 1px solid rgba(0, 0, 0, 0.08);
     background: #f8fafc;
-    max-width: 280px;
+    width: min(100%, var(--media-box-width));
+    height: var(--media-box-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     img {
       width: 100%;
-      height: 180px;
+      height: 100%;
       object-fit: cover;
       display: block;
     }

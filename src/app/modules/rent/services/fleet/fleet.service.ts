@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, from, map, switchMap } from 'rxjs';
 
 import type { PaginatedAggregatorResponse } from '../../../../core/interfaces';
 import { BaseRequestOptions } from '../../../../shared/services/base/base.service';
 import { BaseService } from '../../../../shared/services/base/base.service';
+import { buildImageUploadPayload } from '../../../../shared/utils/image-upload.utils';
 import type { Fleet, FleetUpsertRequest, PaginatedRequest } from '../../models';
 import { normalizePaginatedResponse } from '../../../../shared/utils/paginated-response.normalizer';
 import { normalizeFleet } from '../../models/fleet/fleet.normalizer';
@@ -41,11 +42,36 @@ export class FleetService {
   }
 
   create(body: FleetUpsertRequest): Observable<Fleet> {
-    return this.api.postData<Fleet>(this.base, body);
+    return from(this.toApiPayload(body)).pipe(
+      switchMap(payload => this.api.postData<Fleet>(this.base, payload)),
+    );
   }
 
   update(body: FleetUpsertRequest & { id: string }): Observable<Fleet> {
-    return this.api.putData<Fleet>(`${this.base}/${body.id}`, body);
+    return from(this.toApiPayload(body)).pipe(
+      switchMap(payload => this.api.putData<Fleet>(`${this.base}/${body.id}`, payload)),
+    );
+  }
+
+  private async toApiPayload(body: FleetUpsertRequest): Promise<Record<string, unknown>> {
+    const imagePayload = await buildImageUploadPayload(body.image);
+
+    return {
+      ...body,
+      Name: body.name,
+      Description: body.description,
+      FleetCode: body.fleetCode,
+      TaxNumber: body.taxNumber,
+      Location: body.location,
+      ContactNumber: body.contactNumber,
+      Email: body.email,
+      Url: imagePayload?.attachment ?? '',
+      URL: imagePayload?.attachment ?? '',
+      url: imagePayload?.attachment ?? '',
+      ImageExtension: imagePayload?.extension ?? '',
+      imageExtension: imagePayload?.extension ?? '',
+      image: undefined,
+    };
   }
 }
 

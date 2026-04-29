@@ -229,6 +229,19 @@ export class VehicleListComponent implements OnInit {
     return this.translate.instant(status);
   }
 
+  getVehicleCardStatusClass(status: VehicleStatus): string {
+    switch (status) {
+      case 'Available':
+        return 'vehicle-card--status-success';
+      case 'Booked':
+        return 'vehicle-card--status-warning';
+      case 'Maintenance':
+        return 'vehicle-card--status-danger';
+      default:
+        return 'vehicle-card--status-neutral';
+    }
+  }
+
   getBranchOptionLabel(branch: Branch): string {
     return this.isArabicUi()
       ? branch.nameAr || branch.nameEn || '-'

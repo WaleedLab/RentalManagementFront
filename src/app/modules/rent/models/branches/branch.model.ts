@@ -4,6 +4,11 @@ export interface Branch {
   nameAr: string;
   nameEn?: string;
   code?: string;
+  street?: string;
+  neighborHood?: string;
+  buldingNumber?: string;
+  city?: string;
+  contactNumber?: string;
   isActive: boolean;
 
   createdBy?: string;
@@ -31,5 +36,10 @@ export interface BranchUpsertRequest {
   nameEn?: string;
   isActive: boolean;
   code?: string;
+  street?: string;
+  neighborHood?: string;
+  buldingNumber?: string;
+  city?: string;
+  contactNumber?: string;
 }
 

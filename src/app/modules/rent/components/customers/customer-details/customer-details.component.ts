@@ -50,7 +50,8 @@ export class CustomerDetailsComponent implements OnInit {
     this.loading.set(true);
     this.customerService.getById(id, this.authState.fleetId() ?? '').subscribe({
       next: customer => this.customer.set(customer),
-      error: () => this.toast.error(this.translate.instant('Failed to load customer')),
+      error: err =>
+        this.toast.error(err?.message || this.translate.instant('Failed to load customer')),
       complete: () => this.loading.set(false),
     });
   }

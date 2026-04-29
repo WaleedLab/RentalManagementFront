@@ -55,6 +55,9 @@
             <th>{{ 'Name (AR)' | translate }}</th>
             <th>{{ 'Name (EN)' | translate }}</th>
             <th>{{ 'Code' | translate }}</th>
+            <th>{{ 'City' | translate }}</th>
+            <th>{{ 'Street' | translate }}</th>
+            <th>{{ 'Contact Number' | translate }}</th>
             <th>{{ 'Active' | translate }}</th>
             <th class="text-end">{{ 'Actions' | translate }}</th>
           </tr>
@@ -65,6 +68,9 @@
               <td>{{ branch.nameAr || '-' }}</td>
               <td>{{ branch.nameEn || '-' }}</td>
               <td>{{ branch.code || '-' }}</td>
+              <td>{{ branch.city || '-' }}</td>
+              <td>{{ branch.street || '-' }}</td>
+              <td>{{ branch.contactNumber || '-' }}</td>
               <td>
                 <app-status-badge
                   [label]="branch.isActive ? ('Active' | translate) : ('Inactive' | translate)"

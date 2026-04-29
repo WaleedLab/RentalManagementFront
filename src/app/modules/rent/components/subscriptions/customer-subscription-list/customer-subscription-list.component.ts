@@ -38,39 +38,11 @@ export class CustomerSubscriptionListComponent implements OnInit {
   search = signal('');
   pageNumber = signal(1);
   pageSize = signal(10);
+  totalCount = signal(0);
+  totalPages = signal(1);
   loading = signal(false);
   canManage = computed(() => this.authState.hasAnyRole(TENANT_ADMIN_ROLES));
-
-  filteredSubscriptions = computed(() => {
-    const keyword = this.search().trim().toLowerCase();
-    if (!keyword) {
-      return this.subscriptions();
-    }
-
-    return this.subscriptions().filter(subscription => {
-      const searchableText = [
-        subscription.nameAr,
-        subscription.nameEn,
-        subscription.description,
-        String(subscription.discount),
-        String(subscription.subscriptionApprovedAfter),
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-
-      return searchableText.includes(keyword);
-    });
-  });
-  totalCount = computed(() => this.filteredSubscriptions().length);
-  totalPages = computed(() => Math.max(1, Math.ceil(this.totalCount() / this.pageSize())));
-  currentPage = computed(() => Math.min(this.pageNumber(), this.totalPages()));
-  pagedSubscriptions = computed(() => {
-    const page = this.currentPage();
-    const size = this.pageSize();
-    const start = (page - 1) * size;
-    return this.filteredSubscriptions().slice(start, start + size);
-  });
+  currentPage = computed(() => this.pageNumber());
 
   ngOnInit(): void {
     this.load();
@@ -80,12 +52,26 @@ export class CustomerSubscriptionListComponent implements OnInit {
     const fleetId = this.authState.fleetId();
     if (!fleetId) {
       this.subscriptions.set([]);
+      this.totalCount.set(0);
+      this.totalPages.set(1);
       return;
     }
 
     this.loading.set(true);
-    this.subscriptionService.getList(fleetId).subscribe({
-      next: list => this.subscriptions.set(list ?? []),
+    this.subscriptionService.getPaginated({
+      fleetId,
+      pageNumber: this.pageNumber(),
+      pageSize: this.pageSize(),
+      search: this.search().trim() || undefined,
+      orderByDirection: 'DESC',
+      orderBy: 'CreatedAt',
+    }).subscribe({
+      next: response => {
+        this.subscriptions.set(response.items ?? []);
+        this.totalCount.set(response.totalCount ?? 0);
+        this.totalPages.set(Math.max(1, response.totalPages ?? 1));
+        this.pageNumber.set(response.pageNumber || this.pageNumber());
+      },
       error: err =>
         this.toast.error(
           err?.message ?? this.translate.instant('Failed to load subscription offers'),
@@ -97,14 +83,16 @@ export class CustomerSubscriptionListComponent implements OnInit {
   onSearchSubmit(): void {
     this.search.set(this.search().trim());
     this.pageNumber.set(1);
+    this.load();
   }
 
   goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages() || page === this.currentPage()) {
+    if (page < 1 || page > this.totalPages() || page === this.pageNumber()) {
       return;
     }
 
     this.pageNumber.set(page);
+    this.load();
   }
 
   changePageSize(size: number): void {
@@ -114,6 +102,7 @@ export class CustomerSubscriptionListComponent implements OnInit {
 
     this.pageSize.set(size);
     this.pageNumber.set(1);
+    this.load();
   }
 
   getSubscriptionName(subscription: CustomerSubscription): string {

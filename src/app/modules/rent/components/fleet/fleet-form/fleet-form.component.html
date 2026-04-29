@@ -28,6 +28,11 @@
             }
           </div>
           <div class="col-md-4">
+            <label class="form-label">{{ 'Tax Number' | translate }}</label>
+            <input class="form-control" formControlName="taxNumber" maxlength="100" [placeholder]="'Example Fleet Tax Number' | translate" />
+            <div class="form-text">{{ 'Hint Fleet Tax Number' | translate }}</div>
+          </div>
+          <div class="col-md-4">
             <label class="form-label">{{ 'Location' | translate }}</label>
             <input class="form-control" formControlName="location" maxlength="255" [placeholder]="'Example Fleet Location' | translate" />
             <div class="form-text">{{ 'Hint Fleet Location' | translate }}</div>
@@ -52,6 +57,14 @@
             <label class="form-label">{{ 'Description' | translate }}</label>
             <textarea class="form-control" rows="4" formControlName="description" maxlength="1000" [placeholder]="'Example Fleet Description' | translate"></textarea>
             <div class="form-text">{{ 'Hint Fleet Description' | translate }}</div>
+          </div>
+          <div class="col-12">
+            <app-file-upload
+              [label]="'Fleet Image' | translate"
+              [previewUrl]="previewUrl()"
+              (fileSelected)="onImageSelected($event)"
+            />
+            <div class="form-text mt-2">{{ 'Hint Fleet Image' | translate }}</div>
           </div>
         </div>
 

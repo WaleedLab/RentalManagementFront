@@ -5,7 +5,13 @@ export interface PaymentCount {
   description?: string;
   idCustomer?: number;
   customerName?: string;
-  idVehicle?: number;
+  taxNumber?: string;
+  urllogo?: string;
+  idVehicle?: string | number;
+  vehicleName?: string;
+  plateNumber?: string;
+  yearMake?: string | number;
+  vehicleCategory?: string;
   idBranch?: number;
   branchName?: string;
   paid?: number;
@@ -20,6 +26,7 @@ export interface PaymentCount {
   idBooking?: number;
   idFinancialYear?: string | number;
   createdAt?: string;
+  details?: Array<Record<string, unknown>>;
 }
 
 export interface CreatePaymentCountRequest {

@@ -3,6 +3,9 @@ export interface Fleet {
   name: string;
   description?: string;
   fleetCode?: string;
+  taxNumber?: string;
+  url?: string;
+  imageExtension?: string;
   isActive: boolean;
   location?: string;
   contactNumber?: string;
@@ -20,8 +23,10 @@ export interface FleetUpsertRequest {
   name: string;
   description?: string;
   fleetCode?: string;
+  taxNumber?: string;
   location?: string;
   contactNumber?: string;
   email?: string;
+  image?: File | null;
 }
 

@@ -99,7 +99,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (row of rows; track trackByIndex($index)) {
+              @for (row of rows; track trackByIndex($index); let rowIndex = $index) {
                 <tr>
                   @for (column of columns; track column.key) {
                     <td [class.text-end]="column.align === 'end'">{{ row[column.key] ?? '-' }}</td>
@@ -114,7 +114,7 @@
                             [class]="'btn btn-sm btn-outline-' + (action.variant || 'secondary')"
                             [title]="action.label | translate"
                             [attr.aria-label]="action.label | translate"
-                            (click)="emitRowAction(action.key, $index)"
+                            (click)="emitRowAction(action.key, rowIndex)"
                           >
                             @if (action.icon) {
                               <i [class]="action.icon"></i>

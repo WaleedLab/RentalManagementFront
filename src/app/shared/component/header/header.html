@@ -18,13 +18,13 @@
         <div class="header-datetime-row">
           <span class="header-datetime-item">
             <span class="header-datetime-label">{{ isArabicLanguage ? 'ميلادي' : 'Gregorian' }}</span>
-            <span class="header-datetime-value">{{ gregorianDate }}</span>
+            <span class="header-datetime-value" [hidden]="!isArabicLanguage">{{ gregorianDate }}</span>
             <span class="header-datetime-value header-datetime-value--numeric">{{ gregorianNumericDate }}</span>
           </span>
           <span class="header-datetime-separator">•</span>
           <span class="header-datetime-item">
             <span class="header-datetime-label">{{ isArabicLanguage ? 'هجري' : 'Hijri' }}</span>
-            <span class="header-datetime-value">{{ hijriDate }}</span>
+            <span class="header-datetime-value" [hidden]="!isArabicLanguage">{{ hijriDate }}</span>
             <span class="header-datetime-value header-datetime-value--numeric">{{ hijriNumericDate }}</span>
           </span>
         </div>

@@ -1,12 +1,23 @@
 .app-filters-toolbar--bookings {
   grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: end;
+
+  .app-filter-field {
+    grid-column: span 2;
+    height: 100%;
+  }
 
   .app-filter-field--search {
-    grid-column: span 3;
+    grid-column: span 2;
   }
 
   .app-filter-field--narrow {
-    grid-column: span 1;
+    grid-column: span 2;
+  }
+
+  .app-filter-field:nth-child(4),
+  .app-filter-field:nth-child(5) {
+    grid-column: span 3;
   }
 }
 
@@ -69,24 +80,29 @@
 
 @media (max-width: 1199.98px) {
   .app-filters-toolbar--bookings {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 
     .app-filter-field--search {
-      grid-column: span 4;
+      grid-column: span 3;
     }
 
     .app-filter-field--narrow {
-      grid-column: span 2;
+      grid-column: span 1;
     }
   }
 }
 
 @media (max-width: 767.98px) {
   .app-filters-toolbar--bookings {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 
     .app-filter-field--search,
     .app-filter-field--narrow {
+      grid-column: span 1;
+    }
+
+    .app-filter-field:nth-child(4),
+    .app-filter-field:nth-child(5) {
       grid-column: span 1;
     }
   }
@@ -121,14 +137,14 @@
   border-radius: 20px;
   overflow: visible;
   background:
-    radial-gradient(circle at 16% -8%, color-mix(in srgb, var(--booking-status-accent) 36%, transparent), transparent 46%),
-    linear-gradient(170deg, rgba(255, 255, 255, 0.82), rgba(248, 250, 252, 0.52));
+    radial-gradient(circle at 16% -8%, color-mix(in srgb, var(--booking-status-accent) 24%, transparent), transparent 48%),
+    linear-gradient(170deg, rgba(255, 255, 255, 0.78), rgba(248, 250, 252, 0.6));
   backdrop-filter: blur(18px) saturate(1.25);
   -webkit-backdrop-filter: blur(18px) saturate(1.25);
   box-shadow:
-    0 24px 38px -26px rgba(15, 23, 42, 0.42),
-    0 10px 24px -18px rgba(15, 23, 42, 0.26),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    0 16px 26px -24px rgba(15, 23, 42, 0.28),
+    0 6px 14px -16px rgba(15, 23, 42, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
   transition:
     transform 0.24s ease,
     box-shadow 0.24s ease,
@@ -160,9 +176,9 @@
     transform: translateY(-4px);
     border-color: color-mix(in srgb, var(--booking-status-border-light) 82%, #ffffff 18%);
     box-shadow:
-      0 30px 46px -22px rgba(15, 23, 42, 0.44),
-      0 14px 30px -18px color-mix(in srgb, var(--booking-status-accent) 44%, transparent),
-      inset 0 1px 0 rgba(255, 255, 255, 0.34);
+      0 22px 34px -22px rgba(15, 23, 42, 0.32),
+      0 10px 20px -18px color-mix(in srgb, var(--booking-status-accent) 28%, transparent),
+      inset 0 1px 0 rgba(255, 255, 255, 0.26);
   }
 }
 
@@ -173,8 +189,8 @@
 .booking-card--status-success {
   border-color: rgba(16, 185, 129, 0.52);
   background:
-    radial-gradient(circle at 16% -8%, rgba(16, 185, 129, 0.22), transparent 46%),
-    linear-gradient(170deg, rgba(255, 255, 255, 0.82), rgba(248, 250, 252, 0.52));
+    radial-gradient(circle at 16% -8%, rgba(16, 185, 129, 0.16), transparent 48%),
+    linear-gradient(170deg, rgba(255, 255, 255, 0.78), rgba(248, 250, 252, 0.6));
 }
 
 .booking-card--status-success::after {
@@ -184,8 +200,8 @@
 .booking-card--status-warning {
   border-color: rgba(245, 158, 11, 0.56);
   background:
-    radial-gradient(circle at 16% -8%, rgba(245, 158, 11, 0.24), transparent 46%),
-    linear-gradient(170deg, rgba(255, 255, 255, 0.82), rgba(248, 250, 252, 0.52));
+    radial-gradient(circle at 16% -8%, rgba(245, 158, 11, 0.17), transparent 48%),
+    linear-gradient(170deg, rgba(255, 255, 255, 0.78), rgba(248, 250, 252, 0.6));
 }
 
 .booking-card--status-warning::after {
@@ -195,8 +211,8 @@
 .booking-card--status-info {
   border-color: rgba(59, 130, 246, 0.58);
   background:
-    radial-gradient(circle at 16% -8%, rgba(59, 130, 246, 0.24), transparent 46%),
-    linear-gradient(170deg, rgba(255, 255, 255, 0.82), rgba(248, 250, 252, 0.52));
+    radial-gradient(circle at 16% -8%, rgba(59, 130, 246, 0.17), transparent 48%),
+    linear-gradient(170deg, rgba(255, 255, 255, 0.78), rgba(248, 250, 252, 0.6));
 }
 
 .booking-card--status-info::after {
@@ -366,8 +382,8 @@
   background:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.08),
-        color-mix(in srgb, var(--booking-status-accent) 22%, rgba(148, 163, 184, 0.08))
+      rgba(255, 255, 255, 0.06),
+      color-mix(in srgb, var(--booking-status-accent) 14%, rgba(148, 163, 184, 0.08))
     ),
     radial-gradient(
       circle at 12% -30%,
@@ -832,26 +848,26 @@
 
 .booking-card--status-success .booking-card__body {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(16, 185, 129, 0.14)),
-    radial-gradient(circle at 12% -30%, rgba(16, 185, 129, 0.24), transparent 55%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(16, 185, 129, 0.1)),
+    radial-gradient(circle at 12% -30%, rgba(16, 185, 129, 0.16), transparent 58%);
 }
 
 .booking-card--status-warning .booking-card__body {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(245, 158, 11, 0.14)),
-    radial-gradient(circle at 12% -30%, rgba(245, 158, 11, 0.24), transparent 55%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(245, 158, 11, 0.1)),
+    radial-gradient(circle at 12% -30%, rgba(245, 158, 11, 0.16), transparent 58%);
 }
 
 .booking-card--status-info .booking-card__body {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(59, 130, 246, 0.14)),
-    radial-gradient(circle at 12% -30%, rgba(59, 130, 246, 0.24), transparent 55%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(59, 130, 246, 0.1)),
+    radial-gradient(circle at 12% -30%, rgba(59, 130, 246, 0.16), transparent 58%);
 }
 
 .booking-card--status-neutral .booking-card__body {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(148, 163, 184, 0.16)),
-    radial-gradient(circle at 12% -30%, rgba(148, 163, 184, 0.24), transparent 55%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(148, 163, 184, 0.12)),
+    radial-gradient(circle at 12% -30%, rgba(148, 163, 184, 0.16), transparent 58%);
 }
 
 .booking-card__action {

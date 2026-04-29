@@ -7,13 +7,22 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FleetUpsertRequest } from '../../../models';
 import { FleetService } from '../../../services/fleet/fleet.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
+import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-upload.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
+import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 
 @Component({
   selector: 'app-fleet-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, PageHeaderComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    TranslateModule,
+    PageHeaderComponent,
+    FileUploadComponent,
+  ],
   templateUrl: './fleet-form.component.html',
   styleUrl: './fleet-form.component.scss',
 })
@@ -33,10 +42,13 @@ export class FleetFormComponent implements OnInit {
   isEdit = signal(false);
   fleetId = signal<string | null>(null);
   loading = signal(false);
+  selectedImage = signal<File | null>(null);
+  previewUrl = signal<string | null>(null);
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(255), Validators.pattern(FleetFormComponent.FLEET_NAME_REGEX)]],
     fleetCode: ['', [Validators.maxLength(100), Validators.pattern(FleetFormComponent.FLEET_CODE_REGEX)]],
+    taxNumber: ['', [Validators.maxLength(100)]],
     location: ['', [Validators.maxLength(255)]],
     contactNumber: ['', [Validators.maxLength(50), Validators.pattern(FleetFormComponent.CONTACT_NUMBER_REGEX)]],
     email: ['', [Validators.email, Validators.maxLength(255)]],
@@ -55,11 +67,13 @@ export class FleetFormComponent implements OnInit {
         this.form.patchValue({
           name: fleet.name,
           fleetCode: fleet.fleetCode || '',
+          taxNumber: fleet.taxNumber || '',
           location: fleet.location || '',
           contactNumber: fleet.contactNumber || '',
           email: fleet.email || '',
           description: fleet.description || '',
         });
+        this.previewUrl.set(resolveMediaUrl(fleet.url));
       },
       error: () => this.toast.error(this.translate.instant('Failed to load fleet')),
       complete: () => this.loading.set(false),
@@ -77,10 +91,12 @@ export class FleetFormComponent implements OnInit {
     const body: FleetUpsertRequest = {
       name: raw.name,
       fleetCode: raw.fleetCode || undefined,
+      taxNumber: raw.taxNumber || undefined,
       location: raw.location || undefined,
       contactNumber: raw.contactNumber || undefined,
       email: raw.email || undefined,
       description: raw.description || undefined,
+      image: this.selectedImage(),
     };
 
     this.loading.set(true);
@@ -99,6 +115,10 @@ export class FleetFormComponent implements OnInit {
       },
       complete: () => this.loading.set(false),
     });
+  }
+
+  onImageSelected(file: File | null): void {
+    this.selectedImage.set(file);
   }
 }
 

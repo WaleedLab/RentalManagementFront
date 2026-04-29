@@ -1,1 +1,9 @@
+.fleet-list-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  border: 1px solid var(--app-table-border-color);
+  object-fit: cover;
+  background: color-mix(in srgb, var(--app-table-row-alt) 45%, transparent);
+}
 

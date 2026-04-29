@@ -48,8 +48,10 @@
         <table class="table table-striped">
           <thead>
             <tr>
+              <th>{{ 'Fleet Image' | translate }}</th>
               <th>{{ 'Name' | translate }}</th>
               <th>{{ 'Fleet Code' | translate }}</th>
+              <th>{{ 'Tax Number' | translate }}</th>
               <th>{{ 'Location' | translate }}</th>
               <th>{{ 'Contact Number' | translate }}</th>
               <th>{{ 'Email' | translate }}</th>
@@ -60,13 +62,22 @@
           <tbody>
             @if (fleets().length === 0 && !loading()) {
               <tr>
-                <td colspan="7" class="text-center">{{ 'No fleets found' | translate }}</td>
+                <td colspan="9" class="text-center">{{ 'No fleets found' | translate }}</td>
               </tr>
             } @else {
               @for (f of fleets(); track f.id) {
                 <tr>
+                  <td>
+                    <img
+                      class="fleet-list-thumb"
+                      [src]="fleetImageUrl(f.url)"
+                      [alt]="f.name || ('Fleet Image' | translate)"
+                      loading="lazy"
+                    />
+                  </td>
                   <td>{{ f.name || '-' }}</td>
                   <td>{{ f.fleetCode || '-' }}</td>
+                  <td>{{ f.taxNumber || '-' }}</td>
                   <td>{{ f.location || '-' }}</td>
                   <td>{{ f.contactNumber || '-' }}</td>
                   <td>{{ f.email || '-' }}</td>

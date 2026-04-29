@@ -362,7 +362,8 @@ export class CustomerFormComponent implements OnInit {
 
         this.syncSubscriptionAssignmentModeWithCustomer();
       },
-      error: () => this.toast.error(this.translate.instant('Failed to load customer')),
+      error: err =>
+        this.toast.error(err?.message || this.translate.instant('Failed to load customer')),
       complete: () => this.loading.set(false),
     });
   }

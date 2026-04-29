@@ -82,7 +82,7 @@ export class Header implements OnInit, OnDestroy {
       year: 'numeric',
       month: 'long',
       day: '2-digit',
-      weekday: 'long',
+      weekday: isArabic ? 'long' : 'short',
       calendar: 'gregory',
     }).format(now);
 
@@ -90,7 +90,7 @@ export class Header implements OnInit, OnDestroy {
       year: 'numeric',
       month: 'long',
       day: '2-digit',
-      weekday: 'long',
+      weekday: isArabic ? 'long' : 'short',
       era: 'short',
     }).format(now);
 

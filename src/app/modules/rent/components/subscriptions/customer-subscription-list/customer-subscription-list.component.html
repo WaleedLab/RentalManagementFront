@@ -37,7 +37,7 @@
         <div class="text-center py-5">
           <div class="spinner-border text-primary"></div>
         </div>
-      } @else if (!filteredSubscriptions().length) {
+      } @else if (!subscriptions().length) {
         <app-empty-state
           [title]="'No subscription offers found' | translate"
           [description]="'Create subscription offers for customer discounts and loyalty tiers.' | translate"
@@ -56,7 +56,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (subscription of pagedSubscriptions(); track subscription.id) {
+              @for (subscription of subscriptions(); track subscription.id) {
                 <tr>
                   <td>{{ getSubscriptionName(subscription) }}</td>
                   <td>{{ subscription.description || '-' }}</td>

@@ -77,16 +77,6 @@
         </div>
       </div>
 
-      <div class="vehicle-legend" role="list" aria-label="Vehicle status counts">
-        @for (item of vehicleLegendItems(); track item.key) {
-          <div class="vehicle-legend-item" role="listitem">
-            <span class="vehicle-legend-code">{{ item.count }}</span>
-            <i [class]="item.iconClass" [style.color]="item.iconColor"></i>
-            <span class="vehicle-legend-label">{{ item.label }}</span>
-          </div>
-        }
-      </div>
-
       @if (loading()) {
         <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
       } @else if (!vehicles().length) {
@@ -94,7 +84,7 @@
       } @else {
         <div class="vehicle-cards-grid">
           @for (vehicle of vehicles(); track vehicle.id; let cardIndex = $index) {
-            <article class="vehicle-card">
+            <article class="vehicle-card" [ngClass]="getVehicleCardStatusClass(vehicle.status)">
               <div class="vehicle-card__media">
                 <div class="vehicle-card__media-overlay"></div>
                 <img
@@ -186,6 +176,16 @@
           }
         </div>
       }
+
+      <div class="vehicle-legend" role="list" aria-label="Vehicle status counts">
+        @for (item of vehicleLegendItems(); track item.key) {
+          <div class="vehicle-legend-item" role="listitem">
+            <span class="vehicle-legend-code">{{ item.count }}</span>
+            <i [class]="item.iconClass" [style.color]="item.iconColor"></i>
+            <span class="vehicle-legend-label">{{ item.label }}</span>
+          </div>
+        }
+      </div>
 
       @if (!loading() && totalCount() > 0) {
         <app-pagination-bar

@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title></title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; direction: rtl; color: #1f2937; }
+    h2, h3, p { margin: 0; }
+    h3 { font-size: 18px; margin-bottom: 10px; }
+    p { margin-bottom: 5px; }
+    p:last-child { margin-bottom: 20px; }
+    .my-table { width: 100%; table-layout: fixed; }
+    .my-table th, .my-table td {
+      padding: 8px 10px;
+      text-align: center;
+      border: none;
+      vertical-align: middle;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+    .my-table th { background-color: #f2f2f2; }
+    .my-table td:nth-child(1), .my-table td:nth-child(3) { width: 30%; }
+    .my-table td:nth-child(2) { width: 40%; }
+    .mtable { width: 100%; margin: 20px 0; table-layout: fixed; }
+    .mtable td {
+      padding: 6px 6px;
+      font-size: 14px;
+      line-height: 1.6;
+      vertical-align: middle;
+    }
+    .mtable td:nth-child(1),
+    .mtable td:nth-child(2),
+    .mtable td:nth-child(3) { width: 33.333%; }
+    .mtable td:nth-child(1) { text-align: right; }
+    .mtable td:nth-child(2) { text-align: center; }
+    .mtable td:nth-child(3) { text-align: left; direction: rtl; }
+    .voucher-head-cell { vertical-align: middle; }
+    .voucher-head-block {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid #dde3f8;
+      background: #f8faff;
+      border-radius: 12px;
+      padding: 8px 10px;
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 46px;
+    }
+    .voucher-head-label {
+      font-weight: 700;
+      color: #4b5563;
+      font-size: 13px;
+    }
+    .voucher-title-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 10px 18px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #eef2ff 0%, #f8faff 100%);
+      border: 1px solid #dbe4ff;
+      box-sizing: border-box;
+      min-height: 46px;
+    }
+    .voucher-title {
+      margin: 0;
+      font-size: 34px;
+      font-weight: 700;
+      color: #1f2c7a;
+    }
+    .metric-badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #2d3a8c;
+      font-weight: 700;
+      border: 1px solid #d6ddff;
+    }
+    .metric-badge--date {
+      background: #f3f4f6;
+      color: #374151;
+      border-color: #e5e7eb;
+      direction: rtl;
+    }
+    .header-column { width: 30%; }
+    .rtl { direction: rtl; text-align: right !important; }
+    .ltr { direction: ltr; text-align: left !important; }
+    .header { font-weight: 600; }
+    .label-ar {
+      display: block;
+      direction: rtl;
+      text-align: right;
+      font-weight: 700;
+      color: #1f2937;
+    }
+    .label-en {
+      display: block;
+      direction: ltr;
+      text-align: left;
+      color: #4b5563;
+      font-weight: 600;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+    .field-label-ar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      direction: rtl;
+      text-align: center;
+      font-weight: 700;
+      color: #1e3a8a;
+      font-size: 13px;
+      line-height: 1.4;
+      background: #eaf0ff;
+      border: 1px solid #c8d6ff;
+      border-radius: 0;
+      padding: 7px 10px;
+      min-height: 36px;
+      width: 100%;
+      position: relative;
+      box-sizing: border-box;
+    }
+    .field-label-en {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      direction: ltr;
+      text-align: center;
+      color: #334155;
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 1.4;
+      background: #eaf0ff;
+      border: 1px solid #c8d6ff;
+      border-radius: 0;
+      padding: 7px 10px;
+      min-height: 36px;
+      width: 100%;
+      position: relative;
+      box-sizing: border-box;
+    }
+    .field-label-ar::before,
+    .field-label-en::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 12px;
+      border-top: 1px solid #cbd5e1;
+      transform: translateY(-50%);
+    }
+    .field-label-ar::before {
+      left: -12px;
+    }
+    .field-label-en::before {
+      right: -12px;
+    }
+    .field-value {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      font-weight: 700;
+      color: #111827;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 0;
+      padding: 7px 10px;
+      min-height: 36px;
+      line-height: 1.4;
+    }
+    .field-row td {
+      padding: 0 !important;
+      border: 0;
+    }
+    .field-row td:nth-child(1) .field-label-ar {
+      border-radius: 10px 0 0 10px;
+      border-right: 0;
+    }
+    .field-row td:nth-child(2) .field-value {
+      border-radius: 0;
+    }
+    .field-row td:nth-child(3) .field-label-en {
+      border-radius: 0 10px 10px 0;
+      border-left: 0;
+    }
+    .footer { text-align: center; margin-top: 20px; }
+    .doc-header td { vertical-align: top; line-height: 1.6; }
+    .doc-header td:first-child { text-align: right; }
+    .doc-header td:nth-child(2) { text-align: center; }
+    .doc-header td:last-child { text-align: left; direction: ltr; }
+    .header-meta {
+      text-align: center !important;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .preview-banner {
+      margin: 8px auto 14px;
+      width: fit-content;
+      padding: 6px 18px;
+      border-radius: 999px;
+      border: 1px solid #d7dbe7;
+      background: #f8faff;
+      color: #1f2c7a;
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      text-align: center;
+    }
+    .section-box {
+      border: 1px solid #d7dbe7;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 10px;
+      background: #fff;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #434ea9;
+      margin-bottom: 6px;
+    }
+    .voucher-note {
+      margin-top: 10px;
+      line-height: 1.9;
+      font-size: 14px;
+      border: 1px dashed #cfd6ea;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #fcfdff;
+    }
+    .note-title {
+      display: inline-block;
+      font-weight: 700;
+      color: #434ea9;
+      margin-left: 8px;
+    }
+    .signatures-wrap {
+      margin-top: 18px;
+      border: 1px solid #e4e7f2;
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #fff;
+    }
+    .signatures-wrap .my-table td {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+    .signatures-wrap .my-table tr:first-child td {
+      border-bottom: 1px solid #eef2ff;
+    }
+    .sig-title-ar {
+      display: block;
+      direction: rtl;
+      text-align: right;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 2px;
+    }
+    .sig-title-en {
+      display: block;
+      direction: ltr;
+      text-align: left;
+      color: #374151;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .sign-line {
+      display: block;
+      width: 88%;
+      margin: 0 auto;
+      border-top: 1px dashed #9ca3af;
+      height: 1px;
+    }
+    @media print { body { margin: 12px; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const payloadKey = params.get('payloadKey');
+      let payload = null;
+      if (payloadKey) {
+        try {
+          const raw = localStorage.getItem(payloadKey);
+          if (raw) {
+            payload = JSON.parse(raw);
+            localStorage.removeItem(payloadKey);
+          }
+        } catch (e) {
+          payload = null;
+        }
+      }
+      const get = (k, fallback = '') => {
+        if (payload && Object.prototype.hasOwnProperty.call(payload, k)) {
+          const value = payload[k];
+          return value === null || value === undefined ? '' : String(value);
+        }
+        return params.get(k) || fallback;
+      };
+      const show = (v) => {
+        const text = String(v ?? '').trim();
+        return text ? text : '.---.';
+      };
+      const root = document.getElementById('root');
+      const esc = (v) => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+      const num = (v) => (v === null || v === undefined || v === '' ? '' : v);
+
+      const dir = get('dir', 'rtl').toLowerCase() === 'ltr' ? 'ltr' : 'rtl';
+      document.documentElement.setAttribute('dir', dir);
+      document.body.style.direction = dir;
+      const isPrintMode = get('autoPrint', '0') === '1';
+      if (isPrintMode) {
+        document.title = '';
+      }
+
+      const template = get('template', 'generic');
+      if (template === 'voucher' && root) {
+        const paid = num(get('paid', ''));
+        const bondType = Number(get('bondType', '0'));
+        const paymentType = Number(get('paymentType', '0'));
+        const voucherTitle = bondType === 2 ? 'سند صرف' : 'سند قبض';
+        const personTitleAr = bondType === 1 ? 'استلمت من / ' : 'اصرفوا الى / ';
+        const personTitleEn = bondType === 1 ? 'Received from' : 'Pay To';
+        const paymentMethodAr =
+          paymentType === 1 ? 'نقدًا' :
+          paymentType === 2 ? 'شبكة' :
+          paymentType === 3 ? 'شيك' :
+          paymentType === 4 ? 'تحويل بنكي' :
+          paymentType === 5 ? ' نقداً/بنكي' : '';
+        const status = Number(get('status', '0'));
+        const normalizeDate = (raw) => {
+          const text = String(raw ?? '').trim();
+          if (!text) return '';
+          const parsed = new Date(text);
+          if (!Number.isNaN(parsed.getTime())) {
+            return parsed.toLocaleDateString('ar-SA');
+          }
+          return text.split(' ')[0] || text;
+        };
+        const dateValue = esc(show(normalizeDate(get('date', get('printDate', '')))));
+        const customer = esc(show(get('customer', '')));
+        const paidString = esc(show(get('paidString', '')));
+        const operationNumber = esc(show(get('operationNumber', '')));
+        const bankName = esc(show(get('bankName', '')));
+        const paidBank = esc(show(get('paidBank', '')));
+        const paidCash = esc(show(get('paidCash', '')));
+        const cashName = esc(show(get('cashName', '')));
+        const vehicleName = esc(show(get('vehicleName', '')));
+        const vehicleCategory = esc(show(get('vehicleCategory', '')));
+        const plateNumber = esc(show(get('plateNumber', '')));
+        const bookingNumber = esc(show(get('bookingNumber', '')));
+        const description = get('description', '');
+        const branch = esc(show(get('branchName', '')));
+        const taxRecord = esc(show(get('taxRecord', '')));
+        const logoRaw = String(get('logoUrl', '/assets/images/logo/logo-icon.png') || '').trim();
+        const logo = logoRaw || '/assets/images/logo/logo-icon.png';
+        const companyNameAr = esc(show(get('companyNameAr', 'شركة الطريق المتين المحدودة')));
+        const companySubNameAr = esc(show(get('companySubNameAr', 'لتأجير السيارات')));
+        const companyBrandArLine1 = esc(show(get('companyBrandArLine1', 'الطريق المتين')));
+        const companyBrandArLine2 = esc(show(get('companyBrandArLine2', 'لتأجير السيارات')));
+        const companyNameEn = esc(show(get('companyNameEn', 'Solidroad Co. Ltd')));
+        const companySubNameEn = esc(show(get('companySubNameEn', 'Rent A Car')));
+        const voucherDetailsRaw = payload && Array.isArray(payload['voucherDetails'])
+          ? payload['voucherDetails']
+          : [];
+        const voucherDetailsRows = voucherDetailsRaw.map((row) => {
+          const source = row && typeof row === 'object' ? row : {};
+          const account = esc(show(source['account']));
+          const amount = esc(show(source['amount']));
+          const noteRow = esc(show(source['note']));
+          return `
+            <tr class="field-row">
+              <td class="header header-column rtl"><span class="label-ar">الحساب</span></td>
+              <td><span class="field-value">${account}</span></td>
+              <td class="header ltr"><span class="label-en">Account</span></td>
+            </tr>
+            <tr class="field-row">
+              <td class="header header-column rtl"><span class="label-ar">المبلغ</span></td>
+              <td><span class="field-value">${amount}</span></td>
+              <td class="header ltr"><span class="label-en">Amount</span></td>
+            </tr>
+            <tr class="field-row">
+              <td class="header header-column rtl"><span class="label-ar">البيان</span></td>
+              <td><span class="field-value">${noteRow}</span></td>
+              <td class="header ltr"><span class="label-en">Note</span></td>
+            </tr>
+          `;
+        }).join('');
+
+        let paymentExtra = '';
+        if (paymentType === 2) {
+          paymentExtra = `
+            <tr><td class="header header-column rtl"><span class="label-ar">رقم العملية</span></td><td><span>${operationNumber}</span></td><td class="header ltr"><span class="label-en">Operation Number</span></td></tr>
+          `;
+        } else if (paymentType === 4 || paymentType === 3) {
+          paymentExtra = `
+            <tr><td class="header header-column rtl"><span class="label-ar">رقم العملية</span></td><td><span>${operationNumber}</span></td><td class="header ltr"><span class="label-en">Operation Number</span></td></tr>
+            <tr><td class="header header-column rtl"><span class="label-ar">اسم البنك</span></td><td><span>${bankName}</span></td><td class="header ltr"><span class="label-en">Bank Name</span></td></tr>
+          `;
+        } else if (paymentType === 5) {
+          paymentExtra = `
+            <tr><td class="header header-column rtl"><span class="label-ar">المبلغ</span></td><td><span>${paidBank}</span></td><td class="header ltr"><span class="label-en">Paid Bank</span></td></tr>
+            <tr><td class="header header-column rtl"><span class="label-ar">اسم البنك</span></td><td><span>${bankName}</span></td><td class="header ltr"><span class="label-en">Bank Name</span></td></tr>
+            <tr><td class="header header-column rtl"><span class="label-ar">المبلغ</span></td><td><span>${paidCash}</span></td><td class="header ltr"><span class="label-en">Paid Cash</span></td></tr>
+            <tr><td class="header header-column rtl"><span class="label-ar">الصندوق</span></td><td><span>${cashName}</span></td><td class="header ltr"><span class="label-en">Cash Name</span></td></tr>
+          `;
+        }
+
+        root.innerHTML = `
+          <table style="width:100%;  padding:1px;" class="doc-header">
+            <tr>
+              <td>
+                <h2 style="margin-right:0px; margin-bottom: 6px;color:#434ea9; text-align:center;">${companyNameAr}</h2>
+                <h3 style="margin-right:0px; margin-top: 6px;color:#434ea9; text-align:center;"> ${companySubNameAr} </h3>
+                <p class="header-meta" style="margin-right:0px; margin-top: 6px;color:#434ea9"> الرقم الضريبي ${taxRecord}</p>
+                <p class="header-meta">فرع ${branch}</p>
+              </td>
+              <td style="text-align: center;">
+                <img src="${logo}" style="width:100px;" onerror="this.style.display='none';">
+                <h3 style="margin-top: 6px; color:#434ea9">${companyBrandArLine1}</h3>
+                <h3 style="margin-top: 6px;color:#434ea9">${companyBrandArLine2}</h3>
+              </td>
+              <td style="text-align: left;">
+                <h2 style="margin-right:0px; margin-bottom: 6px;color:#434ea9; text-align:center;">${companyNameEn}</h2>
+                <h3 style="margin-right:0px; margin-top: 6px;color:#434ea9; text-align:center;">${companySubNameEn}</h3>
+                <p class="header-meta" style="margin-right:0px; margin-top: 6px;color:#434ea9">VAT No: ${taxRecord}</p>
+              </td>
+            </tr>
+          </table>
+          <br />
+          ${status !== 2 && !isPrintMode ? '<div class="preview-banner">للمعاينة فقط</div>' : ''}
+          <table style="width: 100%; margin:20px;" class="mtable">
+            <tr>
+              <td class="header rtl voucher-head-cell">
+                <div class="voucher-head-block">
+                  <span class="voucher-head-label">المبلغ :</span>
+                  <span class="metric-badge">${paid} ريال</span>
+                </div>
+              </td>
+              <td class="header voucher-head-cell">
+                <div class="voucher-title-wrap">
+                  <h2 class="voucher-title">${voucherTitle}</h2>
+                </div>
+              </td>
+              <td class="header ltr voucher-head-cell">
+                <div class="voucher-head-block">
+                  <span class="voucher-head-label">التاريخ:</span>
+                  <span class="metric-badge metric-badge--date">${dateValue}</span>
+                </div>
+              </td>
+            </tr>
+          </table>
+          <div class="section-box">
+            <div class="section-title">بيانات السند</div>
+            <table class="my-table">
+              <tr class="field-row">
+                <td class="header header-column rtl">
+                  <span class="field-label-ar">${personTitleAr}</span>
+                </td>
+                <td><span class="field-value">${customer}</span></td>
+                <td class="header ltr">
+                  <span class="field-label-en">${personTitleEn}</span>
+                </td>
+              </tr>
+              <tr class="field-row">
+                <td class="header header-column rtl">
+                  <span class="field-label-ar">مبلغ وقدره</span>
+                </td>
+                <td><span class="field-value">${paidString}</span></td>
+                <td class="header ltr">
+                  <span class="field-label-en">The sum of</span>
+                </td>
+              </tr>
+              <tr class="field-row">
+                <td class="header header-column rtl">
+                  <span class="field-label-ar">طريقة الدفع</span>
+                </td>
+                <td><span class="field-value">${paymentMethodAr}</span></td>
+                <td class="header ltr">
+                  <span class="field-label-en">Payment method</span>
+                </td>
+              </tr>
+              ${paymentExtra}
+            </table>
+          </div>
+          <div class="section-box">
+            <div class="section-title">بيانات المركبة</div>
+            <table class="my-table">
+              <tr class="field-row">
+                <td class="header header-column rtl"><span class="label-ar">بخصوص السيارة نوع</span></td>
+                <td><span class="field-value">${vehicleCategory}</span></td>
+                <td class="header ltr"><span class="label-en">Vehicle Category</span></td>
+              </tr>
+              <tr class="field-row">
+                <td class="header header-column rtl"><span class="label-ar">رقم اللوحة</span></td>
+                <td><span class="field-value">${plateNumber}</span></td>
+                <td class="header ltr"><span class="label-en">Plate Number</span></td>
+              </tr>
+              <tr class="field-row">
+                <td class="header header-column rtl"><span class="label-ar">رقم الحجز</span></td>
+                <td><span class="field-value">${bookingNumber}</span></td>
+                <td class="header ltr"><span class="label-en">Booking Number</span></td>
+              </tr>
+            </table>
+          </div>
+          <div class="voucher-note">
+            <span class="note-title">ملاحظة:</span>
+            <span>${esc(show(description))}</span>
+          </div>
+          ${!isPrintMode && voucherDetailsRows ? `
+          <div class="section-box">
+            <div class="section-title">تفاصيل السند</div>
+            <table class="my-table">
+              ${voucherDetailsRows}
+            </table>
+          </div>
+          ` : ''}
+          <div class="signatures-wrap">
+            <table class="my-table">
+              <tr>
+                <td class="header rtl">
+                  <span class="sig-title-ar">المستلم</span>
+                  <span class="sig-title-en">Received by</span>
+                </td>
+                <td class="header" style="text-align: center;">
+                  <span class="sig-title-ar" style="text-align:center;">المحاسب</span>
+                  <span class="sig-title-en" style="text-align:center;">Accountant</span>
+                </td>
+                <td class="header ltr">
+                  <span class="sig-title-ar">المدير</span>
+                  <span class="sig-title-en">Manager</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="rtl"><span class="sign-line"></span></td>
+                <td class="rtl" style="text-align: center;"><span class="sign-line"></span></td>
+                <td class="ltr"><span class="sign-line"></span></td>
+              </tr>
+            </table>
+          </div>
+          <table style="width:100%"><tr></tr></table>
+          <table style="width:100%">
+            <tr><td><div style="border-bottom:1px solid #1e1e1e;width:100%;margin-bottom:5px;"></div></td></tr>
+          </table>
+          <table style="width:100%; margin-top: 6px; margin-bottom: 6px;">
+            <tr>
+              <td style="text-align:center; color:#434ea9; font-weight:700;">${companyNameAr}</td>
+              <td style="text-align:center; color:#434ea9; font-weight:700;">${companyNameEn}</td>
+            </tr>
+            <tr>
+              <td style="text-align:center; color:#434ea9;">${companySubNameAr}</td>
+              <td style="text-align:center; color:#434ea9;">${companySubNameEn}</td>
+            </tr>
+          </table>
+        `;
+      } else if (template === 'journal' && root) {
+        const normalizeDate = (raw) => {
+          const text = String(raw ?? '').trim();
+          if (!text) return '-';
+          const parsed = new Date(text);
+          if (!Number.isNaN(parsed.getTime())) {
+            return parsed.toLocaleString('ar-SA');
+          }
+          return text;
+        };
+        const branch = esc(get('branchName', '-'));
+        const taxRecord = esc(get('taxRecord', '-'));
+        const logoRaw = String(get('logoUrl', '/assets/images/logo/logo-icon.png') || '').trim();
+        const logo = logoRaw || '/assets/images/logo/logo-icon.png';
+        const dateValue = esc(normalizeDate(get('date', get('printDate', '-'))));
+        const statusLabel = esc(get('statusLabel', '-'));
+        const journalTypeLabel = esc(get('journalTypeLabel', '-'));
+        const operationTypeLabel = esc(get('operationTypeLabel', '-'));
+        const financialYear = esc(get('financialYear', '-'));
+        const debit = esc(get('debit', '-'));
+        const credit = esc(get('credit', '-'));
+        const balance = esc(get('balance', '-'));
+        const docNo = esc(get('documentNo', '-'));
+
+        root.innerHTML = `
+          <table style="width:100%;  padding:1px;" class="doc-header">
+            <tr>
+              <td>
+                <h2 style="margin-right:0px; margin-bottom: 6px;color:#434ea9; text-align:center;">شركة الطريق المتين المحدودة</h2>
+                <h3 style="margin-right:0px; margin-top: 6px;color:#434ea9; text-align:center;"> لتأجير السيارات </h3>
+                <p class="header-meta" style="margin-right:0px; margin-top: 6px;color:#434ea9"> الرقم الضريبي ${taxRecord}</p>
+                <p class="header-meta">فرع ${branch}</p>
+              </td>
+              <td style="text-align: center;">
+                <img src="${logo}" style="width:100px;" onerror="this.style.display='none';">
+                <h3 style="margin-top: 6px; color:#434ea9">الطريق المتين</h3>
+                <h3 style="margin-top: 6px;color:#434ea9">لتأجير السيارات</h3>
+              </td>
+              <td style="text-align: left;">
+                <h2 style="margin-right:0px; margin-bottom: 6px;color:#434ea9; text-align:center;">Solidroad Co. Ltd</h2>
+                <h3 style="margin-right:0px; margin-top: 6px;color:#434ea9; text-align:center;">Rent A Car</h3>
+                <p class="header-meta" style="margin-right:0px; margin-top: 6px;color:#434ea9">VAT No: ${taxRecord}</p>
+              </td>
+            </tr>
+          </table>
+          <br />
+          <table style="width: 100%; margin:20px;" class="mtable">
+            <tr>
+              <td class="header rtl">رقم القيد : <span>${docNo}</span></td>
+              <td class="header"><h2 style="margin-right:120px;">قيد يومي</h2></td>
+              <td class="header ltr">التاريخ:<span>${dateValue}</span></td>
+            </tr>
+          </table>
+          <table class="my-table">
+            <tr>
+              <td class="header header-column rtl">الحالة</td>
+              <td><span>${statusLabel}</span></td>
+              <td class="header ltr">Status</td>
+            </tr>
+            <tr>
+              <td class="header header-column rtl">نوع القيد</td>
+              <td><span>${journalTypeLabel}</span></td>
+              <td class="header ltr">Journal Type</td>
+            </tr>
+            <tr>
+              <td class="header header-column rtl">نوع العملية</td>
+              <td><span>${operationTypeLabel}</span></td>
+              <td class="header ltr">Operation Type</td>
+            </tr>
+            <tr>
+              <td class="header header-column rtl">السنة المالية</td>
+              <td><span>${financialYear}</span></td>
+              <td class="header ltr">Financial Year</td>
+            </tr>
+          </table>
+          <br>
+          <table class="my-table">
+            <tr>
+              <td class="header rtl">مدين Debit</td>
+              <td class="header" style="text-align: center;">دائن Credit</td>
+              <td class="header ltr">الرصيد Balance</td>
+            </tr>
+            <tr>
+              <td class="rtl">${debit}</td>
+              <td class="rtl" style="text-align: center;">${credit}</td>
+              <td class="ltr">${balance}</td>
+            </tr>
+          </table>
+          <br><br>
+          <table class="my-table">
+            <tr>
+              <td class="header rtl">المعد Prepared by</td>
+              <td class="header" style="text-align: center;">المراجع Reviewed by</td>
+              <td class="header ltr">المعتمد Approved by</td>
+            </tr>
+            <tr>
+              <td class="rtl">............................................ </td>
+              <td class="rtl" style="text-align: center;">............................................</td>
+              <td class="ltr">............................................</td>
+            </tr>
+          </table>
+          <table style="width:100%"><tr></tr></table>
+          <table style="width:100%">
+            <tr><td><div style="border-bottom:1px solid #1e1e1e;width:100%;margin-bottom:5px;"></div></td></tr>
+          </table>
+        `;
+      } else if (root) {
+        const rawContent = get('content', '');
+        const decodedContent = payload ? rawContent : decodeURIComponent(rawContent);
+        root.innerHTML = `
+          <div style="border: 1px solid #d1d5db; border-radius: 10px; padding: 20px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <img src="/assets/images/logo/logo-icon.png" alt="logo" style="width:44px;height:44px;object-fit:contain;" onerror="this.style.display='none';" />
+                <div>
+                  <div style="font-size:18px;font-weight:700;color:#111827;">${esc(get('companyName', 'Car Rental Management'))}</div>
+                  <div>${esc(get('documentKind', 'Official Document'))}</div>
+                </div>
+              </div>
+              <div style="font-size:12px;color:#6b7280;text-align:end;">
+                <div>${esc(get('printDateLabel', 'Print Date'))}: ${esc(get('printDate', new Date().toLocaleString()))}</div>
+                <div>${esc(get('branchLabel', 'Branch'))}: ${esc(get('branchName', '-'))}</div>
+                <div>${esc(get('docNoLabel', 'Document No.'))}: ${esc(get('documentNo', '-'))}</div>
+              </div>
+            </div>
+            <h2 style="margin:0 0 12px;font-size:20px;">${esc(get('title', 'Document'))}</h2>
+            ${decodedContent}
+          </div>
+        `;
+      }
+
+      const autoPrint = get('autoPrint', '0') === '1';
+      if (autoPrint) {
+        const triggerPrint = () => {
+          window.focus();
+          window.print();
+        };
+
+        if (document.readyState === 'complete') {
+          setTimeout(triggerPrint, 150);
+        } else {
+          window.addEventListener('load', () => setTimeout(triggerPrint, 150), { once: true });
+        }
+
+        window.addEventListener('afterprint', () => {
+          setTimeout(() => window.close(), 120);
+        }, { once: true });
+      }
+    })();
+  </script>
+</body>
+</html>

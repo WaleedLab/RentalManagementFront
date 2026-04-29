@@ -6,7 +6,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { TENANT_ADMIN_ROLES } from '../../../../../core/auth/access.constants';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
-import { Customer } from '../../../models';
+import { Customer, CustomerOrderBy } from '../../../models';
 import { CustomerSubscription } from '../../../models/subscriptions/customer-subscription.model';
 import { CustomerService } from '../../../services/customers/customer.service';
 import { CustomerSubscriptionService } from '../../../services/subscriptions/customer-subscription.service';
@@ -16,16 +16,6 @@ import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
-
-type CustomerSearchField =
-  | 'all'
-  | 'subscription'
-  | 'nameAr'
-  | 'phone'
-  | 'licenseExpiry'
-  | 'identity'
-  | 'license'
-  | 'birthDate';
 
 @Component({
   selector: 'app-customer-list',
@@ -46,28 +36,22 @@ export class CustomerListComponent implements OnInit {
   customerSubscriptions = signal<CustomerSubscription[]>([]);
   canManageSubscriptions = computed(() => this.authState.hasAnyRole(TENANT_ADMIN_ROLES));
   search = signal('');
-  searchField = signal<CustomerSearchField>('all');
+  orderBy = signal<CustomerOrderBy>('CreatedAt');
+  orderByDirection = signal<'ASC' | 'DESC'>('DESC');
   pageNumber = signal(1);
   pageSize = signal(10);
   totalCount = signal(0);
   totalPages = signal(0);
   loading = signal(false);
-  searchFieldOptions: Array<{ value: CustomerSearchField; label: string }> = [
-    { value: 'all', label: 'All Fields' },
-    { value: 'subscription', label: 'Subscription' },
-    { value: 'nameAr', label: 'Arabic Name' },
-    { value: 'phone', label: 'Phone' },
-    { value: 'licenseExpiry', label: 'License Expiry Date' },
-    { value: 'identity', label: 'Identity' },
-    { value: 'license', label: 'License' },
-    { value: 'birthDate', label: 'Birth Date' },
-  ];
-  searchFieldFilterOptions = computed<SmoothSelectOption[]>(() =>
-    this.searchFieldOptions.map(option => ({
-      label: option.label,
-      value: option.value,
-    })),
-  );
+  orderByFilterOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('Created Date'), value: 'CreatedAt' },
+    { label: this.translate.instant('Name'), value: 'Name' },
+    { label: this.translate.instant('Nationality'), value: 'Nationality' },
+  ]);
+  orderDirectionFilterOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('Descending'), value: 'DESC' },
+    { label: this.translate.instant('Ascending'), value: 'ASC' },
+  ]);
 
   ngOnInit(): void {
     this.loadSubscriptions();
@@ -81,9 +65,10 @@ export class CustomerListComponent implements OnInit {
         fleetId: this.authState.fleetId() || undefined,
         pageNumber: this.pageNumber(),
         pageSize: this.pageSize(),
-        search: this.search() || undefined,
-        searchField: this.searchField() === 'all' ? undefined : this.searchField(),
+        search: this.search().trim() || undefined,
         isActive: '',
+        orderBy: this.orderBy(),
+        orderByDirection: this.orderByDirection(),
       })
       .subscribe({
         next: page => {
@@ -112,8 +97,22 @@ export class CustomerListComponent implements OnInit {
     this.load();
   }
 
-  onSearchFieldChange(field: CustomerSearchField): void {
-    this.searchField.set(field);
+  onOrderByChange(value: CustomerOrderBy): void {
+    const normalized = (value ?? 'CreatedAt') as CustomerOrderBy;
+    if (this.orderBy() === normalized) {
+      return;
+    }
+    this.orderBy.set(normalized);
+    this.pageNumber.set(1);
+    this.load();
+  }
+
+  onOrderDirectionChange(value: 'ASC' | 'DESC'): void {
+    const normalized: 'ASC' | 'DESC' = value === 'ASC' ? 'ASC' : 'DESC';
+    if (this.orderByDirection() === normalized) {
+      return;
+    }
+    this.orderByDirection.set(normalized);
     this.pageNumber.set(1);
     this.load();
   }
@@ -230,12 +229,33 @@ export class CustomerListComponent implements OnInit {
 
   private sortCustomersForStableDisplay(items: Customer[]): Customer[] {
     return [...items].sort((a, b) => {
+      const orderDirectionFactor = this.orderByDirection() === 'ASC' ? 1 : -1;
+      const orderBy = this.orderBy();
+
+      if (orderBy === 'Name') {
+        const nameA = String(this.getArabicName(a) || '').toLowerCase();
+        const nameB = String(this.getArabicName(b) || '').toLowerCase();
+        const diff = nameA.localeCompare(nameB, undefined, { sensitivity: 'base' });
+        if (diff !== 0) {
+          return diff * orderDirectionFactor;
+        }
+      }
+
+      if (orderBy === 'Nationality') {
+        const nationalityA = String(a.nationality || '').toLowerCase();
+        const nationalityB = String(b.nationality || '').toLowerCase();
+        const diff = nationalityA.localeCompare(nationalityB, undefined, { sensitivity: 'base' });
+        if (diff !== 0) {
+          return diff * orderDirectionFactor;
+        }
+      }
+
       const aDate = new Date((a as unknown as Record<string, unknown>)['createdAt'] as string ?? '').getTime();
       const bDate = new Date((b as unknown as Record<string, unknown>)['createdAt'] as string ?? '').getTime();
       const safeADate = Number.isFinite(aDate) ? aDate : 0;
       const safeBDate = Number.isFinite(bDate) ? bDate : 0;
       if (safeADate !== safeBDate) {
-        return safeBDate - safeADate;
+        return (safeBDate - safeADate) * orderDirectionFactor;
       }
 
       const idA = Number(a.id);

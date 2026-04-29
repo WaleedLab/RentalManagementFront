@@ -16,7 +16,9 @@
         <div class="row g-4">
           <div class="col-lg-4">
             @if (imageUrl()) {
-              <img class="img-fluid rounded border" [src]="imageUrl()" alt="vehicle" />
+              <div class="vehicle-details-image-frame">
+                <img class="vehicle-details-image" [src]="imageUrl()" alt="vehicle" />
+              </div>
             }
           </div>
           <div class="col-lg-8">

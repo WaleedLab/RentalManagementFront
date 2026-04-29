@@ -80,14 +80,16 @@ export class VehicleService {
       BranchId: params.branchId ?? undefined,
     });
 
+    // Prefer the explicit endpoint that maps to GetVehicleStatusCountsQuery.
     return this.api.getData<VehicleStatusCountsResponse>(
-      `${this.base}/StatusCounts`,
+      `${this.base}/GetVehicleStatusCounts`,
       requestParams,
       { suppressErrorToast: true },
     ).pipe(
+      // Backward compatibility for older API routes.
       catchError(() =>
         this.api.getData<VehicleStatusCountsResponse>(
-          `${this.base}/GetVehicleStatusCounts`,
+          `${this.base}/StatusCounts`,
           requestParams,
           { suppressErrorToast: true },
         ),

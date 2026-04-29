@@ -19,3 +19,12 @@ export interface CustomerSubscriptionUpsertRequest {
   subscriptionApprovedAfter: number;
   fleetId?: string;
 }
+
+export interface CustomerSubscriptionPaginatedRequest {
+  fleetId?: string | null;
+  pageNumber: number;
+  pageSize: number;
+  search?: string;
+  orderByDirection?: 'ASC' | 'DESC';
+  orderBy?: string;
+}

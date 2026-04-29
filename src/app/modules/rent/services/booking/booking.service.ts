@@ -74,12 +74,13 @@ export class BookingService {
   getById(id: string, fleetId?: string | null): Observable<Booking> {
     const normalizedFleetId = normalizeFleetId(fleetId);
     if (!normalizedFleetId) {
-      return this.getByIdFromList(id);
+      return throwError(() => new Error('FleetId is required to load booking details'));
     }
 
-    return this.api.getData<unknown>(`${this.base}/${id}/${normalizedFleetId}`).pipe(
+    const encodedId = encodeURIComponent(String(id));
+    const encodedFleetId = encodeURIComponent(normalizedFleetId);
+    return this.api.getData<unknown>(`${this.base}/${encodedId}/${encodedFleetId}`).pipe(
       map(normalizeBooking),
-      catchError(error => this.getByIdFromList(id, normalizedFleetId, error)),
     );
   }
 
@@ -322,31 +323,6 @@ export class BookingService {
     return status;
   }
 
-  private getByIdFromList(
-    id: string,
-    fleetId?: string,
-    sourceError?: unknown,
-  ): Observable<Booking> {
-    return this.api
-      .getData<unknown[]>(
-        `${this.base}/List`,
-        {
-          ...buildFleetQueryParams(fleetId, 'id'),
-        },
-        { suppressErrorToast: true },
-      )
-      .pipe(
-        map(items => (items ?? []).map(normalizeBooking)),
-        map(items => items.find(item => String(item.id) === String(id))),
-        map(item => {
-          if (!item) {
-            throw sourceError ?? new Error('Booking not found');
-          }
-          return item;
-        }),
-        catchError(error => throwError(() => sourceError ?? error)),
-      );
-  }
 }
 
 export interface BookingStatusCountsResponse {

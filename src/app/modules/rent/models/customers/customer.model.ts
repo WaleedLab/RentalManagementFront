@@ -33,11 +33,15 @@ export interface Customer {
   imageUrl?: string | null;
 }
 
+export type CustomerOrderBy = 'CreatedAt' | 'Name' | 'Nationality';
+
 export interface CustomerFilters {
   fleetId?: string;
   search?: string;
   searchField?: string;
   isActive?: boolean | '';
+  orderByDirection?: 'ASC' | 'DESC';
+  orderBy?: CustomerOrderBy;
   pageNumber: number;
   pageSize: number;
 }

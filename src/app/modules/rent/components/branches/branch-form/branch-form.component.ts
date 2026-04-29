@@ -23,6 +23,7 @@ export class BranchFormComponent implements OnInit {
   private static readonly ARABIC_NAME_REGEX = /^[\u0600-\u06FF0-9\s.'-]{2,255}$/;
   private static readonly ENGLISH_NAME_REGEX = /^[A-Za-z0-9\s.'-]{0,255}$/;
   private static readonly BRANCH_CODE_REGEX = /^[A-Za-z0-9-_]{0,100}$/;
+  private static readonly CONTACT_NUMBER_REGEX = /^(?:\+?[0-9]\s?[-()]?){7,20}$/;
 
   private fb = inject(NonNullableFormBuilder);
   private authState = inject(AuthStateService);
@@ -41,6 +42,11 @@ export class BranchFormComponent implements OnInit {
     nameAr: ['', [Validators.required, Validators.maxLength(255), Validators.pattern(BranchFormComponent.ARABIC_NAME_REGEX)]],
     nameEn: ['', [Validators.maxLength(255), Validators.pattern(BranchFormComponent.ENGLISH_NAME_REGEX)]],
     code: ['', [Validators.maxLength(100), Validators.pattern(BranchFormComponent.BRANCH_CODE_REGEX)]],
+    street: ['', [Validators.maxLength(250)]],
+    neighborHood: ['', [Validators.maxLength(150)]],
+    buldingNumber: ['', [Validators.maxLength(100)]],
+    city: ['', [Validators.maxLength(150)]],
+    contactNumber: ['', [Validators.maxLength(50), Validators.pattern(BranchFormComponent.CONTACT_NUMBER_REGEX)]],
     isActive: [true],
   });
 
@@ -74,6 +80,11 @@ export class BranchFormComponent implements OnInit {
           nameAr: branch.nameAr ?? '',
           nameEn: branch.nameEn ?? '',
           code: branch.code ?? '',
+          street: branch.street ?? '',
+          neighborHood: branch.neighborHood ?? '',
+          buldingNumber: branch.buldingNumber ?? '',
+          city: branch.city ?? '',
+          contactNumber: branch.contactNumber ?? '',
           isActive: !!branch.isActive,
         });
       },
@@ -105,6 +116,11 @@ export class BranchFormComponent implements OnInit {
       nameAr: raw.nameAr.trim(),
       nameEn: raw.nameEn.trim() || undefined,
       code: raw.code.trim() || undefined,
+      street: raw.street.trim() || undefined,
+      neighborHood: raw.neighborHood.trim() || undefined,
+      buldingNumber: raw.buldingNumber.trim() || undefined,
+      city: raw.city.trim() || undefined,
+      contactNumber: raw.contactNumber.trim() || undefined,
       isActive: raw.isActive,
     };
 
