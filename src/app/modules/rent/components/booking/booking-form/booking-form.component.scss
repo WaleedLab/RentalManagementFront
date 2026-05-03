@@ -641,3 +641,57 @@
 :host-context(body.dark-only) .booking-limits-alert__title {
   color: #fecaca;
 }
+
+.nationality-field-hint {
+  font-size: 0.72rem;
+  color: var(--bs-secondary-color, #64748b);
+  margin-top: 0.25rem;
+}
+
+.nationality-suggestions {
+  z-index: 40;
+  top: 100%;
+  left: 0;
+  margin-top: 0.2rem;
+  max-height: 14rem;
+  overflow-y: auto;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: var(--bs-body-bg, #fff);
+}
+
+.nationality-suggestions__btn {
+  color: var(--bs-body-color, #0f172a);
+  font-size: 0.82rem;
+  border: 0;
+  border-radius: 0;
+}
+
+.nationality-suggestions__btn:hover,
+.nationality-suggestions__btn:focus-visible {
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--bs-body-color, #0f172a);
+}
+
+.nationality-suggestions__item + .nationality-suggestions__item {
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+:host-context(body.dark-only) .nationality-suggestions,
+:host-context([data-bs-theme='dark']) .nationality-suggestions {
+  border-color: rgba(100, 116, 139, 0.52);
+  background: linear-gradient(155deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.96));
+}
+
+:host-context(body.dark-only) .nationality-suggestions__btn,
+:host-context([data-bs-theme='dark']) .nationality-suggestions__btn {
+  color: rgba(241, 245, 249, 0.96);
+}
+
+:host-context(body.dark-only) .nationality-suggestions__btn:hover,
+:host-context(body.dark-only) .nationality-suggestions__btn:focus-visible,
+:host-context([data-bs-theme='dark']) .nationality-suggestions__btn:hover,
+:host-context([data-bs-theme='dark']) .nationality-suggestions__btn:focus-visible {
+  background: rgba(59, 130, 246, 0.18);
+  color: rgba(241, 245, 249, 0.98);
+}

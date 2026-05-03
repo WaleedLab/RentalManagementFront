@@ -40,6 +40,10 @@ import { CategoryVehicleService } from '../../../services/category-vehicles/cate
 import { CustomerService } from '../../../services/customers/customer.service';
 import { SettingService } from '../../../services/settings/setting.service';
 import { VehicleService } from '../../../services/vehicles/vehicle.service';
+import {
+  type BookingNationalitySuggestion,
+  searchBookingNationalities,
+} from './booking-nationality.options';
 
 @Component({
   selector: 'app-booking-form',
@@ -151,6 +155,8 @@ export class BookingFormComponent implements OnInit {
       value: String(counting.id),
     })),
   ]);
+  nationalitySuggestions = signal<BookingNationalitySuggestion[]>([]);
+  nationalitySuggestionsOpen = signal(false);
 
   private readonly customerBasicFields: Array<{
     label: string;
@@ -214,7 +220,7 @@ export class BookingFormComponent implements OnInit {
     customerNameAr: ['', [Validators.maxLength(200)]],
     customerFirstMobileNumber: ['', [Validators.maxLength(20)]],
     customerAddress: ['', [Validators.maxLength(500)]],
-    customerNationality: ['', [Validators.maxLength(100)]],
+    customerNationality: ['', [Validators.maxLength(200)]],
     customerDrivingLicenseNumber: ['', [Validators.maxLength(50)]],
     customerDateDrivinglicense: [''],
     customerBirthDay: [''],
@@ -277,6 +283,10 @@ export class BookingFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.refreshNationalitySuggestionList();
+    });
+
     const fleetId = this.authState.fleetId() || undefined;
     const branchId = Number(this.authState.branchId() || 0) || undefined;
     forkJoin({
@@ -889,15 +899,18 @@ export class BookingFormComponent implements OnInit {
             );
             return;
           }
+          // No customer from backend — new customer will be created on save: default license number to national ID.
           const currentSelected = this.selectedCustomer();
           const currentSelectedIqama = currentSelected
             ? this.normalizeAsciiDigits(
                 this.valueOf(currentSelected.idNationality ?? currentSelected.identityNumber),
               )
             : '';
+          const patch: Record<string, string> = { customerDrivingLicenseNumber: iqama };
           if (currentSelectedIqama !== iqama) {
-            this.form.patchValue({ customerId: '' }, { emitEvent: false });
+            patch['customerId'] = '';
           }
+          this.form.patchValue(patch, { emitEvent: false });
         },
         error: () => {},
       });
@@ -911,6 +924,29 @@ export class BookingFormComponent implements OnInit {
     }
     this.form.patchValue({ customerIqama: iqama }, { emitEvent: true });
     this.customerLookupByIqama(iqama);
+  }
+
+  onNationalityFocus(): void {
+    this.nationalitySuggestionsOpen.set(true);
+    this.refreshNationalitySuggestionList();
+  }
+
+  onNationalityInput(): void {
+    this.nationalitySuggestionsOpen.set(true);
+    this.refreshNationalitySuggestionList();
+  }
+
+  onNationalityBlur(): void {
+    window.setTimeout(() => {
+      this.nationalitySuggestionsOpen.set(false);
+    }, 180);
+  }
+
+  pickNationalitySuggestion(event: Event, suggestion: BookingNationalitySuggestion): void {
+    event.preventDefault();
+    this.form.controls.customerNationality.patchValue(suggestion.canonicalValue, { emitEvent: true });
+    this.nationalitySuggestionsOpen.set(false);
+    this.nationalitySuggestions.set([]);
   }
 
   // onCustomerIqamaKeydown(event: KeyboardEvent): void {
@@ -2106,6 +2142,17 @@ export class BookingFormComponent implements OnInit {
     const hh = String(date.getHours()).padStart(2, '0');
     const min = String(date.getMinutes()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+  }
+
+  private refreshNationalitySuggestionList(): void {
+    const q = this.valueOf(this.form.controls.customerNationality.value);
+    this.nationalitySuggestions.set(
+      searchBookingNationalities(q, {
+        asia: this.translate.instant('NatBookingRegion.Asia'),
+        africa: this.translate.instant('NatBookingRegion.Africa'),
+        other: this.translate.instant('NatBookingRegion.RestOfWorld'),
+      }),
+    );
   }
 
   /**

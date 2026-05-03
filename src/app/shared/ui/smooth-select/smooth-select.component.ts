@@ -78,7 +78,11 @@ export class SmoothSelectComponent implements ControlValueAccessor, OnInit {
       return this.options;
     }
 
-    return this.options.filter(option => option.label.toLowerCase().includes(query));
+    return this.options.filter(option => {
+      const label = String(option.label).toLowerCase();
+      const value = String(option.value ?? '').toLowerCase();
+      return label.includes(query) || value.includes(query);
+    });
   });
 
   selectedLabel = computed(() => {

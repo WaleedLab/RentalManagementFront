@@ -76,7 +76,40 @@
             </div>
             <div class="col-md-4">
               <label class="form-label">{{ 'Nationality' | translate }} <span class="text-danger">*</span></label>
-              <input class="form-control" formControlName="customerNationality" />
+              <div class="nationality-field position-relative">
+                <input
+                  class="form-control"
+                  formControlName="customerNationality"
+                  maxlength="200"
+                  autocomplete="off"
+                  [attr.aria-label]="'Nationality' | translate"
+                  [attr.aria-expanded]="nationalitySuggestionsOpen() && nationalitySuggestions().length > 0"
+                  [attr.aria-controls]="'nationality-suggest-list'"
+                  (focus)="onNationalityFocus()"
+                  (input)="onNationalityInput()"
+                  (blur)="onNationalityBlur()"
+                />
+                @if (nationalitySuggestionsOpen() && nationalitySuggestions().length > 0) {
+                  <ul
+                    id="nationality-suggest-list"
+                    class="nationality-suggestions list-group position-absolute w-100 shadow-sm"
+                    role="listbox"
+                  >
+                    @for (s of nationalitySuggestions(); track s.canonicalValue) {
+                      <li class="list-group-item p-0 nationality-suggestions__item" role="option">
+                        <button
+                          type="button"
+                          class="btn btn-link nationality-suggestions__btn text-start w-100 py-2 px-3 text-decoration-none"
+                          (mousedown)="pickNationalitySuggestion($event, s)"
+                        >
+                          {{ s.label }}
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+              <div class="form-text nationality-field-hint">{{ 'Nationality type or pick suggestion' | translate }}</div>
             </div>
             <div class="col-md-4">
               <label class="form-label">{{ 'Driving License Expiry Date' | translate }} <span class="text-danger">*</span></label>
