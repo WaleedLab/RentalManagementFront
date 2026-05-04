@@ -159,8 +159,17 @@ export class VehicleListComponent implements OnInit {
     }
   }
 
+  /** Card title: serial only (year & engine appear on the card badges). */
   getVehicleTitle(vehicle: Vehicle): string {
-    return `${vehicle.make} ${vehicle.model} (${vehicle.year})`;
+    const serial = vehicle.serialNumber?.trim();
+    if (serial) {
+      return serial;
+    }
+    const plate = vehicle.plateNumber?.trim();
+    if (plate) {
+      return plate;
+    }
+    return [vehicle.make, vehicle.model].filter(Boolean).join(' ').trim() || '-';
   }
 
   getBranchName(vehicle: Vehicle): string {

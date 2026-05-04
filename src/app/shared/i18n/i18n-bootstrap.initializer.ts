@@ -4,22 +4,17 @@ import { firstValueFrom } from 'rxjs';
 
 import { LayoutService } from '../services/layout/layout.service';
 
-/** Must match `Language` header component (`app_language`, supported codes). */
-const APP_LANGUAGE_KEY = 'app_language';
-
 /**
- * Applies saved language, loads ngx-translate bundles, and sets document direction
- * before any route (including login). Without this, RTL and `instant()` only run
- * after the header mounts post-login.
+ * Loads ngx-translate bundles and sets **Arabic (RTL)** as the active language before any route
+ * (including login). Optional in-session switch to English remains available from the header.
  */
 export function bootstrapI18nFromStorage(): Promise<void> {
   const translate = inject(TranslateService);
   const layout = inject(LayoutService);
 
-  translate.setDefaultLang('en');
-  const saved = localStorage.getItem(APP_LANGUAGE_KEY)?.toLowerCase();
-  const lang = saved === 'ar' ? 'ar' : 'en';
-  const direction = lang === 'ar' ? 'rtl' : 'ltr';
+  translate.setDefaultLang('ar');
+  const lang = 'ar';
+  const direction = 'rtl';
 
   return firstValueFrom(translate.use(lang)).then(() => {
     layout.applyDirection(direction, lang);

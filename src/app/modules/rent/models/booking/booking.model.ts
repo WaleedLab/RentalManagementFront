@@ -14,25 +14,56 @@ export type BookingStatus =
   | 'Unknown';
 
 /**
- * Aligned with `CarRentalManagament.Application.Common.DTOs.BookingDto` (+ nested customer/vehicle when present).
- * Many fields are optional because list/payment DTOs expose a smaller surface.
+ * Normalized booking row for list/detail screens.
+ *
+ * **Detail (`GET …/Booking/{id}/{fleetId}`)** maps from
+ * `CarRentalManagament.Application.Features.Booking.GetBookingByIdQueryResponse`
+ * (flat snapshot: `CustomerNameAr`, `VehiclePlatnumber`, `CategoryVehicleName`, `Color`, `Urllogo`,
+ * `Stutus`, `TOTAL`, `DateReturnVehical`, `NumberBookingINBasame`, `BranchBuldingNumber`, `CountingCustVehicleName`, …).
+ *
+ * **List / other DTOs** may omit fields or nest `customer` / `vehicle` / `fleet`; the normalizer keeps fallbacks.
  */
 export interface Booking {
   id: string;
   bookingNumber?: string;
+  /** Primary payment / document reference on the booking (`PaymentNumber`). */
+  paymentNumber?: string;
   numberBookingINBasame?: string;
   fleetId: string;
   fleetName?: string;
+  /** Fleet / company logo (`Urllogo`). */
+  urlLogo?: string;
+  /** VAT / tax registration (`TaxNumber`). */
+  taxNumber?: string;
   branchId?: number | null;
   branchName?: string;
+  /** From `GetBookingById` branch address fields. */
+  branchStreet?: string;
+  branchNeighborHood?: string;
+  branchBuildingNumber?: string;
+  branchCity?: string;
   customerId: string;
+  /** Snapshot Arabic name (`CustomerNameAr` / `NameAr` / nested customer). */
   customerName?: string;
+  /** `CustomerNameEn` when present on booking-by-id DTOs. */
+  customerNameEn?: string;
   customerIqama?: string;
+  /** Present when GetById (or nested `customer`) includes profile fields. */
+  customerNationality?: string;
+  customerMobile?: string;
+  customerAddress?: string;
+  customerDrivingLicenseNumber?: string;
+  customerDrivingLicenseExpiry?: string;
+  customerBirthDay?: string;
   vehicleId: string;
   vehicleImageUrl?: string;
   vehicleName?: string;
   vehiclePlateNumber?: string;
   vehicleSerialNumber?: string;
+  vehicleYear?: number;
+  vehicleColor?: string;
+  vehicleEngine?: string;
+  vehicleCategoryLabel?: string;
   statusDisplayName?: string;
   startDate: string;
   endDate: string;
@@ -77,6 +108,8 @@ export interface Booking {
   totaltax?: number | null;
   placeUSE?: string;
   idCountingCustVehicle?: string;
+  /** From `GetBookingByIdQueryResponse.CountingCustVehicleName` (chart of accounts, Arabic). */
+  countingCustVehicleName?: string;
   updatedBy?: string;
 }
 

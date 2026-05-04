@@ -3,6 +3,7 @@ import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core'
 import { AbstractControl, NonNullableFormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { finalize } from 'rxjs';
 
 import { AuthStateService } from '../../core/auth/auth-state.service';
 import { AuthService } from '../../shared/services/auth/auth.service';
@@ -69,40 +70,48 @@ export class LoginComponent implements OnInit {
     const value = this.form.getRawValue();
     const username = value.username.trim();
     const password = value.password.trim();
-    this.auth.login({ username, password }).subscribe({
-      next: result => {
-        this.loading = false;
-        if (result.success) {
-          if (!this.tokenService.getToken()) {
-            const msg = this.translate.instant('Login succeeded but no auth token was stored.');
-            this.errorMessage = msg;
-            this.toast.error(msg);
-            return;
-          }
+    this.auth
+      .login({ username, password })
+      .pipe(
+        finalize(() => {
+          queueMicrotask(() => {
+            this.loading = false;
+          });
+        }),
+      )
+      .subscribe({
+        next: result => {
+          queueMicrotask(() => {
+            if (result.success) {
+              if (!this.tokenService.getToken()) {
+                const msg = this.translate.instant('Login succeeded but no auth token was stored.');
+                this.errorMessage = msg;
+                this.toast.error(msg);
+                return;
+              }
 
-          this.toast.success(this.translate.instant('Login successful'));
-          this.router.navigate(['/dashboard']);
-        } else {
-          const msg = this.resolveLoginError(result.message);
-          this.errorMessage = msg;
-          this.toast.error(msg);
-          this.loginDisabled = true;
-          setTimeout(() => {
-            this.loginDisabled = false;
-            this.usernameInput?.nativeElement.focus();
-          }, 2000);
-        }
-      },
-      error: err => {
-        this.loading = false;
-        const message = this.resolveLoginError(err);
-        this.errorMessage = message;
-        this.toast.error(message);
-      },
-      complete: () => {
-        this.loading = false;
-      },
-    });
+              this.toast.success(this.translate.instant('Login successful'));
+              this.router.navigate(['/dashboard']);
+            } else {
+              const msg = this.resolveLoginError(result.message);
+              this.errorMessage = msg;
+              this.toast.error(msg);
+              this.loginDisabled = true;
+              setTimeout(() => {
+                this.loginDisabled = false;
+                this.usernameInput?.nativeElement.focus();
+              }, 2000);
+            }
+          });
+        },
+        error: err => {
+          queueMicrotask(() => {
+            const message = this.resolveLoginError(err);
+            this.errorMessage = message;
+            this.toast.error(message);
+          });
+        },
+      });
   }
 
   onShellMouseMove(event: MouseEvent): void {

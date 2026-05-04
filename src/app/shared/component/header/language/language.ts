@@ -40,23 +40,15 @@ export class Language {
   ];
 
   public selectedLanguage: selectedlanguage = {
-    language: 'English',
-    code: 'en',
-    type: 'US',
-    icon: 'us',
+    language: 'العربية',
+    code: 'ar',
+    icon: 'sa',
   };
 
   constructor() {
-    const savedLanguage = localStorage.getItem('app_language')?.toLowerCase();
-    const current = (
-      savedLanguage ||
-      this.translate.currentLang ||
-      this.translate.defaultLang ||
-      'en'
-    ).toLowerCase();
-    const match = this.languages.find(l => l.code === current) ?? this.languages[0];
+    const match = this.languages.find(l => l.code === 'ar') ?? this.languages[0];
     this.selectedLanguage = match;
-    this.translate.setDefaultLang('en');
+    this.translate.setDefaultLang('ar');
     this.translate.use(match.code);
     this.applyLanguageDirection(match.code);
   }
@@ -70,7 +62,6 @@ export class Language {
     event?.stopPropagation();
     this.translate.use(lang.code);
     this.selectedLanguage = lang;
-    localStorage.setItem('app_language', lang.code);
     this.navServices.language = false;
     this.applyLanguageDirection(lang.code);
   }

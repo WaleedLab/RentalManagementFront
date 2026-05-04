@@ -10,6 +10,30 @@ function pick<T>(source: Record<string, unknown>, ...keys: string[]): T | undefi
   return undefined;
 }
 
+/**
+ * Resolves the first matching property ignoring key casing (handles mixed PascalCase / camelCase
+ * from ASP.NET serializers and proxies where `key in source` can miss the actual key).
+ */
+function pickLoose(source: Record<string, unknown> | undefined, ...candidates: string[]): unknown {
+  if (!source || typeof source !== 'object') {
+    return undefined;
+  }
+  const keyByLower = new Map<string, string>();
+  for (const k of Object.keys(source)) {
+    keyByLower.set(k.toLowerCase(), k);
+  }
+  for (const wanted of candidates) {
+    const actualKey = keyByLower.get(wanted.toLowerCase());
+    if (actualKey !== undefined) {
+      const value = source[actualKey];
+      if (value !== undefined && value !== null) {
+        return value;
+      }
+    }
+  }
+  return undefined;
+}
+
 /** Value may be null (e.g. SQL NULL serialized as JSON null). */
 function pickPresent<T>(source: Record<string, unknown>, ...keys: string[]): T | undefined {
   for (const key of keys) {
@@ -113,8 +137,23 @@ export function normalizeBooking(raw: unknown): Booking {
     ) ?? '';
 
   const customerName =
-    trimText(pick(source, 'customerName', 'CustomerName', 'nameAr', 'NameAr', 'fullName', 'FullName')) ??
-    trimText(customer ? pick(customer, 'nameAr', 'NameAr', 'fullName', 'FullName', 'nameEn', 'NameEn') : undefined);
+    trimText(
+      pick(
+        source,
+        'customerNameAr',
+        'CustomerNameAr',
+        'customerName',
+        'CustomerName',
+        'nameAr',
+        'NameAr',
+        'fullName',
+        'FullName',
+      ),
+    ) ?? trimText(customer ? pick(customer, 'nameAr', 'NameAr', 'fullName', 'FullName', 'nameEn', 'NameEn') : undefined);
+
+  const customerNameEn =
+    trimText(pick(source, 'customerNameEn', 'CustomerNameEn')) ??
+    trimText(customer ? pick(customer, 'nameEn', 'NameEn') : undefined);
 
   const customerIqama =
     trimText(
@@ -142,13 +181,160 @@ export function normalizeBooking(raw: unknown): Booking {
         : undefined,
     );
 
+  const customerNationality =
+    trimText(pick(source, 'customerNationality', 'CustomerNationality', 'nationality', 'Nationality')) ??
+    trimText(customer ? pick(customer, 'nationality', 'Nationality') : undefined);
+
+  const customerMobile =
+    trimText(
+      pick(
+        source,
+        'firstMobileNumber',
+        'FirstMobileNumber',
+        'customerMobile',
+        'CustomerMobile',
+        'phoneNumber',
+        'PhoneNumber',
+      ),
+    ) ??
+    trimText(
+      customer
+        ? pick(
+            customer,
+            'firstMobileNumber',
+            'FirstMobileNumber',
+            'phoneNumber',
+            'PhoneNumber',
+            'mobile',
+            'Mobile',
+          )
+        : undefined,
+    );
+
+  const customerAddress =
+    trimText(pick(source, 'customerAddress', 'CustomerAddress', 'address', 'Address')) ??
+    trimText(customer ? pick(customer, 'address', 'Address') : undefined);
+
+  const customerDrivingLicenseNumber =
+    trimText(
+      pick(
+        source,
+        'customerDrivingLicenseNumber',
+        'CustomerDrivingLicenseNumber',
+        'licenceNo',
+        'LicenceNo',
+        'drivingLicenseNumber',
+        'DrivingLicenseNumber',
+      ),
+    ) ??
+    trimText(
+      customer
+        ? pick(
+            customer,
+            'licenceNo',
+            'LicenceNo',
+            'drivingLicenseNumber',
+            'DrivingLicenseNumber',
+          )
+        : undefined,
+    );
+
+  const customerDrivingLicenseExpiry = toDateString(
+    pickPresent(
+      source,
+      'customerDrivingLicenseExpiry',
+      'CustomerDrivingLicenseExpiry',
+      'dateDrivinglicense',
+      'DateDrivinglicense',
+      'dateDrivingLicense',
+      'DateDrivingLicense',
+    ) ??
+      (customer
+        ? pickPresent(
+            customer,
+            'dateDrivinglicense',
+            'DateDrivinglicense',
+            'dateDrivingLicense',
+            'DateDrivingLicense',
+            'drivingLicenseExpiryDate',
+            'DrivingLicenseExpiryDate',
+          )
+        : undefined),
+  );
+
+  const customerBirthDay = toDateString(
+    pickPresent(source, 'customerBirthDay', 'CustomerBirthDay', 'birthDay', 'BirthDay') ??
+      (customer
+        ? pickPresent(customer, 'birthDay', 'BirthDay', 'dateOfBirth', 'DateOfBirth')
+        : undefined),
+  );
+
   const vehiclePlate =
-    trimText(pick(source, 'plateNumber', 'PlateNumber', 'vehiclePlateNumber', 'VehiclePlateNumber')) ??
-    trimText(vehicle ? pick(vehicle, 'plateNumber', 'PlateNumber') : undefined);
+    trimText(
+      pick(
+        source,
+        'vehiclePlatnumber',
+        'VehiclePlatnumber',
+        'plateNumber',
+        'PlateNumber',
+        'vehiclePlateNumber',
+        'VehiclePlateNumber',
+      ),
+    ) ?? trimText(vehicle ? pick(vehicle, 'plateNumber', 'PlateNumber') : undefined);
 
   const vehicleSerialNumber =
     trimText(pick(source, 'vehicleSerialNumber', 'VehicleSerialNumber', 'serialNumber', 'SerialNumber')) ??
     trimText(vehicle ? pick(vehicle, 'serialNumber', 'SerialNumber') : undefined);
+
+  const vehicleYear =
+    toNumber(
+      pickLoose(
+        source,
+        'vehicleYear',
+        'VehicleYear',
+        'year',
+        'Year',
+        'modelYear',
+        'ModelYear',
+        'manufactureYear',
+        'ManufactureYear',
+        'vehicleModelYear',
+        'VehicleModelYear',
+      ),
+    ) ??
+    toNumber(pick(source, 'vehicleYear', 'VehicleYear')) ??
+    toNumber(vehicle ? pick(vehicle, 'year', 'Year', 'yearMake', 'YearMake', 'vehicleYear', 'VehicleYear') : undefined);
+
+  const vehicleColor =
+    trimText(
+      pickLoose(source, 'vehicleColor', 'color', 'colour', 'colorName', 'vehicleColorName', 'vehicleColour'),
+    ) ??
+    trimText(pick(source, 'vehicleColor', 'VehicleColor', 'color', 'Color')) ??
+    trimText(
+      vehicle
+        ? pickLoose(vehicle, 'vehicleColor', 'color', 'colour', 'colorName', 'vehicleColour')
+        : undefined,
+    ) ??
+    trimText(vehicle ? pick(vehicle, 'color', 'Color', 'vehicleColor', 'VehicleColor') : undefined);
+
+  const vehicleEngine =
+    trimText(pick(source, 'vehicleEngine', 'VehicleEngine', 'engine', 'Engine')) ??
+    trimText(vehicle ? pick(vehicle, 'engine', 'Engine') : undefined);
+
+  const vehicleCategoryLabel =
+    trimText(
+      pick(
+        source,
+        'categoryVehicleName',
+        'CategoryVehicleName',
+        'vehicleCategoryLabel',
+        'VehicleCategoryLabel',
+        'vehicleCategoryName',
+        'VehicleCategoryName',
+        'categoryName',
+        'CategoryName',
+      ),
+    ) ?? trimText(vehicle ? pick(vehicle, 'categoryName', 'CategoryName') : undefined);
 
   const vehicleImageUrl =
     trimText(
@@ -176,6 +362,11 @@ export function normalizeBooking(raw: unknown): Booking {
       pick(source, 'branchName', 'BranchName', 'branchNameAr', 'BranchNameAr'),
     ) ??
     trimText(pick(source, 'placeUSE', 'PlaceUSE', 'placeUse', 'PlaceUse'));
+
+  const branchStreet = trimText(pick(source, 'branchStreet', 'BranchStreet'));
+  const branchNeighborHood = trimText(pick(source, 'branchNeighborHood', 'BranchNeighborHood'));
+  const branchBuildingNumber = trimText(pick(source, 'branchBuldingNumber', 'BranchBuldingNumber', 'branchBuildingNumber', 'BranchBuildingNumber'));
+  const branchCity = trimText(pick(source, 'branchCity', 'BranchCity'));
 
   const statusDisplayName = trimText(
     pick(source, 'statusDisplayName', 'StatusDisplayName'),
@@ -225,6 +416,7 @@ export function normalizeBooking(raw: unknown): Booking {
     ) ?? undefined;
 
   const fleetName =
+    trimText(pickLoose(source, 'fleetName', 'FleetName')) ??
     trimText(pick(source, 'fleetName', 'FleetName')) ??
     trimText(fleet ? pick(fleet, 'name', 'Name', 'nameAr', 'NameAr') : undefined);
 
@@ -248,26 +440,56 @@ export function normalizeBooking(raw: unknown): Booking {
   return {
     id,
     bookingNumber: trimText(pick(source, 'bookingNumber', 'BookingNumber')) ?? undefined,
+    paymentNumber: trimText(pick(source, 'paymentNumber', 'PaymentNumber')) ?? undefined,
     numberBookingINBasame:
       trimText(pick(source, 'numberBookingINBasame', 'NumberBookingINBasame')) ?? undefined,
     fleetId: String(pick(source, 'fleetId', 'FleetId') ?? ''),
     fleetName,
+    urlLogo: trimText(pickLoose(source, 'urllogo', 'urlLogo', 'Urllogo', 'UrlLogo')) ?? undefined,
+    taxNumber: trimText(pick(source, 'taxNumber', 'TaxNumber')) ?? undefined,
     branchId: pick<number>(source, 'branchId', 'BranchId', 'idBranch', 'IdBranch') ?? null,
     branchName,
+    branchStreet: branchStreet || undefined,
+    branchNeighborHood: branchNeighborHood || undefined,
+    branchBuildingNumber: branchBuildingNumber || undefined,
+    branchCity: branchCity || undefined,
     customerId,
     customerName,
+    customerNameEn: customerNameEn || undefined,
     customerIqama,
+    customerNationality: customerNationality || undefined,
+    customerMobile: customerMobile || undefined,
+    customerAddress: customerAddress || undefined,
+    customerDrivingLicenseNumber: customerDrivingLicenseNumber || undefined,
+    customerDrivingLicenseExpiry: customerDrivingLicenseExpiry || undefined,
+    customerBirthDay: customerBirthDay || undefined,
     vehicleId,
     vehicleImageUrl: vehicleImageUrl || undefined,
     vehicleName,
     vehiclePlateNumber: vehiclePlate,
     vehicleSerialNumber,
+    vehicleYear,
+    vehicleColor: vehicleColor || undefined,
+    vehicleEngine: vehicleEngine || undefined,
+    vehicleCategoryLabel: vehicleCategoryLabel || undefined,
     startDate,
     endDate,
     pickupDate: pickupDate || undefined,
     returnDate: returnDate || undefined,
     totalAmount: toNumber(
-      pick(source, 'TOTAL', 'total', 'Total', 'totalAmount', 'TotalAmount', 'paidtotal', 'Paidtotal', 'paid', 'Paid'),
+      pickLoose(source, 'TOTAL', 'total', 'totalAmount', 'paidtotal', 'Paidtotal') ??
+        pick(
+          source,
+          'TOTAL',
+          'total',
+          'Total',
+          'totalAmount',
+          'TotalAmount',
+          'paidtotal',
+          'Paidtotal',
+          'paid',
+          'Paid',
+        ),
     ),
     paidtotal: toNumber(pick(source, 'paidtotal', 'Paidtotal', 'paidTotal', 'PaidTotal')),
     depositAmount: toNumber(pick(source, 'depositAmount', 'DepositAmount')),
@@ -306,7 +528,12 @@ export function normalizeBooking(raw: unknown): Booking {
     totaltax,
     placeUSE: trimText(pick(source, 'placeUSE', 'PlaceUSE', 'placeUse', 'PlaceUse')),
     idCountingCustVehicle: trimText(
-      pick(source, 'idCountingCustVehicle', 'IdCountingCustVehicle'),
+      pickLoose(source, 'idCountingCustVehicle', 'IdCountingCustVehicle') ??
+        pick(source, 'idCountingCustVehicle', 'IdCountingCustVehicle'),
     ),
+    countingCustVehicleName:
+      trimText(pickLoose(source, 'countingCustVehicleName', 'CountingCustVehicleName')) ??
+      trimText(pick(source, 'countingCustVehicleName', 'CountingCustVehicleName')) ??
+      undefined,
   };
 }

@@ -741,6 +741,27 @@ body.dark-only .page-wrapper.compact-wrapper .page-header .header-wrapper .toggl
   }
 }
 
+/*
+ * `themes/_responsive.scss` (max-width: 1199px, min-width: 992px) sets
+ * `div.sidebar-wrapper ~ .page-body { margin-left: 0 }` for compact-wrapper, which
+ * removes the main column offset and lets content sit under the fixed sidebar.
+ */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .page-wrapper.compact-wrapper .page-body-wrapper {
+    div.sidebar-wrapper:not(.close_icon) ~ .page-body {
+      margin-inline-start: $sidebar-width !important;
+      width: calc(100% - #{$sidebar-width}) !important;
+      max-width: calc(100% - #{$sidebar-width}) !important;
+    }
+
+    div.sidebar-wrapper.close_icon ~ .page-body {
+      margin-inline-start: $sidebar-collapsed-width !important;
+      width: calc(100% - #{$sidebar-collapsed-width}) !important;
+      max-width: calc(100% - #{$sidebar-collapsed-width}) !important;
+    }
+  }
+}
+
 @media (max-width: 991.98px) {
   .page-wrapper.compact-wrapper {
     .page-header {
@@ -893,5 +914,22 @@ body.dark-only .page-wrapper.compact-wrapper .page-header .header-wrapper .toggl
   html[dir='rtl'] .page-wrapper.compact-wrapper .page-body-wrapper > .sidebar-wrapper {
     inset-inline-start: auto !important;
     inset-inline-end: 0 !important;
+  }
+
+  /*
+   * Global `styles.scss` sets `.page-body` to z-index 970 (dropdowns vs footer).
+   * On small screens the sidebar drawer must paint above the route outlet; reset main column + footer
+   * stacking here so the fixed sidebar (1050–1300) always wins over page chrome.
+   */
+  .page-wrapper.compact-wrapper .page-body-wrapper .page-body {
+    z-index: 0 !important;
+  }
+
+  .page-wrapper.compact-wrapper .page-body-wrapper app-footer .footer {
+    z-index: 0 !important;
+  }
+
+  .page-wrapper.compact-wrapper .page-body-wrapper > .sidebar-wrapper {
+    z-index: 10040 !important;
   }
 }
