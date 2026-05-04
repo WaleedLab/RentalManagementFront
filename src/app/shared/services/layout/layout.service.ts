@@ -4,13 +4,12 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class LayoutService {
-  private readonly themeStorageKey = 'app_theme';
   public customizer: string = '';
 
   public config = {
     settings: {
       layout: '',
-      layout_type: 'ltr' as 'ltr' | 'rtl',
+      layout_type: 'rtl' as 'ltr' | 'rtl',
       layout_version: 'dark-only',
       sidebar_type: 'compact-wrapper',
       icon: 'fill-svg',
@@ -50,7 +49,6 @@ export class LayoutService {
     this.config.settings.layout_version = theme;
     document.body.classList.toggle('dark-only', theme === 'dark-only');
     document.body.classList.toggle('light-only', theme === 'light-only');
-    localStorage.setItem(this.themeStorageKey, theme);
   }
 
   toggleTheme(): 'dark-only' | 'light-only' {
@@ -60,7 +58,6 @@ export class LayoutService {
   }
 
   private getInitialTheme(): 'dark-only' | 'light-only' {
-    const savedTheme = localStorage.getItem(this.themeStorageKey);
-    return savedTheme === 'light-only' ? 'light-only' : 'dark-only';
+    return 'dark-only';
   }
 }

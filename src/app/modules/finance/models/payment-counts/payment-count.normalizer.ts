@@ -9,6 +9,25 @@ function toNumberOrUndefined(value: unknown): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
+/** `GetPaymentcountByIdBookingQueryResponse.PaymentNumber` is a string; list DTOs may use numeric payment numbers. */
+function normalizePaymentNumberValue(raw: unknown): string | number | undefined {
+  if (raw === undefined || raw === null || raw === '') {
+    return undefined;
+  }
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    return raw;
+  }
+  const s = String(raw).trim();
+  if (!s) {
+    return undefined;
+  }
+  const asNum = Number(s);
+  if (Number.isFinite(asNum) && s === String(asNum)) {
+    return asNum;
+  }
+  return s;
+}
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' ? (value as Record<string, unknown>) : null;
 }
@@ -19,7 +38,7 @@ export function normalizePaymentCount(raw: unknown): PaymentCount {
   const vehicleCategorySource = asRecord(
     vehicleSource ? pick(vehicleSource, 'categoryVehicle', 'CategoryVehicle') : null,
   );
-  const paymentNumber = toNumberOrUndefined(
+  const paymentNumber = normalizePaymentNumberValue(
     pick(
       source,
       'paymentNumber',
@@ -127,6 +146,7 @@ export function normalizePaymentCount(raw: unknown): PaymentCount {
     paidBank: pick<number>(source, 'paidBank', 'PaidBank'),
     expenseCategory: pick<number>(source, 'expenseCategory', 'ExpenseCategory'),
     idBooking: pick<number>(source, 'idBooking', 'IdBooking'),
+    stutusbooking: pick<number>(source, 'stutusbooking', 'Stutusbooking', 'statusBooking', 'StatusBooking'),
     idFinancialYear: pick<string | number>(source, 'idFinancialYear', 'IdFinancialYear'),
     details: normalizedDetails,
     createdAt: pick<string>(

@@ -1,6 +1,7 @@
 export interface PaymentCount {
   id: string;
-  paymentNumber?: number;
+  /** Voucher / document number — string in `GetPaymentcountByIdBookingQueryResponse.PaymentNumber`, may be numeric in other DTOs. */
+  paymentNumber?: string | number;
   name?: string;
   description?: string;
   idCustomer?: number;
@@ -28,6 +29,8 @@ export interface PaymentCount {
   paidBank?: number;
   expenseCategory?: number;
   idBooking?: number;
+  /** Booking workflow flag from payment-count DTO when present. */
+  stutusbooking?: number;
   idFinancialYear?: string | number;
   createdAt?: string;
   details?: Array<Record<string, unknown>>;

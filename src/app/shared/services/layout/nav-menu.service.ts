@@ -51,7 +51,7 @@ export class NavMenuService {
       path: '/dashboard/accounting',
       title: 'Accounting Dashboard',
       icon: 'sample-page',
-      imageIcon: 'assets/images/rent_icon/Payment_Counts.png',
+      imageIcon: 'assets/images/rent_icon/dashboard.png',
       type: 'link',
     },
     { headTitle1: 'Operations' },

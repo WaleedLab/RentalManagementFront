@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
 import { PaginatedAggregatorResponse } from '../../../../core/interfaces';
 
 import { BaseService } from '../../../../shared/services/base/base.service';
-import { buildFleetQueryParams } from '../../../../shared/utils/fleet-query.utils';
+import { buildFleetQueryParams, normalizeFleetId } from '../../../../shared/utils/fleet-query.utils';
 import { normalizePaginatedResponse } from '../../../../shared/utils/paginated-response.normalizer';
 import {
   CreatePaymentCountRequest,
@@ -83,6 +83,51 @@ export class PaymentCountService {
     return this.api
       .getData<unknown>(`${this.base}/${encodedId}/${encodedFleetId}`)
       .pipe(map(item => normalizePaymentCount(item)));
+  }
+
+  /**
+   * Maps `PaymentcountRouting.GetByIdBooking`: `GET Paymentcount/{IdBooking}/{fleetid}`.
+   * (`CarRentalManagament.Api.Common.Routering.PaymentcountRouting`)
+   */
+  getByBookingId(idBooking: number, fleetId?: string | null): Observable<PaymentCount[]> {
+    const fleet = normalizeFleetId(fleetId);
+    if (!fleet || !Number.isFinite(idBooking) || idBooking <= 0) {
+      return of([]);
+    }
+    const idSeg = encodeURIComponent(String(idBooking));
+    const fleetSeg = encodeURIComponent(fleet);
+    return this.api
+      .getData<unknown[]>(`${this.base}/${idSeg}/${fleetSeg}`, undefined, { suppressErrorToast: true })
+      .pipe(map(items => (Array.isArray(items) ? items : []).map(normalizePaymentCount)));
+  }
+
+  /**
+   * Maps `PaymentcountRouting.GetSumByIdBooking`: `GET Paymentcount/sum/{IdBooking}/{fleetid}`.
+   */
+  getSumForBooking(idBooking: number, fleetId?: string | null): Observable<number | null> {
+    const fleet = normalizeFleetId(fleetId);
+    if (!fleet || !Number.isFinite(idBooking) || idBooking <= 0) {
+      return of(null);
+    }
+    const idSeg = encodeURIComponent(String(idBooking));
+    const fleetSeg = encodeURIComponent(fleet);
+    return this.api
+      .getData<unknown>(`${this.base}/sum/${idSeg}/${fleetSeg}`, undefined, { suppressErrorToast: true })
+      .pipe(
+        map(raw => {
+          if (typeof raw === 'number' && Number.isFinite(raw)) {
+            return raw;
+          }
+          const source = (raw ?? {}) as Record<string, unknown>;
+          const candidate =
+            source['sumPaymentBooking'] ??
+            source['SumPaymentBooking'] ??
+            source['sum'] ??
+            source['Sum'];
+          const n = Number(candidate);
+          return Number.isFinite(n) ? n : null;
+        }),
+      );
   }
 
   create(payload: CreatePaymentCountRequest): Observable<unknown> {

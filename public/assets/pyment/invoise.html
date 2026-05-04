@@ -591,6 +591,937 @@
       font-weight: 800;
       white-space: nowrap;
     }
+    .booking-print-page {
+      width: 100%;
+      min-height: calc(100vh - 24px);
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+    .booking-print-main {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+    .booking-print-footer {
+      margin-top: auto;
+      flex-shrink: 0;
+      padding-top: 10px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    /* ذيل صفحة الإيصال — صناديق ذهبية، خطوط منقطة، شريط بنفسجي */
+    .booking-receipt-tail {
+      box-sizing: border-box;
+      border: 1px solid #0a0a0a;
+      border-radius: 2px;
+      padding: 5px 6px 0;
+      background: #fff;
+    }
+    .booking-receipt-head {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: nowrap;
+      margin-bottom: 5px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .booking-receipt-head-dates {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .booking-receipt-title {
+      font-size: 8px;
+      font-weight: 800;
+      text-align: right;
+      margin-bottom: 2px;
+    }
+    .booking-receipt-dates-row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .booking-receipt-hijri,
+    .booking-receipt-greg {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 3px;
+      font-size: 7px;
+      font-weight: 700;
+    }
+    .booking-receipt-gold {
+      box-sizing: border-box;
+      border: 2px solid #c9a227;
+      border-radius: 3px;
+      background: #fffef3;
+      min-height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1px 4px;
+      font-size: 7.5px;
+      font-weight: 800;
+      color: #1a1a1a;
+    }
+    .booking-receipt-gold--hijri {
+      min-width: 32px;
+      min-height: 16px;
+      padding: 1px 3px;
+    }
+    .booking-receipt-gold--greg {
+      min-width: 92px;
+      min-height: 18px;
+    }
+    .booking-receipt-amount-block {
+      flex: 0 0 auto;
+      text-align: center;
+    }
+    .booking-receipt-sr-label {
+      font-size: 7.5px;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+    .booking-receipt-gold--sr {
+      min-width: 72px;
+      min-height: 22px;
+    }
+    .booking-receipt-moafiq {
+      flex: 0 0 auto;
+      font-size: 8px;
+      font-weight: 800;
+      padding: 0 2px 2px;
+      align-self: center;
+    }
+    .booking-receipt-mid {
+      margin: 4px 0 5px;
+    }
+    .booking-receipt-mid-line {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 4px;
+      margin: 3px 0;
+      font-size: 7.5px;
+      font-weight: 700;
+    }
+    .booking-receipt-mid-line .lbl-en {
+      flex: 0 0 auto;
+      direction: ltr;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .booking-receipt-mid-line .lbl-ar {
+      flex: 0 0 auto;
+      direction: rtl;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .booking-receipt-mid-line .fill {
+      flex: 1 1 auto;
+      border-bottom: 1px dotted #000;
+      min-height: 22px;
+      text-align: center;
+      font-size: 7.5px;
+      font-weight: 700;
+      padding: 0 2px 1px;
+    }
+    .booking-receipt-sigs {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 6px 0 4px;
+      padding-top: 4px;
+      border-top: 1px solid #ddd;
+    }
+    .booking-receipt-sig {
+      flex: 1 1 33%;
+      text-align: center;
+      font-size: 7px;
+      font-weight: 800;
+    }
+    .booking-receipt-sig .ar {
+      display: block;
+      direction: rtl;
+    }
+    .booking-receipt-sig .en {
+      display: block;
+      direction: ltr;
+      font-size: 6.5px;
+      color: #374151;
+      margin-top: 1px;
+    }
+    .booking-receipt-sig .sig-dots {
+      margin-top: 4px;
+      border-bottom: 1px dotted #000;
+      min-height: 14px;
+    }
+    .booking-receipt-footer-bar {
+      margin: 5px -6px 0;
+      padding: 4px 6px 5px;
+      box-sizing: border-box;
+      border: 1px solid #4338ca;
+      border-bottom-left-radius: 2px;
+      border-bottom-right-radius: 2px;
+      background: linear-gradient(180deg, #eceaff 0%, #e6e6fa 55%, #dfe2fb 100%);
+      text-align: center;
+    }
+    .booking-receipt-footer-bar .ln-ar {
+      font-size: 7px;
+      font-weight: 700;
+      line-height: 1.35;
+      color: #312e81;
+      direction: rtl;
+      margin: 0;
+    }
+    .booking-receipt-footer-bar .ln-en {
+      font-size: 6.5px;
+      font-weight: 600;
+      line-height: 1.35;
+      color: #3730a3;
+      direction: ltr;
+      margin: 3px 0 0;
+    }
+    .booking-print--onepage .booking-receipt-tail {
+      padding: 4px 5px 0;
+    }
+    .booking-print--onepage .booking-receipt-gold {
+      border-width: 1.5px;
+      font-size: 6.5px;
+      min-height: 15px;
+    }
+    .booking-print--onepage .booking-receipt-gold--hijri {
+      min-height: 14px;
+      min-width: 28px;
+    }
+    .booking-print--onepage .booking-receipt-gold--greg {
+      min-width: 76px;
+    }
+    .booking-print--onepage .booking-receipt-mid-line,
+    .booking-print--onepage .booking-receipt-title {
+      font-size: 6.5px;
+    }
+    .booking-print--onepage .booking-receipt-footer-bar .ln-ar {
+      font-size: 6.5px;
+    }
+    .booking-print--onepage .booking-receipt-footer-bar .ln-en {
+      font-size: 6px;
+    }
+    .booking-voucher-tail--booking {
+      margin-top: 0;
+    }
+    /* شريط عنوان الفرع (مثل سند القبض): يُعرض مرتين أعلى وأسفل */
+    .booking-address-strip {
+      width: 100%;
+      box-sizing: border-box;
+      margin: 0 0 5px;
+      padding: 4px 8px;
+      text-align: center;
+      font-size: 8px;
+      line-height: 1.35;
+      font-weight: 600;
+      border-radius: 3px;
+    }
+    .booking-address-strip--dark {
+      background: #1e293b;
+      color: #f8fafc;
+      letter-spacing: 0.02em;
+    }
+    .booking-address-strip + .booking-address-strip {
+      margin-top: 3px;
+    }
+    .booking-print--onepage .booking-address-strip {
+      font-size: 9px;
+      padding: 4px 8px;
+    }
+    /* وضع صفحة واحدة: خطوط صغيرة جداً للشبكات والعنوان */
+    .booking-print--onepage .booking-doc-header-compact h2 {
+      font-size: 15px !important;
+      margin: 0 0 3px !important;
+    }
+    .booking-print--onepage .booking-doc-header-compact .header-meta {
+      font-size: 10px !important;
+      margin: 2px 0 !important;
+    }
+    .booking-print--onepage .booking-doc-header-compact .header-fleet-tagline {
+      font-size: 11px !important;
+      margin: 0 0 4px !important;
+    }
+    .booking-print--onepage .booking-doc-header-compact img {
+      max-width: 72px !important;
+      max-height: 58px !important;
+    }
+    .booking-print--onepage .booking-doc-title__ar {
+      font-size: 16px;
+    }
+    .booking-print--onepage .booking-doc-title__en {
+      font-size: 10px;
+    }
+    .booking-print--onepage .booking-doc-title p {
+      font-size: 11px;
+    }
+    .booking-print--onepage .booking-doc-meta .booking-doc-no {
+      font-size: 14px;
+      padding: 4px 10px;
+    }
+    .booking-print--onepage .booking-doc-status {
+      font-size: 11px;
+    }
+    .booking-print--onepage .booking-top-bar {
+      margin-bottom: 4px;
+      padding: 4px 2px 6px;
+      gap: 8px;
+    }
+    .booking-print--onepage .booking-upper-row {
+      margin: 2px 0 4px;
+    }
+    .booking-print--onepage .booking-fin-summary-wrap {
+      margin: 3px 0 4px;
+    }
+    .booking-print--onepage .booking-section-title {
+      margin: 6px 0 4px;
+      padding: 3px 6px;
+      font-size: 13px;
+    }
+    .booking-print--onepage .booking-fields-bento {
+      padding: 3px 4px;
+      border-radius: 6px;
+    }
+    .booking-print--onepage .booking-fields-bento--main .booking-fields-grid {
+      grid-auto-rows: minmax(30px, auto);
+      gap: 1px;
+    }
+    .booking-print--onepage .booking-fields-bento--main .booking-tile {
+      min-height: 30px;
+      border-radius: 3px;
+    }
+    .booking-print--onepage .booking-fields-bento--main .booking-tile-label {
+      font-size: 7px;
+      padding: 1px 2px;
+      line-height: 1.05;
+    }
+    .booking-print--onepage .booking-fields-bento--main .booking-tile-value {
+      font-size: 8px;
+      padding: 2px 2px;
+      min-height: 17px;
+      line-height: 1.08;
+    }
+    .booking-print--onepage .booking-fields-bento--main .booking-tile--key .booking-tile-value {
+      font-size: 9px;
+    }
+    .booking-print--onepage .booking-fields-grid--fin {
+      grid-auto-rows: minmax(34px, auto);
+      gap: 1px;
+    }
+    .booking-print--onepage .booking-fin-summary-wrap .booking-tile {
+      min-height: 34px;
+    }
+    .booking-print--onepage .booking-fin-summary-wrap .booking-tile-label {
+      font-size: 7.5px;
+      padding: 1px 2px;
+    }
+    .booking-print--onepage .booking-fin-summary-wrap .booking-tile-value {
+      font-size: 8.5px;
+      min-height: 18px;
+      padding: 2px 3px 2px;
+    }
+    .booking-print--onepage .booking-fin-summary-wrap .booking-tile--key .booking-tile-value {
+      font-size: 9.5px;
+    }
+    .booking-print--onepage .booking-mini-caption {
+      font-size: 9.5px;
+      margin-top: 3px;
+    }
+    .booking-print--onepage .booking-print-footer {
+      padding-top: 6px;
+    }
+    /* نموذج ورقي كلاسيكي (أسفل العقد) — أطر بنية، خط صغير */
+    .booking-classic-addendum {
+      margin-top: 6px;
+      padding: 5px 6px;
+      border: 1.5px solid #92400e;
+      border-radius: 4px;
+      background: #fffdfa;
+      box-sizing: border-box;
+      color: #1c1917;
+    }
+    .booking-classic-subtitle {
+      margin-top: 5px;
+      margin-bottom: 2px;
+      font-size: 7.5px;
+      font-weight: 800;
+      color: #9a3412;
+      border-bottom: 1px solid #ea580c;
+      padding-bottom: 1px;
+    }
+    .booking-classic-lines {
+      min-height: 22px;
+      border: 1px dashed #d6d3d1;
+      border-radius: 2px;
+      margin-top: 2px;
+      background: repeating-linear-gradient(
+        transparent,
+        transparent 10px,
+        #e7e5e4 10px,
+        #e7e5e4 11px
+      );
+    }
+    .booking-classic-bullets {
+      margin: 2px 0 4px;
+      padding: 0 14px 0 0;
+      font-size: 7px;
+      line-height: 1.25;
+      direction: rtl;
+      text-align: right;
+      color: #7f1d1d;
+    }
+    .booking-classic-bullets li {
+      margin-bottom: 2px;
+    }
+    .booking-classic-num-list {
+      margin: 2px 0 4px;
+      padding: 0 12px 0 0;
+      font-size: 7px;
+      line-height: 1.25;
+      direction: rtl;
+      text-align: right;
+      list-style-type: decimal;
+      color: #431407;
+    }
+    .booking-classic-num-list li {
+      margin-bottom: 2px;
+    }
+    /* عمودان: ملاحظات/تأمين | إقرار المستأجر */
+    .booking-classic-two-col {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 8px;
+      width: 100%;
+      margin-top: 2px;
+    }
+    .booking-classic-pane {
+      flex: 1 1 50%;
+      min-width: 0;
+      border: 1px solid #92400e;
+      border-radius: 3px;
+      padding: 5px 6px;
+      background: #fffefa;
+      box-sizing: border-box;
+    }
+    .booking-classic-pane--notes {
+      flex: 1 1 52%;
+    }
+    .booking-classic-pane--ack {
+      flex: 1 1 48%;
+      display: flex;
+      flex-direction: column;
+    }
+    .booking-classic-box--in-pane {
+      border: none;
+      padding: 0;
+      margin: 0;
+      min-height: 0;
+      background: transparent;
+      flex: 1 1 auto;
+      width: 100%;
+      align-self: stretch;
+    }
+    .booking-classic-prepared-wrap {
+      margin-top: 6px;
+      text-align: center;
+      font-size: 7px;
+      font-weight: 700;
+      color: #9a3412;
+    }
+    .booking-classic-prepared-line {
+      border-bottom: 1px dashed #92400e;
+      min-height: 10px;
+      margin: 4px 12px 0;
+    }
+    /* صف: السيارة كامل المواصفات + شبكة التأمين */
+    .booking-classic-cover-row {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 6px;
+      margin-top: 4px;
+      width: 100%;
+    }
+    .booking-classic-insurance-wrap {
+      flex: 1 1 74%;
+      min-width: 0;
+    }
+    .booking-classic-insurance-grid {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 6px;
+      border: 1px solid #0a0a0a;
+    }
+    .booking-classic-insurance-grid td {
+      border: 1px solid #0a0a0a;
+      padding: 3px 4px;
+      text-align: center;
+      vertical-align: middle;
+      color: #b91c1c;
+      font-weight: 700;
+      line-height: 1.25;
+      background: #fff;
+    }
+    .booking-classic-insurance-grid .ins-mark {
+      display: block;
+      font-size: 1.1em;
+      margin-bottom: 2px;
+      font-weight: 800;
+    }
+    .booking-classic-fullopt {
+      flex: 0 0 24%;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4px 3px;
+      font-weight: 800;
+      color: #0a0a0a;
+      font-size: 7px;
+      line-height: 1.25;
+    }
+    .booking-classic-fullopt .fullopt-en {
+      display: block;
+      margin-top: 3px;
+      direction: ltr;
+      font-size: 6.5px;
+      font-weight: 800;
+    }
+    .booking-classic-box {
+      flex: 0 1 auto;
+      border: 1px solid #92400e;
+      border-radius: 3px;
+      padding: 4px 5px;
+      background: #fff;
+      min-height: 72px;
+    }
+    .booking-classic-box h4 {
+      margin: 0 0 3px;
+      font-size: 7.5px;
+      font-weight: 800;
+      color: #9a3412;
+      border-bottom: 1px solid #fdba74;
+      padding-bottom: 2px;
+      text-align: right;
+      direction: rtl;
+    }
+    .booking-classic-field {
+      font-size: 6.5px;
+      margin-top: 3px;
+      direction: rtl;
+      text-align: right;
+    }
+    .booking-classic-field .booking-classic-dots {
+      display: block;
+      border-bottom: 1px dotted #78716c;
+      min-height: 12px;
+      margin-top: 2px;
+    }
+    .booking-classic-return {
+      margin-top: 6px;
+      border: 1px solid #92400e;
+      border-radius: 3px;
+      padding: 4px 5px;
+      background: #fffbeb;
+    }
+    .booking-classic-return p {
+      margin: 0 0 4px;
+      font-size: 6.5px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.2;
+      direction: rtl;
+    }
+    .booking-classic-return .booking-classic-sign-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .booking-classic-return .booking-classic-sign-cell {
+      flex: 1;
+      text-align: center;
+      font-size: 6.5px;
+    }
+    .booking-classic-return .booking-classic-dots {
+      border-bottom: 1px dashed #92400e;
+      min-height: 14px;
+      margin-top: 3px;
+    }
+    .booking-print--onepage .booking-classic-addendum {
+      padding: 4px 5px;
+      margin-top: 4px;
+    }
+    .booking-print--onepage .booking-classic-subtitle,
+    .booking-print--onepage .booking-classic-bullets,
+    .booking-print--onepage .booking-classic-num-list {
+      font-size: 6.5px;
+    }
+    .booking-print--onepage .booking-classic-box h4 {
+      font-size: 7px;
+    }
+    .booking-print--onepage .booking-classic-insurance-grid {
+      font-size: 5.5px;
+    }
+    .booking-print--onepage .booking-classic-fullopt {
+      font-size: 6px;
+    }
+    .booking-print--onepage .booking-classic-fullopt .fullopt-en {
+      font-size: 5.5px;
+    }
+    .booking-print--onepage .booking-classic-lines {
+      min-height: 16px;
+    }
+    .booking-print--onepage .booking-classic-pane {
+      padding: 4px 5px;
+    }
+    .booking-print--onepage .booking-classic-two-col {
+      gap: 5px;
+    }
+    .booking-print--onepage .booking-classic-prepared-wrap {
+      font-size: 6.5px;
+      margin-top: 4px;
+    }
+    .booking-print--onepage .booking-classic-box {
+      min-height: 64px;
+      padding: 3px 4px;
+    }
+    @media print {
+      .booking-classic-addendum {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .booking-classic-two-col {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+    }
+    .booking-top-bar {
+      direction: ltr;
+      display: grid;
+      grid-template-columns: 1fr auto max-content;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      padding: 8px 4px 10px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .booking-doc-title {
+      grid-column: 2;
+      justify-self: center;
+      text-align: center;
+      max-width: min(100%, 520px);
+      margin: 0;
+    }
+    .booking-doc-title__h {
+      margin: 0;
+      padding: 0;
+      font-weight: 800;
+      line-height: 1.2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .booking-doc-title__ar {
+      display: block;
+      font-size: 21px;
+      color: #1e3a8a;
+      letter-spacing: 0.02em;
+      direction: rtl;
+    }
+    .booking-doc-title__en {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      direction: ltr;
+    }
+    .booking-doc-title p { margin: 0; font-size: 14px; color: #4b5563; }
+    .booking-doc-meta {
+      grid-column: 3;
+      justify-self: end;
+      align-self: center;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .booking-doc-status {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e3a8a;
+      direction: rtl;
+      white-space: nowrap;
+      max-width: min(220px, 40vw);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .booking-doc-no {
+      font-size: 17px;
+      font-weight: 800;
+      color: #b91c1c;
+      background: linear-gradient(180deg, #fffbfb 0%, #ffffff 55%);
+      border: 2px solid #e11d48;
+      padding: 6px 14px;
+      border-radius: 999px;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(190, 18, 60, 0.12);
+    }
+    .booking-section-title {
+      background: #eaf0ff;
+      border: 1px solid #c8d6ff;
+      padding: 6px 10px;
+      font-weight: 800;
+      color: #1e3a8a;
+      margin: 14px 0 8px;
+      font-size: 17px;
+    }
+    .booking-mini-caption {
+      font-size: 14px;
+      color: #64748b;
+      text-align: center;
+      margin-top: 4px;
+    }
+    .booking-note-box {
+      border: 1px dashed #94a3b8;
+      padding: 8px 10px;
+      margin-top: 10px;
+      min-height: 48px;
+      font-size: 14px;
+      background: #fafafa;
+    }
+    /* صف علوي: شبكة حقول موحّدة — الملخص المالي أسفل */
+    .booking-upper-row {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 6px;
+      width: 100%;
+      align-items: flex-start;
+      box-sizing: border-box;
+      margin: 4px 0 8px;
+    }
+    .booking-upper-col {
+      flex: 1 1 calc(50% - 3px);
+      min-width: 0;
+      max-width: 50%;
+      box-sizing: border-box;
+    }
+    .booking-upper-col--full {
+      flex: 1 1 100%;
+      max-width: 100%;
+    }
+    .booking-fin-summary-wrap {
+      width: 100%;
+      box-sizing: border-box;
+      margin: 6px 0 10px;
+    }
+    .booking-fin-summary-wrap .booking-fields-bento {
+      margin-top: 4px;
+      padding: 4px 5px;
+    }
+    .booking-fields-grid--fin {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-auto-rows: minmax(42px, auto);
+      gap: 2px;
+    }
+    /* الشبكة الرئيسية (بيانات العقد): أقصر من مربعات الملخص المالي */
+    .booking-fields-bento--main {
+      padding: 5px 6px;
+    }
+    .booking-fields-bento--main .booking-fields-grid {
+      grid-auto-rows: minmax(38px, auto);
+      gap: 2px;
+    }
+    .booking-fields-bento--main .booking-tile {
+      min-height: 38px;
+      border-radius: 4px;
+    }
+    .booking-fields-bento--main .booking-tile-label {
+      font-size: 8px;
+      line-height: 1.08;
+      padding: 2px 2px 1px;
+    }
+    .booking-fields-bento--main .booking-tile-value {
+      padding: 3px 3px 3px;
+      font-size: 9px;
+      min-height: 20px;
+      line-height: 1.12;
+    }
+    .booking-fields-bento--main .booking-tile--key .booking-tile-value {
+      font-size: 10px;
+    }
+    /* ملخص مالي: مربعات أقصر من السابق، لكن أطول قليلاً من الشبكة الرئيسية */
+    .booking-fin-summary-wrap .booking-tile {
+      min-height: 42px;
+      border-radius: 4px;
+    }
+    .booking-fin-summary-wrap .booking-tile-label {
+      font-size: 8.5px;
+      padding: 2px 3px 2px;
+      line-height: 1.1;
+    }
+    .booking-fin-summary-wrap .booking-tile-value {
+      padding: 3px 4px 4px;
+      font-size: 10px;
+      min-height: 22px;
+      line-height: 1.15;
+    }
+    .booking-fin-summary-wrap .booking-tile--key .booking-tile-value {
+      font-size: 11px;
+    }
+    .booking-fin-summary-wrap .booking-tile-value strong {
+      font-weight: 800;
+    }
+    /* شبكة موحّدة (bento): خلايا بنفس الارتفاع تقريباً، الأولوية بالترتيب في DOM */
+    .booking-fields-bento {
+      width: 100%;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 5px 6px;
+      background: linear-gradient(165deg, #f8fafc 0%, #ffffff 55%);
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .booking-fields-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-auto-rows: minmax(40px, auto);
+      gap: 2px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .booking-tile {
+      display: flex;
+      flex-direction: column;
+      min-height: 40px;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      overflow: hidden;
+      background: #fff;
+      box-sizing: border-box;
+    }
+    .booking-tile--key {
+      border-color: #434ea9;
+      box-shadow: inset 0 0 0 1px rgba(67, 78, 169, 0.14);
+      background: linear-gradient(180deg, #f5f7ff 0%, #ffffff 72%);
+    }
+    .booking-tile-label {
+      font-size: 8.5px;
+      line-height: 1.12;
+      padding: 2px 3px 2px;
+      background: #f1f5f9;
+      border-bottom: 1px solid #e2e8f0;
+      color: #334155;
+      font-weight: 800;
+      word-break: break-word;
+      text-align: center;
+    }
+    .booking-tile--key .booking-tile-label {
+      background: linear-gradient(180deg, #e8ebfa 0%, #eef0fb 100%);
+      color: #1e3a5f;
+      border-bottom-color: #c7d2fe;
+    }
+    .booking-tile-value {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 4px 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.15;
+      word-break: break-word;
+      min-height: 23px;
+      text-align: center;
+    }
+    .booking-tile-value[dir="ltr"] {
+      direction: ltr;
+      unicode-bidi: isolate;
+    }
+    .booking-tile--key .booking-tile-value {
+      font-size: 11px;
+      letter-spacing: 0.01em;
+    }
+    .booking-fin-summary-wrap .booking-mini-caption {
+      margin-top: 4px;
+      font-size: 10.5px;
+      max-width: 100%;
+      text-align: center;
+      line-height: 1.35;
+    }
+    .booking-fin-summary-wrap > .booking-section-title:first-child {
+      background: #f3f4f6 !important;
+      border: 1px solid #d1d5db !important;
+      color: #111827 !important;
+      font-weight: 800 !important;
+    }
+    .booking-upper-col .booking-cust-veh-wrap {
+      width: 100%;
+      max-width: 100%;
+    }
+    .booking-upper-col > .booking-section-title {
+      margin: 0 0 6px;
+      font-size: 12px;
+      line-height: 1.3;
+      padding: 4px 8px;
+    }
+    .booking-cust-veh-wrap {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+    .booking-cust-veh-table {
+      width: 100%;
+      table-layout: fixed;
+      font-size: 11px;
+    }
+    .booking-cust-veh-table .booking-section-title {
+      margin: 0;
+      font-size: 11px;
+      line-height: 1.3;
+      padding: 4px 8px;
+    }
+    .booking-cust-veh-table .field-label-ar,
+    .booking-cust-veh-table .field-label-en {
+      font-size: 10px;
+      padding: 3px 6px;
+      min-height: 26px;
+      line-height: 1.25;
+    }
+    .booking-cust-veh-table .field-value {
+      font-size: 11px;
+      padding: 3px 6px;
+      min-height: 26px;
+      line-height: 1.25;
+    }
+    .booking-cust-veh-table .field-row td:nth-child(1) .field-label-ar {
+      border-radius: 8px 0 0 8px;
+    }
+    .booking-cust-veh-table .field-row td:nth-child(3) .field-label-en {
+      border-radius: 0 8px 8px 0;
+    }
     @media print {
       @page { size: A4 portrait; margin: 7mm; }
       body { margin: 0; }
@@ -608,6 +1539,22 @@
         break-before: avoid-page;
         page-break-before: auto;
       }
+      .booking-print-page {
+        break-inside: auto;
+        min-height: calc(297mm - 14mm);
+      }
+      .booking-print-footer {
+        margin-top: auto;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .booking-section-title { break-inside: avoid; page-break-inside: avoid; }
+      .booking-upper-row { break-inside: auto; page-break-inside: auto; }
+      .booking-upper-col { break-inside: auto; page-break-inside: auto; }
+      .booking-fin-summary-wrap { break-inside: avoid; page-break-inside: avoid; }
+      .booking-fields-bento { break-inside: auto; page-break-inside: auto; }
+      .booking-tile { break-inside: avoid; page-break-inside: avoid; }
+      .booking-cust-veh-wrap { break-inside: avoid; page-break-inside: avoid; }
     }
   </style>
 </head>
@@ -1112,6 +2059,242 @@
         `;
         };
         root.innerHTML = detailPages.map((pageRows, pageIndex) => renderJournalPage(pageRows, pageIndex)).join('');
+      } else if (template === 'booking' && root) {
+        const fleetName = esc(show(get('fleetName', '-')));
+        const logoRaw = String(get('logoUrl', '/assets/images/logo/logo-icon.png') || '').trim();
+        const logo = logoRaw || '/assets/images/logo/logo-icon.png';
+        const taxRecord = esc(show(get('taxNumber', '')));
+        const branch = esc(show(get('branchName', '')));
+        const branchAddress = esc(show(get('branchAddress', '')));
+        const branchAddressEn = esc(show(get('branchAddressEn', get('branchAddress', ''))));
+        const docNo = esc(show(get('documentNo', '-')));
+        const statusText = esc(show(get('statusText', '')));
+        document.title = `عقد إيجار ${show(get('documentNo', '-'))}`;
+        root.innerHTML = `
+          <div class="booking-print-page booking-print--onepage">
+          <div class="booking-print-main">
+          <table style="width:100%;padding:2px;" class="doc-header booking-doc-header-compact">
+            <tr>
+              <td style="vertical-align:top;width:34%;">
+                <h2 style="margin:0 0 4px;color:#434ea9;text-align:center;font-size:18px;">${fleetName}</h2>
+                <p class="header-fleet-tagline" style="margin:0 0 6px;color:#434ea9;text-align:center;font-size:14px;font-weight:700;">لتأجير السيارات</p>
+                <p class="header-meta" style="margin:4px 0;color:#434ea9;text-align:center;">الرقم الضريبي ${taxRecord}</p>
+                <p class="header-meta" style="text-align:center;">فرع ${branch}</p>
+              </td>
+              <td style="text-align:center;width:32%;vertical-align:middle;">
+                <img src="${logo}" style="max-width:110px;max-height:90px;object-fit:contain;" onerror="this.style.display='none';" />
+                <p style="margin:6px 0 0;font-weight:700;color:#434ea9;">${fleetName}</p>
+              </td>
+              <td style="vertical-align:top;width:34%;direction:ltr;text-align:center;">
+                <h2 style="margin:0 0 4px;color:#434ea9;font-size:18px;">${fleetName}</h2>
+                <p class="header-fleet-tagline" style="margin:0 0 6px;color:#434ea9;font-size:14px;font-weight:700;direction:rtl;">لتأجير السيارات</p>
+                <p class="header-meta" style="margin:4px 0;color:#434ea9;">VAT: ${taxRecord}</p>
+              </td>
+            </tr>
+          </table>
+          <div class="booking-top-bar">
+            <div class="booking-doc-title">
+              <h2 class="booking-doc-title__h">
+                <span class="booking-doc-title__ar">عقد إيجار مركبة</span>
+                <span class="booking-doc-title__en">Vehicle Rental Agreement</span>
+              </h2>
+            </div>
+            <div class="booking-doc-meta">
+              <div class="booking-doc-no" dir="ltr">${docNo}</div>
+              ${statusText ? `<div class="booking-doc-status">${statusText}</div>` : ''}
+            </div>
+          </div>
+
+          <div class="booking-upper-row">
+          <div class="booking-upper-col booking-upper-col--full">
+                <div class="booking-fields-bento booking-fields-bento--main" dir="${dir}">
+                <div class="booking-fields-grid">
+                <div class="booking-tile booking-tile--key"><div class="booking-tile-label">اسم المستأجر / Renter name</div><div class="booking-tile-value">${esc(show(get('customerNameAr', '')))}</div></div>
+                <div class="booking-tile booking-tile--key"><div class="booking-tile-label">رقم الهوية / الإقامة / ID</div><div class="booking-tile-value" dir="ltr">${esc(show(get('identityNumber', '')))}</div></div>
+                <div class="booking-tile booking-tile--key"><div class="booking-tile-label">جوال / Mobile</div><div class="booking-tile-value" dir="ltr">${esc(show(get('mobile', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">الجنسية / Nationality</div><div class="booking-tile-value">${esc(show(get('nationality', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">العنوان / Address</div><div class="booking-tile-value">${esc(show(get('address', '')))}</div></div>
+                <div class="booking-tile booking-tile--key"><div class="booking-tile-label">رقم اللوحة / Plate no.</div><div class="booking-tile-value" dir="ltr">${esc(show(get('plateNumber', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">نوع السيارة / Vehicle type</div><div class="booking-tile-value">${esc(show(get('vehicleCategory', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">سنة الموديل / Model year</div><div class="booking-tile-value" dir="ltr">${esc(show(get('vehicleYear', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">اللون / Color</div><div class="booking-tile-value">${esc(show(get('color', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">سعر اليوم / Daily rate</div><div class="booking-tile-value" dir="ltr">${esc(show(get('priceInDay', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">سعر الشهر / Monthly rate</div><div class="booking-tile-value" dir="ltr">${esc(show(get('priceInMonth', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">الخصم / Discount</div><div class="booking-tile-value" dir="ltr">${esc(show(get('discount', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">المسموح (كم) / Allowed km</div><div class="booking-tile-value" dir="ltr">${esc(show(get('allowTo', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">سعر الساعة الإضافية / Extra hour price</div><div class="booking-tile-value" dir="ltr">${esc(show(get('priceHoureExtra', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">سعر الكيلومتر الإضافي / Extra km price</div><div class="booking-tile-value" dir="ltr">${esc(show(get('priceKmExtra', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">كم إضافي (العدد) / Extra km qty</div><div class="booking-tile-value" dir="ltr">${esc(show(get('countKMExtra', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">مصروفات أخرى / Other expenses</div><div class="booking-tile-value" dir="ltr">${esc(show(get('otherExpenses', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">رسوم النقل / Transportation fees</div><div class="booking-tile-value" dir="ltr">${esc(show(get('transportationFees', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">المخالفات المرورية / Traffic fines</div><div class="booking-tile-value" dir="ltr">${esc(show(get('totalTrafic', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">الصيانة والإصلاح / Maintenance</div><div class="booking-tile-value" dir="ltr">${esc(show(get('totalMaintance', '')))}</div></div>
+                <div class="booking-tile booking-tile--key"><div class="booking-tile-label">الضريبة / Tax</div><div class="booking-tile-value" dir="ltr">${esc(show(get('totaltax', '')))}</div></div>
+                <div class="booking-tile booking-tile--key"><div class="booking-tile-label">تاريخ ووقت البداية / Start</div><div class="booking-tile-value" dir="ltr">${esc(show(get('startDate', '')))}</div></div>
+                <div class="booking-tile booking-tile--key"><div class="booking-tile-label">تاريخ ووقت نهاية العقد / End (contract)</div><div class="booking-tile-value" dir="ltr">${esc(show(get('endDate', '')))}</div></div>
+                <div class="booking-tile booking-tile--key"><div class="booking-tile-label">تاريخ عودة المركبة / Return</div><div class="booking-tile-value" dir="ltr">${esc(show(get('returnDate', '')))}</div></div>
+                <div class="booking-tile booking-tile--key"><div class="booking-tile-label">عدد أيام الإيجار / Rent days</div><div class="booking-tile-value" dir="ltr">${esc(show(get('countOfDay', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">عداد الخروج / Odometer out</div><div class="booking-tile-value" dir="ltr">${esc(show(get('checkoutCounter', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">عداد العودة / Odometer in</div><div class="booking-tile-value" dir="ltr">${esc(show(get('checkinCounter', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">المسافة المقطوعة (كم) / Km driven</div><div class="booking-tile-value" dir="ltr">${esc(show(get('kmDriven', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">الساعات الزائدة / Extra hours</div><div class="booking-tile-value" dir="ltr">${esc(show(get('numberOfHoursExcess', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">الكيلومترات الزائدة / Extra km</div><div class="booking-tile-value" dir="ltr">${esc(show(get('numberKmExcess', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">أيام زائدة / Extra days</div><div class="booking-tile-value" dir="ltr">${esc(show(get('dayExcess', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">المسافة (GPS) / Distance GPS</div><div class="booking-tile-value" dir="ltr">${esc(show(get('distanceGps', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">مكان الاستخدام / Usage place</div><div class="booking-tile-value">${esc(show(get('placeUse', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">حساب عهدة مركبة العميل / Custody account</div><div class="booking-tile-value" dir="ltr">${esc(show(get('countingCustVehicle', '')))}</div></div>
+                </div>
+                </div>
+          </div>
+          </div>
+
+          <div class="booking-fin-summary-wrap">
+                <div class="booking-section-title" style="margin-top:0;">ملخص مالي / Financial summary</div>
+                <div class="booking-fields-bento">
+                <div class="booking-fields-grid booking-fields-grid--fin">
+                <div class="booking-tile"><div class="booking-tile-label">المقدم (استلام مركبة) / Advance</div><div class="booking-tile-value" dir="ltr">${esc(show(get('totalReceivedVehicle', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">إجمالي المدفوع / Paid total</div><div class="booking-tile-value" dir="ltr">${esc(show(get('paidTotal', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">إجمالي بعد خصم / After discount</div><div class="booking-tile-value" dir="ltr">${esc(show(get('totalAfterDiscount', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">بدون ضريبة / Excl. tax</div><div class="booking-tile-value" dir="ltr">${esc(show(get('totalWithoutTax', '')))}</div></div>
+                <div class="booking-tile"><div class="booking-tile-label">الضريبة / Tax</div><div class="booking-tile-value" dir="ltr">${esc(show(get('totaltax', '')))}</div></div>
+                <div class="booking-tile booking-tile--key"><div class="booking-tile-label">إجمالي العقد / Contract total</div><div class="booking-tile-value" dir="ltr">${esc(show(get('total', '')))}</div></div>
+                <div class="booking-tile booking-tile--key"><div class="booking-tile-label">المتبقي / Remaining</div><div class="booking-tile-value" dir="ltr"><strong>${esc(show(get('remaining', '')))}</strong></div></div>
+                <div class="booking-tile"><div class="booking-tile-label">نسبة التحصيل / Collected</div><div class="booking-tile-value" dir="ltr">${esc(show(get('collectionPercent', '')))}</div></div>
+                </div>
+                </div>
+          </div>
+
+          <div class="booking-classic-addendum" dir="rtl">
+            <div class="booking-classic-two-col">
+              <div class="booking-classic-pane booking-classic-pane--notes">
+                <div class="booking-classic-subtitle">ملاحظات هامة / Important Notes</div>
+                <ul class="booking-classic-bullets">
+                  <li>يتحمل المستأجر المسؤولية الكاملة عن السيارة خلال فترة الإيجار.</li>
+                  <li>يجب إعادة السيارة في الموعد المحدد؛ التأخير قد يترتب عليه رسوم إضافية.</li>
+                  <li>السائق ملزم بالالتزام بأنظمة المرور وبشروط التأمين السارية.</li>
+                  <li>في حال الحوادث أو التلف يلتزم المستأجر بإبلاغ الشركة فوراً وإرفاق التقارير اللازمة.</li>
+                </ul>
+                <div class="booking-classic-subtitle">ملاحظات الخروج / Out Remarks</div>
+                <div class="booking-classic-lines" aria-hidden="true"></div>
+                <div class="booking-classic-cover-row" dir="rtl">
+                  <div class="booking-classic-insurance-wrap">
+                    <table class="booking-classic-insurance-grid" dir="rtl">
+                      <tr>
+                        <td>كيفية تغطية الأضرار الناتجة عن الحوادث</td>
+                        <td><span class="ins-mark">أ</span>بشكل مباشر من قبل المستأجر</td>
+                        <td><span class="ins-mark">ب</span>عن طريق شركة التأمين التي يحمل المستأجر وثيقة منها</td>
+                        <td><span class="ins-mark">ج</span>قبول التغطية التأمينية التي يقدمها له المؤجر</td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div class="booking-classic-fullopt">
+                    <span>السيارة بها كافة المشتملات</span>
+                    <span class="fullopt-en">Car With Full Option</span>
+                  </div>
+                </div>
+                <div class="booking-classic-subtitle">ملاحظات العودة / Remarks Of Return</div>
+                <div class="booking-classic-lines" aria-hidden="true"></div>
+              </div>
+              <div class="booking-classic-pane booking-classic-pane--ack">
+                <div class="booking-classic-box booking-classic-box--in-pane">
+                <h4>إقرار المستأجر / Renter&apos;s Acknowledgment</h4>
+                <ol class="booking-classic-num-list">
+                  <li>أقر باستلام السيارة بحالتها المثبتة في العقد والملاحق.</li>
+                  <li>أتعهد بعدم العبث بعداد المسافات أو أي أجهزة تابعة للمركبة.</li>
+                  <li>أتحمل تكاليف أي إصلاح أو خدمة تتم دون علم وموافقة المكتب.</li>
+                  <li>ألتزم بسداد جميع المبالغ المستحقة عند إنهاء العقد أو عند المطالبة.</li>
+                  <li>أقر باطلاعي على شروط الإيجار والموافقة الكاملة عليها.</li>
+                </ol>
+                <div class="booking-classic-field">إسم المستأجر / Renter&apos;s Name<span class="booking-classic-dots">${esc(show(get('customerNameAr', '')))}</span></div>
+                <div class="booking-classic-field">التوقيع / Signature<span class="booking-classic-dots"></span></div>
+                <div class="booking-classic-field">التاريخ / Date<span class="booking-classic-dots">${esc(show(get('printDate', '')))}</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="booking-classic-prepared-wrap">الموظف المؤجر / R/A Prepared By</div>
+            <div class="booking-classic-prepared-line" aria-hidden="true"></div>
+            <div class="booking-classic-return">
+              <p>توقيع المستأجر بإعادة السيارة إنهاء العقد والتعهد بسداد الحساب — Renter&apos;s Signature To Returned The Car Agreement Turning Termination And Certified Account</p>
+              <div class="booking-classic-sign-row">
+                <div class="booking-classic-sign-cell">
+                  <div>توقيع المستأجر / Renters Sign.</div>
+                  <div class="booking-classic-dots"></div>
+                </div>
+                <div class="booking-classic-sign-cell">
+                  <div>توقيع الموظف المستلم للسيارة / R/A Finished By</div>
+                  <div class="booking-classic-dots"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          </div>
+          <div class="booking-print-footer">
+          <div class="voucher-tail booking-voucher-tail--booking">
+            <div class="booking-receipt-tail">
+              <div class="booking-receipt-head">
+                <div class="booking-receipt-head-dates">
+                  <div class="booking-receipt-title">التاريخ</div>
+                  <div class="booking-receipt-dates-row">
+                    <div class="booking-receipt-hijri">
+                      <span>هـ .H</span>
+                      <span class="booking-receipt-gold booking-receipt-gold--hijri" dir="ltr">&nbsp;</span>
+                    </div>
+                    <div class="booking-receipt-greg">
+                      <span>م .M</span>
+                      <span class="booking-receipt-gold booking-receipt-gold--greg" dir="ltr">&nbsp;</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="booking-receipt-amount-block">
+                  <div class="booking-receipt-sr-label">ريال <span dir="ltr">.S.R</span></div>
+                  <div class="booking-receipt-gold booking-receipt-gold--sr" dir="ltr">&nbsp;</div>
+                </div>
+                <div class="booking-receipt-moafiq">الموافق</div>
+              </div>
+              <div class="booking-receipt-mid">
+                <div class="booking-receipt-mid-line" dir="ltr">
+                  <span class="lbl-en">Customer Name:</span>
+                  <span class="fill" dir="auto">&nbsp;</span>
+                  <span class="lbl-ar" dir="rtl">إسم العميل:</span>
+                </div>
+                <div class="booking-receipt-mid-line" dir="ltr">
+                  <span class="lbl-en">Amount:</span>
+                  <span class="fill" dir="ltr">&nbsp;</span>
+                  <span class="lbl-ar" dir="rtl">مبلغ و قدره:</span>
+                </div>
+                <div class="booking-receipt-mid-line" dir="ltr">
+                  <span class="lbl-en">Pay To:</span>
+                  <span class="fill" dir="auto">&nbsp;</span>
+                  <span class="lbl-ar" dir="rtl">وذلك قيمة:</span>
+                </div>
+              </div>
+              <div class="booking-receipt-sigs" dir="ltr">
+                <div class="booking-receipt-sig">
+                  <span class="ar" dir="rtl">المدير</span>
+                  <span class="en">Manager</span>
+                  <div class="sig-dots"></div>
+                </div>
+                <div class="booking-receipt-sig">
+                  <span class="ar" dir="rtl">المحاسب</span>
+                  <span class="en">Accountant</span>
+                  <div class="sig-dots"></div>
+                </div>
+                <div class="booking-receipt-sig">
+                  <span class="ar" dir="rtl">المستلم</span>
+                  <span class="en">Receiver</span>
+                  <div class="sig-dots"></div>
+                </div>
+              </div>
+              <div class="booking-receipt-footer-bar">
+                <p class="ln-ar">${branchAddress}</p>
+                <p class="ln-en">${branchAddressEn}</p>
+              </div>
+            </div>
+          </div>
+          </div>
+          </div>
+        `;
       } else if (root) {
         const rawContent = get('content', '');
         const decodedContent = payload ? rawContent : decodeURIComponent(rawContent);
