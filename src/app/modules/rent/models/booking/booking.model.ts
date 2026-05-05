@@ -90,6 +90,16 @@ export interface Booking {
   discount?: number;
   checkoutCounter?: number;
   checkinCounter?: number;
+  checkoutPhotoFrontUrl?: string;
+  checkoutPhotoRightUrl?: string;
+  checkoutPhotoLeftUrl?: string;
+  checkoutPhotoBackUrl?: string;
+  checkoutPhotoInteriorUrl?: string;
+  checkinPhotoFrontUrl?: string;
+  checkinPhotoRightUrl?: string;
+  checkinPhotoLeftUrl?: string;
+  checkinPhotoBackUrl?: string;
+  checkinPhotoInteriorUrl?: string;
   countOfDay?: number;
   /** Soft delete — aligns with DB/API `IsDeleted` (replaces legacy `IsDelete`). */
   isDeleted?: boolean;

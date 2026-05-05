@@ -130,6 +130,21 @@ export class PaymentCountService {
       );
   }
 
+  /**
+   * Maps `PaymentcountRouting.GetLastByIdBooking`: `GET Paymentcount/last/{IdBooking}/{fleetid}`.
+   */
+  getLastForBooking(idBooking: number, fleetId?: string | null): Observable<PaymentCount | null> {
+    const fleet = normalizeFleetId(fleetId);
+    if (!fleet || !Number.isFinite(idBooking) || idBooking <= 0) {
+      return of(null);
+    }
+    const idSeg = encodeURIComponent(String(idBooking));
+    const fleetSeg = encodeURIComponent(fleet);
+    return this.api
+      .getData<unknown>(`${this.base}/last/${idSeg}/${fleetSeg}`, undefined, { suppressErrorToast: true })
+      .pipe(map(raw => (raw ? normalizePaymentCount(raw) : null)));
+  }
+
   create(payload: CreatePaymentCountRequest): Observable<unknown> {
     return this.api.postData<unknown>(this.base, this.toCreateApiPayload(payload));
   }

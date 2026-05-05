@@ -91,6 +91,7 @@ export class BookingDetailsComponent implements OnInit {
       right: 'Contract vehicle photo right',
       left: 'Contract vehicle photo left',
       back: 'Contract vehicle photo back',
+      interior: 'Contract vehicle photo interior',
     };
     const key = map[angle];
     return key ? this.translate.instant(key) : angle;
@@ -101,11 +102,26 @@ export class BookingDetailsComponent implements OnInit {
     return resolved && resolved.length > 0 ? resolved : null;
   }
 
-  /**
-   * Per-angle vehicle photos from the API can be wired here later.
-   * Until then, every slot uses the fleet logo (`Urllogo`) as the default placeholder image.
-   */
-  contractPhotoSlotUrl(item: Booking, _phase: 'checkout' | 'return', _angle: string): string | null {
+  contractPhotoSlotUrl(item: Booking, phase: 'checkout' | 'return', angle: string): string | null {
+    const checkoutMap: Partial<Record<string, string | undefined>> = {
+      front: item.checkoutPhotoFrontUrl,
+      right: item.checkoutPhotoRightUrl,
+      left: item.checkoutPhotoLeftUrl,
+      back: item.checkoutPhotoBackUrl,
+      interior: item.checkoutPhotoInteriorUrl,
+    };
+    const returnMap: Partial<Record<string, string | undefined>> = {
+      front: item.checkinPhotoFrontUrl,
+      right: item.checkinPhotoRightUrl,
+      left: item.checkinPhotoLeftUrl,
+      back: item.checkinPhotoBackUrl,
+      interior: item.checkinPhotoInteriorUrl,
+    };
+    const raw = (phase === 'checkout' ? checkoutMap[angle] : returnMap[angle]) ?? '';
+    const resolved = resolveMediaUrl(raw);
+    if (resolved && resolved.length > 0) {
+      return resolved;
+    }
     return this.logoOnlyUrl(item);
   }
 
@@ -302,6 +318,28 @@ export class BookingDetailsComponent implements OnInit {
     }
   }
 
+  private paymentMethodArabicForPrint(value: number | null | undefined): string {
+    switch (Number(value)) {
+      case 1:
+        return 'نقدا';
+      case 2:
+        return 'شبكة';
+      case 3:
+        return 'شيك';
+      case 4:
+        return 'تحويل بنكي';
+      case 5:
+        return 'نقدا / بنكي';
+      default:
+        return '-';
+    }
+  }
+
+  private toArabicDigits(value: string): string {
+    const digits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return String(value ?? '').replace(/[0-9]/g, d => digits[Number(d)] ?? d);
+  }
+
   private toBookingNumericId(rawId: string): number | null {
     const n = Number(String(rawId ?? '').trim());
     return Number.isFinite(n) && n > 0 ? n : null;
@@ -383,26 +421,50 @@ export class BookingDetailsComponent implements OnInit {
     if (!item) {
       return;
     }
-    const payloadKey = `booking-print-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-    const payload = this.buildBookingPrintPayload(item, autoPrint);
-    localStorage.setItem(payloadKey, JSON.stringify(payload));
-    const page = autoPrint ? 'invoise-print.html' : 'invoise-view.html';
-    const url = `${window.location.origin}/assets/pyment/${page}?payloadKey=${encodeURIComponent(payloadKey)}`;
-    const win = window.open('', '_blank', 'width=980,height=760');
-    if (!win) {
-      this.toast.error(this.translate.instant('Unable to open print preview window'));
-      localStorage.removeItem(payloadKey);
-      return;
-    }
-    win.location.href = url;
+    const fleetId = this.authState.fleetId() ?? '';
+    const idBooking = this.toBookingNumericId(item.id);
+    const lastPayment$ =
+      idBooking && fleetId
+        ? this.paymentCountService.getLastForBooking(idBooking, fleetId).pipe(catchError(() => of(null)))
+        : of(null);
+    lastPayment$.subscribe(lastPayment => {
+      const payloadKey = `booking-print-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      const payload = this.buildBookingPrintPayload(item, autoPrint, lastPayment);
+      localStorage.setItem(payloadKey, JSON.stringify(payload));
+      const page = autoPrint ? 'invoise-print.html' : 'invoise-view.html';
+      const url = `${window.location.origin}/assets/pyment/${page}?payloadKey=${encodeURIComponent(payloadKey)}`;
+      const win = window.open('', '_blank', 'width=980,height=760');
+      if (!win) {
+        this.toast.error(this.translate.instant('Unable to open print preview window'));
+        localStorage.removeItem(payloadKey);
+        return;
+      }
+      win.location.href = url;
+    });
   }
 
-  private buildBookingPrintPayload(item: Booking, autoPrint: boolean): Record<string, unknown> {
+  private buildBookingPrintPayload(
+    item: Booking,
+    autoPrint: boolean,
+    lastPayment: PaymentCount | null = null,
+  ): Record<string, unknown> {
     const isArabic = this.translate.currentLang?.startsWith('ar');
     const cIn = Number(item.checkinCounter);
     const cOut = Number(item.checkoutCounter);
     const kmDriven =
       Number.isFinite(cIn) && Number.isFinite(cOut) ? String(Math.round(cIn - cOut)) : '-';
+
+    const receiptAmount = this.moneyOrDash(lastPayment?.paid ?? this.displayedPaidTotal(item));
+    const receiptDateGreg = this.formatBookingDateTimeForPrint(lastPayment?.createdAt ?? new Date());
+    const receiptCustomerName = this.valueOrDash(item.customerName);
+    const paymentMethodAr = this.paymentMethodArabicForPrint(lastPayment?.paymentType);
+    const receiptAmountArabicDigits = this.toArabicDigits(receiptAmount);
+    const receiptAmountText =
+      paymentMethodAr && paymentMethodAr !== '-'
+        ? `${receiptAmountArabicDigits} ريال (${paymentMethodAr})`
+        : `${receiptAmountArabicDigits} ريال`;
+    const paymentNo = this.valueOrDash(lastPayment?.paymentNumber);
+    const receiptPurpose = `عقد تأجير (${this.contractNumber(item)}) ورقم المركبة (${this.valueOrDash(item.vehiclePlateNumber)})`;
 
     return {
       template: 'booking',
@@ -454,6 +516,7 @@ export class BookingDetailsComponent implements OnInit {
       countingCustVehicle: this.countingCustVehicleDisplay(item),
       dailyRentalRevenue: this.dailyRentalRevenueForPrint(item),
       statusText: this.statusDisplayText(item),
+      statusTone: this.statusBadgeTone(item.status),
       totalReceivedVehicle: this.moneyOrDash(item.totalReceivedVehicle),
       paidTotal: this.moneyOrDash(this.displayedPaidTotal(item)),
       totalAfterDiscount: this.moneyOrDash(this.totalAfterDiscount(item)),
@@ -463,6 +526,13 @@ export class BookingDetailsComponent implements OnInit {
       decisionHint: this.decisionHintText(item),
       note: this.valueOrDash(item.notes),
       branchAddressEn: this.resolveBookingBranchAddress(item),
+      receiptDateHijri: '',
+      receiptDateGreg,
+      receiptAmount,
+      receiptAmountText,
+      receiptCustomerName,
+      receiptPurpose,
+      receiptVoucherNo: paymentNo,
     };
   }
 

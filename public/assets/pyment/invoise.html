@@ -627,6 +627,7 @@
       margin-bottom: 5px;
       padding-bottom: 4px;
       border-bottom: 1px solid #e5e5e5;
+      position: relative;
     }
     .booking-receipt-head-dates {
       flex: 1 1 auto;
@@ -685,6 +686,30 @@
       font-size: 7.5px;
       font-weight: 800;
       margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .booking-receipt-voucher-no {
+      font-size: 7px;
+      font-weight: 700;
+      color: #374151;
+    }
+    .booking-receipt-voucher-center {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      transform: translate(-50%, 15px);
+      font-size: 8px;
+      font-weight: 800;
+      color: #111827;
+      white-space: nowrap;
+      text-align: center;
+      background: #fff;
+      padding: 0 6px;
+      border-radius: 8px;
     }
     .booking-receipt-gold--sr {
       min-width: 72px;
@@ -705,7 +730,7 @@
       flex-direction: row;
       align-items: flex-end;
       justify-content: space-between;
-      gap: 4px;
+      gap: 2px;
       margin: 3px 0;
       font-size: 7.5px;
       font-weight: 700;
@@ -724,12 +749,17 @@
     }
     .booking-receipt-mid-line .fill {
       flex: 1 1 auto;
+      display: flex;
+      align-items: flex-end;
       border-bottom: 1px dotted #000;
+      min-width: 230px;
       min-height: 22px;
-      text-align: center;
-      font-size: 7.5px;
-      font-weight: 700;
-      padding: 0 2px 1px;
+      text-align: right;
+      direction: rtl;
+      font-size: 8.5px;
+      font-weight: 1000;
+      line-height: 1;
+      padding: 0 4px 0;
     }
     .booking-receipt-sigs {
       display: flex;
@@ -866,12 +896,13 @@
     .booking-print--onepage .booking-doc-title p {
       font-size: 11px;
     }
-    .booking-print--onepage .booking-doc-meta .booking-doc-no {
+    .booking-print--onepage .booking-doc-no {
       font-size: 14px;
       padding: 4px 10px;
     }
     .booking-print--onepage .booking-doc-status {
       font-size: 11px;
+      padding: 4px 10px;
     }
     .booking-print--onepage .booking-top-bar {
       margin-bottom: 4px;
@@ -1127,10 +1158,17 @@
       text-align: right;
     }
     .booking-classic-field .booking-classic-dots {
-      display: block;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-start;
       border-bottom: 1px dotted #78716c;
       min-height: 12px;
       margin-top: 2px;
+      padding: 0 3px;
+      font-size: 7px;
+      font-weight: 700;
+      line-height: 1;
+      text-align: right;
     }
     .booking-classic-return {
       margin-top: 6px;
@@ -1256,27 +1294,55 @@
       direction: ltr;
     }
     .booking-doc-title p { margin: 0; font-size: 14px; color: #4b5563; }
-    .booking-doc-meta {
+    .booking-doc-status-slot {
+      grid-column: 1;
+      justify-self: start;
+      align-self: center;
+      min-width: 0;
+    }
+    .booking-doc-status {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 800;
+      direction: rtl;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 2px solid;
+      white-space: nowrap;
+      max-width: min(240px, 42vw);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
+    }
+    .booking-doc-status--success {
+      color: #047857;
+      background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 55%);
+      border-color: #10b981;
+    }
+    .booking-doc-status--warning {
+      color: #b45309;
+      background: linear-gradient(180deg, #fffbeb 0%, #ffffff 55%);
+      border-color: #f59e0b;
+    }
+    .booking-doc-status--danger {
+      color: #b91c1c;
+      background: linear-gradient(180deg, #fef2f2 0%, #ffffff 55%);
+      border-color: #ef4444;
+    }
+    .booking-doc-status--secondary {
+      color: #475569;
+      background: linear-gradient(180deg, #f1f5f9 0%, #ffffff 55%);
+      border-color: #94a3b8;
+    }
+    .booking-doc-status--info {
+      color: #1d4ed8;
+      background: linear-gradient(180deg, #eff6ff 0%, #ffffff 55%);
+      border-color: #3b82f6;
+    }
+    .booking-doc-no {
       grid-column: 3;
       justify-self: end;
       align-self: center;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .booking-doc-status {
-      font-size: 13px;
-      font-weight: 700;
-      color: #1e3a8a;
-      direction: rtl;
-      white-space: nowrap;
-      max-width: min(220px, 40vw);
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .booking-doc-no {
       font-size: 17px;
       font-weight: 800;
       color: #b91c1c;
@@ -2069,6 +2135,10 @@
         const branchAddressEn = esc(show(get('branchAddressEn', get('branchAddress', ''))));
         const docNo = esc(show(get('documentNo', '-')));
         const statusText = esc(show(get('statusText', '')));
+        const rawTone = String(get('statusTone', 'secondary') ?? 'secondary');
+        const statusTone = ['success', 'warning', 'danger', 'secondary', 'info'].includes(rawTone)
+          ? rawTone
+          : 'secondary';
         document.title = `عقد إيجار ${show(get('documentNo', '-'))}`;
         root.innerHTML = `
           <div class="booking-print-page booking-print--onepage">
@@ -2093,16 +2163,16 @@
             </tr>
           </table>
           <div class="booking-top-bar">
+            <div class="booking-doc-status-slot">
+              ${statusText ? `<div class="booking-doc-status booking-doc-status--${statusTone}">${statusText}</div>` : ''}
+            </div>
             <div class="booking-doc-title">
               <h2 class="booking-doc-title__h">
                 <span class="booking-doc-title__ar">عقد إيجار مركبة</span>
                 <span class="booking-doc-title__en">Vehicle Rental Agreement</span>
               </h2>
             </div>
-            <div class="booking-doc-meta">
-              <div class="booking-doc-no" dir="ltr">${docNo}</div>
-              ${statusText ? `<div class="booking-doc-status">${statusText}</div>` : ''}
-            </div>
+            <div class="booking-doc-no" dir="ltr">${docNo}</div>
           </div>
 
           <div class="booking-upper-row">
@@ -2205,7 +2275,7 @@
                   <li>ألتزم بسداد جميع المبالغ المستحقة عند إنهاء العقد أو عند المطالبة.</li>
                   <li>أقر باطلاعي على شروط الإيجار والموافقة الكاملة عليها.</li>
                 </ol>
-                <div class="booking-classic-field">إسم المستأجر / Renter&apos;s Name<span class="booking-classic-dots">${esc(show(get('customerNameAr', '')))}</span></div>
+                <div class="booking-classic-field">Renter&apos;s Name / إسم المستأجر<span class="booking-classic-dots"></span></div>
                 <div class="booking-classic-field">التوقيع / Signature<span class="booking-classic-dots"></span></div>
                 <div class="booking-classic-field">التاريخ / Date<span class="booking-classic-dots">${esc(show(get('printDate', '')))}</span></div>
                 </div>
@@ -2233,39 +2303,42 @@
           <div class="voucher-tail booking-voucher-tail--booking">
             <div class="booking-receipt-tail">
               <div class="booking-receipt-head">
+                <div class="booking-receipt-voucher-center">رقم السند: ${esc(show(get('receiptVoucherNo', '')))}</div>
                 <div class="booking-receipt-head-dates">
                   <div class="booking-receipt-title">التاريخ</div>
                   <div class="booking-receipt-dates-row">
                     <div class="booking-receipt-hijri">
                       <span>هـ .H</span>
-                      <span class="booking-receipt-gold booking-receipt-gold--hijri" dir="ltr">&nbsp;</span>
+                      <span class="booking-receipt-gold booking-receipt-gold--hijri" dir="ltr">${esc(show(get('receiptDateHijri', '')))}</span>
                     </div>
                     <div class="booking-receipt-greg">
                       <span>م .M</span>
-                      <span class="booking-receipt-gold booking-receipt-gold--greg" dir="ltr">&nbsp;</span>
+                      <span class="booking-receipt-gold booking-receipt-gold--greg" dir="ltr">${esc(show(get('receiptDateGreg', get('printDate', ''))))}</span>
                     </div>
                   </div>
                 </div>
                 <div class="booking-receipt-amount-block">
-                  <div class="booking-receipt-sr-label">ريال <span dir="ltr">.S.R</span></div>
-                  <div class="booking-receipt-gold booking-receipt-gold--sr" dir="ltr">&nbsp;</div>
+                  <div class="booking-receipt-sr-label">
+                    <span>ريال <span dir="ltr">.S.R</span></span>
+                  </div>
+                  <div class="booking-receipt-gold booking-receipt-gold--sr" dir="ltr">${esc(show(get('receiptAmount', '')))}</div>
                 </div>
                 <div class="booking-receipt-moafiq">الموافق</div>
               </div>
               <div class="booking-receipt-mid">
                 <div class="booking-receipt-mid-line" dir="ltr">
                   <span class="lbl-en">Customer Name:</span>
-                  <span class="fill" dir="auto">&nbsp;</span>
+                  <span class="fill" dir="auto">${esc(show(get('receiptCustomerName', get('customerNameAr', ''))))}</span>
                   <span class="lbl-ar" dir="rtl">إسم العميل:</span>
                 </div>
                 <div class="booking-receipt-mid-line" dir="ltr">
                   <span class="lbl-en">Amount:</span>
-                  <span class="fill" dir="ltr">&nbsp;</span>
+                  <span class="fill" dir="rtl">${esc(show(get('receiptAmountText', get('receiptAmount', ''))))}</span>
                   <span class="lbl-ar" dir="rtl">مبلغ و قدره:</span>
                 </div>
                 <div class="booking-receipt-mid-line" dir="ltr">
                   <span class="lbl-en">Pay To:</span>
-                  <span class="fill" dir="auto">&nbsp;</span>
+                  <span class="fill" dir="auto">${esc(show(get('receiptPurpose', '')))}</span>
                   <span class="lbl-ar" dir="rtl">وذلك قيمة:</span>
                 </div>
               </div>

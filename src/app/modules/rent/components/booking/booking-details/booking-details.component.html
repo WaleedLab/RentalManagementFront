@@ -127,7 +127,7 @@
         <section class="contract-panel">
           <h2 class="contract-panel__title">{{ 'Contract section photos checkout' | translate }}</h2>
           <div class="contract-photo-grid">
-            @for (angle of ['front', 'right', 'left', 'back']; track angle) {
+            @for (angle of ['front', 'right', 'left', 'back', 'interior']; track angle) {
               <div class="contract-photo-slot">
                 @if (contractPhotoSlotUrl(item, 'checkout', angle); as imgUrl) {
                   <img class="contract-photo-slot__img" [src]="imgUrl" alt="" />
@@ -259,14 +259,13 @@
                   <th>{{ 'Paid Amount' | translate }}</th>
                   <th>{{ 'Paid Cash' | translate }}</th>
                   <th>{{ 'Paid Bank' | translate }}</th>
-                  <th>{{ 'Status' | translate }}</th>
                   <th>{{ 'Created At' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
                 @if (paymentRows().length === 0) {
                   <tr>
-                    <td colspan="8" class="text-center text-muted py-3">
+                    <td colspan="7" class="text-center text-muted py-3">
                       {{ 'No linked voucher payments for this booking' | translate }}
                     </td>
                   </tr>
@@ -279,7 +278,6 @@
                       <td>{{ moneyOrDash(row.paid) }}</td>
                       <td>{{ moneyOrDash(row.paidCash) }}</td>
                       <td>{{ moneyOrDash(row.paidBank) }}</td>
-                      <td>{{ paymentStatusLabel(row.status) }}</td>
                       <td>{{ dateOrDash(row.createdAt) }}</td>
                     </tr>
                   }
@@ -336,7 +334,7 @@
         <section class="contract-panel">
           <h2 class="contract-panel__title">{{ 'Contract section photos return' | translate }}</h2>
           <div class="contract-photo-grid">
-            @for (angle of ['front', 'right', 'left', 'back']; track angle) {
+            @for (angle of ['front', 'right', 'left', 'back', 'interior']; track angle) {
               <div class="contract-photo-slot">
                 @if (contractPhotoSlotUrl(item, 'return', angle); as imgUrl) {
                   <img class="contract-photo-slot__img" [src]="imgUrl" alt="" />
