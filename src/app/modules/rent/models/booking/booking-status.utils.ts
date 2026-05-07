@@ -166,7 +166,7 @@ export const BOOKING_STATUS_THEME: Record<BookingStatusKey, BookingStatusTheme> 
     chartColor: '#2563EB',
   },
   finsh: {
-    labelAr: 'منتهي',
+    labelAr: 'مصفى',
     labelEn: 'Finished',
     iconClass: 'fa-solid fa-circle-xmark',
     color: '#16A34A',

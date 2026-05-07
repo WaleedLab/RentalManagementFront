@@ -181,7 +181,7 @@
   "Booking invalid branch id": "معرّف الفرع غير صالح. أدخل رقماً صحيحاً (يفضّل أرقام لاتينية 0-9).",
   "Booking smart subtotal": "إجمالي الإيجار المقترح (الأيام × اليومي − الخصم): {{amount}}",
   "Booking status.open": "مفتوح",
-  "Booking status.finsh": "منتهي",
+  "Booking status.finsh": "مصفى",
   "Booking status.Suspended_due_to_accident": "معلق — حادث",
   "Booking status.translate": "تحويل",
   "Booking status.close": "مغلق",

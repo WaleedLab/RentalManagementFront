@@ -100,6 +100,8 @@ export class BookingListComponent implements OnInit {
     { key: 'finsh', label: 'إنهاء', color: '#16A34A' },
     { key: 'close', label: 'إغلاق', color: '#6B7280' },
     { key: 'suspend', label: 'تعليق', color: '#111827' },
+    { key: 'debts', label: 'ذمم', color: '#DC2626' },
+    { key: 'cases', label: 'قضايا', color: '#7F1D1D' },
   ] as const;
 
   getBookingStatusIconClass(status: BookingStatus): string {
