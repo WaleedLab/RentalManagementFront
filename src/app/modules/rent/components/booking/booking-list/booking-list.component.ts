@@ -96,12 +96,13 @@ export class BookingListComponent implements OnInit {
     { label: this.translate.instant('Ascending'), value: 'ASC' },
   ]);
   colorGuide = [
-    { key: 'extension', label: 'تمديد', color: '#F59E0B' },
-    { key: 'finsh', label: 'مصفى', color: '#16A34A' },
-    { key: 'close', label: 'إغلاق', color: '#6B7280' },
-    { key: 'suspend', label: 'تعليق', color: '#111827' },
-    { key: 'debts', label: 'ذمم', color: '#DC2626' },
-    { key: 'cases', label: 'قضايا', color: '#7F1D1D' },
+    { key: 'open', label: 'مفتوح', color: '#5B7A9E' },
+    { key: 'extension', label: 'تمديد', color: '#9E7840' },
+    { key: 'finsh', label: 'مصفى', color: '#558A6C' },
+    { key: 'close', label: 'إغلاق', color: '#6D727A' },
+    { key: 'suspend', label: 'تعليق', color: '#5C6773' },
+    { key: 'debts', label: 'ذمم', color: '#9B5560' },
+    { key: 'cases', label: 'قضايا', color: '#7A4A52' },
   ] as const;
 
   getBookingStatusIconClass(status: BookingStatus): string {
@@ -125,7 +126,6 @@ export class BookingListComponent implements OnInit {
       '--booking-status-border-light': theme.borderLight,
       '--booking-status-border-dark': theme.borderDark,
       '--booking-status-accent': theme.color,
-      '--booking-status-gradient': theme.gradient,
     };
   }
 
@@ -212,6 +212,12 @@ export class BookingListComponent implements OnInit {
     this.router.navigate(['/booking', booking.id, 'details'], {
       queryParams: { action },
     });
+  }
+
+  closeBookingCardMore(panel: HTMLDetailsElement | null): void {
+    if (panel) {
+      panel.open = false;
+    }
   }
 
   updateCustomerTooltip(container: HTMLElement, booking: Booking): void {

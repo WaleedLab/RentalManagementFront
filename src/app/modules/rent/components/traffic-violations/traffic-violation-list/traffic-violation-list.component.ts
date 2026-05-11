@@ -159,7 +159,10 @@ export class TrafficViolationListComponent implements OnInit {
     if (row.bookingLabel) {
       return row.bookingLabel;
     }
-    return String(row.idBooking);
+    if (row.idBooking != null && row.idBooking > 0) {
+      return String(row.idBooking);
+    }
+    return '-';
   }
 
   vehicleCell(row: TrafficViolation): string {

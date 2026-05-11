@@ -1,181 +1,264 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
-import { finalize } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { forkJoin } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 
+import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
-import {
-  DashboardAlert,
-  DashboardHeatmapCell,
-  DashboardKpiItem,
-  DashboardSummary,
-  DashboardSummaryFilters,
-  DashboardTableCustomer,
-  DashboardTableVehicle,
-} from '../../../models/dashboard/dashboard-summary.model';
-import { DashboardService } from '../../../services/dashboard/dashboard.service';
-import { AlertsPanelComponent } from '../shared/alerts-panel.component';
-import { DashboardCardComponent } from '../shared/dashboard-card.component';
+import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
+import { Booking, Branch, Vehicle } from '../../../models';
+import { BookingService, BookingStatusCountsPeriod } from '../../../services/booking/booking.service';
+import { BranchService } from '../../../services/branches/branch.service';
+import { VehicleService } from '../../../services/vehicles/vehicle.service';
 import { DashboardChartComponent } from '../shared/dashboard-chart.component';
-import { DashboardTableComponent } from '../shared/dashboard-table.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    TranslateModule,
-    PageHeaderComponent,
-    DashboardCardComponent,
-    DashboardChartComponent,
-    DashboardTableComponent,
-    AlertsPanelComponent,
-  ],
+  imports: [CommonModule, FormsModule, TranslateModule, PageHeaderComponent, DashboardChartComponent, SmoothSelectComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
-  private readonly dashboardService = inject(DashboardService);
+  private vehicleService = inject(VehicleService);
+  private bookingService = inject(BookingService);
+  private branchService = inject(BranchService);
+  readonly authState = inject(AuthStateService);
+  private translate = inject(TranslateService);
 
-  loading = signal(false);
-  loadError = signal(false);
-  summary = signal<DashboardSummary | null>(null);
+  branches = signal<Branch[]>([]);
+  vehicleBranchId = signal<number | ''>('');
+  vehicleStatus = signal<Vehicle['status'] | ''>('');
+  bookingBranchId = signal<number | ''>('');
+  bookingPeriod = signal<BookingStatusCountsPeriod>('ThisMonth');
 
-  filtersForm = this.fb.nonNullable.group({
-    startDate: [''],
-    endDate: [''],
-    fleet: [''],
-    branch: [''],
-  });
+  vehicleLoading = signal(false);
+  vehicleError = signal(false);
+  bookingLoading = signal(false);
+  bookingError = signal(false);
 
-  kpis = computed<DashboardKpiItem[]>(() => this.summary()?.kpis ?? []);
-  topVehicles = computed<DashboardTableVehicle[]>(() => this.summary()?.topVehicles ?? []);
-  topCustomers = computed<DashboardTableCustomer[]>(() => this.summary()?.topCustomers ?? []);
-  alerts = computed<DashboardAlert[]>(() => this.summary()?.alerts ?? []);
-  heatmap = computed<DashboardHeatmapCell[]>(() => this.summary()?.heatmap ?? []);
+  vehicleStatusCounts = signal<{ label: string; value: number }[]>([]);
+  vehicleByBranch = signal<{ label: string; value: number }[]>([]);
+  vehicleByYear = signal<{ label: string; value: number }[]>([]);
+  vehicleTotal = signal(0);
 
-  vehicleColumns = [
-    { key: 'vehicleName', label: 'Vehicle Name', format: 'text' as const },
-    { key: 'revenue', label: 'Revenue', format: 'currency' as const },
-    { key: 'utilization', label: 'Utilization %', format: 'percent' as const },
-    { key: 'maintenanceCost', label: 'Maintenance Cost', format: 'currency' as const },
-  ];
+  bookingStatusCounts = signal<{ label: string; value: number }[]>([]);
+  bookingByBranch = signal<{ label: string; value: number }[]>([]);
+  bookingByStatusList = signal<{ label: string; value: number }[]>([]);
+  bookingTotal = signal(0);
 
-  customerColumns = [
-    { key: 'name', label: 'Name', format: 'text' as const },
-    { key: 'totalSpent', label: 'Total Spent', format: 'currency' as const },
-    { key: 'bookings', label: 'Number of bookings', format: 'number' as const },
-    { key: 'debt', label: 'Debt', format: 'currency' as const },
-  ];
+  branchOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('All branches'), value: '' },
+    ...this.branches().map(b => ({
+      label: (b.nameAr || b.nameEn || String(b.id)).trim() || String(b.id),
+      value: Number(b.id),
+    })),
+  ]);
 
-  revenueLabels = computed(() => (this.summary()?.revenueSeries ?? []).map(item => item.label));
-  revenueValues = computed(() => (this.summary()?.revenueSeries ?? []).map(item => item.value));
-  utilizationLabels = computed(() => (this.summary()?.utilizationSeries ?? []).map(item => item.label));
-  utilizationValues = computed(() => (this.summary()?.utilizationSeries ?? []).map(item => item.value));
+  vehicleStatusOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('All statuses'), value: '' },
+    { label: this.translate.instant('Dashboard vehicle status available'), value: 'Available' },
+    { label: this.translate.instant('Dashboard vehicle status booked'), value: 'Booked' },
+    { label: this.translate.instant('Dashboard vehicle status maintenance'), value: 'Maintenance' },
+    { label: this.translate.instant('Dashboard vehicle status management'), value: 'Management' },
+    { label: this.translate.instant('Dashboard vehicle status sold'), value: 'Sold' },
+  ]);
 
-  maxHeatmapValue = computed(() => Math.max(...this.heatmap().map(item => item.bookings), 1));
-  heatmapDays = computed(() => [...new Set(this.heatmap().map(item => item.day))]);
-  heatmapWeeks = computed(() => [...new Set(this.heatmap().map(item => item.week))]);
-  hasNoData = computed(() => {
-    const summary = this.summary();
-    if (!summary) {
-      return false;
-    }
+  bookingPeriodOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('Dashboard booking period this month'), value: 'ThisMonth' },
+    { label: this.translate.instant('Dashboard booking period last 3 months'), value: 'Last3Months' },
+    { label: this.translate.instant('Dashboard booking period this year'), value: 'ThisYear' },
+  ]);
 
-    return (
-      summary.kpis.length === 0 &&
-      summary.revenueSeries.length === 0 &&
-      summary.utilizationSeries.length === 0 &&
-      summary.topVehicles.length === 0 &&
-      summary.topCustomers.length === 0 &&
-      summary.alerts.length === 0 &&
-      summary.heatmap.length === 0
-    );
-  });
+  chartLabels = (rows: { label: string; value: number }[]) => rows.map(r => r.label);
+  chartValues = (rows: { label: string; value: number }[]) => rows.map(r => r.value);
 
   ngOnInit(): void {
-    this.loadSummary();
+    this.loadBranches();
+    this.refreshAll();
   }
 
-  applyFilters(): void {
-    this.loadSummary();
+  refreshAll(): void {
+    this.loadVehicleSection();
+    this.loadBookingSection();
   }
 
-  resetFilters(): void {
-    this.filtersForm.reset({ startDate: '', endDate: '', fleet: '', branch: '' });
-    this.loadSummary();
+  resetVehicleFilters(): void {
+    this.vehicleBranchId.set('');
+    this.vehicleStatus.set('');
+    this.loadVehicleSection();
   }
 
-  getHeatmapValue(day: string, week: string): number {
-    return this.heatmap().find(item => item.day === day && item.week === week)?.bookings ?? 0;
+  resetBookingFilters(): void {
+    this.bookingBranchId.set('');
+    this.bookingPeriod.set('ThisMonth');
+    this.loadBookingSection();
   }
 
-  getHeatmapOpacity(day: string, week: string): number {
-    return Math.max(0.12, this.getHeatmapValue(day, week) / this.maxHeatmapValue());
+  applyVehicleFilters(): void {
+    this.loadVehicleSection();
   }
 
-  private loadSummary(): void {
-    this.loading.set(true);
-    this.loadError.set(false);
-    const form = this.filtersForm.getRawValue();
-    const filters: DashboardSummaryFilters = {
-      startDate: form.startDate || undefined,
-      endDate: form.endDate || undefined,
-      fleet: form.fleet || undefined,
-      branch: form.branch || undefined,
-    };
+  applyBookingFilters(): void {
+    this.loadBookingSection();
+  }
 
-    this.dashboardService
-      .getSummary(filters)
-      .pipe(finalize(() => this.loading.set(false)))
+  onVehicleBranchChange(value: number | ''): void {
+    this.vehicleBranchId.set(value === '' ? '' : Number(value));
+  }
+
+  onVehicleStatusChange(value: string): void {
+    this.vehicleStatus.set((value || '') as Vehicle['status'] | '');
+  }
+
+  onBookingBranchChange(value: number | ''): void {
+    this.bookingBranchId.set(value === '' ? '' : Number(value));
+  }
+
+  onBookingPeriodChange(value: string): void {
+    const v = value as BookingStatusCountsPeriod;
+    if (v === 'ThisMonth' || v === 'Last3Months' || v === 'ThisYear') {
+      this.bookingPeriod.set(v);
+    }
+  }
+
+  private loadBranches(): void {
+    const fleetId = this.authState.fleetId() || undefined;
+    this.branchService
+      .getPaginated({ fleetId, pageNumber: 1, pageSize: 500, search: undefined })
       .subscribe({
-        next: summary => this.summary.set(this.normalizeSummary(summary)),
+        next: page => this.branches.set(page.items ?? []),
+        error: () => this.branches.set([]),
+      });
+  }
+
+  private loadVehicleSection(): void {
+    const fleetId = this.authState.fleetId();
+    if (!fleetId) {
+      this.vehicleError.set(false);
+      this.vehicleStatusCounts.set([]);
+      this.vehicleByBranch.set([]);
+      this.vehicleByYear.set([]);
+      this.vehicleTotal.set(0);
+      return;
+    }
+    this.vehicleLoading.set(true);
+    this.vehicleError.set(false);
+    const branchId = this.vehicleBranchId() === '' ? undefined : Number(this.vehicleBranchId());
+    const status = this.vehicleStatus() || undefined;
+
+    forkJoin({
+      counts: this.vehicleService.getStatusCounts({ fleetId, branchId }),
+      list: this.vehicleService.getList({
+        fleetId,
+        branchId: branchId ?? null,
+        status: status ?? '',
+        includeEmptyStatus: !status,
+      }),
+    })
+      .pipe(finalize(() => this.vehicleLoading.set(false)))
+      .subscribe({
+        next: ({ counts, list }) => {
+          const rows =
+            counts.statusCounts?.map(s => ({
+              label: (s.statusDisplayName || s.status || '').trim() || '—',
+              value: Number(s.count) || 0,
+            })) ?? [];
+          this.vehicleStatusCounts.set(rows);
+          this.vehicleTotal.set(counts.totalCount ?? rows.reduce((a, b) => a + b.value, 0));
+          this.vehicleByBranch.set(this.aggregateField(list, v => String(v.branchName ?? '').trim() || `#${v.branchId ?? ''}`));
+          this.vehicleByYear.set(this.aggregateField(list, v => String(v.yearMake ?? '').trim() || '—', 8));
+        },
         error: () => {
-          this.summary.set(this.createEmptySummary());
-          this.loadError.set(true);
+          this.vehicleError.set(true);
+          this.vehicleStatusCounts.set([]);
+          this.vehicleByBranch.set([]);
+          this.vehicleByYear.set([]);
         },
       });
   }
 
-  private normalizeSummary(summary: DashboardSummary | null | undefined): DashboardSummary {
-    if (!summary) {
-      return this.createEmptySummary();
+  private loadBookingSection(): void {
+    const fleetId = this.authState.fleetId();
+    if (!fleetId) {
+      this.bookingError.set(false);
+      this.bookingStatusCounts.set([]);
+      this.bookingByBranch.set([]);
+      this.bookingByStatusList.set([]);
+      this.bookingTotal.set(0);
+      return;
     }
+    this.bookingLoading.set(true);
+    this.bookingError.set(false);
+    const branchId = this.bookingBranchId() === '' ? undefined : Number(this.bookingBranchId());
+    const period = this.bookingPeriod();
 
-    const defaults = this.createEmptySummary();
-    return {
-      ...defaults,
-      ...summary,
-      kpis: summary.kpis ?? defaults.kpis,
-      revenueSeries: summary.revenueSeries ?? defaults.revenueSeries,
-      utilizationSeries: summary.utilizationSeries ?? defaults.utilizationSeries,
-      topVehicles: summary.topVehicles ?? defaults.topVehicles,
-      topCustomers: summary.topCustomers ?? defaults.topCustomers,
-      alerts: summary.alerts ?? defaults.alerts,
-      heatmap: summary.heatmap ?? defaults.heatmap,
-      fleets: summary.fleets?.length ? summary.fleets : defaults.fleets,
-      branches: summary.branches?.length ? summary.branches : defaults.branches,
-    };
+    const list$ =
+      branchId !== undefined && branchId > 0
+        ? this.bookingService.getBookings({ fleetId, branchId })
+        : this.bookingService.getList({ fleetId, branchId: undefined, includeAllStatuses: true });
+
+    forkJoin({
+      counts: this.bookingService.getStatusCounts({ fleetId, branchId, period }),
+      list: list$,
+    })
+      .pipe(finalize(() => this.bookingLoading.set(false)))
+      .subscribe({
+        next: ({ counts, list }) => {
+          const rows =
+            counts.statusCounts?.map(s => ({
+              label: (s.statusDisplayName || s.status || '').trim() || '—',
+              value: Number(s.count) || 0,
+            })) ?? [];
+          this.bookingStatusCounts.set(rows);
+          this.bookingTotal.set(counts.totalCount ?? rows.reduce((a, b) => a + b.value, 0));
+          this.bookingByBranch.set(this.aggregateBookingsByBranch(list));
+          this.bookingByStatusList.set(this.aggregateBookingsByStatus(list));
+        },
+        error: () => {
+          this.bookingError.set(true);
+          this.bookingStatusCounts.set([]);
+          this.bookingByBranch.set([]);
+          this.bookingByStatusList.set([]);
+        },
+      });
   }
 
-  private createEmptySummary(): DashboardSummary {
-    return {
-      kpis: [],
-      revenueSeries: [],
-      utilizationSeries: [],
-      topVehicles: [],
-      topCustomers: [],
-      alerts: [],
-      heatmap: [],
-      fleets: [
-        { value: '', label: 'All Fleets' },
-      ],
-      branches: [
-        { value: '', label: 'All branches' },
-      ],
-    };
+  private aggregateField(items: Vehicle[], keyFn: (v: Vehicle) => string, topN = 10): { label: string; value: number }[] {
+    const map = new Map<string, number>();
+    for (const item of items) {
+      const k = keyFn(item);
+      map.set(k, (map.get(k) ?? 0) + 1);
+    }
+    return [...map.entries()]
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, topN);
+  }
+
+  private aggregateBookingsByBranch(items: Booking[]): { label: string; value: number }[] {
+    const map = new Map<string, number>();
+    for (const b of items) {
+      const label = (b.branchName ?? '').trim() || (b.branchId ? `#${b.branchId}` : '—');
+      map.set(label, (map.get(label) ?? 0) + 1);
+    }
+    return [...map.entries()]
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10);
+  }
+
+  private aggregateBookingsByStatus(items: Booking[]): { label: string; value: number }[] {
+    const map = new Map<string, number>();
+    for (const b of items) {
+      const label = (b.statusDisplayName ?? '').trim() || String(b.status ?? '—');
+      map.set(label, (map.get(label) ?? 0) + 1);
+    }
+    return [...map.entries()]
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 12);
   }
 }

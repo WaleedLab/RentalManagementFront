@@ -3,7 +3,7 @@ import { Component, ElementRef, OnInit, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { finalize } from 'rxjs';
+import { catchError, finalize, forkJoin, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { FieldValueStateDirective } from '../../../../../shared/directives/field-value-state.directive';
@@ -15,7 +15,7 @@ import {
   SmoothSelectValue,
 } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
-import { Booking } from '../../../models';
+import { Booking, Vehicle } from '../../../models';
 import { TrafficViolationUpsertRequest } from '../../../models/traffic-violations/traffic-violation.model';
 import { BookingService } from '../../../services/booking/booking.service';
 import { TrafficViolationService } from '../../../services/traffic-violations/traffic-violation.service';
@@ -54,15 +54,16 @@ export class TrafficViolationFormComponent implements OnInit {
   initializing = signal(true);
   saving = signal(false);
   bookingOptions = signal<SmoothSelectOption[]>([]);
+  vehicleOptions = signal<SmoothSelectOption[]>([]);
   /** Raw rows from `GetBookingsQuery` for resolving `vehicleId` after pick */
   bookings = signal<Booking[]>([]);
-  /** Resolved via `GetVehicleById` / `VehicleService.getById` */
-  selectedVehicleLabel = signal('');
+  /** Fleet/branch vehicles from `Vehicle/List` (same shape as `GetVehiclesQuery`). */
+  vehicles = signal<Vehicle[]>([]);
   loadingVehicle = signal(false);
 
   form = this.fb.group({
     nameViolation: [''],
-    idBooking: this.fb.control<number | null>(null, [Validators.required]),
+    idBooking: this.fb.control<number | null>(null),
     idVehicle: this.fb.control<number | null>(null, [Validators.required]),
     dateViolation: ['', [Validators.required]],
     violationFine: [0, [Validators.required, Validators.min(0)]],
@@ -84,24 +85,39 @@ export class TrafficViolationFormComponent implements OnInit {
     this.idBookingCtrl.markAsTouched();
 
     if (next === null || !Number.isFinite(next)) {
-      this.clearVehicleFromBooking();
       return;
     }
 
     const booking = this.bookings().find(b => Number(b.id) === next);
     if (!booking) {
-      this.clearVehicleFromBooking();
       return;
     }
 
     const vehicleId = Number(booking.vehicleId);
     if (!Number.isFinite(vehicleId) || vehicleId <= 0) {
-      this.clearVehicleFromBooking();
       this.toast.error(this.translate.instant('trafficViolations.noVehicleOnBooking'));
       return;
     }
 
-    this.loadVehicleById(vehicleId);
+    this.applyVehicleFromFleetOrFetch(vehicleId);
+  }
+
+  onVehicleChange(value: SmoothSelectValue): void {
+    const next = value === '' || value === null ? null : Number(value);
+    const idV = Number.isFinite(next as number) && (next as number) > 0 ? (next as number) : null;
+    this.idVehicleCtrl.setValue(idV);
+    this.idVehicleCtrl.markAsTouched();
+
+    if (idV === null) {
+      return;
+    }
+
+    const row = this.vehicles().find(v => Number(v.id) === idV);
+    if (row) {
+      return;
+    }
+
+    this.loadVehicleById(idV, { silent: true });
   }
 
   ngOnInit(): void {
@@ -110,10 +126,21 @@ export class TrafficViolationFormComponent implements OnInit {
     const branchId = Number(this.authState.branchId() || 0) || 0;
 
     this.initializing.set(true);
-    this.bookingService.getBookings({ fleetId, branchId }).subscribe({
-      next: bookings => {
-        this.bookings.set(bookings ?? []);
-        this.bookingOptions.set(this.toBookingOptions(bookings ?? []));
+    forkJoin({
+      bookings: this.bookingService.getBookings({ fleetId, branchId }),
+      vehicles: this.vehicleService
+        .getListMergedAllStatuses({
+          fleetId,
+          branchId: branchId > 0 ? branchId : undefined,
+        })
+        .pipe(catchError(() => of([] as Vehicle[]))),
+    }).subscribe({
+      next: ({ bookings, vehicles }) => {
+        const list = bookings ?? [];
+        this.bookings.set(list);
+        this.vehicles.set(vehicles ?? []);
+        this.bookingOptions.set(this.buildBookingOptions(list));
+        this.vehicleOptions.set(this.toVehicleOptions(vehicles ?? []));
         if (id) {
           this.isEdit.set(true);
           this.violationId.set(id);
@@ -143,10 +170,14 @@ export class TrafficViolationFormComponent implements OnInit {
     }
 
     const raw = this.form.getRawValue();
-    const idBooking = Number(raw.idBooking);
+    const idBookingRaw = raw.idBooking;
+    const idBooking: number | null =
+      idBookingRaw != null && Number.isFinite(Number(idBookingRaw)) && Number(idBookingRaw) > 0
+        ? Number(idBookingRaw)
+        : null;
     const idVehicle = Number(raw.idVehicle);
-    if (!Number.isFinite(idBooking) || idBooking <= 0 || !Number.isFinite(idVehicle) || idVehicle <= 0) {
-      this.toast.error(this.translate.instant('trafficViolations.invalidBookingVehicle'));
+    if (!Number.isFinite(idVehicle) || idVehicle <= 0) {
+      this.toast.error(this.translate.instant('trafficViolations.invalidVehicle'));
       return;
     }
 
@@ -188,14 +219,14 @@ export class TrafficViolationFormComponent implements OnInit {
       next: v => {
         this.form.patchValue({
           nameViolation: v.nameViolation ?? '',
-          idBooking: v.idBooking,
+          idBooking: v.idBooking != null && v.idBooking > 0 ? v.idBooking : null,
           idVehicle: v.idVehicle,
           dateViolation: this.toDatetimeLocalValue(v.dateViolation),
           violationFine: v.violationFine,
           description: v.description ?? '',
           numberViolation: v.numberViolation,
         });
-        this.loadVehicleById(v.idVehicle, {
+        this.applyVehicleFromFleetOrFetch(v.idVehicle, {
           silent: true,
           after: () => this.initializing.set(false),
         });
@@ -207,10 +238,21 @@ export class TrafficViolationFormComponent implements OnInit {
     });
   }
 
-  private clearVehicleFromBooking(): void {
-    this.idVehicleCtrl.setValue(null);
-    this.selectedVehicleLabel.set('');
-    this.idVehicleCtrl.markAsTouched();
+  /**
+   * Prefer fleet list (`Vehicle/List`); fall back to `Vehicle/{id}/{fleetId}` when missing.
+   */
+  private applyVehicleFromFleetOrFetch(
+    vehicleId: number,
+    opts?: { silent?: boolean; after?: () => void },
+  ): void {
+    const row = this.vehicles().find(vr => Number(vr.id) === vehicleId);
+    if (row) {
+      this.idVehicleCtrl.setValue(vehicleId);
+      this.idVehicleCtrl.markAsTouched();
+      opts?.after?.();
+      return;
+    }
+    this.loadVehicleById(vehicleId, opts);
   }
 
   /**
@@ -219,13 +261,13 @@ export class TrafficViolationFormComponent implements OnInit {
   private loadVehicleById(vehicleId: number, opts?: { silent?: boolean; after?: () => void }): void {
     const fleetId = this.authState.fleetId();
     if (!fleetId?.trim()) {
-      this.clearVehicleFromBooking();
+      this.idVehicleCtrl.setValue(null);
       opts?.after?.();
       return;
     }
 
     if (!Number.isFinite(vehicleId) || vehicleId <= 0) {
-      this.clearVehicleFromBooking();
+      this.idVehicleCtrl.setValue(null);
       opts?.after?.();
       return;
     }
@@ -241,19 +283,36 @@ export class TrafficViolationFormComponent implements OnInit {
       )
       .subscribe({
         next: vehicle => {
+          this.mergeVehicleIntoReferenceLists(vehicle);
           this.idVehicleCtrl.setValue(vehicleId);
-          const plate = vehicle.plateNumber?.trim() || '';
-          const name = [vehicle.make, vehicle.model].filter(Boolean).join(' ').trim();
-          this.selectedVehicleLabel.set([plate, name].filter(Boolean).join(' — ') || String(vehicleId));
           this.idVehicleCtrl.markAsTouched();
         },
         error: err => {
-          this.clearVehicleFromBooking();
+          this.idVehicleCtrl.setValue(null);
           if (!opts?.silent) {
             this.toast.error(err?.message ?? this.translate.instant('trafficViolations.vehicleLoadFailed'));
           }
         },
       });
+  }
+
+  private mergeVehicleIntoReferenceLists(vehicle: Vehicle): void {
+    const idNum = Number(vehicle.id);
+    if (!Number.isFinite(idNum) || idNum <= 0) {
+      return;
+    }
+    if (!this.vehicles().some(v => Number(v.id) === idNum)) {
+      this.vehicles.update(rows => [...rows, vehicle]);
+      this.vehicleOptions.update(opts => [...opts, { label: this.formatVehicleLabel(vehicle), value: idNum }]);
+    }
+  }
+
+  private buildBookingOptions(bookings: Booking[]): SmoothSelectOption[] {
+    const none: SmoothSelectOption = {
+      label: this.translate.instant('trafficViolations.bookingNone'),
+      value: '',
+    };
+    return [none, ...this.toBookingOptions(bookings)];
   }
 
   private toBookingOptions(bookings: Booking[]): SmoothSelectOption[] {
@@ -264,6 +323,29 @@ export class TrafficViolationFormComponent implements OnInit {
       const label = labelParts.length ? labelParts.join(' · ') : `#${b.id}`;
       return { label: String(label), value: idNum };
     });
+  }
+
+  private toVehicleOptions(vehicles: Vehicle[]): SmoothSelectOption[] {
+    return vehicles
+      .filter(v => {
+        const n = Number(v.id);
+        return Number.isFinite(n) && n > 0;
+      })
+      .map(v => ({
+        label: this.formatVehicleLabel(v),
+        value: Number(v.id),
+      }));
+  }
+
+  private formatVehicleLabel(vehicle: Vehicle): string {
+    const plate = vehicle.plateNumber?.trim() || '';
+    const serial = vehicle.serialNumber?.trim() || '';
+    const engine = vehicle.engine?.trim() || '';
+    const name = [vehicle.make, vehicle.model].filter(Boolean).join(' ').trim();
+    const tailParts = [serial, engine].filter(Boolean);
+    const tail = tailParts.length ? tailParts.join(' ') : name;
+    const main = [plate, tail].filter(Boolean).join(' — ');
+    return main || String(vehicle.id);
   }
 
   /** `datetime-local` value from API date string */

@@ -4,7 +4,8 @@ export type TrafficViolationOrderBy = number;
 export interface TrafficViolation {
   id: string;
   nameViolation?: string;
-  idBooking: number;
+  /** `null` / absent when not linked to a booking (matches `long? IdBooking`). */
+  idBooking: number | null;
   idVehicle: number;
   /** Display helpers from nested `booking` / `vehicle` when API includes them. */
   bookingLabel?: string;
@@ -30,7 +31,8 @@ export interface TrafficViolationFilters {
 export interface TrafficViolationUpsertRequest {
   id?: string;
   nameViolation?: string;
-  idBooking: number;
+  /** Omitted or JSON `null` when not tied to a booking (matches `long? IdBooking`). */
+  idBooking?: number | null;
   idVehicle: number;
   dateViolation: string;
   violationFine: number;

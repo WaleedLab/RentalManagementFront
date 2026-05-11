@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { Observable, catchError, from, map, of, switchMap, throwError } from 'rxjs';
+import { Observable, catchError, forkJoin, from, map, of, switchMap, throwError } from 'rxjs';
 
 import { PaginatedAggregatorResponse } from '../../../../core/interfaces';
 import { BaseRequestOptions, BaseService } from '../../../../shared/services/base/base.service';
@@ -29,6 +29,10 @@ export class VehicleService {
     fleetId?: string | null;
     branchId?: number | null;
     status?: Vehicle['status'] | '';
+    /**
+     * @deprecated No longer sends `Stutus: ''` (many backends return an empty list for that).
+     * Omitting `status` already means “no status filter” for `Vehicle/List`.
+     */
     includeEmptyStatus?: boolean;
   } = {}): Observable<Vehicle[]> {
     const normalizedFleetId = normalizeFleetId(params.fleetId);
@@ -36,9 +40,10 @@ export class VehicleService {
     const status = params.status || undefined;
     const backendStatus = status ? this.toBackendVehicleStatusEnumName(status) : undefined;
     const requestParams = this.typeSafeParams({
+      ...buildFleetQueryParams(normalizedFleetId, 'both'),
       Fleetid: normalizedFleetId ?? undefined,
       Branchid: branchId,
-      ...(params.includeEmptyStatus && !backendStatus ? { Stutus: '' } : {}),
+      BranchId: branchId ?? undefined,
       ...(backendStatus ? { Stutus: backendStatus } : {}),
     });
 
@@ -49,6 +54,38 @@ export class VehicleService {
         { suppressErrorToast: true },
       )
       .pipe(map(items => (items ?? []).map(normalizeVehicle)));
+  }
+
+  /**
+   * Loads vehicles for a fleet/branch without assuming a single `Vehicle/List` call returns every status.
+   * Tries an unfiltered list first, then merges per-status lists (journal entry form uses the same fallback).
+   */
+  getListMergedAllStatuses(params: { fleetId?: string | null; branchId?: number | null }): Observable<Vehicle[]> {
+    const base = { fleetId: params.fleetId, branchId: params.branchId };
+    return this.getList(base).pipe(
+      catchError(() => of([] as Vehicle[])),
+      switchMap(list => {
+        if (list.length) {
+          return of(list);
+        }
+        const statuses: Vehicle['status'][] = ['Available', 'Booked', 'Maintenance', 'Inactive', 'Sold'];
+        return forkJoin(
+          statuses.map(status =>
+            this.getList({ ...base, status }).pipe(catchError(() => of([] as Vehicle[]))),
+          ),
+        ).pipe(
+          map(groups => {
+            const byId = new Map<string, Vehicle>();
+            for (const group of groups) {
+              for (const v of group) {
+                byId.set(String(v.id), v);
+              }
+            }
+            return Array.from(byId.values());
+          }),
+        );
+      }),
+    );
   }
 
   getPaginated(

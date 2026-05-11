@@ -73,13 +73,12 @@ export class TrafficViolationService {
   }
 
   /**
-   * Soft delete via `DELETE TrafficViolation/{id}/{fleetid}` — `TrafficViolationRouting.Delete`
-   * (sends `SoftDeleteTrafficViolationCommand` on the server).
+   * `PATCH TrafficViolation/SoftDelete/{id}` — matches `TrafficViolationRouting.SoftDelete`
+   * (same pattern as `VehicleService.softDelete` / `CustomerService.softDelete`).
    */
-  softDelete(id: string | number, fleetId: string): Observable<unknown> {
+  softDelete(id: string | number, _fleetId: string): Observable<unknown> {
     const encodedId = encodeURIComponent(String(id));
-    const encodedFleet = encodeURIComponent(fleetId);
-    return this.api.deleteData(`${this.base}/${encodedId}/${encodedFleet}`);
+    return this.api.patchData(`${this.base}/SoftDelete/${encodedId}`, {});
   }
 
   private toCommandPayload(body: TrafficViolationUpsertRequest): Record<string, unknown> {
@@ -90,8 +89,8 @@ export class TrafficViolationService {
       id: idNum,
       NameViolation: body.nameViolation,
       nameViolation: body.nameViolation,
-      IdBooking: body.idBooking,
-      idBooking: body.idBooking,
+      IdBooking: this.normalizeOptionalBookingId(body.idBooking),
+      idBooking: this.normalizeOptionalBookingId(body.idBooking),
       IdVehicle: body.idVehicle,
       idVehicle: body.idVehicle,
       DateViolation: body.dateViolation,
@@ -105,5 +104,14 @@ export class TrafficViolationService {
       FleetId: fleet,
       fleetId: fleet,
     };
+  }
+
+  /** Backend `long? IdBooking` — send JSON `null` when there is no booking. */
+  private normalizeOptionalBookingId(value: number | null | undefined): number | null {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    const n = Number(value);
+    return Number.isFinite(n) && n > 0 ? n : null;
   }
 }

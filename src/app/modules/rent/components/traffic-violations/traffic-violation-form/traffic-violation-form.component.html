@@ -26,25 +26,28 @@
               [value]="idBookingCtrl.value ?? ''"
               (valueChange)="onBookingChange($event)"
             />
-            @if (idBookingCtrl.invalid && idBookingCtrl.touched) {
-              <div class="invalid-feedback d-block">{{ 'This field is required' | translate }}</div>
-            }
           </div>
           <div class="col-md-6">
             <label class="form-label">{{ 'trafficViolations.fieldVehicle' | translate }}</label>
             <input class="d-none" type="number" formControlName="idVehicle" tabindex="-1" aria-hidden="true" />
-            <div
-              class="traffic-violation-form__vehicle-readonly form-control d-flex align-items-center gap-2"
-              [class.traffic-violation-form__vehicle-readonly--empty]="!selectedVehicleLabel() && !loadingVehicle()"
-            >
-              @if (loadingVehicle()) {
-                <span class="spinner-border spinner-border-sm flex-shrink-0" role="status"></span>
-              }
-              <span class="text-truncate flex-grow-1">{{
-                selectedVehicleLabel() || ('trafficViolations.vehiclePlaceholder' | translate)
-              }}</span>
-            </div>
-            <div class="form-text">{{ 'trafficViolations.vehicleHint' | translate }}</div>
+            <app-smooth-select
+              [ariaLabel]="'trafficViolations.fieldVehicle' | translate"
+              [options]="vehicleOptions()"
+              [value]="idVehicleCtrl.value ?? ''"
+              [placeholder]="'trafficViolations.vehicleSelectPlaceholder' | translate"
+              [disabled]="loadingVehicle()"
+              [searchable]="true"
+              [searchPlaceholder]="'trafficViolations.searchVehicle'"
+              (valueChange)="onVehicleChange($event)"
+            />
+            @if (loadingVehicle()) {
+              <div class="form-text text-muted d-flex align-items-center gap-2 mt-1">
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                <span>{{ 'trafficViolations.resolvingVehicle' | translate }}</span>
+              </div>
+            } @else {
+              <div class="form-text">{{ 'trafficViolations.vehicleHint' | translate }}</div>
+            }
             @if (idVehicleCtrl.invalid && idVehicleCtrl.touched) {
               <div class="invalid-feedback d-block">{{ 'This field is required' | translate }}</div>
             }

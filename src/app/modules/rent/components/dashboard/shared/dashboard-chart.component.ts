@@ -14,9 +14,11 @@ import { Chart, ChartConfiguration } from 'chart.js/auto';
 export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() title = '';
   @Input() subtitle = '';
-  @Input() type: 'line' | 'bar' = 'line';
+  @Input() type: 'line' | 'bar' | 'doughnut' = 'line';
   @Input() labels: string[] = [];
   @Input() values: number[] = [];
+  /** When set (same length as `values`), used as per-segment colors for bar/doughnut. */
+  @Input() segmentColors: string[] = [];
   @Input() loading = false;
 
   @ViewChild('canvasRef') canvasRef?: ElementRef<HTMLCanvasElement>;
@@ -27,7 +29,7 @@ export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDest
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['labels'] || changes['values'] || changes['type'] || changes['loading']) {
+    if (changes['labels'] || changes['values'] || changes['type'] || changes['loading'] || changes['segmentColors']) {
       this.renderChart();
     }
   }
@@ -42,20 +44,41 @@ export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDest
     }
 
     this.chart?.destroy();
+    const defaultBar = 'rgba(127, 29, 63, 0.7)';
+    const defaultLineFill = 'rgba(127, 29, 63, 0.15)';
+    const palette =
+      this.segmentColors.length === this.values.length && this.values.length > 0
+        ? this.segmentColors
+        : this.values.map(
+            (_, i) =>
+              [
+                'rgba(59, 130, 246, 0.75)',
+                'rgba(16, 185, 129, 0.75)',
+                'rgba(245, 158, 11, 0.78)',
+                'rgba(139, 92, 246, 0.75)',
+                'rgba(236, 72, 153, 0.75)',
+                'rgba(14, 165, 233, 0.75)',
+                'rgba(100, 116, 139, 0.75)',
+                'rgba(234, 179, 8, 0.78)',
+              ][i % 8],
+          );
+
+    const isRadial = this.type === 'doughnut';
+    const isBar = this.type === 'bar';
     const configuration: ChartConfiguration = {
-      type: this.type,
+      type: isRadial ? 'doughnut' : this.type,
       data: {
         labels: this.labels,
         datasets: [
           {
             label: this.title,
             data: this.values,
-            borderColor: '#7f1d3f',
-            backgroundColor: this.type === 'bar' ? 'rgba(127, 29, 63, 0.7)' : 'rgba(127, 29, 63, 0.15)',
+            borderColor: isRadial ? '#ffffff' : '#7f1d3f',
+            backgroundColor: isRadial || isBar ? palette : defaultLineFill,
             pointBackgroundColor: '#7f1d3f',
             fill: this.type === 'line',
             tension: 0.35,
-            borderWidth: 2,
+            borderWidth: isRadial ? 1 : 2,
             maxBarThickness: 36,
           },
         ],
@@ -65,28 +88,32 @@ export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDest
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            display: false,
+            display: isRadial,
+            position: 'bottom',
+            labels: { color: '#64748b', boxWidth: 10 },
           },
         },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: 'rgba(148, 163, 184, 0.18)',
+        scales: isRadial
+          ? {}
+          : {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: 'rgba(148, 163, 184, 0.18)',
+                },
+                ticks: {
+                  color: '#64748b',
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
+                },
+                ticks: {
+                  color: '#64748b',
+                },
+              },
             },
-            ticks: {
-              color: '#64748b',
-            },
-          },
-          x: {
-            grid: {
-              display: false,
-            },
-            ticks: {
-              color: '#64748b',
-            },
-          },
-        },
       },
     };
 

@@ -86,23 +86,24 @@ $font-awesome: FontAwesome;
 $font-ICO: IcoFont;
 $landing-header: #323c58;
 $landing-card-box-shadow: -13px 8px 41px rgba(42, 54, 80, 0.25);
-// dark layout variables
-$dark-body-background: #191f31;
-$dark-card-background: #1f2639;
-$dark-background: #21283b;
-$dark-card-inbox: #323846;
+// dark layout — midnight teal (darker than legacy #0B2D3E for depth)
+$dark-base: #051a28;
+$dark-body-background: $dark-base;
+$dark-card-background: mix(#ffffff, $dark-base, 11%);
+$dark-background: mix(#ffffff, $dark-base, 15%);
+$dark-card-inbox: mix(#ffffff, $dark-base, 19%);
 $dark-small-font-color: #98a6ad;
 $dark-all-font-color: rgba(255, 255, 255, 0.6);
 $dark-all-title-color: rgba(255, 255, 255, 0.8);
 $light-all-font-color: rgba(255, 255, 255, 0.2);
-$dark-border-color: $dark-body-background;
-$dark-card-border: #374558;
-$dark-editor-document: #2b2b2b;
-$bg-dark-color: #1f2533;
+$dark-border-color: darken($dark-base, 4%);
+$dark-card-border: mix(#8ecae6, $dark-base, 26%);
+$dark-editor-document: darken($dark-base, 6%);
+$bg-dark-color: darken($dark-base, 5%);
 $dark-datatable-odd: $dark-body-background;
 $dark-datatable-sorting: $dark-card-background;
-$dark-datatable-sorting-even: $dark-body-background;
-$dark-even-hover-sorting: #36405e;
+$dark-datatable-sorting-even: darken($dark-base, 2%);
+$dark-even-hover-sorting: mix(#ffffff, $dark-base, 22%);
 //General tag settings
 $body-font-size: 14px;
 $body-font-color: $theme-body-font-color;

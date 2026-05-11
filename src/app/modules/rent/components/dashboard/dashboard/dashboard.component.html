@@ -1,143 +1,252 @@
-<div class="container-fluid enterprise-dashboard">
-  <app-page-header [title]="'Enterprise Dashboard' | translate"></app-page-header>
-
-  <form class="dashboard-filters" [formGroup]="filtersForm">
-    <div class="dashboard-filters__grid">
-      <label>
-        <span>{{ 'Date From' | translate }}</span>
-        <input type="date" class="form-control" formControlName="startDate" />
-      </label>
-
-      <label>
-        <span>{{ 'Date To' | translate }}</span>
-        <input type="date" class="form-control" formControlName="endDate" />
-      </label>
-
-      <label>
-        <span>{{ 'Fleet' | translate }}</span>
-        <select class="form-select" formControlName="fleet">
-          @for (fleet of (summary()?.fleets ?? []); track fleet.value) {
-            <option [value]="fleet.value">{{ fleet.label | translate }}</option>
-          }
-        </select>
-      </label>
-
-      <label>
-        <span>{{ 'Branch' | translate }}</span>
-        <select class="form-select" formControlName="branch">
-          @for (branch of (summary()?.branches ?? []); track branch.value) {
-            <option [value]="branch.value">{{ branch.label | translate }}</option>
-          }
-        </select>
-      </label>
+<div class="container-fluid ops-dashboard">
+  <app-page-header
+    [title]="'Dashboard ops title' | translate"
+    [subtitle]="'Dashboard ops subtitle' | translate"
+  >
+    <div class="ops-header-actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        (click)="refreshAll()"
+        [disabled]="!authState.fleetId() || vehicleLoading() || bookingLoading()"
+      >
+        {{ 'Dashboard ops refresh' | translate }}
+      </button>
     </div>
+  </app-page-header>
 
-    <div class="dashboard-filters__actions">
-      <button type="button" class="btn btn-primary" (click)="applyFilters()">{{ 'Apply Filters' | translate }}</button>
-      <button type="button" class="btn btn-outline-secondary" (click)="resetFilters()">{{ 'Reset' | translate }}</button>
+  @if (!authState.fleetId()) {
+    <div class="ops-banner ops-banner--warn" role="status">
+      {{ 'Dashboard ops fleet required' | translate }}
     </div>
-  </form>
-
-  @if (loadError()) {
-    <section class="dashboard-state dashboard-state--error" role="alert">
-      <h4>{{ 'Dashboard summary failed to load' | translate }}</h4>
-      <p>{{ 'Please try again or change filters.' | translate }}</p>
-    </section>
   }
 
-  @if (!loading() && !loadError() && hasNoData()) {
-    <section class="dashboard-state dashboard-state--empty">
-      <h4>{{ 'No dashboard data for selected filters' | translate }}</h4>
-      <p>{{ 'Try adjusting date range, fleet, or branch filters.' | translate }}</p>
-    </section>
-  }
-
-  <section class="kpi-grid">
-    @for (kpi of kpis(); track kpi.key) {
-      <dashboard-card [label]="kpi.label" [value]="kpi.value" [format]="kpi.format" [tone]="kpi.tone" [loading]="loading()" />
-    } @empty {
-      @for (item of [1, 2, 3, 4, 5]; track $index) {
-        <dashboard-card [loading]="true" />
-      }
-    }
-  </section>
-
-  <section class="dashboard-grid">
-    <dashboard-chart
-      class="dashboard-grid__revenue"
-      [title]="'Revenue over time'"
-      [subtitle]="'Monthly revenue trend'"
-      [type]="'line'"
-      [labels]="revenueLabels()"
-      [values]="revenueValues()"
-      [loading]="loading()"
-    />
-
-    <dashboard-chart
-      class="dashboard-grid__utilization"
-      [title]="'Utilization per vehicle'"
-      [subtitle]="'Top vehicles utilization %'"
-      [type]="'bar'"
-      [labels]="utilizationLabels()"
-      [values]="utilizationValues()"
-      [loading]="loading()"
-    />
-
-    <dashboard-table
-      class="dashboard-grid__vehicles"
-      [title]="'Top 10 Vehicles'"
-      [subtitle]="'Revenue and efficiency leaders'"
-      [columns]="vehicleColumns"
-      [rows]="topVehicles()"
-      [loading]="loading()"
-    />
-
-    <dashboard-table
-      class="dashboard-grid__customers"
-      [title]="'Top Customers'"
-      [subtitle]="'Most valuable customers and debt exposure'"
-      [columns]="customerColumns"
-      [rows]="topCustomers()"
-      [loading]="loading()"
-    />
-
-    <alerts-panel
-      class="dashboard-grid__alerts"
-      [title]="'Alerts Panel'"
-      [subtitle]="'Operational risk monitoring'"
-      [alerts]="alerts()"
-      [loading]="loading()"
-    />
-
-    <section class="dashboard-widget dashboard-grid__heatmap">
-      <header class="dashboard-widget__header">
-        <h3>{{ 'Booking Heatmap' | translate }}</h3>
-        <p>{{ 'Bookings per day/week' | translate }}</p>
+  <div class="ops-grid">
+    <article class="ops-card">
+      <header class="ops-card__header">
+        <div>
+          <h2 class="ops-card__title">{{ 'Vehicles' | translate }}</h2>
+          <p class="ops-card__meta">{{ 'Dashboard ops vehicle card' | translate }}</p>
+        </div>
+        @if (vehicleLoading()) {
+          <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
+        }
       </header>
 
-      @if (loading()) {
-        <div class="heatmap-skeleton"></div>
-      } @else {
-        <div class="heatmap">
-          <div class="heatmap__head">
-            <span></span>
-            @for (week of heatmapWeeks(); track week) {
-              <span>{{ week }}</span>
-            }
-          </div>
+      <div class="ops-card__filters">
+        <div class="ops-filter-field">
+          <label class="ops-filter-label">{{ 'Branch' | translate }}</label>
+          <app-smooth-select
+            [ariaLabel]="'Branch' | translate"
+            [placeholder]="'All branches' | translate"
+            [options]="branchOptions()"
+            [value]="vehicleBranchId()"
+            [disabled]="!authState.fleetId()"
+            (valueChange)="onVehicleBranchChange($any($event))"
+          />
+        </div>
+        <div class="ops-filter-field">
+          <label class="ops-filter-label">{{ 'Status' | translate }}</label>
+          <app-smooth-select
+            [ariaLabel]="'Status' | translate"
+            [placeholder]="'All statuses' | translate"
+            [options]="vehicleStatusOptions()"
+            [value]="vehicleStatus()"
+            [disabled]="!authState.fleetId()"
+            (valueChange)="onVehicleStatusChange($any($event))"
+          />
+        </div>
+        <div class="ops-filter-actions">
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            (click)="applyVehicleFilters()"
+            [disabled]="!authState.fleetId() || vehicleLoading()"
+          >
+            {{ 'Dashboard ops apply' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="resetVehicleFilters()"
+            [disabled]="!authState.fleetId() || vehicleLoading()"
+          >
+            {{ 'Dashboard ops reset' | translate }}
+          </button>
+        </div>
+      </div>
 
-          @for (day of heatmapDays(); track day) {
-            <div class="heatmap__row">
-              <span class="heatmap__day">{{ day | translate }}</span>
-              @for (week of heatmapWeeks(); track week) {
-                <span class="heatmap__cell" [style.opacity]="getHeatmapOpacity(day, week)">
-                  {{ getHeatmapValue(day, week) }}
-                </span>
-              }
-            </div>
-          }
+      @if (authState.fleetId() && vehicleError()) {
+        <div class="ops-banner ops-banner--error" role="alert">
+          {{ 'Dashboard summary failed to load' | translate }}
         </div>
       }
-    </section>
-  </section>
+
+      <div class="ops-card__kpis">
+        <div class="ops-kpi">
+          <span class="ops-kpi__label">{{ 'Dashboard ops total label' | translate }}</span>
+          <span class="ops-kpi__value">{{ vehicleTotal() }}</span>
+        </div>
+      </div>
+
+      <div class="ops-charts">
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops chart status api"
+          subtitle="GetVehicleStatusCounts"
+          type="bar"
+          [labels]="chartLabels(vehicleStatusCounts())"
+          [values]="chartValues(vehicleStatusCounts())"
+          [loading]="vehicleLoading()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops chart status donut"
+          subtitle="GetVehicleStatusCounts"
+          type="doughnut"
+          [labels]="chartLabels(vehicleStatusCounts())"
+          [values]="chartValues(vehicleStatusCounts())"
+          [loading]="vehicleLoading()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops chart by branch list"
+          subtitle="GetVehicles"
+          type="bar"
+          [labels]="chartLabels(vehicleByBranch())"
+          [values]="chartValues(vehicleByBranch())"
+          [loading]="vehicleLoading()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops chart by year list"
+          subtitle="GetVehicles"
+          type="bar"
+          [labels]="chartLabels(vehicleByYear())"
+          [values]="chartValues(vehicleByYear())"
+          [loading]="vehicleLoading()"
+        />
+      </div>
+    </article>
+
+    <article class="ops-card">
+      <header class="ops-card__header">
+        <div>
+          <h2 class="ops-card__title">{{ 'Bookings' | translate }}</h2>
+          <p class="ops-card__meta">{{ 'Dashboard ops booking card' | translate }}</p>
+        </div>
+        @if (bookingLoading()) {
+          <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
+        }
+      </header>
+
+      <div class="ops-card__filters">
+        <div class="ops-filter-field">
+          <label class="ops-filter-label">{{ 'Branch' | translate }}</label>
+          <app-smooth-select
+            [ariaLabel]="'Branch' | translate"
+            [placeholder]="'All branches' | translate"
+            [options]="branchOptions()"
+            [value]="bookingBranchId()"
+            [disabled]="!authState.fleetId()"
+            (valueChange)="onBookingBranchChange($any($event))"
+          />
+        </div>
+        <div class="ops-filter-field">
+          <label class="ops-filter-label">{{ 'Dashboard ops booking period filter' | translate }}</label>
+          <app-smooth-select
+            [ariaLabel]="'Dashboard ops booking period filter' | translate"
+            [options]="bookingPeriodOptions()"
+            [value]="bookingPeriod()"
+            [disabled]="!authState.fleetId()"
+            (valueChange)="onBookingPeriodChange($any($event))"
+          />
+        </div>
+        <div class="ops-filter-actions">
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            (click)="applyBookingFilters()"
+            [disabled]="!authState.fleetId() || bookingLoading()"
+          >
+            {{ 'Dashboard ops apply' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="resetBookingFilters()"
+            [disabled]="!authState.fleetId() || bookingLoading()"
+          >
+            {{ 'Dashboard ops reset' | translate }}
+          </button>
+        </div>
+      </div>
+
+      @if (authState.fleetId() && bookingError()) {
+        <div class="ops-banner ops-banner--error" role="alert">
+          {{ 'Dashboard summary failed to load' | translate }}
+        </div>
+      }
+
+      <div class="ops-card__kpis">
+        <div class="ops-kpi">
+          <span class="ops-kpi__label">{{ 'Dashboard ops total label' | translate }}</span>
+          <span class="ops-kpi__value">{{ bookingTotal() }}</span>
+        </div>
+      </div>
+
+      <div class="ops-charts">
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops chart status api"
+          subtitle="GetBookingStatusCounts"
+          type="bar"
+          [labels]="chartLabels(bookingStatusCounts())"
+          [values]="chartValues(bookingStatusCounts())"
+          [loading]="bookingLoading()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops chart status donut"
+          subtitle="GetBookingStatusCounts"
+          type="doughnut"
+          [labels]="chartLabels(bookingStatusCounts())"
+          [values]="chartValues(bookingStatusCounts())"
+          [loading]="bookingLoading()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops chart booking branch list"
+          subtitle="Dashboard ops chart booking list subtitle"
+          type="bar"
+          [labels]="chartLabels(bookingByBranch())"
+          [values]="chartValues(bookingByBranch())"
+          [loading]="bookingLoading()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops chart booking status list"
+          subtitle="Dashboard ops chart booking list subtitle"
+          type="bar"
+          [labels]="chartLabels(bookingByStatusList())"
+          [values]="chartValues(bookingByStatusList())"
+          [loading]="bookingLoading()"
+        />
+      </div>
+    </article>
+
+    <article class="ops-card ops-card--placeholder">
+      <header class="ops-card__header">
+        <h2 class="ops-card__title">{{ 'Dashboard ops placeholder voucher' | translate }}</h2>
+      </header>
+      <p class="ops-placeholder">{{ 'Dashboard ops placeholder later' | translate }}</p>
+    </article>
+
+    <article class="ops-card ops-card--placeholder">
+      <header class="ops-card__header">
+        <h2 class="ops-card__title">{{ 'Dashboard ops placeholder journal' | translate }}</h2>
+      </header>
+      <p class="ops-placeholder">{{ 'Dashboard ops placeholder later' | translate }}</p>
+    </article>
+  </div>
 </div>

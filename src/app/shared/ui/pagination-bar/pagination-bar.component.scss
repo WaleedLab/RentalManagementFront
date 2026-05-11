@@ -1,9 +1,9 @@
 .app-pagination-bar {
   margin-top: 1rem;
   padding: 0.75rem 0.95rem;
-  border: 1px solid var(--app-table-border-color);
+  border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 14px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(148, 163, 184, 0.05));
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.5), rgba(248, 250, 252, 0.28));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -35,20 +35,20 @@
 .app-pagination-bar__btn {
   min-width: 90px;
   border-radius: 10px;
-  border: 1px solid var(--app-table-border-color);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.9));
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(243, 246, 250, 0.86));
   color: #0f172a;
   font-weight: 700;
 }
 
 .app-pagination-bar__btn:hover:not(:disabled) {
-  border-color: rgba(59, 130, 246, 0.38);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 1), rgba(219, 234, 254, 0.92));
+  border-color: rgba(91, 122, 158, 0.32);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.92));
 }
 
 .app-pagination-bar__btn--next:not(:disabled) {
-  border-color: rgba(37, 99, 235, 0.42);
-  background: linear-gradient(145deg, rgba(59, 130, 246, 0.18), rgba(219, 234, 254, 0.96));
+  border-color: rgba(91, 122, 158, 0.34);
+  background: linear-gradient(145deg, rgba(91, 122, 158, 0.12), rgba(248, 250, 252, 0.94));
 }
 
 .app-pagination-bar__btn:disabled {
@@ -61,8 +61,8 @@
   text-align: center;
   padding: 0.38rem 0.65rem;
   border-radius: 10px;
-  border: 1px solid var(--app-table-border-color);
-  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(248, 250, 252, 0.75);
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -98,61 +98,41 @@
   height: 44px;
 }
 
-:host-context(body.dark-only) {
+:host-context(body.dark-only),
+:host-context([data-bs-theme='dark']) {
   .app-pagination-bar {
-    border-color: rgba(100, 116, 139, 0.34);
-    background: linear-gradient(160deg, rgba(30, 41, 59, 0.72), rgba(15, 23, 42, 0.62));
+    border-color: rgba(100, 116, 139, 0.22);
+    background: linear-gradient(160deg, rgba(8, 40, 56, 0.42), rgba(5, 26, 40, 0.32));
   }
 
   .app-pagination-bar__current {
-    border-color: rgba(100, 116, 139, 0.38);
-    background: rgba(30, 41, 59, 0.52);
+    border-color: rgba(100, 116, 139, 0.24);
+    background: rgba(5, 26, 40, 0.45);
     color: rgba(241, 245, 249, 0.92);
   }
 
   .app-pagination-bar__btn {
-    border-color: rgba(100, 116, 139, 0.46);
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.94), rgba(15, 23, 42, 0.92));
+    border-color: rgba(100, 116, 139, 0.26);
+    background: linear-gradient(145deg, rgba(8, 40, 56, 0.75), rgba(5, 26, 40, 0.65));
     color: rgba(241, 245, 249, 0.96);
   }
 
   .app-pagination-bar__btn:hover:not(:disabled) {
-    border-color: rgba(96, 165, 250, 0.62);
-    background: linear-gradient(145deg, rgba(37, 99, 235, 0.32), rgba(30, 41, 59, 0.95));
+    border-color: rgba(100, 130, 148, 0.4);
+    background: linear-gradient(145deg, rgba(12, 48, 64, 0.85), rgba(5, 26, 40, 0.72));
     color: #f8fafc;
   }
 
   .app-pagination-bar__btn:disabled {
-    border-color: rgba(71, 85, 105, 0.46);
-    background: rgba(30, 41, 59, 0.5);
-    color: rgba(148, 163, 184, 0.78);
-    opacity: 1;
-  }
-}
-
-:host-context([data-bs-theme='dark']) {
-  .app-pagination-bar__btn {
-    border-color: rgba(100, 116, 139, 0.46);
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.94), rgba(15, 23, 42, 0.92));
-    color: rgba(241, 245, 249, 0.96);
-  }
-
-  .app-pagination-bar__btn:hover:not(:disabled) {
-    border-color: rgba(96, 165, 250, 0.62);
-    background: linear-gradient(145deg, rgba(37, 99, 235, 0.32), rgba(30, 41, 59, 0.95));
-    color: #f8fafc;
-  }
-
-  .app-pagination-bar__btn:disabled {
-    border-color: rgba(71, 85, 105, 0.46);
-    background: rgba(30, 41, 59, 0.5);
-    color: rgba(148, 163, 184, 0.78);
+    border-color: rgba(71, 85, 105, 0.28);
+    background: rgba(5, 26, 40, 0.38);
+    color: rgba(148, 163, 184, 0.72);
     opacity: 1;
   }
 
   .app-pagination-bar__btn--next:not(:disabled) {
-    border-color: rgba(96, 165, 250, 0.66);
-    background: linear-gradient(145deg, rgba(37, 99, 235, 0.42), rgba(30, 41, 59, 0.92));
+    border-color: rgba(100, 130, 148, 0.34);
+    background: linear-gradient(145deg, rgba(10, 52, 68, 0.82), rgba(5, 26, 40, 0.68));
     color: #f8fafc;
   }
 }

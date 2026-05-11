@@ -3,14 +3,3 @@
     max-width: 920px;
   }
 }
-
-.traffic-violation-form__vehicle-readonly {
-  min-height: 38px;
-  background-color: var(--bs-secondary-bg, rgba(148, 163, 184, 0.12));
-  cursor: default;
-}
-
-.traffic-violation-form__vehicle-readonly--empty {
-  color: var(--bs-secondary-color, #64748b);
-  font-style: italic;
-}

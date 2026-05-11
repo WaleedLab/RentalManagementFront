@@ -57,10 +57,19 @@ export function normalizeTrafficViolation(raw: unknown): TrafficViolation {
   const booking = asRecord(pickLoose(r, 'booking', 'Booking'));
   const vehicle = asRecord(pickLoose(r, 'vehicle', 'Vehicle'));
 
+  const rawBookingId = pickLoose(r, 'idBooking', 'IdBooking');
+  const parsedBooking = toNumber(rawBookingId);
+  const idBooking =
+    rawBookingId === null || rawBookingId === undefined || rawBookingId === ''
+      ? null
+      : parsedBooking !== undefined && parsedBooking > 0
+        ? parsedBooking
+        : null;
+
   return {
     id: String(id),
     nameViolation: String(pickLoose(r, 'nameViolation', 'NameViolation') ?? '').trim() || undefined,
-    idBooking: toNumber(pickLoose(r, 'idBooking', 'IdBooking')) ?? 0,
+    idBooking,
     idVehicle: toNumber(pickLoose(r, 'idVehicle', 'IdVehicle')) ?? 0,
     bookingLabel: bookingLabelFromNested(booking),
     vehiclePlate: vehiclePlateFromNested(vehicle),

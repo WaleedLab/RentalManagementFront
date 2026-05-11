@@ -5,6 +5,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
+  /* Dark theme brand base — overridden on `body.dark-only` */
+  --app-dark-base: #051a28;
+  --app-dark-base-rgb: 5, 26, 40;
   --app-font-family: 'Inter', 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-size-h1: 1.75rem;
   --font-size-h2: 1.375rem;
@@ -126,12 +129,25 @@ body.light-only {
 }
 
 body.dark-only {
+  --app-dark-base: #051a28;
+  --app-dark-base-rgb: 5, 26, 40;
   --app-page-bg-image: url('/assets/images/BG/dark.jpg');
   --app-page-bg-overlay:
-    linear-gradient(165deg, rgba(7, 13, 28, 0.78) 0%, rgba(10, 18, 35, 0.84) 52%, rgba(9, 16, 30, 0.88) 100%);
+    linear-gradient(
+      172deg,
+      rgba(var(--app-dark-base-rgb), 0.97) 0%,
+      rgba(2, 14, 24, 0.98) 20%,
+      rgba(var(--app-dark-base-rgb), 0.91) 42%,
+      rgba(3, 20, 32, 0.96) 62%,
+      rgba(var(--app-dark-base-rgb), 0.88) 82%,
+      rgba(1, 9, 16, 0.99) 100%
+    );
   --app-page-bg-accent:
-    radial-gradient(980px circle at 86% -12%, rgba(59, 130, 246, 0.2), transparent 60%),
-    radial-gradient(760px circle at -6% 108%, rgba(20, 184, 166, 0.14), transparent 62%);
+    radial-gradient(ellipse 130% 44% at 50% -12%, rgba(16, 90, 108, 0.1), transparent 56%),
+    radial-gradient(ellipse 96% 46% at 6% 104%, rgba(10, 72, 68, 0.07), transparent 52%),
+    radial-gradient(ellipse 90% 38% at 96% 48%, rgba(20, 68, 96, 0.08), transparent 50%),
+    radial-gradient(920px circle at 82% -8%, rgba(32, 120, 148, 0.07), transparent 58%),
+    radial-gradient(720px circle at -4% 102%, rgba(14, 88, 82, 0.055), transparent 62%);
 }
 
 .page-wrapper.compact-wrapper .page-body-wrapper {
@@ -230,20 +246,21 @@ html[dir='rtl'] .tap-top {
 
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .card,
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .app-filter-field,
+body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .app-pagination-bar,
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .table-responsive,
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .modal-content,
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .dropdown-menu,
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .swal2-popup {
-  background: linear-gradient(165deg, rgba(255, 255, 255, 0.95), rgba(247, 250, 255, 0.93)) !important;
-  border-color: rgba(148, 163, 184, 0.34) !important;
-  box-shadow: 0 18px 34px -28px rgba(15, 23, 42, 0.32);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.9)) !important;
+  border-color: rgba(148, 163, 184, 0.2) !important;
+  box-shadow: 0 12px 28px -22px rgba(15, 23, 42, 0.14);
 }
 
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .form-control,
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .form-select {
-  background-color: rgba(255, 255, 255, 0.95) !important;
+  background-color: rgba(255, 255, 255, 0.92) !important;
   color: rgba(15, 23, 42, 0.96) !important;
-  border-color: rgba(148, 163, 184, 0.44) !important;
+  border-color: rgba(148, 163, 184, 0.24) !important;
 }
 
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .form-control::placeholder {
@@ -340,26 +357,26 @@ html[dir='rtl'] .table-actions {
 }
 
 body.dark-only {
-  --app-table-border-color: rgba(148, 163, 184, 0.16);
-  --app-table-surface: linear-gradient(180deg, rgba(25, 32, 56, 0.96) 0%, rgba(23, 30, 52, 0.92) 100%);
-  --app-table-head-bg: rgba(45, 58, 96, 0.62);
+  --app-table-border-color: rgba(148, 189, 209, 0.18);
+  --app-table-surface: linear-gradient(180deg, rgba(8, 40, 56, 0.96) 0%, rgba(5, 26, 40, 0.94) 100%);
+  --app-table-head-bg: rgba(18, 72, 96, 0.72);
   --app-table-head-color: rgba(241, 245, 249, 0.88);
   --app-table-text-color: rgba(248, 250, 252, 0.92);
-  --app-table-muted-color: rgba(148, 163, 184, 0.82);
-  --app-table-row-alt: rgba(24, 34, 62, 0.9);
-  --app-table-row-hover: rgba(59, 130, 246, 0.14);
-  --app-table-shadow: 0 22px 48px -30px rgba(2, 6, 23, 0.8);
-  --app-table-action-surface: rgba(255, 255, 255, 0.04);
-  --app-form-hint-color: rgba(203, 213, 225, 0.94);
-  --app-form-label-color: rgba(241, 245, 249, 0.96);
-  --app-form-placeholder-color: rgba(148, 163, 184, 0.72);
-  --app-form-empty-bg: rgba(15, 23, 42, 0.24);
-  --app-form-empty-border: rgba(148, 163, 184, 0.3);
-  --app-form-empty-text: rgba(203, 213, 225, 0.82);
-  --app-form-filled-bg: rgba(37, 99, 235, 0.19);
-  --app-form-filled-border: rgba(96, 165, 250, 0.45);
+  --app-table-muted-color: rgba(165, 205, 222, 0.78);
+  --app-table-row-alt: rgba(5, 26, 40, 0.82);
+  --app-table-row-hover: rgba(56, 189, 248, 0.16);
+  --app-table-shadow: 0 22px 48px -30px rgba(2, 12, 20, 0.72);
+  --app-table-action-surface: rgba(255, 255, 255, 0.06);
+  --app-form-hint-color: rgba(203, 230, 240, 0.92);
+  --app-form-label-color: rgba(241, 249, 252, 0.96);
+  --app-form-placeholder-color: rgba(148, 187, 208, 0.72);
+  --app-form-empty-bg: rgba(5, 26, 40, 0.45);
+  --app-form-empty-border: rgba(129, 184, 212, 0.35);
+  --app-form-empty-text: rgba(203, 225, 235, 0.82);
+  --app-form-filled-bg: rgba(14, 116, 144, 0.22);
+  --app-form-filled-border: rgba(56, 189, 248, 0.42);
   --app-form-filled-text: rgba(248, 250, 252, 0.96);
-  --app-form-readonly-bg: rgba(59, 130, 246, 0.2);
+  --app-form-readonly-bg: rgba(14, 116, 144, 0.18);
   --app-sidebar-logo-filter: brightness(1.16) contrast(1.06) saturate(1.03);
   --app-sidebar-logo-opacity: 0.99;
   --app-btn-primary-bg: linear-gradient(135deg, #3d8bff 0%, #2f6ee4 50%, #214ec4 100%);
@@ -367,8 +384,8 @@ body.dark-only {
   --app-btn-primary-border: rgba(126, 184, 255, 0.58);
   --app-btn-primary-shadow: 0 12px 22px -14px rgba(22, 66, 168, 0.66);
   --app-btn-primary-shadow-hover: 0 16px 26px -12px rgba(40, 100, 228, 0.76);
-  --app-btn-outline-bg: linear-gradient(135deg, rgba(24, 36, 62, 0.84), rgba(14, 24, 48, 0.78));
-  --app-btn-outline-bg-hover: linear-gradient(135deg, rgba(33, 50, 84, 0.9), rgba(18, 31, 60, 0.86));
+  --app-btn-outline-bg: linear-gradient(135deg, rgba(8, 40, 56, 0.88), rgba(5, 26, 40, 0.82));
+  --app-btn-outline-bg-hover: linear-gradient(135deg, rgba(22, 66, 88, 0.92), rgba(14, 48, 66, 0.88));
   --app-btn-outline-border: rgba(125, 177, 255, 0.58);
   --app-btn-outline-border-hover: rgba(154, 198, 255, 0.86);
   --app-btn-outline-text: rgba(201, 227, 255, 0.95);
@@ -405,27 +422,27 @@ body.dark-only {
   }
 
   .app-filter-field {
-    --app-filter-select-border-color: rgba(100, 116, 139, 0.5);
+    --app-filter-select-border-color: rgba(100, 116, 139, 0.26);
     --app-filter-select-text: rgba(241, 245, 249, 0.95);
-    --app-filter-select-bg: linear-gradient(145deg, rgba(32, 44, 67, 0.94), rgba(16, 24, 40, 0.9));
-    --app-filter-select-bg-hover: linear-gradient(145deg, rgba(40, 55, 84, 0.96), rgba(19, 29, 49, 0.94));
-    --app-filter-select-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%2393c5fd' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 6l5 5 5-5'/%3E%3C/svg%3E");
-    --app-filter-option-bg: rgba(15, 23, 42, 0.98);
+    --app-filter-select-bg: linear-gradient(145deg, rgba(8, 40, 56, 0.72), rgba(5, 26, 40, 0.62));
+    --app-filter-select-bg-hover: linear-gradient(145deg, rgba(12, 48, 64, 0.82), rgba(5, 26, 40, 0.72));
+    --app-filter-select-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%2389a8b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 6l5 5 5-5'/%3E%3C/svg%3E");
+    --app-filter-option-bg: rgba(5, 22, 34, 0.98);
     --app-filter-option-color: rgba(241, 245, 249, 0.96);
     --app-filter-select-radius: 15px;
     --app-filter-select-shadow:
-      0 10px 20px -18px rgba(2, 6, 23, 0.62),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      0 8px 18px -14px rgba(2, 6, 23, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
     --app-filter-select-shadow-hover:
-      0 16px 26px -18px rgba(59, 130, 246, 0.38),
-      inset 0 1px 0 rgba(255, 255, 255, 0.14);
-    border-color: rgba(100, 116, 139, 0.38);
-    background: linear-gradient(160deg, rgba(30, 41, 59, 0.76), rgba(15, 23, 42, 0.66));
-    box-shadow: 0 14px 24px -20px rgba(2, 6, 23, 0.68);
+      0 12px 22px -14px rgba(2, 12, 20, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    border-color: rgba(100, 116, 139, 0.22);
+    background: linear-gradient(160deg, rgba(8, 40, 56, 0.45), rgba(5, 26, 40, 0.32));
+    box-shadow: 0 10px 22px -18px rgba(2, 6, 23, 0.42);
 
     .form-control {
-      border-color: rgba(100, 116, 139, 0.45);
-      background-color: rgba(15, 23, 42, 0.5);
+      border-color: rgba(100, 116, 139, 0.28);
+      background-color: rgba(5, 26, 40, 0.42);
       color: rgba(241, 245, 249, 0.94);
     }
 
@@ -448,7 +465,7 @@ body.dark-only {
     }
 
     .form-select:hover:not(:disabled) {
-      border-color: rgba(147, 197, 253, 0.64);
+      border-color: rgba(100, 130, 148, 0.38);
       background:
         var(--app-filter-select-icon) no-repeat right 0.78rem center / 0.76rem,
         var(--app-filter-select-bg-hover);
@@ -467,14 +484,14 @@ body.dark-only {
 
     .form-select:focus,
     .form-control:focus {
-      border-color: rgba(96, 165, 250, 0.62);
+      border-color: rgba(100, 130, 148, 0.45);
       box-shadow:
-        0 0 0 0.16rem rgba(59, 130, 246, 0.24),
+        0 0 0 0.14rem rgba(56, 120, 140, 0.18),
         var(--app-filter-select-shadow-hover);
     }
 
     .form-control:focus {
-      background-color: rgba(30, 64, 175, 0.2);
+      background-color: rgba(14, 116, 144, 0.28);
     }
 
     .form-select:focus {
@@ -485,21 +502,101 @@ body.dark-only {
   }
 
   .app-search-btn {
-    border-color: rgba(96, 165, 250, 0.46);
-    box-shadow: 0 12px 20px -16px rgba(30, 64, 175, 0.75);
+    border-color: rgba(100, 130, 148, 0.38);
+    box-shadow: 0 10px 18px -14px rgba(2, 12, 20, 0.4);
+  }
+}
+
+html[data-bs-theme='dark'] .app-filter-field {
+  --app-filter-select-border-color: rgba(100, 116, 139, 0.26);
+  --app-filter-select-text: rgba(241, 245, 249, 0.95);
+  --app-filter-select-bg: linear-gradient(145deg, rgba(8, 40, 56, 0.72), rgba(5, 26, 40, 0.62));
+  --app-filter-select-bg-hover: linear-gradient(145deg, rgba(12, 48, 64, 0.82), rgba(5, 26, 40, 0.72));
+  --app-filter-select-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%2389a8b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 6l5 5 5-5'/%3E%3C/svg%3E");
+  --app-filter-option-bg: rgba(5, 22, 34, 0.98);
+  --app-filter-option-color: rgba(241, 245, 249, 0.96);
+  --app-filter-select-radius: 15px;
+  --app-filter-select-shadow:
+    0 8px 18px -14px rgba(2, 6, 23, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --app-filter-select-shadow-hover:
+    0 12px 22px -14px rgba(2, 12, 20, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: rgba(100, 116, 139, 0.22);
+  background: linear-gradient(160deg, rgba(8, 40, 56, 0.45), rgba(5, 26, 40, 0.32));
+  box-shadow: 0 10px 22px -18px rgba(2, 6, 23, 0.42);
+
+  .form-control {
+    border-color: rgba(100, 116, 139, 0.28);
+    background-color: rgba(5, 26, 40, 0.42);
+    color: rgba(241, 245, 249, 0.94);
+  }
+
+  .form-select {
+    border-color: var(--app-filter-select-border-color);
+    color: var(--app-filter-select-text);
+    background:
+      var(--app-filter-select-icon) no-repeat right 0.78rem center / 0.76rem,
+      var(--app-filter-select-bg);
+    padding-inline-end: 2.3rem;
+    border-radius: var(--app-filter-select-radius);
+    box-shadow: var(--app-filter-select-shadow);
+    cursor: pointer;
+    appearance: none;
+    transition:
+      border-color 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+      background 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .form-select:hover:not(:disabled) {
+    border-color: rgba(100, 130, 148, 0.38);
+    background:
+      var(--app-filter-select-icon) no-repeat right 0.78rem center / 0.76rem,
+      var(--app-filter-select-bg-hover);
+    box-shadow: var(--app-filter-select-shadow-hover);
+    transform: translateY(-1px) scale(1.005);
+  }
+
+  .form-select option {
+    color: var(--app-filter-option-color);
+    background: var(--app-filter-option-bg);
+  }
+
+  .form-control::placeholder {
+    color: rgba(148, 163, 184, 0.82);
+  }
+
+  .form-select:focus,
+  .form-control:focus {
+    border-color: rgba(100, 130, 148, 0.45);
+    box-shadow:
+      0 0 0 0.14rem rgba(56, 120, 140, 0.18),
+      var(--app-filter-select-shadow-hover);
+  }
+
+  .form-control:focus {
+    background-color: rgba(14, 116, 144, 0.28);
+  }
+
+  .form-select:focus {
+    background:
+      var(--app-filter-select-icon) no-repeat right 0.78rem center / 0.76rem,
+      var(--app-filter-select-bg-hover);
   }
 }
 
 body.dark-only .table-striped > tbody > tr:nth-of-type(odd) > * {
-  background-color: rgba(24, 34, 62, 0.92) !important;
+  background-color: rgba(5, 26, 40, 0.88) !important;
 }
 
 body.dark-only .table-striped > tbody > tr:nth-of-type(even) > * {
-  background-color: rgba(16, 24, 46, 0.94) !important;
+  background-color: rgba(14, 54, 74, 0.92) !important;
 }
 
 body.dark-only .table-hover > tbody > tr:hover > * {
-  background-color: rgba(45, 96, 190, 0.28) !important;
+  background-color: rgba(14, 165, 233, 0.22) !important;
   color: var(--app-table-text-color) !important;
 }
 
@@ -902,26 +999,26 @@ thead th,
 }
 
 .app-filter-field {
-  --app-filter-select-border-color: rgba(148, 163, 184, 0.36);
+  --app-filter-select-border-color: rgba(148, 163, 184, 0.22);
   --app-filter-select-text: rgba(15, 23, 42, 0.9);
-  --app-filter-select-bg: linear-gradient(150deg, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.9));
-  --app-filter-select-bg-hover: linear-gradient(150deg, rgba(255, 255, 255, 0.99), rgba(236, 244, 255, 0.94));
-  --app-filter-select-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23307ef3' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 6l5 5 5-5'/%3E%3C/svg%3E");
+  --app-filter-select-bg: linear-gradient(150deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.88));
+  --app-filter-select-bg-hover: linear-gradient(150deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.92));
+  --app-filter-select-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%236b7d95' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 6l5 5 5-5'/%3E%3C/svg%3E");
   --app-filter-option-bg: #ffffff;
   --app-filter-option-color: rgba(15, 23, 42, 0.92);
   --app-filter-select-radius: 15px;
   --app-filter-select-shadow:
-    0 10px 18px -16px rgba(15, 23, 42, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    0 8px 16px -14px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
   --app-filter-select-shadow-hover:
-    0 16px 24px -16px rgba(37, 99, 235, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.94);
+    0 12px 20px -14px rgba(15, 23, 42, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
   grid-column: span 1;
   padding: 0.72rem;
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: 16px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(148, 163, 184, 0.04));
-  box-shadow: 0 10px 20px -18px rgba(15, 23, 42, 0.45);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.45), rgba(241, 245, 249, 0.2));
+  box-shadow: 0 8px 18px -14px rgba(15, 23, 42, 0.1);
 
   .form-select,
   .form-control,
@@ -958,7 +1055,7 @@ thead th,
   }
 
   .form-select:hover:not(:disabled) {
-    border-color: rgba(48, 126, 243, 0.5);
+    border-color: rgba(91, 122, 158, 0.32);
     background:
       var(--app-filter-select-icon) no-repeat right 0.78rem center / 0.76rem,
       var(--app-filter-select-bg-hover);
@@ -978,9 +1075,9 @@ thead th,
 
   .form-select:focus,
   .form-control:focus {
-    border-color: rgba(59, 130, 246, 0.5);
+    border-color: rgba(91, 122, 158, 0.4);
     box-shadow:
-      0 0 0 0.16rem rgba(59, 130, 246, 0.16),
+      0 0 0 0.14rem rgba(91, 122, 158, 0.12),
       var(--app-filter-select-shadow-hover);
   }
 

@@ -85,12 +85,12 @@
     position: relative;
     z-index: 1;
     margin-bottom: 2px;
-    border: 1px solid rgba(245, 158, 11, 0.28);
-    background: rgba(245, 158, 11, 0.1);
-    color: #d97706;
+    border: 1px solid rgba(220, 100, 100, 0.32);
+    background: rgba(185, 60, 65, 0.12);
+    color: #e08587;
     justify-content: flex-start;
     gap: 12px;
-    box-shadow: 0 14px 28px -24px rgba(146, 64, 14, 0.36);
+    box-shadow: 0 14px 28px -24px rgba(127, 29, 29, 0.28);
     transition:
       background-color 0.2s ease,
       border-color 0.2s ease,
@@ -120,9 +120,9 @@
     }
 
     &:hover {
-      background: rgba(245, 158, 11, 0.16);
-      border-color: rgba(245, 158, 11, 0.46);
-      color: #f59e0b;
+      background: rgba(185, 60, 65, 0.2);
+      border-color: rgba(230, 110, 110, 0.45);
+      color: #f0a0a2;
     }
   }
 

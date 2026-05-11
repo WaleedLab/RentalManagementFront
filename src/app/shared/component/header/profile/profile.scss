@@ -96,7 +96,7 @@
   border: 1px solid transparent;
   border-radius: 14px;
   background: transparent;
-  color: #c2410c;
+  color: #b4232c;
   font-weight: 700;
   text-align: start;
   cursor: pointer;
@@ -121,22 +121,23 @@
   }
 
   &:hover {
-    border-color: rgba(245, 158, 11, 0.34);
-    background: rgba(245, 158, 11, 0.12);
-    color: #b45309;
+    border-color: rgba(220, 90, 90, 0.38);
+    background: rgba(220, 38, 38, 0.1);
+    color: #991b1b;
     box-shadow:
-      0 12px 20px -18px rgba(180, 83, 9, 0.4),
+      0 12px 20px -18px rgba(127, 29, 29, 0.22),
       inset 0 1px 0 rgba(255, 255, 255, 0.35);
     transform: translateY(-1px) scale(1.01);
   }
 
   &:focus-visible {
-    outline: 2px solid rgba(245, 158, 11, 0.42);
+    outline: 2px solid rgba(220, 90, 90, 0.45);
     outline-offset: 1px;
   }
 }
 
-:host-context(body.dark-only) {
+:host-context(body.dark-only),
+:host-context([data-bs-theme='dark']) {
   .user-profile-meta {
     span {
       color: rgba(248, 250, 252, 0.95);
@@ -160,15 +161,15 @@
   }
 
   .user-profile-menu-item {
-    color: rgba(251, 191, 36, 0.98);
+    color: rgba(252, 165, 165, 0.96);
 
     &:hover {
-      border-color: rgba(251, 191, 36, 0.46);
-      background: rgba(245, 158, 11, 0.2);
-      color: rgba(254, 240, 138, 0.98);
+      border-color: rgba(248, 113, 113, 0.38);
+      background: rgba(220, 38, 38, 0.16);
+      color: rgba(254, 226, 226, 0.98);
       box-shadow:
-        0 14px 22px -20px rgba(245, 158, 11, 0.48),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        0 14px 22px -20px rgba(127, 29, 29, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
   }
 }
