@@ -12,6 +12,85 @@ html[dir='rtl'] .page-wrapper.compact-wrapper {
       justify-content: center;
     }
   }
+
+  /*
+   * Legacy `_sidebar.scss` sets `.sidebar-wrapper { text-align: left }` under compact-wrapper and
+   * submenu rows use physical `padding-left: 75px`. In RTL that staggers child icons vs parents.
+   * Force one column: same logical padding, RTL direction, no float on `.pull-right` chevrons.
+   */
+  .page-body-wrapper .sidebar-wrapper:not(.close_icon) {
+    text-align: right !important;
+
+    .sidebar-main {
+      text-align: right !important;
+
+      .sidebar-links {
+        direction: rtl !important;
+        text-align: right !important;
+      }
+
+      ul.sidebar-submenu,
+      .submenu-content.opensubmegamenu {
+        direction: rtl !important;
+        text-align: right !important;
+        padding-inline: 0 !important;
+        margin-inline: 0 !important;
+      }
+
+      .sidebar-submenu > li,
+      .submenu-content.opensubmegamenu > li {
+        padding-inline: 0 !important;
+        margin-inline: 0 !important;
+      }
+
+      .sidebar-links > li.sidebar-list > a.sidebar-link,
+      .sidebar-submenu > li > a,
+      .sidebar-submenu a.sidebar-link,
+      .sidebar-submenu a.submenu-title,
+      .submenu-content.opensubmegamenu li > a {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        padding-block: 12px !important;
+        padding-inline: 16px !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        margin-inline: 0 !important;
+      }
+
+      .according-menu,
+      a .according-menu.pull-right,
+      a .pull-right {
+        float: none !important;
+      }
+
+      .according-menu {
+        margin-inline-start: auto !important;
+      }
+
+      .sidebar-links li a > span,
+      .sidebar-submenu a > span {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        height: auto !important;
+        padding: 0 !important;
+      }
+
+      .sidebar-links li a svg,
+      .sidebar-submenu a svg,
+      .sidebar-links li a app-svg-icon,
+      .sidebar-submenu a app-svg-icon {
+        width: 24px !important;
+        height: 24px !important;
+        max-width: 24px !important;
+        max-height: 24px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        flex-shrink: 0;
+      }
+    }
+  }
 }
 
 @media (max-width: 991.98px) {

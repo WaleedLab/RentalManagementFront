@@ -39,6 +39,7 @@
             [class]="{
                 'sidebar-list': item.level === 1,
                 'sidebar-main-title': item.headTitle1,
+                'sidebar-group': item.level === 1 && !!item.children?.length && !item.headTitle1,
               }"
             [class.pined]="isPined(item.title)"
           >
@@ -67,7 +68,9 @@
               <app-svg-icon [icon]="item.icon" />
               } @if (item.level === 1) {
               <span>{{ item.title | translate }}</span>
-              } @else { {{ item.title | translate }} }
+              } @else {
+              <span>{{ item.title | translate }}</span>
+              }
 
               <div class="according-menu">
                 @if (item.children) {
@@ -85,13 +88,15 @@
               href="javascript:void(0)"
               (click)="navigateTo(item, $event)"
             >
-              @if (item.imageIcon && item.level === 1) {
+              @if (item.imageIcon && (item.level === 1 || item.level === 2)) {
               <img class="menu-image-icon" [src]="item.imageIcon" [alt]="item.title || ''" />
-              } @else if (item.icon && item.level === 1) {
+              } @else if (item.icon && (item.level === 1 || item.level === 2)) {
               <app-svg-icon [icon]="item.icon" />
               } @if (item.level === 1) {
               <span>{{ item.title | translate }}</span>
-              } @else { {{ item.title | translate }} }
+              } @else {
+              <span>{{ item.title | translate }}</span>
+              }
 
               <div class="according-menu"></div>
             </a>

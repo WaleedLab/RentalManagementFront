@@ -1,5 +1,6 @@
 $sidebar-width: 246px;
-$sidebar-collapsed-width: 71px;
+/* Slightly wider rail so 20px icons + borders are not clipped at the viewport edge (RTL/LTR). */
+$sidebar-collapsed-width: 78px;
 
 .page-wrapper.compact-wrapper {
   .page-header {
@@ -336,8 +337,8 @@ $sidebar-collapsed-width: 71px;
     .logo-wrapper,
     .logo-icon-wrapper {
       display: flex-end;
-      align-items: flex-end;
-      justify-content: flex-end;
+      align-items: center;
+      justify-content: center;
       width: 100%;
       box-sizing: border-box;
       overflow: hidden;
@@ -350,8 +351,8 @@ $sidebar-collapsed-width: 71px;
 
       a {
         display: flex-end;
-        align-items: flex-end;
-        justify-content: flex-end;
+        align-items: center;
+        justify-content: center;
         width: 100%;
         min-width: 0;
       }
@@ -420,7 +421,7 @@ $sidebar-collapsed-width: 71px;
       align-items: center;
       min-height: 42px;
       padding: 10px 14px;
-      border-radius: 10px;
+      border-radius: 0px;
     }
 
     .sidebar-link span,
@@ -428,6 +429,173 @@ $sidebar-collapsed-width: 71px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    /*
+     * Legacy `themes/_sidebar.scss` (compact-wrapper) sets `.sidebar-main .sidebar-links { color: rgba(0,0,0,0) }`
+     * outside `.close_icon`, so nested submenu titles inherit fully transparent text (icons still show).
+     * When the rail is expanded, force readable text + flex layout for nested items.
+     */
+    &:not(.close_icon) {
+      .sidebar-main .sidebar-links {
+        color: var(--app-sidebar-fg, rgba(248, 250, 252, 0.96));
+      }
+
+      .sidebar-submenu a {
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+        color: var(--app-sidebar-fg, rgba(248, 250, 252, 0.96)) !important;
+        font-size: 0.8125rem !important;
+        line-height: 1.35 !important;
+      }
+
+      .sidebar-submenu a > span {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        color: inherit !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        width: auto !important;
+        height: auto !important;
+        font-size: 0.8125rem !important;
+        line-height: 1.35 !important;
+      }
+
+      /*
+       * Legacy compact theme pushes submenu rows with `padding-left: 75px !important` and draws
+       * short `::after` / tree `::before` marks (reads like a "-" next to children). Strip those
+       * so children share the same vertical column as the parent row (16px gutter, flex icons).
+       */
+      .sidebar-main .sidebar-links > li.sidebar-list > a.sidebar-link,
+      .sidebar-main .sidebar-links > .sidebar-list > a.sidebar-link {
+        padding: 12px 16px !important;
+        margin-inline: 0 !important;
+      }
+
+      .sidebar-main .sidebar-submenu > li > a,
+      .sidebar-main .sidebar-submenu a.sidebar-link,
+      .sidebar-main .sidebar-submenu a.sidebar-title,
+      .sidebar-main .sidebar-submenu a.submenu-title,
+      .sidebar-main .submenu-content.opensubmegamenu li > a,
+      .sidebar-main .nav-sub-childmenu li > a {
+        padding: 12px 16px !important;
+        margin-inline: 0 !important;
+      }
+
+      .sidebar-main .sidebar-submenu a::before,
+      .sidebar-main .sidebar-submenu a::after,
+      .sidebar-main .submenu-content.opensubmegamenu a::before,
+      .sidebar-main .submenu-content.opensubmegamenu a::after,
+      .sidebar-main .nav-sub-childmenu a::before,
+      .sidebar-main .nav-sub-childmenu a::after {
+        display: none !important;
+        content: none !important;
+        border: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        background: none !important;
+        box-shadow: none !important;
+      }
+
+      .sidebar-main .sidebar-submenu::before {
+        display: none !important;
+        content: none !important;
+      }
+
+      .sidebar-main .sidebar-submenu > li,
+      .sidebar-main .submenu-content.opensubmegamenu > li {
+        padding-inline: 0 !important;
+        margin-inline: 0 !important;
+      }
+
+      /* Legacy `li a span { width: 168px; padding: ... }` breaks a single flex row — normalize. */
+      .sidebar-main .sidebar-links li a > span,
+      .sidebar-main .sidebar-submenu a > span {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        height: auto !important;
+        padding: 0 !important;
+      }
+
+      .sidebar-main .sidebar-links li a svg,
+      .sidebar-main .sidebar-submenu a svg {
+        width: 24px !important;
+        height: 24px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        vertical-align: middle !important;
+      }
+    }
+
+    body.light-only &:not(.close_icon) {
+      .sidebar-main .sidebar-links {
+        color: rgba(15, 23, 42, 0.92);
+      }
+
+      .sidebar-submenu a {
+        color: rgba(15, 23, 42, 0.92) !important;
+      }
+    }
+
+    /*
+     * Collapsed rail: legacy theme uses `.close_icon .sidebar-submenu a { display: none }`.
+     * Restore flex row for icons only; `app-sidebar.sidebar-rail` hides labels in component SCSS.
+     * Theme also sets `.sidebar-links > li { max-width: 86px }` which clips icons in a narrow rail.
+     */
+    /*
+     * Collapsed rail: center icons in the strip (idle + hover). Packing to `start` in RTL glued icons
+     * to the outer viewport edge and clipped them; symmetric padding + a few extra px width fixes that.
+     */
+    &.close_icon app-sidebar.sidebar-rail,
+    &.close_icon:hover app-sidebar.sidebar-rail {
+      .sidebar-main {
+        padding-inline: 4px !important;
+        box-sizing: border-box;
+      }
+
+      .sidebar-main .sidebar-links > li {
+        max-width: none !important;
+      }
+
+      .sidebar-main .sidebar-list.sidebar-group > .sidebar-submenu,
+      .sidebar-main .sidebar-list.sidebar-group > .submenu-content.opensubmegamenu {
+        align-items: center !important;
+      }
+
+      .sidebar-submenu a,
+      .submenu-content.opensubmegamenu a {
+        display: flex !important;
+        align-items: center;
+        justify-content: center !important;
+        padding-inline: 4px !important;
+        box-sizing: border-box;
+
+        &::after,
+        &::before {
+          display: none !important;
+          content: none !important;
+          width: 0 !important;
+          border: 0 !important;
+        }
+      }
+
+      .sidebar-main .sidebar-list:not(.sidebar-group) > a.sidebar-link {
+        justify-content: center !important;
+        align-items: center !important;
+        padding-inline: 4px !important;
+        box-sizing: border-box;
+      }
+
+      .sidebar-main .sidebar-logout {
+        justify-content: center !important;
+        padding-inline: 4px !important;
+        box-sizing: border-box;
+      }
     }
   }
 }
@@ -671,18 +839,27 @@ body.dark-only .page-wrapper.compact-wrapper .page-header .header-wrapper .toggl
         }
       }
 
-      .sidebar-wrapper.close_icon {
-        width: $sidebar-collapsed-width;
-        z-index: 1200;
-        overflow: visible;
-      }
-
+      /*
+       * Legacy `_sidebar.scss` uses `width: auto` when collapsed and expands to `$sidebar-compact-width`
+       * on `:hover`. Lock rail width so hover does not change layout (same size with or without mouse).
+       */
+      div.sidebar-wrapper.close_icon,
+      .sidebar-wrapper.close_icon,
+      div.sidebar-wrapper.close_icon:hover,
       .sidebar-wrapper.close_icon:hover {
         width: $sidebar-collapsed-width !important;
         min-width: $sidebar-collapsed-width !important;
         max-width: $sidebar-collapsed-width !important;
+        flex: 0 0 $sidebar-collapsed-width !important;
         z-index: 1200 !important;
         overflow: visible !important;
+        box-sizing: border-box !important;
+        transition:
+          width 0.25s ease,
+          min-width 0.25s ease,
+          max-width 0.25s ease,
+          transform 0.25s ease,
+          opacity 0.2s ease !important;
       }
 
       /* Prevent any theme rule from auto-expanding collapsed sidebar on hover */

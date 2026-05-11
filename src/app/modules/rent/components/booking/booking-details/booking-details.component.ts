@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { catchError, forkJoin, of } from 'rxjs';
@@ -24,6 +24,8 @@ import {
   SmoothSelectOption,
 } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 
+type BookingDetailsToolbarAction = 'suspend' | 'extend' | 'print' | 'cancel' | 'finish';
+
 @Component({
   selector: 'app-booking-details',
   standalone: true,
@@ -42,6 +44,7 @@ export class BookingDetailsComponent implements OnInit {
   private static readonly EXTEND_BOND_TYPE_RECEIPT = 2;
   private static readonly EXTEND_STATUS_EDIT = 2;
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private authState = inject(AuthStateService);
   private bookingService = inject(BookingService);
   private paymentCountService = inject(PaymentCountService);
@@ -819,6 +822,43 @@ export class BookingDetailsComponent implements OnInit {
     });
   }
 
+  canFinishBooking(booking: Booking): boolean {
+    return booking.status !== 'finsh' && booking.status !== 'close';
+  }
+
+  /** Same actions as booking list card: suspend, extend, quick print, cancel, finish (edit uses routerLink in template). */
+  onDetailsToolbarAction(action: BookingDetailsToolbarAction, item: Booking): void {
+    if (action === 'finish' && !this.canFinishBooking(item)) {
+      return;
+    }
+    if (action === 'extend') {
+      this.enterExtendModeFromToolbar(item);
+      return;
+    }
+    if (action === 'print') {
+      this.openBookingPrint(true);
+      return;
+    }
+    const labels: Record<BookingDetailsToolbarAction, string> = {
+      suspend: 'تعليق',
+      extend: 'تمديد',
+      print: 'طباعة',
+      cancel: 'إلغاء',
+      finish: 'إنهاء',
+    };
+    this.toast.info(`${labels[action]}: ${this.translate.instant('Details')}`);
+    this.router.navigate(['/booking', item.id, 'details'], { queryParams: { action } });
+  }
+
+  private enterExtendModeFromToolbar(item: Booking): void {
+    this.isExtendMode.set(true);
+    this.paymentRows.set([]);
+    this.paymentCountSum.set(null);
+    this.loadExtendLookupData();
+    this.setExtendRequiredAmountFromBooking(item);
+    this.loadPaymentSummaryForBooking(item);
+  }
+
   private buildBookingPrintPayload(
     item: Booking,
     autoPrint: boolean,
@@ -937,23 +977,15 @@ export class BookingDetailsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const action = String(this.route.snapshot.queryParamMap.get('action') ?? '')
-      .trim()
-      .toLowerCase();
-    if (action === 'extend') {
-      this.isExtendMode.set(true);
-      this.paymentRows.set([]);
-      this.paymentCountSum.set(null);
-      this.loadExtendLookupData();
-    }
+    const extendFromQuery =
+      String(this.route.snapshot.queryParamMap.get('action') ?? '').trim().toLowerCase() === 'extend';
 
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      if (this.isExtendMode()) {
+      if (extendFromQuery) {
         const mock = this.buildExtendMockBooking();
         this.booking.set(mock);
-        this.paymentCountSum.set(null);
-        this.setExtendRequiredAmountFromBooking(mock);
+        this.enterExtendModeFromToolbar(mock);
       }
       return;
     }
@@ -962,18 +994,17 @@ export class BookingDetailsComponent implements OnInit {
     this.bookingService.getById(id, this.authState.fleetId() ?? '').subscribe({
       next: booking => {
         this.booking.set(booking);
-        if (this.isExtendMode()) {
-          this.setExtendRequiredAmountFromBooking(booking);
-          this.loadPaymentSummaryForBooking(booking);
+        if (extendFromQuery) {
+          this.enterExtendModeFromToolbar(booking);
           return;
         }
         this.loadPaymentSummaryForBooking(booking);
       },
       error: () => {
-        if (this.isExtendMode()) {
+        if (extendFromQuery) {
           const mock = this.buildExtendMockBooking();
           this.booking.set(mock);
-          this.setExtendRequiredAmountFromBooking(mock);
+          this.enterExtendModeFromToolbar(mock);
           return;
         }
         this.toast.error(this.translate.instant('Failed to load booking'));

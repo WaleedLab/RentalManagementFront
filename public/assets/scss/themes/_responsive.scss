@@ -1719,6 +1719,7 @@
                     &.active {
                       ~ .sidebar-submenu {
                         display: none !important;
+                        justify-content: left ;
                       }
                     }
                   }

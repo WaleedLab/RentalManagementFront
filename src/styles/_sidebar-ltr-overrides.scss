@@ -1,0 +1,78 @@
+/*
+ * English / LTR: keep parent + child menu rows in one vertical column (same inset as RTL overrides).
+ * Mirrors `_sidebar-rtl-overrides.scss` so legacy `padding-left: 75px` and floats do not shift children.
+ */
+html[dir='ltr'] .page-wrapper.compact-wrapper .page-body-wrapper .sidebar-wrapper:not(.close_icon),
+html:not([dir]) .page-wrapper.compact-wrapper .page-body-wrapper .sidebar-wrapper:not(.close_icon) {
+  text-align: left !important;
+
+  .sidebar-main {
+    text-align: left !important;
+
+    .sidebar-links {
+      direction: ltr !important;
+      text-align: left !important;
+    }
+
+    ul.sidebar-submenu,
+    .submenu-content.opensubmegamenu {
+      direction: ltr !important;
+      text-align: left !important;
+      padding-inline: 0 !important;
+      margin-inline: 0 !important;
+    }
+
+    .sidebar-submenu > li,
+    .submenu-content.opensubmegamenu > li {
+      padding-inline: 0 !important;
+      margin-inline: 0 !important;
+    }
+
+    .sidebar-links > li.sidebar-list > a.sidebar-link,
+    .sidebar-submenu > li > a,
+    .sidebar-submenu a.sidebar-link,
+    .sidebar-submenu a.submenu-title,
+    .submenu-content.opensubmegamenu li > a {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      padding-block: 12px !important;
+      padding-inline: 16px !important;
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+      margin-inline: 0 !important;
+    }
+
+    .according-menu,
+    a .according-menu.pull-right,
+    a .pull-right {
+      float: none !important;
+    }
+
+    .according-menu {
+      margin-inline-start: auto !important;
+    }
+
+    .sidebar-links li a > span,
+    .sidebar-submenu a > span {
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      padding: 0 !important;
+    }
+
+    .sidebar-links li a svg,
+    .sidebar-submenu a svg,
+    .sidebar-links li a app-svg-icon,
+    .sidebar-submenu a app-svg-icon {
+      width: 24px !important;
+      height: 24px !important;
+      max-width: 24px !important;
+      max-height: 24px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      flex-shrink: 0;
+    }
+  }
+}

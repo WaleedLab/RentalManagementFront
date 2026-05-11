@@ -1,5 +1,5 @@
 import { NgClass, NgTemplateOutlet } from '@angular/common';
-import { Component, HostListener, effect, inject, OnInit } from '@angular/core';
+import { Component, HostBinding, HostListener, effect, inject, OnInit } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 
 import { TranslateModule } from '@ngx-translate/core';
@@ -27,6 +27,12 @@ import { SvgIcon } from '../svg-icon/svg-icon';
 })
 export class Sidebar implements OnInit {
   public navServices = inject(NavMenuService);
+
+  /** Mirrors `NavMenuService.isDisplay` / `.sidebar-wrapper.close_icon` — scoped rail styles live in `sidebar.scss`. */
+  @HostBinding('class.sidebar-rail')
+  protected get sidebarRailMode(): boolean {
+    return this.navServices.isDisplay;
+  }
   public layout = inject(LayoutService);
   private router = inject(Router);
   private sidebarService = inject(SidebarService);
