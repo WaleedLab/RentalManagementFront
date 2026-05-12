@@ -1,9 +1,13 @@
 import { Injectable } from '@angular/core';
 
+export type AppThemeId = 'dark-only' | 'light-only';
+
 @Injectable({
   providedIn: 'root',
 })
 export class LayoutService {
+  private static readonly THEME_STORAGE_KEY = 'rental-app.layout-theme';
+
   public customizer: string = '';
 
   public config = {
@@ -45,19 +49,36 @@ export class LayoutService {
     document.body.classList.toggle('ltr', direction === 'ltr');
   }
 
-  applyTheme(theme: 'dark-only' | 'light-only'): void {
+  applyTheme(theme: AppThemeId): void {
     this.config.settings.layout_version = theme;
     document.body.classList.toggle('dark-only', theme === 'dark-only');
     document.body.classList.toggle('light-only', theme === 'light-only');
+    this.persistTheme(theme);
   }
 
-  toggleTheme(): 'dark-only' | 'light-only' {
+  toggleTheme(): AppThemeId {
     const nextTheme = this.config.settings.layout_version === 'dark-only' ? 'light-only' : 'dark-only';
     this.applyTheme(nextTheme);
     return nextTheme;
   }
 
-  private getInitialTheme(): 'dark-only' | 'light-only' {
+  private getInitialTheme(): AppThemeId {
+    try {
+      const raw = String(localStorage.getItem(LayoutService.THEME_STORAGE_KEY) ?? '').trim();
+      if (raw === 'light-only' || raw === 'dark-only') {
+        return raw;
+      }
+    } catch {
+      /* private mode / blocked storage */
+    }
     return 'dark-only';
+  }
+
+  private persistTheme(theme: AppThemeId): void {
+    try {
+      localStorage.setItem(LayoutService.THEME_STORAGE_KEY, theme);
+    } catch {
+      /* ignore */
+    }
   }
 }

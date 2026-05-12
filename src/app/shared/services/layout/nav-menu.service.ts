@@ -83,7 +83,7 @@ export class NavMenuService {
           path: '/traffic-violations',
           title: 'trafficViolations.title',
           icon: 'sample-page',
-          imageIcon: 'assets/images/rent_icon/Vehicles.png',
+          imageIcon: 'assets/images/rent_icon/Traffic-violations.png',
           type: 'link',
           privileges: [APP_PRIVILEGES.booking, APP_PRIVILEGES.vehicle],
         },

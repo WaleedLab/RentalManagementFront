@@ -1,0 +1,249 @@
+<div class="container-fluid contract-finish-page">
+  @if (loading()) {
+    <app-page-header [title]="'Contract finish page title' | translate" [subtitle]="''" />
+    <div class="card">
+      <div class="card-body text-center py-5">
+        <div class="spinner-border text-primary"></div>
+      </div>
+    </div>
+  } @else if (booking(); as item) {
+    <app-page-header [title]="'Contract finish page title' | translate" [subtitle]="pageSubtitle(item)" />
+
+    <div class="card contract-finish-card">
+      <div class="card-body">
+        @if (finishLocked()) {
+          <div class="alert alert-warning finish-closed-banner mb-3" role="alert">
+            {{ 'Contract finish not allowed' | translate }}
+          </div>
+        }
+        <div class="finish-form-grid">
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish customer identity' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="valueOrDash(item.customerName)" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish plate' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="valueOrDash(item.vehiclePlateNumber)" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish days' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="numberOrDash(item.countOfDay)" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish odometer checkout' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="numberOrDash(item.checkoutCounter)" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish odometer return' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="numberOrDash(item.checkinCounter)" />
+          </div>
+
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish km allowed per day' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="moneyOrDash(item.allowTo)" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish km allowed total' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="moneyOrDash(totalKmAllowance())" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish extra km' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="numberOrDash(item.numberKmExcess)" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish extra km price' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="moneyOrDash(item.priceKmExtra)" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish extra km total' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="moneyOrDash(extraKmTotal())" />
+          </div>
+
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish extra hour price' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="moneyOrDash(item.priceHoureExtra)" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish extra hours' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="numberOrDash(item.numberOfHoursExcess)" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish daily rent' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="moneyOrDash(item.priceInDay)" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish checkout time' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="formatDateTime(item.startDate)" />
+          </div>
+          <div class="finish-field">
+            <label class="form-label">{{ 'Contract finish return time' | translate }}</label>
+            <input
+              class="form-control"
+              type="datetime-local"
+              [disabled]="finishLocked()"
+              [value]="returnDateTime()"
+              (input)="onReturnDateChange($any($event.target).value)"
+            />
+          </div>
+
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish extra hours total' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="moneyOrDash(extraHoursTotal())" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish payments total' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="moneyOrDash(item.paidtotal)" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish discount' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="moneyOrDash(item.discount)" />
+          </div>
+          <div class="finish-field">
+            <label class="form-label">{{ 'Contract finish repairs' | translate }}</label>
+            <input
+              class="form-control"
+              type="number"
+              min="0"
+              step="0.01"
+              [disabled]="finishLocked()"
+              [value]="repairs()"
+              (input)="onRepairsChange($any($event.target).value)"
+            />
+          </div>
+          <div class="finish-field">
+            <label class="form-label">{{ 'Contract finish traffic' | translate }}</label>
+            <input
+              class="form-control"
+              type="number"
+              min="0"
+              step="0.01"
+              [disabled]="finishLocked()"
+              [value]="traffic()"
+              (input)="onTrafficChange($any($event.target).value)"
+            />
+          </div>
+
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish tax' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="moneyOrDash(item.totaltax)" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish grand total' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="moneyOrDash(item.totalAmount)" />
+          </div>
+          <div class="finish-field finish-field--readonly">
+            <label class="form-label">{{ 'Contract finish balance' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="moneyOrDash(balanceDisplay())" />
+          </div>
+        </div>
+
+        <div class="finish-payment-card">
+          <div class="finish-payment-card__title">{{ 'Contract finish payment section' | translate }}</div>
+          <div class="finish-payment-grid">
+            <div class="finish-field">
+              <label class="form-label">
+                {{ 'Contract finish payment method' | translate }} <span class="text-danger">*</span>
+              </label>
+              <app-smooth-select
+                [value]="paymentMethod()"
+                [ariaLabel]="'Payment Type' | translate"
+                [placeholder]="'Payment Type' | translate"
+                [options]="paymentTypeOptions()"
+                [disabled]="finishLocked()"
+                (valueChange)="onPaymentMethodChange('' + $any($event))"
+              />
+            </div>
+            <div class="finish-field">
+              <label class="form-label">
+                {{ 'Contract finish cash account' | translate }} <span class="text-danger">*</span>
+              </label>
+              <app-smooth-select
+                [value]="cashAccount()"
+                [ariaLabel]="'Cash Account' | translate"
+                [placeholder]="'Select cash account'"
+                [options]="cashAccountOptions()"
+                [disabled]="paymentTypeIsBankOnly() || finishLocked()"
+                (valueChange)="onCashChange('' + $any($event))"
+              />
+            </div>
+            <div class="finish-field">
+              <label class="form-label">{{ 'Contract finish paid cash' | translate }}</label>
+              <input
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.01"
+                [value]="paidCash()"
+                [disabled]="paymentTypeIsBankOnly() || finishLocked()"
+                [readonly]="!paymentTypeIsMixed()"
+                (input)="onPaidCashChange($any($event.target).value)"
+              />
+            </div>
+            <div class="finish-field finish-field--span-2">
+              <label class="form-label">
+                {{ 'Contract finish bank account' | translate }} <span class="text-danger">*</span>
+              </label>
+              <app-smooth-select
+                [value]="bankAccount()"
+                [ariaLabel]="'Bank Account' | translate"
+                [placeholder]="'Select bank'"
+                [options]="bankAccountOptions()"
+                [disabled]="paymentTypeIsCash() || finishLocked()"
+                (valueChange)="onBankChange('' + $any($event))"
+              />
+            </div>
+            <div class="finish-field">
+              <label class="form-label">{{ 'Contract finish paid bank' | translate }}</label>
+              <input
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.01"
+                [value]="paidBank()"
+                [disabled]="paymentTypeIsCash() || finishLocked()"
+                [readonly]="!paymentTypeIsMixed()"
+                (input)="onPaidBankChange($any($event.target).value)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="finish-field finish-field--notes mt-3">
+          <label class="form-label">{{ 'Contract finish notes' | translate }}</label>
+          <textarea
+            class="form-control"
+            rows="5"
+            [disabled]="finishLocked()"
+            [value]="notes()"
+            (input)="onNotesChange($any($event.target).value)"
+          ></textarea>
+        </div>
+
+        <div class="finish-actions mt-4 d-flex flex-wrap gap-2 justify-content-between">
+          <a class="btn btn-outline-secondary" [routerLink]="['/booking', item.id, 'details']">
+            {{ 'Back' | translate }}
+          </a>
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="finishLocked() || saving()"
+            (click)="submit()"
+          >
+            @if (saving()) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            }
+            {{ 'Contract finish submit' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <app-page-header [title]="'Contract finish page title' | translate" [subtitle]="''" />
+    <div class="card">
+      <div class="card-body">
+        <p class="text-muted mb-3">{{ 'Failed to load booking' | translate }}</p>
+        <a class="btn btn-outline-secondary" routerLink="/booking">{{ 'Back' | translate }}</a>
+      </div>
+    </div>
+  }
+</div>

@@ -169,14 +169,15 @@
                       <span class="booking-card__action-label">{{ 'Booking card view' | translate }}</span>
                     </a>
                     <button
-                      class="table-action-icon booking-card__action booking-card__action--labeled booking-card__action--cancel booking-card__action--tooltip"
+                      class="table-action-icon booking-card__action booking-card__action--labeled booking-card__action--close-contract booking-card__action--tooltip"
                       type="button"
-                      [attr.aria-label]="'Cancel' | translate"
-                      [attr.data-action-tooltip]="'Cancel' | translate"
-                      (click)="onCardAction('cancel', booking)"
+                      [disabled]="!canFinishBooking(booking)"
+                      [attr.aria-label]="'Booking card close contract' | translate"
+                      [attr.data-action-tooltip]="'Booking card close contract' | translate"
+                      (click)="onCardAction('closeContract', booking)"
                     >
-                      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                      <span class="booking-card__action-label">{{ 'Cancel' | translate }}</span>
+                      <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                      <span class="booking-card__action-label">{{ 'Booking card close contract' | translate }}</span>
                     </button>
                     <button
                       class="table-action-icon booking-card__action booking-card__action--labeled booking-card__action--finish booking-card__action--tooltip"

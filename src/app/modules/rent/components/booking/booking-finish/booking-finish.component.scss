@@ -1,0 +1,114 @@
+.contract-finish-page {
+  padding-bottom: 1.5rem;
+}
+
+.finish-closed-banner {
+  border-radius: 12px;
+  border: 1px solid rgba(217, 119, 6, 0.35);
+}
+
+.contract-finish-card {
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 12px 28px -22px rgba(15, 23, 42, 0.12);
+  border-top: 3px solid rgba(59, 130, 246, 0.55);
+}
+
+.finish-form-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem 0.85rem;
+}
+
+@media (max-width: 1199px) {
+  .finish-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575px) {
+  .finish-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.finish-field .form-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #334155;
+}
+
+.finish-field--readonly .form-control[disabled],
+.finish-field--readonly .form-control[readonly] {
+  opacity: 1;
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #e2e8f0;
+}
+
+.finish-payment-card {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  background: linear-gradient(140deg, #f8fafc, #eff6ff 55%, #e8f1fe);
+}
+
+.finish-payment-card__title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 0.65rem;
+}
+
+.finish-payment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.finish-field--span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 991px) {
+  .finish-payment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .finish-field--span-2 {
+    grid-column: span 1;
+  }
+}
+
+:host-context(body.dark-only) .contract-finish-card {
+  border-color: rgba(100, 116, 139, 0.35);
+  border-top-color: rgba(96, 165, 250, 0.55);
+  background: rgba(15, 23, 42, 0.35);
+}
+
+:host-context(body.dark-only) .finish-field .form-label {
+  color: rgba(226, 232, 240, 0.92);
+}
+
+:host-context(body.dark-only) .finish-field--readonly .form-control[disabled] {
+  background: rgba(30, 41, 59, 0.72);
+  color: #e2e8f0;
+  border-color: rgba(100, 116, 139, 0.45);
+}
+
+:host-context(body.dark-only) .finish-payment-card {
+  border-color: rgba(59, 130, 246, 0.4);
+  background: linear-gradient(140deg, rgba(15, 23, 42, 0.55), rgba(30, 58, 138, 0.35));
+}
+
+:host-context(body.dark-only) .finish-payment-card__title {
+  color: #bfdbfe;
+}
+
+:host-context(body.dark-only) .finish-field .form-control:not([disabled]) {
+  background: rgba(15, 23, 42, 0.55);
+  color: #f8fafc;
+  border-color: rgba(100, 116, 139, 0.45);
+}

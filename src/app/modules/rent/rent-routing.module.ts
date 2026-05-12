@@ -234,6 +234,18 @@ const routes: Routes = [
         loadComponent: () => import('./components/booking/booking-form/booking-form.component').then(m => m.BookingFormComponent),
       },
       {
+        path: ':id/finish',
+        loadComponent: () =>
+          import('./components/booking/booking-finish/booking-finish.component').then(m => m.BookingFinishComponent),
+        data: { title: 'Contract finish page title', breadcrumb: 'Contract finish page title' },
+      },
+      {
+        path: ':id/close',
+        loadComponent: () =>
+          import('./components/booking/booking-close/booking-close.component').then(m => m.BookingCloseComponent),
+        data: { title: 'Contract close page title', breadcrumb: 'Contract close page title' },
+      },
+      {
         path: ':id/edit',
         loadComponent: () => import('./components/booking/booking-form/booking-form.component').then(m => m.BookingFormComponent),
       },

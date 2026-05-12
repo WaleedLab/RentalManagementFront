@@ -138,6 +138,72 @@
   padding-top: 0.85rem;
 }
 
+.extend-payment-date-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.65rem 0.75rem;
+}
+
+.extend-payment-date-row__date {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.extend-payment-date-row__days {
+  flex: 0 0 auto;
+  width: min(7.5rem, 100%);
+}
+
+.extend-payment-date-row__days-input {
+  text-align: center;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: default;
+}
+
+/** Highlight: «دفعة الآن» — primary payment field in extend flow */
+.extend-field-group--pay-now {
+  position: relative;
+  padding: 0.75rem 0.85rem 0.9rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(5, 150, 105, 0.06));
+  border: 1px solid rgba(52, 211, 153, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, 0.12),
+    0 14px 32px -20px rgba(16, 185, 129, 0.55);
+}
+
+.extend-field-group--pay-now .extend-field-group__label {
+  margin-bottom: 0.4rem;
+  color: #6ee7b7;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.contract-panel--extend .extend-field-group--pay-now .extend-field-group__input--pay-now {
+  min-height: 48px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: #ecfdf5;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.78));
+  border-color: rgba(52, 211, 153, 0.55);
+  border-radius: 12px;
+}
+
+.contract-panel--extend .extend-field-group--pay-now .extend-field-group__input--pay-now::placeholder {
+  color: rgba(236, 253, 245, 0.45);
+}
+
+.contract-panel--extend .extend-field-group--pay-now .extend-field-group__input--pay-now:focus {
+  border-color: rgba(110, 231, 183, 0.95);
+  box-shadow: 0 0 0 0.22rem rgba(16, 185, 129, 0.28);
+  outline: 0;
+}
+
 .extend-readonly-field .form-control[disabled] {
   opacity: 1;
   background: linear-gradient(180deg, rgba(51, 65, 85, 0.45), rgba(30, 41, 59, 0.52));
@@ -208,6 +274,13 @@
 .contract-panel--extend input[type='number'].form-control {
   background: rgba(15, 23, 42, 0.42);
   color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.42);
+}
+
+.contract-panel--extend .extend-payment-date-row__days-input.form-control[readonly] {
+  background: rgba(15, 23, 42, 0.42);
+  color: #e2e8f0;
+  -webkit-text-fill-color: #e2e8f0;
   border-color: rgba(148, 163, 184, 0.42);
 }
 
@@ -660,4 +733,117 @@
   color: #fdba74;
   background: rgba(124, 45, 18, 0.42);
   border-color: rgba(234, 88, 12, 0.45);
+}
+
+/* ----- Light theme: extend panel (تمديد العقد) readable on pale surfaces ----- */
+:host-context(body.light-only) .contract-panel--extend {
+  border-color: rgba(148, 163, 184, 0.38);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+}
+
+:host-context(body.light-only) .contract-panel--extend .contract-panel__title {
+  color: #0f172a;
+  border-bottom-color: rgba(148, 163, 184, 0.32);
+}
+
+:host-context(body.light-only) .extend-form-grid {
+  border-top-color: rgba(148, 163, 184, 0.32);
+}
+
+:host-context(body.light-only) .contract-panel--extend .form-label {
+  color: #334155;
+}
+
+:host-context(body.light-only) .extend-readonly-field .form-control[disabled] {
+  background: linear-gradient(180deg, #f1f5f9, #e8eef4);
+  color: #0f172a;
+  -webkit-text-fill-color: #0f172a;
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+:host-context(body.light-only) .contract-panel--extend input[type='datetime-local'].form-control,
+:host-context(body.light-only) .contract-panel--extend input[type='number'].form-control {
+  background: #fff;
+  color: #0f172a;
+  -webkit-text-fill-color: #0f172a;
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+:host-context(body.light-only) .contract-panel--extend .extend-payment-date-row__days-input.form-control[readonly] {
+  background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+  color: #0f172a;
+  -webkit-text-fill-color: #0f172a;
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+:host-context(body.light-only) .contract-panel--extend textarea.form-control {
+  background: #fff;
+  color: #0f172a;
+  -webkit-text-fill-color: #0f172a;
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+:host-context(body.light-only) .contract-panel--extend .form-control[readonly] {
+  background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+  color: #0f172a;
+  -webkit-text-fill-color: #0f172a;
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+:host-context(body.light-only) .extend-field-group--pay-now {
+  background: linear-gradient(135deg, rgba(209, 250, 229, 0.92), rgba(167, 243, 208, 0.42));
+  border-color: rgba(16, 185, 129, 0.42);
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, 0.08),
+    0 12px 28px -18px rgba(5, 150, 105, 0.22);
+}
+
+:host-context(body.light-only) .extend-field-group--pay-now .extend-field-group__label {
+  color: #047857;
+}
+
+:host-context(body.light-only) .contract-panel--extend .extend-field-group--pay-now .extend-field-group__input--pay-now {
+  color: #064e3b;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border-color: rgba(16, 185, 129, 0.48);
+}
+
+:host-context(body.light-only) .contract-panel--extend .extend-field-group--pay-now .extend-field-group__input--pay-now::placeholder {
+  color: rgba(6, 78, 59, 0.45);
+}
+
+:host-context(body.light-only) .contract-panel--extend .extend-field-group--pay-now .extend-field-group__input--pay-now:focus {
+  border-color: rgba(5, 150, 105, 0.72);
+  box-shadow: 0 0 0 0.22rem rgba(16, 185, 129, 0.16);
+}
+
+:host-context(body.light-only) .extend-payment-card {
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  background: linear-gradient(140deg, #f0f9ff, #e0f2fe 52%, #dbeafe);
+}
+
+:host-context(body.light-only) .extend-payment-card__title {
+  color: #0c4a6e;
+}
+
+:host-context(body.light-only) .extend-payment-field .form-label {
+  color: #334155;
+}
+
+:host-context(body.light-only) .extend-payment-amount,
+:host-context(body.light-only) .extend-payment-select {
+  background: #fff;
+  color: #0f172a;
+  -webkit-text-fill-color: #0f172a;
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+:host-context(body.light-only) .extend-payment-select:focus,
+:host-context(body.light-only) .extend-payment-amount:focus {
+  border-color: rgba(59, 130, 246, 0.55);
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.12);
+}
+
+:host-context(body.light-only) .contract-panel--extend .form-text.text-warning {
+  color: #b45309;
 }

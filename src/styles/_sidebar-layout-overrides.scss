@@ -451,6 +451,13 @@ $sidebar-collapsed-width: 78px;
         line-height: 1.35 !important;
       }
 
+      /* Legacy `_sidebar.scss` uses `.sidebar-submenu li a { color: $white }` — keep same ink as parent row */
+      .sidebar-main .sidebar-submenu li > a,
+      .sidebar-main .nav-sub-childmenu li > a,
+      .sidebar-main .submenu-content.opensubmegamenu li > a {
+        color: var(--app-sidebar-fg, rgba(248, 250, 252, 0.96)) !important;
+      }
+
       .sidebar-submenu a > span {
         display: inline-block !important;
         visibility: visible !important;
@@ -532,15 +539,11 @@ $sidebar-collapsed-width: 78px;
       }
     }
 
-    body.light-only &:not(.close_icon) {
-      .sidebar-main .sidebar-links {
-        color: rgba(15, 23, 42, 0.92);
-      }
-
-      .sidebar-submenu a {
-        color: rgba(15, 23, 42, 0.92) !important;
-      }
-    }
+    /*
+     * Do not set `body.light-only` text colors here: the compact sidebar keeps the dark rail surface
+     * (`$sidebar-background`); forcing slate ink (meant for pale surfaces) makes child submenu labels
+     * nearly invisible. Parent + child colors stay on `var(--app-sidebar-fg, …)` from `&:not(.close_icon)` above.
+     */
 
     /*
      * Collapsed rail: legacy theme uses `.close_icon .sidebar-submenu a { display: none }`.
@@ -598,6 +601,18 @@ $sidebar-collapsed-width: 78px;
       }
     }
   }
+}
+
+/* Light page theme: compact sidebar rail — target ink ~`#243447` (match dark UI family). */
+body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .sidebar-wrapper {
+  --app-sidebar-logo-filter: brightness(1.16) contrast(1.06) saturate(1.03);
+  --app-sidebar-logo-opacity: 0.99;
+  background-color: #243447 !important;
+}
+
+body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .sidebar-wrapper .logo-wrapper,
+body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .sidebar-wrapper .logo-icon-wrapper {
+  background-color: #2a3d52 !important;
 }
 
 body.light-only .page-wrapper.compact-wrapper .page-header .header-wrapper .toggle-sidebar {

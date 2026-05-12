@@ -24,7 +24,7 @@ import {
   SmoothSelectOption,
 } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 
-type BookingDetailsToolbarAction = 'suspend' | 'extend' | 'print' | 'cancel' | 'finish';
+type BookingDetailsToolbarAction = 'suspend' | 'extend' | 'print' | 'finish' | 'closeContract';
 
 @Component({
   selector: 'app-booking-details',
@@ -43,6 +43,12 @@ type BookingDetailsToolbarAction = 'suspend' | 'extend' | 'print' | 'cancel' | '
 export class BookingDetailsComponent implements OnInit {
   private static readonly EXTEND_BOND_TYPE_RECEIPT = 2;
   private static readonly EXTEND_STATUS_EDIT = 2;
+
+  /** `datetime-local` value in local time (no timezone suffix). */
+  private static toDateTimeLocalInputValue(d: Date = new Date()): string {
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authState = inject(AuthStateService);
@@ -58,7 +64,7 @@ export class BookingDetailsComponent implements OnInit {
   paymentCountSum = signal<number | null>(null);
   paymentRows = signal<PaymentCount[]>([]);
   isExtendMode = signal(false);
-  extendPaymentDate = signal('2025-12-31T13:01');
+  extendPaymentDate = signal(BookingDetailsComponent.toDateTimeLocalInputValue());
   extendRequiredAmountValue = signal<number>(0);
   extendCurrentPaymentAmount = signal<number>(0);
   /** Mirrors backend PaymentTypePaymentcountEnum: 1..5 */
@@ -378,6 +384,8 @@ export class BookingDetailsComponent implements OnInit {
     this.extendPaymentDate.set(String(value ?? ''));
     if (this.isExtendMode() && this.booking()) {
       this.setExtendRequiredAmountFromBooking(this.booking()!);
+      this.extendCurrentPaymentAmount.set(this.extendRequiredAmount());
+      this.syncExtendAmountsFromType();
     }
   }
 
@@ -432,6 +440,18 @@ export class BookingDetailsComponent implements OnInit {
     const required = this.extendRequiredAmount();
     const paid = this.extendPaidTotal(item);
     return Math.max(0, Math.round((required - paid) * 100) / 100);
+  }
+
+  /**
+   * عدد الأيام المستخدم في حساب «المبلغ المطلوب» (من بداية العقد إلى «تاريخ الدفعة»).
+   * «—» عند غياب تاريخ بداية صالح؛ 0 إذا كان تاريخ الدفعة قبل البداية.
+   */
+  extendPaymentElapsedDaysDisplay(item: Booking): string {
+    const days = this.computeExtendElapsedDays(item);
+    if (days === null) {
+      return '—';
+    }
+    return String(days);
   }
 
   extendPaidTotal(item: Booking): number {
@@ -614,37 +634,56 @@ export class BookingDetailsComponent implements OnInit {
   private setExtendRequiredAmountFromBooking(item: Booking): void {
     const required = this.computeExtendRequiredAmount(item);
     this.extendRequiredAmountValue.set(required);
-    // "Pay now" must always be user-entered only; never auto-filled.
     this.syncExtendAmountsFromType();
   }
 
   /**
-   * Required amount in extension screen:
-   * - If return date not reached: current contract net (total with tax - discount).
-   * - If return date passed: accrued amount from start date to now (days * daily) + tax - discount.
+   * Extension «المبلغ المطلوب»: (سعر اليوم × عدد الأيام من بداية العقد إلى تاريخ/وقت «تاريخ الدفعة»)
+   * + الضريبة − الخصم. إذا لم يُحدد تاريخ بداية صالح يُستخدم إجمالي العقد بعد الخصم كاحتياطي.
    */
   private computeExtendRequiredAmount(item: Booking): number {
-    const contractNet = Math.max(0, Number(this.totalAfterDiscount(item) ?? 0) || 0);
-    const returnText = String(item.returnDate ?? item.endDate ?? '').trim();
-    const startText = String(item.startDate ?? '').trim();
-    const now = new Date();
-    const returnDate = returnText ? new Date(returnText) : null;
-    if (!returnDate || Number.isNaN(returnDate.getTime()) || now.getTime() <= returnDate.getTime()) {
+    const elapsedDays = this.computeExtendElapsedDays(item);
+    if (elapsedDays === null) {
+      const contractNet = Math.max(0, Number(this.totalAfterDiscount(item) ?? 0) || 0);
       return Math.round(contractNet * 100) / 100;
+    }
+    if (elapsedDays === 0) {
+      return 0;
     }
 
-    const startDate = startText ? new Date(startText) : null;
-    if (!startDate || Number.isNaN(startDate.getTime())) {
-      return Math.round(contractNet * 100) / 100;
-    }
-    const dayMs = 24 * 60 * 60 * 1000;
-    const elapsedMs = Math.max(0, now.getTime() - startDate.getTime());
-    const elapsedDays = Math.max(1, Math.ceil(elapsedMs / dayMs));
     const daily = Math.max(0, Number(item.priceInDay ?? 0) || 0);
     const tax = Math.max(0, Number(item.totaltax ?? 0) || 0);
     const discount = Math.max(0, Number(item.discount ?? 0) || 0);
-    const accrued = Math.max(0, elapsedDays * daily + tax - discount);
-    return Math.round(accrued * 100) / 100;
+    const raw = elapsedDays * daily + tax - discount;
+    return Math.round(Math.max(0, raw) * 100) / 100;
+  }
+
+  /** نفس تعريف «يوم» المستخدم في `computeExtendRequiredAmount`: `null` = لا تاريخ بداية صالح. */
+  private computeExtendElapsedDays(item: Booking): number | null {
+    const startText = String(item.startDate ?? '').trim();
+    const startDate = startText ? new Date(startText) : null;
+    if (!startDate || Number.isNaN(startDate.getTime())) {
+      return null;
+    }
+
+    const end = this.parseExtendPaymentDateInput(this.extendPaymentDate());
+    if (end.getTime() < startDate.getTime()) {
+      return 0;
+    }
+
+    const dayMs = 24 * 60 * 60 * 1000;
+    const elapsedMs = Math.max(0, end.getTime() - startDate.getTime());
+    return Math.max(1, Math.ceil(elapsedMs / dayMs));
+  }
+
+  /** Parses `datetime-local` string as local `Date`; invalid → now. */
+  private parseExtendPaymentDateInput(value: string): Date {
+    const text = String(value ?? '').trim();
+    if (!text) {
+      return new Date();
+    }
+    const d = new Date(text);
+    return Number.isNaN(d.getTime()) ? new Date() : d;
   }
 
   private buildExtendMockBooking(): Booking {
@@ -826,9 +865,20 @@ export class BookingDetailsComponent implements OnInit {
     return booking.status !== 'finsh' && booking.status !== 'close';
   }
 
-  /** Same actions as booking list card: suspend, extend, quick print, cancel, finish (edit uses routerLink in template). */
+  /** Toolbar actions: suspend, extend, print, close contract, finish (edit uses routerLink in template). */
   onDetailsToolbarAction(action: BookingDetailsToolbarAction, item: Booking): void {
     if (action === 'finish' && !this.canFinishBooking(item)) {
+      return;
+    }
+    if (action === 'finish') {
+      this.router.navigate(['/booking', item.id, 'finish']);
+      return;
+    }
+    if (action === 'closeContract' && !this.canFinishBooking(item)) {
+      return;
+    }
+    if (action === 'closeContract') {
+      this.router.navigate(['/booking', item.id, 'close']);
       return;
     }
     if (action === 'extend') {
@@ -843,8 +893,8 @@ export class BookingDetailsComponent implements OnInit {
       suspend: 'تعليق',
       extend: 'تمديد',
       print: 'طباعة',
-      cancel: 'إلغاء',
       finish: 'إنهاء',
+      closeContract: 'إغلاق',
     };
     this.toast.info(`${labels[action]}: ${this.translate.instant('Details')}`);
     this.router.navigate(['/booking', item.id, 'details'], { queryParams: { action } });
@@ -854,8 +904,11 @@ export class BookingDetailsComponent implements OnInit {
     this.isExtendMode.set(true);
     this.paymentRows.set([]);
     this.paymentCountSum.set(null);
+    this.extendPaymentDate.set(BookingDetailsComponent.toDateTimeLocalInputValue());
     this.loadExtendLookupData();
     this.setExtendRequiredAmountFromBooking(item);
+    this.extendCurrentPaymentAmount.set(this.extendRequiredAmount());
+    this.syncExtendAmountsFromType();
     this.loadPaymentSummaryForBooking(item);
   }
 
@@ -979,6 +1032,9 @@ export class BookingDetailsComponent implements OnInit {
   ngOnInit(): void {
     const extendFromQuery =
       String(this.route.snapshot.queryParamMap.get('action') ?? '').trim().toLowerCase() === 'extend';
+    if (extendFromQuery) {
+      this.isExtendMode.set(true);
+    }
 
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {

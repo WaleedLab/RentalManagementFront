@@ -1,0 +1,127 @@
+<div class="container-fluid contract-close-page">
+  @if (loading()) {
+    <app-page-header [title]="'Contract close page title' | translate" [subtitle]="''" />
+    <div class="card">
+      <div class="card-body text-center py-5">
+        <div class="spinner-border text-primary"></div>
+      </div>
+    </div>
+  } @else if (booking(); as item) {
+    <app-page-header [title]="'Contract close page title' | translate" [subtitle]="pageSubtitle(item)" />
+
+    <div class="card contract-close-card">
+      <div class="card-body">
+        @if (closeLocked()) {
+          <div class="alert alert-warning contract-close-banner mb-3" role="alert">
+            {{ 'Contract close not allowed' | translate }}
+          </div>
+        }
+
+        <div class="contract-close-form-grid">
+          <div class="contract-close-field contract-close-field--readonly">
+            <label class="form-label">{{ 'Contract finish customer identity' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="valueOrDash(item.customerName)" />
+          </div>
+          <div class="contract-close-field contract-close-field--readonly">
+            <label class="form-label">{{ 'Contract finish plate' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="valueOrDash(item.vehiclePlateNumber)" />
+          </div>
+          <div class="contract-close-field contract-close-field--readonly">
+            <label class="form-label">{{ 'Contract close exit time' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="checkoutTimeDisplay(item)" />
+          </div>
+          <div class="contract-close-field contract-close-field--readonly">
+            <label class="form-label">{{ 'Contract close return time' | translate }}</label>
+            <input
+              class="form-control"
+              readonly
+              disabled
+              [value]="formatDateTime(item.returnDate || item.endDate)"
+            />
+          </div>
+          <div class="contract-close-field contract-close-field--readonly">
+            <label class="form-label">{{ 'Contract finish days' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="numberOrDash(item.countOfDay)" />
+          </div>
+          <div class="contract-close-field contract-close-field--readonly">
+            <label class="form-label">{{ 'Contract close payment label' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="paymentDisplay(item)" />
+          </div>
+          <div class="contract-close-field contract-close-field--readonly">
+            <label class="form-label">{{ 'Contract finish odometer checkout' | translate }}</label>
+            <input class="form-control" readonly disabled [value]="numberOrDash(item.checkoutCounter)" />
+          </div>
+          <div class="contract-close-field">
+            <label class="form-label">{{ 'Contract finish odometer return' | translate }}</label>
+            <input
+              class="form-control"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              step="1"
+              [disabled]="closeLocked()"
+              [value]="returnOdometerText()"
+              (input)="onReturnOdometerInput($any($event.target).value)"
+            />
+          </div>
+        </div>
+
+        <div class="contract-close-field contract-close-field--notes mt-3">
+          <label class="form-label">{{ 'Contract finish notes' | translate }}</label>
+          <textarea
+            class="form-control"
+            rows="4"
+            [disabled]="closeLocked()"
+            [value]="notes()"
+            (input)="onNotesInput($any($event.target).value)"
+          ></textarea>
+        </div>
+
+        <div class="contract-close-actions mt-4 d-flex flex-wrap gap-2 justify-content-between">
+          <a class="btn btn-secondary" routerLink="/booking">{{ 'Back to Bookings' | translate }}</a>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-secondary" [routerLink]="['/booking', item.id, 'details']">
+              {{ 'Contract close go back' | translate }}
+            </a>
+            <button
+              type="button"
+              class="btn btn-danger"
+              [disabled]="closeLocked() || saving() || closeDisabledReason() !== null"
+              (click)="submit()"
+            >
+              {{ 'Contract close submit' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <app-page-header [title]="'Contract close page title' | translate" [subtitle]="''" />
+    <div class="card">
+      <div class="card-body">
+        <p class="text-muted mb-0">{{ 'Failed to load booking' | translate }}</p>
+        <a class="btn btn-secondary mt-3" routerLink="/booking">{{ 'Back to Bookings' | translate }}</a>
+      </div>
+    </div>
+  }
+
+  @if (warningMessage(); as warn) {
+    <div class="contract-close-modal-backdrop" role="presentation" (click)="dismissWarning()">
+      <div
+        class="contract-close-modal card shadow"
+        role="dialog"
+        aria-modal="true"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="card-body text-center">
+          <div class="contract-close-modal-icon mb-3" aria-hidden="true">!</div>
+          <h2 class="h5 text-danger mb-3">{{ 'Contract close warning title' | translate }}</h2>
+          <p class="text-body mb-4 text-pre-wrap">{{ warn }}</p>
+          <button type="button" class="btn btn-success px-4" (click)="dismissWarning()">
+            {{ 'Contract close warning ok' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

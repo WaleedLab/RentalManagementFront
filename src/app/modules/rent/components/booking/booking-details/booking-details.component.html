@@ -1,7 +1,7 @@
 <div class="container-fluid contract-details-page">
   @if (loading()) {
     <app-page-header
-      [title]="'Contract details view' | translate"
+      [title]="(isExtendMode() ? 'Contract extension page title' : 'Contract details view') | translate"
       [subtitle]="'View booking data in read-only mode.' | translate"
     />
     <div class="card">
@@ -11,7 +11,7 @@
     </div>
   } @else if (booking(); as item) {
     <app-page-header
-      [title]="'Contract details view' | translate"
+      [title]="(isExtendMode() ? 'Contract extension page title' : 'Contract details view') | translate"
       [subtitle]="contractSubtitle(item)"
     />
 
@@ -19,7 +19,7 @@
       <div class="card-body">
         @if (isExtendMode()) {
           <section class="contract-panel contract-panel--extend">
-            <h2 class="contract-panel__title">تمديد العقد</h2>
+            <h2 class="contract-panel__title">{{ 'Contract extension page title' | translate }}</h2>
             <div class="row g-3 extend-form-grid">
               <div class="col-md-6 extend-readonly-field">
                 <label class="form-label">اسم العميل</label>
@@ -34,18 +34,33 @@
                 <input class="form-control" readonly disabled [value]="contractNumber(item)" />
               </div>
               <div class="col-md-6">
-                <label class="form-label">تاريخ الدفعة</label>
-                <input
-                  class="form-control"
-                  type="datetime-local"
-                  [value]="extendPaymentDate()"
-                  (input)="onExtendPaymentDateChange($any($event.target).value)"
-                />
+                <div class="extend-payment-date-row">
+                  <div class="extend-payment-date-row__date">
+                    <label class="form-label">تاريخ الدفعة</label>
+                    <input
+                      class="form-control"
+                      type="datetime-local"
+                      [value]="extendPaymentDate()"
+                      (input)="onExtendPaymentDateChange($any($event.target).value)"
+                    />
+                  </div>
+                  <div class="extend-payment-date-row__days">
+                    <label class="form-label">عدد الأيام</label>
+                    <input
+                      class="form-control extend-payment-date-row__days-input"
+                      type="text"
+                      readonly
+                      tabindex="-1"
+                      [value]="extendPaymentElapsedDaysDisplay(item)"
+                    />
+                  </div>
+                </div>
               </div>
-              <div class="col-md-6">
-                <label class="form-label">دفعة الآن</label>
+              <div class="col-md-6 extend-field-group extend-field-group--pay-now">
+                <label class="form-label extend-field-group__label" for="extend-pay-now-input">دفعة الآن</label>
                 <input
-                  class="form-control"
+                  id="extend-pay-now-input"
+                  class="form-control extend-field-group__input extend-field-group__input--pay-now"
                   type="number"
                   min="0"
                   step="0.01"
@@ -577,10 +592,11 @@
               <button
                 type="button"
                 class="btn btn-sm btn-outline-danger contract-details__toolbar-btn"
-                (click)="onDetailsToolbarAction('cancel', item)"
+                [disabled]="!canFinishBooking(item)"
+                (click)="onDetailsToolbarAction('closeContract', item)"
               >
-                <i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>
-                {{ 'Cancel' | translate }}
+                <i class="fa-solid fa-lock me-1" aria-hidden="true"></i>
+                {{ 'Booking card close contract' | translate }}
               </button>
               <button
                 type="button"
