@@ -27,8 +27,8 @@
           <label class="app-filter-label">{{ 'Status' | translate }}</label>
           <app-smooth-select
             [ariaLabel]="'Status' | translate"
-            [placeholder]="'All statuses'"
-            [options]="statusFilterOptions"
+            [placeholder]="'All statuses' | translate"
+            [options]="statusFilterOptions()"
             [value]="status()"
             (valueChange)="onStatusFilterChange($any($event))"
           />
@@ -38,7 +38,7 @@
           <label class="app-filter-label">{{ 'Branch' | translate }}</label>
           <app-smooth-select
             [ariaLabel]="'Branch' | translate"
-            [placeholder]="'All branches'"
+            [placeholder]="'All branches' | translate"
             [options]="branchFilterOptions()"
             [value]="branchId()"
             (valueChange)="onBranchFilterChange($any($event))"
@@ -49,7 +49,7 @@
           <label class="app-filter-label">{{ 'Vehicle Category' | translate }}</label>
           <app-smooth-select
             [ariaLabel]="'Vehicle Category' | translate"
-            [placeholder]="'All categories'"
+            [placeholder]="'All categories' | translate"
             [options]="categoryFilterOptions()"
             [value]="categoryId()"
             (valueChange)="onCategoryFilterChange($any($event))"
@@ -60,7 +60,7 @@
           <label class="app-filter-label">{{ 'Sort by' | translate }}</label>
           <app-smooth-select
             [ariaLabel]="'Sort by' | translate"
-            [options]="orderByFilterOptions"
+            [options]="orderByFilterOptions()"
             [value]="orderBy()"
             (valueChange)="onOrderByChange($any($event))"
           />
@@ -70,7 +70,7 @@
           <label class="app-filter-label">{{ 'Order direction' | translate }}</label>
           <app-smooth-select
             [ariaLabel]="'Order direction' | translate"
-            [options]="orderDirectionFilterOptions"
+            [options]="orderDirectionFilterOptions()"
             [value]="orderByDirection()"
             (valueChange)="onOrderDirectionChange($any($event))"
           />

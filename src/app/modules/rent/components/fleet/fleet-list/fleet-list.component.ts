@@ -10,14 +10,13 @@ import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
-import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 
 @Component({
   selector: 'app-fleet-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, TranslateModule, PageHeaderComponent, EmptyStateComponent, PaginationBarComponent, SmoothSelectComponent, StatusBadgeComponent],
+  imports: [CommonModule, RouterLink, FormsModule, TranslateModule, PageHeaderComponent, EmptyStateComponent, PaginationBarComponent, StatusBadgeComponent],
   templateUrl: './fleet-list.component.html',
   styleUrl: './fleet-list.component.scss',
 })
@@ -33,12 +32,6 @@ export class FleetListComponent implements OnInit {
   pageSize = signal(10);
   search = signal('');
   loading = signal(false);
-  readonly pageSizeFilterOptions: SmoothSelectOption[] = [
-    { label: '5', value: 5 },
-    { label: '10', value: 10 },
-    { label: '20', value: 20 },
-  ];
-
   pageNumbers = computed(() => {
     const total = this.totalPages();
     return Array.from({ length: total }, (_, i) => i + 1);

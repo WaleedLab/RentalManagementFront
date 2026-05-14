@@ -53,7 +53,7 @@
             <div class="app-filter-field app-filter-field--narrow">
               <label class="app-filter-label">{{ 'Direction' | translate }}</label>
               <app-smooth-select
-                [options]="orderByDirectionOptions"
+                [options]="orderByDirectionOptions()"
                 [value]="orderByDirectionValue"
                 [placeholder]="'Direction' | translate"
                 (valueChange)="onOrderByDirectionChange($event)"

@@ -258,14 +258,15 @@ const routes: Routes = [
   {
     path: 'traffic-violations',
     data: {
-      title: 'Traffic Violations',
-      breadcrumb: 'Traffic Violations',
+      title: 'trafficViolations.title',
+      breadcrumb: 'trafficViolations.title',
       privileges: [APP_PRIVILEGES.booking, APP_PRIVILEGES.vehicle],
     },
     canActivate: [authGuard, privilegeGuard],
     children: [
       {
         path: '',
+        data: { title: 'trafficViolations.title', breadcrumb: 'trafficViolations.title' },
         loadComponent: () =>
           import('./components/traffic-violations/traffic-violation-list/traffic-violation-list.component').then(
             m => m.TrafficViolationListComponent,
@@ -273,6 +274,7 @@ const routes: Routes = [
       },
       {
         path: 'create',
+        data: { title: 'trafficViolations.createTitle', breadcrumb: 'trafficViolations.createTitle' },
         loadComponent: () =>
           import('./components/traffic-violations/traffic-violation-form/traffic-violation-form.component').then(
             m => m.TrafficViolationFormComponent,
@@ -280,6 +282,7 @@ const routes: Routes = [
       },
       {
         path: ':id/edit',
+        data: { title: 'trafficViolations.editTitle', breadcrumb: 'trafficViolations.editTitle' },
         loadComponent: () =>
           import('./components/traffic-violations/traffic-violation-form/traffic-violation-form.component').then(
             m => m.TrafficViolationFormComponent,

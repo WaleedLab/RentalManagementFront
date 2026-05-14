@@ -1,7 +1,6 @@
 <div class="container-fluid ops-dashboard">
   <app-page-header
     [title]="'Dashboard ops title' | translate"
-    [subtitle]="'Dashboard ops subtitle' | translate"
   >
     <div class="ops-header-actions">
       <button
@@ -26,7 +25,6 @@
       <header class="ops-card__header">
         <div>
           <h2 class="ops-card__title">{{ 'Vehicles' | translate }}</h2>
-          <p class="ops-card__meta">{{ 'Dashboard ops vehicle card' | translate }}</p>
         </div>
         @if (vehicleLoading()) {
           <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
@@ -92,8 +90,7 @@
       <div class="ops-charts">
         <dashboard-chart
           class="ops-chart"
-          title="Dashboard ops chart status api"
-          subtitle="GetVehicleStatusCounts"
+          title="Dashboard ops vehicle chart title status bar"
           type="bar"
           [labels]="chartLabels(vehicleStatusCounts())"
           [values]="chartValues(vehicleStatusCounts())"
@@ -101,8 +98,7 @@
         />
         <dashboard-chart
           class="ops-chart"
-          title="Dashboard ops chart status donut"
-          subtitle="GetVehicleStatusCounts"
+          title="Dashboard ops vehicle chart title status donut"
           type="doughnut"
           [labels]="chartLabels(vehicleStatusCounts())"
           [values]="chartValues(vehicleStatusCounts())"
@@ -111,7 +107,6 @@
         <dashboard-chart
           class="ops-chart"
           title="Dashboard ops chart by branch list"
-          subtitle="GetVehicles"
           type="bar"
           [labels]="chartLabels(vehicleByBranch())"
           [values]="chartValues(vehicleByBranch())"
@@ -120,7 +115,6 @@
         <dashboard-chart
           class="ops-chart"
           title="Dashboard ops chart by year list"
-          subtitle="GetVehicles"
           type="bar"
           [labels]="chartLabels(vehicleByYear())"
           [values]="chartValues(vehicleByYear())"
@@ -133,7 +127,6 @@
       <header class="ops-card__header">
         <div>
           <h2 class="ops-card__title">{{ 'Bookings' | translate }}</h2>
-          <p class="ops-card__meta">{{ 'Dashboard ops booking card' | translate }}</p>
         </div>
         @if (bookingLoading()) {
           <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
@@ -198,8 +191,7 @@
       <div class="ops-charts">
         <dashboard-chart
           class="ops-chart"
-          title="Dashboard ops chart status api"
-          subtitle="GetBookingStatusCounts"
+          title="Dashboard ops booking chart title status bar"
           type="bar"
           [labels]="chartLabels(bookingStatusCounts())"
           [values]="chartValues(bookingStatusCounts())"
@@ -207,8 +199,7 @@
         />
         <dashboard-chart
           class="ops-chart"
-          title="Dashboard ops chart status donut"
-          subtitle="GetBookingStatusCounts"
+          title="Dashboard ops booking chart title status donut"
           type="doughnut"
           [labels]="chartLabels(bookingStatusCounts())"
           [values]="chartValues(bookingStatusCounts())"
@@ -217,7 +208,6 @@
         <dashboard-chart
           class="ops-chart"
           title="Dashboard ops chart booking branch list"
-          subtitle="Dashboard ops chart booking list subtitle"
           type="bar"
           [labels]="chartLabels(bookingByBranch())"
           [values]="chartValues(bookingByBranch())"
@@ -226,7 +216,6 @@
         <dashboard-chart
           class="ops-chart"
           title="Dashboard ops chart booking status list"
-          subtitle="Dashboard ops chart booking list subtitle"
           type="bar"
           [labels]="chartLabels(bookingByStatusList())"
           [values]="chartValues(bookingByStatusList())"

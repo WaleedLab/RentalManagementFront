@@ -55,5 +55,11 @@
   "Failed to create recommended accounts": "Failed to create recommended accounts",
   "Seed the recommended accounts once, then reuse them in vouchers, journals, cash, and bank flows.": "Seed the recommended accounts once, then reuse them in vouchers, journals, cash, and bank flows.",
   "Skipped {{count}} accounts because parent account was missing": "Skipped {{count}} accounts because parent account was missing",
-  "You cannot set the account as its own parent": "You cannot set the account as its own parent"
+  "You cannot set the account as its own parent": "You cannot set the account as its own parent",
+  "Counting tree levels legend": "Tree level filters",
+  "Counting Tree Level 1": "Level 1",
+  "Counting Tree Level 2": "Level 2",
+  "Counting Tree Level 3": "Level 3",
+  "Counting Tree Level 4": "Level 4",
+  "Counting Tree Level 5 Plus": "Level 5+"
 }

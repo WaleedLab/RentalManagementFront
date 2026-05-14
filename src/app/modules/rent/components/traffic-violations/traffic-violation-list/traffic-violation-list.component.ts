@@ -11,10 +11,6 @@ import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
-import {
-  SmoothSelectComponent,
-  SmoothSelectOption,
-} from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { TrafficViolation } from '../../../models/traffic-violations/traffic-violation.model';
 import { TrafficViolationService } from '../../../services/traffic-violations/traffic-violation.service';
 
@@ -29,7 +25,6 @@ import { TrafficViolationService } from '../../../services/traffic-violations/tr
     EmptyStateComponent,
     PageHeaderComponent,
     PaginationBarComponent,
-    SmoothSelectComponent,
   ],
   templateUrl: './traffic-violation-list.component.html',
   styleUrl: './traffic-violation-list.component.scss',
@@ -49,12 +44,6 @@ export class TrafficViolationListComponent implements OnInit {
   pageSize = signal(10);
   search = signal('');
   deletingIds = signal<string[]>([]);
-
-  readonly pageSizeFilterOptions: SmoothSelectOption[] = [
-    { label: '5', value: 5 },
-    { label: '10', value: 10 },
-    { label: '25', value: 25 },
-  ];
 
   ngOnInit(): void {
     this.load();

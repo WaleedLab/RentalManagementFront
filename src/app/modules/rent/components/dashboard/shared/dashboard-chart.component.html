@@ -1,7 +1,9 @@
 <section class="dashboard-widget">
   <header class="dashboard-widget__header">
     <h3>{{ title | translate }}</h3>
-    <p>{{ subtitle | translate }}</p>
+    @if (subtitle.trim()) {
+      <p>{{ subtitle | translate }}</p>
+    }
   </header>
 
   @if (loading) {

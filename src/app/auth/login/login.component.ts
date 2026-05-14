@@ -1,16 +1,18 @@
-import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { AbstractControl, NonNullableFormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { finalize } from 'rxjs';
+import { Subscription, finalize, firstValueFrom } from 'rxjs';
 
 import { AuthStateService } from '../../core/auth/auth-state.service';
 import { AuthService } from '../../shared/services/auth/auth.service';
-import { AppShellLoadingService } from '../../shared/services/app-shell-loading.service';
+import { LayoutService } from '../../shared/services/layout/layout.service';
 import { TokenService } from '../../shared/services/storage/token.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { focusFirstInvalidControl } from '../../shared/utils/focus-first-invalid-control.util';
+
+const REMEMBER_USERNAME_KEY = 'ewecar_login_remember_username';
 
 function noWhitespaceValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value;
@@ -28,8 +30,9 @@ function noWhitespaceValidator(control: AbstractControl): ValidationErrors | nul
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
+  private readonly document = inject(DOCUMENT);
   private fb = inject(NonNullableFormBuilder);
   private auth = inject(AuthService);
   private authState = inject(AuthStateService);
@@ -37,7 +40,7 @@ export class LoginComponent implements OnInit {
   private tokenService = inject(TokenService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
-  private appShellLoading = inject(AppShellLoadingService);
+  private layout = inject(LayoutService);
 
   loading = false;
   loginDisabled = false;
@@ -45,20 +48,40 @@ export class LoginComponent implements OnInit {
   currentYear = new Date().getFullYear();
   parallaxX = 0;
   parallaxY = 0;
+  readonly showPassword = signal(false);
+  readonly langUi = signal<'ar' | 'en'>('ar');
+  private langSub?: Subscription;
 
   @ViewChild('usernameInput') usernameInput?: ElementRef<HTMLInputElement>;
 
   form = this.fb.group({
     username: ['', [Validators.required, noWhitespaceValidator]],
     password: ['', [Validators.required, noWhitespaceValidator]],
+    rememberMe: [false],
   });
 
   ngOnInit(): void {
+    this.document.documentElement.classList.add('app-login-scroll-lock');
+    this.document.body.classList.add('app-login-scroll-lock');
+
     if (this.authState.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
       return;
     }
 
+    this.syncLangUi();
+    this.langSub = this.translate.onLangChange.subscribe(() => this.syncLangUi());
+
+    const savedUsername = localStorage.getItem(REMEMBER_USERNAME_KEY);
+    if (savedUsername) {
+      this.form.patchValue({ username: savedUsername, rememberMe: true });
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.document.documentElement.classList.remove('app-login-scroll-lock');
+    this.document.body.classList.remove('app-login-scroll-lock');
+    this.langSub?.unsubscribe();
   }
 
   onSubmit(): void {
@@ -72,6 +95,7 @@ export class LoginComponent implements OnInit {
     const value = this.form.getRawValue();
     const username = value.username.trim();
     const password = value.password.trim();
+    const rememberMe = value.rememberMe;
     this.auth
       .login({ username, password })
       .pipe(
@@ -92,8 +116,13 @@ export class LoginComponent implements OnInit {
                 return;
               }
 
+              if (rememberMe) {
+                localStorage.setItem(REMEMBER_USERNAME_KEY, username);
+              } else {
+                localStorage.removeItem(REMEMBER_USERNAME_KEY);
+              }
+
               this.toast.success(this.translate.instant('Login successful'));
-              this.appShellLoading.enterPostAuthTransition();
               this.router.navigate(['/dashboard']);
             } else {
               const msg = this.resolveLoginError(result.message);
@@ -132,6 +161,23 @@ export class LoginComponent implements OnInit {
   onShellMouseLeave(): void {
     this.parallaxX = 0;
     this.parallaxY = 0;
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword.update(v => !v);
+  }
+
+  setLang(code: 'ar' | 'en'): void {
+    const direction = code === 'ar' ? 'rtl' : 'ltr';
+    void firstValueFrom(this.translate.use(code)).then(() => {
+      this.layout.applyDirection(direction, code);
+      this.langUi.set(code);
+    });
+  }
+
+  private syncLangUi(): void {
+    const raw = (this.translate.currentLang || this.translate.defaultLang || 'ar').toLowerCase();
+    this.langUi.set(raw.startsWith('ar') ? 'ar' : 'en');
   }
 
   private resolveLoginError(source: unknown): string {

@@ -106,21 +106,29 @@ export class CountingEntryListComponent implements OnInit {
   private languageTick = signal(0);
   readonly coreAccountTemplates = getCoreCountingAccountTemplates();
 
-  readonly accountTypeOptions: SmoothSelectOption[] = [
-    { label: 'Assets', value: 1 },
-    { label: 'Liabilities', value: 2 },
-    { label: 'Equity', value: 3 },
-    { label: 'Revenue', value: 4 },
-    { label: 'Expenses', value: 5 },
-  ];
+  readonly accountTypeOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('Assets'), value: 1 },
+      { label: t('Liabilities'), value: 2 },
+      { label: t('Equity'), value: 3 },
+      { label: t('Revenue'), value: 4 },
+      { label: t('Expenses'), value: 5 },
+    ];
+  });
 
-  readonly reportNumberOptions: SmoothSelectOption[] = [
-    { label: 'Assets', value: 1 },
-    { label: 'Liabilities', value: 2 },
-    { label: 'Equity', value: 3 },
-    { label: 'Revenue', value: 4 },
-    { label: 'Expenses', value: 5 },
-  ];
+  readonly reportNumberOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('Assets'), value: 1 },
+      { label: t('Liabilities'), value: 2 },
+      { label: t('Equity'), value: 3 },
+      { label: t('Revenue'), value: 4 },
+      { label: t('Expenses'), value: 5 },
+    ];
+  });
 
   readonly selectedEntry = computed<CountingEntry | null>(() => {
     const currentId = this.selectedId();
@@ -140,7 +148,7 @@ export class CountingEntryListComponent implements OnInit {
       .sort((left, right) => this.compareEntries(left, right));
 
     return [
-      { label: 'No Parent Account', value: 0 },
+      { label: this.translate.instant('No Parent Account'), value: 0 },
       ...items.map(item => ({
         label: this.formatAccountLabel(item),
         value: item.countingNumber ?? 0,

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -38,6 +39,8 @@ export class VehicleListComponent implements OnInit {
   private modal = inject(NgbModal);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly languageTick = signal(0);
   private readonly vehicleFallbackImage = 'assets/images/rent_icon/car_defulte.png';
 
   vehicles = signal<Vehicle[]>([]);
@@ -65,37 +68,57 @@ export class VehicleListComponent implements OnInit {
     { key: 'IsMangament', labelAr: 'إدارة', labelEn: 'Management', iconClass: 'fa-solid fa-briefcase', iconColor: '#6366F1' },
     { key: 'IsSold', labelAr: 'مباعة', labelEn: 'Sold', iconClass: 'fa-solid fa-tags', iconColor: '#374151' },
   ] as const;
-  readonly statusFilterOptions: SmoothSelectOption[] = [
-    { label: 'All statuses', value: '' },
-    { label: 'Available', value: 'Available' },
-    { label: 'Booked', value: 'Booked' },
-    { label: 'Maintenance', value: 'Maintenance' },
-    { label: 'Management', value: 'Inactive' },
-    { label: 'Sold', value: 'Sold' },
-  ];
-  readonly orderByFilterOptions: SmoothSelectOption[] = [
-    { label: 'Created Date', value: 'CreatedAt' },
-    { label: 'Year', value: 'Year' },
-    { label: 'Plate Number', value: 'Plantnumber' },
-  ];
-  readonly orderDirectionFilterOptions: SmoothSelectOption[] = [
-    { label: 'Descending', value: 'DESC' },
-    { label: 'Ascending', value: 'ASC' },
-  ];
-  branchFilterOptions = computed<SmoothSelectOption[]>(() => [
-    { label: 'All branches', value: '' },
-    ...this.branches().map(branch => ({
-      label: this.getBranchOptionLabel(branch),
-      value: Number(branch.id),
-    })),
-  ]);
-  categoryFilterOptions = computed<SmoothSelectOption[]>(() => [
-    { label: 'All categories', value: '' },
-    ...this.categories().map(category => ({
-      label: this.getCategoryOptionLabel(category),
-      value: String(category.id),
-    })),
-  ]);
+  readonly statusFilterOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('All statuses'), value: '' },
+      { label: t('Available'), value: 'Available' },
+      { label: t('Booked'), value: 'Booked' },
+      { label: t('Maintenance'), value: 'Maintenance' },
+      { label: t('Management'), value: 'Inactive' },
+      { label: t('Sold'), value: 'Sold' },
+    ];
+  });
+  readonly orderByFilterOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('Created Date'), value: 'CreatedAt' },
+      { label: t('Year'), value: 'Year' },
+      { label: t('Plate Number'), value: 'Plantnumber' },
+    ];
+  });
+  readonly orderDirectionFilterOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('Descending'), value: 'DESC' },
+      { label: t('Ascending'), value: 'ASC' },
+    ];
+  });
+  branchFilterOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('All branches'), value: '' },
+      ...this.branches().map(branch => ({
+        label: this.getBranchOptionLabel(branch),
+        value: Number(branch.id),
+      })),
+    ];
+  });
+  categoryFilterOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('All categories'), value: '' },
+      ...this.categories().map(category => ({
+        label: this.getCategoryOptionLabel(category),
+        value: String(category.id),
+      })),
+    ];
+  });
   vehicleLegendItems = computed(() => {
     const counts = this.vehicleStatusCounts();
     const items = this.vehicleStatusLegendConfig.map(item => ({
@@ -138,6 +161,9 @@ export class VehicleListComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.languageTick.update(v => v + 1);
+    });
     this.loadReferenceData();
     this.loadStatusCounts();
     this.load();

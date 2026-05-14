@@ -1,6 +1,6 @@
 <app-finance-list-shell
   [title]="'Journals'"
-  [subtitle]="'Track simplified journal entries generated from operational and financial activity.'"
+  [subtitle]="'Journals list subtitle'"
   [columns]="columns"
   [rows]="rows()"
   [loading]="loading()"
@@ -17,7 +17,7 @@
   [enableDateRangeFilter]="true"
   [orderByValue]="orderBy()"
   [orderByDirectionValue]="orderByDirection()"
-  [orderByOptions]="orderByOptions"
+  [orderByOptions]="orderByOptions()"
   [dateFrom]="dateFrom()"
   [dateTo]="dateTo()"
   (searchChange)="onSearchChange($event)"
@@ -36,7 +36,7 @@
     <app-smooth-select
       [ariaLabel]="'Status' | translate"
       [placeholder]="'All statuses' | translate"
-      [options]="statusFilterOptions"
+      [options]="statusFilterOptions()"
       [value]="statusFilter()"
       (valueChange)="onStatusFilterChange($any($event))"
     />
@@ -47,7 +47,7 @@
     <app-smooth-select
       [ariaLabel]="'Journal Type' | translate"
       [placeholder]="'All journal types' | translate"
-      [options]="journalTypeFilterOptions"
+      [options]="journalTypeFilterOptions()"
       [value]="journalTypeFilter()"
       (valueChange)="onJournalTypeFilterChange($any($event))"
     />
@@ -58,7 +58,7 @@
     <app-smooth-select
       [ariaLabel]="'Operation Type' | translate"
       [placeholder]="'All operation types' | translate"
-      [options]="operationTypeFilterOptions"
+      [options]="operationTypeFilterOptions()"
       [value]="operationTypeFilter()"
       (valueChange)="onOperationTypeFilterChange($any($event))"
     />

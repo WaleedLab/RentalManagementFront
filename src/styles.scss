@@ -268,7 +268,6 @@ html[dir='rtl'] .tap-top {
 
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .card,
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .app-filter-field,
-body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .app-pagination-bar,
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .table-responsive,
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .modal-content,
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .dropdown-menu,
@@ -276,6 +275,13 @@ body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .swal2-popup {
   background: linear-gradient(165deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.9)) !important;
   border-color: rgba(148, 163, 184, 0.2) !important;
   box-shadow: 0 12px 28px -22px rgba(15, 23, 42, 0.14);
+}
+
+body.light-only .page-wrapper.compact-wrapper .page-body-wrapper app-pagination-bar .app-pagination-bar,
+body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .app-pagination-bar {
+  background: linear-gradient(165deg, rgba(248, 250, 252, 0.96), rgba(241, 245, 249, 0.9)) !important;
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
+  box-shadow: 0 10px 26px -20px rgba(15, 23, 42, 0.12);
 }
 
 body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .form-control,
@@ -287,7 +293,6 @@ body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .form-select {
 
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .card,
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .app-filter-field,
-body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .app-pagination-bar,
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .table-responsive,
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .modal-content,
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .dropdown-menu,
@@ -301,6 +306,17 @@ body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .swal2-popup {
     background 0.22s ease,
     border-color 0.22s ease,
     box-shadow 0.22s ease;
+}
+
+body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper app-pagination-bar .app-pagination-bar,
+body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .app-pagination-bar {
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(2, 6, 23, 0.94)) !important;
+  border: 1px solid rgba(51, 65, 85, 0.55) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 14px 40px -16px rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .card:hover,
@@ -1062,15 +1078,17 @@ thead th,
   gap: 0.85rem;
   margin-bottom: 1rem;
   align-items: end;
-  /* Stacking: following .table-responsive paints later and can cover overflow; keep toolbar above. */
+  /* Stacking: following .table-responsive paints later; keep toolbar + its overflow menus above table */
   position: relative;
-  z-index: 8;
+  z-index: 100;
+  overflow: visible;
 }
 
 /* Lift the whole filter cell while its smooth-select is open so the panel clears sibling fields (grid overlap). */
 .app-filters-toolbar .app-filter-field:has(app-smooth-select.app-smooth-select-host--open) {
   position: relative;
-  z-index: 30;
+  z-index: 110;
+  overflow: visible;
 }
 
 .app-filter-field {
@@ -1094,6 +1112,7 @@ thead th,
   border-radius: 16px;
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.45), rgba(241, 245, 249, 0.2));
   box-shadow: 0 8px 18px -14px rgba(15, 23, 42, 0.1);
+  overflow: visible;
 
   .form-select,
   .form-control,
@@ -1235,9 +1254,13 @@ thead th,
 }
 
 .sidebar-wrapper .sidebar-link,
-.sidebar-wrapper .submenu-title,
-.sidebar-wrapper .sidebar-submenu a {
+.sidebar-wrapper .submenu-title {
   font-size: var(--font-size-sidebar);
+  line-height: 1.6;
+}
+
+.sidebar-wrapper .sidebar-submenu a {
+  font-size: 17px;
   line-height: 1.6;
 }
 
@@ -1481,4 +1504,21 @@ html[dir='ltr'] td {
     overflow: hidden;
     border-radius: 16px;
   }
+}
+
+/* Login route: suppress document scrollbar (scroll stays inside `app-login` if needed). */
+html.app-login-scroll-lock,
+body.app-login-scroll-lock {
+  overflow: hidden;
+  height: 100%;
+  overscroll-behavior: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html.app-login-scroll-lock::-webkit-scrollbar,
+body.app-login-scroll-lock::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }

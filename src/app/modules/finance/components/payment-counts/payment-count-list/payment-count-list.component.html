@@ -1,6 +1,6 @@
 <app-finance-list-shell
-  [title]="'Payment Counts'"
-  [subtitle]="'Review payment operations tied to bookings, branches, and collection channels.'"
+  [title]="'Vouchers'"
+  [subtitle]="'Vouchers list subtitle'"
   [columns]="columns"
   [rows]="rows()"
   [loading]="loading()"
@@ -16,7 +16,7 @@
   [enableSorting]="true"
   [orderByValue]="orderBy()"
   [orderByDirectionValue]="orderByDirection()"
-  [orderByOptions]="orderByOptions"
+  [orderByOptions]="orderByOptions()"
   (searchChange)="onSearchChange($event)"
   (orderByChange)="onOrderByChange($event)"
   (orderByDirectionChange)="onOrderByDirectionChange($event)"
@@ -43,7 +43,7 @@
     <app-smooth-select
       [ariaLabel]="'Payment Type' | translate"
       [placeholder]="'All payment types' | translate"
-      [options]="paymentTypeFilterOptions"
+      [options]="paymentTypeFilterOptions()"
       [value]="paymentTypeFilter()"
       (valueChange)="onPaymentTypeFilterChange($any($event))"
     />

@@ -142,14 +142,14 @@
             />
           </div>
 
-          <div class="counting-tree-legend mb-3" aria-label="Tree levels legend">
+          <div class="counting-tree-legend mb-3" [attr.aria-label]="'Counting tree levels legend' | translate">
             <button
               type="button"
               class="counting-tree-legend__item level-0"
               [class.is-active]="selectedLegendLevel() === 0"
               (click)="onLegendLevelSelect(0)"
             >
-              المستوى 1
+              {{ 'Counting Tree Level 1' | translate }}
             </button>
             <button
               type="button"
@@ -157,7 +157,7 @@
               [class.is-active]="selectedLegendLevel() === 1"
               (click)="onLegendLevelSelect(1)"
             >
-              المستوى 2
+              {{ 'Counting Tree Level 2' | translate }}
             </button>
             <button
               type="button"
@@ -165,7 +165,7 @@
               [class.is-active]="selectedLegendLevel() === 2"
               (click)="onLegendLevelSelect(2)"
             >
-              المستوى 3
+              {{ 'Counting Tree Level 3' | translate }}
             </button>
             <button
               type="button"
@@ -173,7 +173,7 @@
               [class.is-active]="selectedLegendLevel() === 3"
               (click)="onLegendLevelSelect(3)"
             >
-              المستوى 4
+              {{ 'Counting Tree Level 4' | translate }}
             </button>
             <button
               type="button"
@@ -181,7 +181,7 @@
               [class.is-active]="selectedLegendLevel() === 4"
               (click)="onLegendLevelSelect(4)"
             >
-              المستوى 5+
+              {{ 'Counting Tree Level 5 Plus' | translate }}
             </button>
           </div>
 
@@ -349,7 +349,7 @@
                 >
                 <app-smooth-select
                   formControlName="countingType"
-                  [options]="accountTypeOptions"
+                  [options]="accountTypeOptions()"
                   [placeholder]="'Select account type' | translate"
                   [ariaLabel]="'Account Type' | translate"
                 />
@@ -361,7 +361,7 @@
                 >
                 <app-smooth-select
                   formControlName="reportNumber"
-                  [options]="reportNumberOptions"
+                  [options]="reportNumberOptions()"
                   [placeholder]="'Select final account' | translate"
                   [ariaLabel]="'Final Account' | translate"
                 />

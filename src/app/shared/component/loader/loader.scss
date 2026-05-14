@@ -12,8 +12,8 @@
   opacity: 1;
   visibility: visible;
   transition:
-    opacity 0.5s ease,
-    visibility 0.5s ease;
+    opacity 0.22s ease,
+    visibility 0.22s ease;
 }
 
 .loading-screen.hide {
@@ -141,6 +141,6 @@
   }
 
   .loading-screen {
-    transition: opacity 0.25s ease, visibility 0.25s ease;
+    transition: opacity 0.18s ease, visibility 0.18s ease;
   }
 }

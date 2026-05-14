@@ -6,8 +6,10 @@ import {
   EventEmitter,
   HostListener,
   Input,
+  OnChanges,
   OnInit,
   Output,
+  SimpleChanges,
   ViewChild,
   computed,
   forwardRef,
@@ -43,7 +45,7 @@ export interface SmoothSelectOption {
     },
   ],
 })
-export class SmoothSelectComponent implements ControlValueAccessor, OnInit {
+export class SmoothSelectComponent implements ControlValueAccessor, OnInit, OnChanges {
   private elementRef = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router, { optional: true });
@@ -72,11 +74,20 @@ export class SmoothSelectComponent implements ControlValueAccessor, OnInit {
   menuStyles = signal<Record<string, string>>({});
   private internalValue = signal<SmoothSelectValue>('');
   private disabledFromControl = signal(false);
+  /** Bumps when `options` @Input changes so computeds refresh (e.g. language switch). */
+  private readonly optionsVersion = signal(0);
   private onChange: (value: SmoothSelectValue) => void = () => {};
   private onTouched: () => void = () => {};
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['options'] && !changes['options'].firstChange) {
+      this.optionsVersion.update(v => v + 1);
+    }
+  }
+
   readonly isDisabled = computed(() => this.disabled || this.disabledFromControl());
   readonly filteredOptions = computed(() => {
+    this.optionsVersion();
     const query = this.searchTerm().trim().toLowerCase();
     if (!this.searchable || !query) {
       return this.options;
@@ -100,6 +111,7 @@ export class SmoothSelectComponent implements ControlValueAccessor, OnInit {
   }
 
   selectedLabel = computed(() => {
+    this.optionsVersion();
     const selectedOption = this.options.find(option => this.areValuesEqual(option.value, this.internalValue()));
     if (selectedOption) {
       return this.optionLabelText(selectedOption);

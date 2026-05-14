@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
 
 import {
@@ -32,7 +33,11 @@ import { DateRangeFilterComponent, DateRangeValue } from '../../../../../shared/
   templateUrl: './finance-list-shell.component.html',
   styleUrl: './finance-list-shell.component.scss',
 })
-export class FinanceListShellComponent {
+export class FinanceListShellComponent implements OnInit {
+  private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly languageTick = signal(0);
+
   @Input() title = '';
   @Input() subtitle = '';
   @Input() emptyTitle = 'No records were returned for the current fleet context.';
@@ -69,10 +74,20 @@ export class FinanceListShellComponent {
   @Output() pageSizeChange = new EventEmitter<number>();
   @Output() rowAction = new EventEmitter<{ actionKey: string; rowIndex: number }>();
 
-  readonly orderByDirectionOptions: SmoothSelectOption[] = [
-    { label: 'Newest', value: 'DESC' },
-    { label: 'Oldest', value: 'ASC' },
-  ];
+  readonly orderByDirectionOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('Newest'), value: 'DESC' },
+      { label: t('Oldest'), value: 'ASC' },
+    ];
+  });
+
+  ngOnInit(): void {
+    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.languageTick.update(v => v + 1);
+    });
+  }
 
   onSearchChange(value: string): void {
     this.searchChange.emit(value ?? '');

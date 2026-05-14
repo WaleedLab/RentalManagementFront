@@ -82,5 +82,11 @@
   "Search vehicle...": "Search vehicle...",
   "Search customer...": "Search customer...",
   "Vehicle ID": "Vehicle ID",
-  "Customer ID": "Customer ID"
+  "Customer ID": "Customer ID",
+  "Journals": "Journals",
+  "Journals list subtitle": "Track simplified journal entries generated from operational and financial activity.",
+  "Search journals": "Search journals",
+  "Name": "Name",
+  "View": "View",
+  "Print": "Print"
 }

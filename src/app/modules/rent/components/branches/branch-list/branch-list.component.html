@@ -27,15 +27,6 @@
         </button>
       </div>
     </div>
-    <div class="app-filter-field app-filter-field--narrow">
-      <label class="app-filter-label">{{ 'Page Size' | translate }}</label>
-      <app-smooth-select
-        [ariaLabel]="'Page Size' | translate"
-        [options]="pageSizeFilterOptions"
-        [value]="pageSize()"
-        (valueChange)="changePageSize(+$any($event))"
-      />
-    </div>
   </div>
 
   @if (loading()) {
@@ -116,9 +107,9 @@
       [totalPages]="totalPages()"
       [totalCount]="totalCount()"
       [pageSize]="pageSize()"
-      [showPageSize]="false"
       [pageSizeOptions]="[5, 10, 25, 50]"
       (pageChange)="goToPage($event)"
+      (pageSizeChange)="changePageSize($event)"
     />
   }
 </div>

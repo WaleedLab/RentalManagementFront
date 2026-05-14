@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
 
 @Component({
@@ -12,6 +13,9 @@ import { Chart, ChartConfiguration } from 'chart.js/auto';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDestroy {
+  private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
+
   @Input() title = '';
   @Input() subtitle = '';
   @Input() type: 'line' | 'bar' | 'doughnut' = 'line';
@@ -24,12 +28,25 @@ export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDest
   @ViewChild('canvasRef') canvasRef?: ElementRef<HTMLCanvasElement>;
   private chart?: Chart;
 
+  constructor() {
+    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.renderChart();
+    });
+  }
+
   ngAfterViewInit(): void {
     this.renderChart();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['labels'] || changes['values'] || changes['type'] || changes['loading'] || changes['segmentColors']) {
+    if (
+      changes['labels'] ||
+      changes['values'] ||
+      changes['type'] ||
+      changes['loading'] ||
+      changes['segmentColors'] ||
+      changes['title']
+    ) {
       this.renderChart();
     }
   }
@@ -65,13 +82,14 @@ export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDest
 
     const isRadial = this.type === 'doughnut';
     const isBar = this.type === 'bar';
+    const datasetLabel = this.title ? this.translate.instant(this.title) : '';
     const configuration: ChartConfiguration = {
       type: isRadial ? 'doughnut' : this.type,
       data: {
         labels: this.labels,
         datasets: [
           {
-            label: this.title,
+            label: datasetLabel,
             data: this.values,
             borderColor: isRadial ? '#ffffff' : '#7f1d3f',
             backgroundColor: isRadial || isBar ? palette : defaultLineFill,

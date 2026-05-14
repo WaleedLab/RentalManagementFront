@@ -1,66 +1,138 @@
-<div class="auth-shell">
-  <div class="auth-panel auth-panel--luxury-auto">
-    <div class="auth-hero-glass">
-      <div class="auth-hero-copy">
-        <p class="auth-kicker">{{ 'Login Brand Kicker' | translate }}</p>
-        <h1 class="auth-title">{{ 'Login Title' | translate }}</h1>
-        <p class="auth-subtitle">{{ 'Login Subtitle' | translate }}</p>
-      </div>
-      <div class="auth-hero-logos">
-        <img class="auth-logo" src="assets/images/logo/logo-icon.png" alt="Engineer Guarantee" />
-        <img class="auth-logo auth-logo--secondary" src="assets/images/logo/rent%20app%20icon.png" alt="EWE Car Rental" />
-      </div>
-    </div>
+<div
+  class="login-cyber"
+  (mousemove)="onShellMouseMove($event)"
+  (mouseleave)="onShellMouseLeave()"
+>
+  <div
+    class="login-cyber__parallax"
+    [style.transform]="'translate3d(' + parallaxX + 'px, ' + parallaxY + 'px, 0)'"
+    aria-hidden="true"
+  ></div>
 
-    <form class="auth-form" [formGroup]="form" (ngSubmit)="onSubmit()">
-      <div class="field-group">
-        <input
-          id="username"
-          type="text"
-          class="form-control"
-          #usernameInput
-          formControlName="username"
-          [placeholder]="'Login Username Placeholder' | translate"
-          [class.is-invalid]="form.get('username')?.invalid && form.get('username')?.touched"
-          autocomplete="username"
-        />
-        @if (form.get('username')?.invalid && form.get('username')?.touched) {
-          <div class="invalid-feedback">{{ 'Login Username Required' | translate }}</div>
-        }
-      </div>
-
-      <div class="field-group">
-        <input
-          id="password"
-          type="password"
-          class="form-control"
-          formControlName="password"
-          [placeholder]="'Login Password Placeholder' | translate"
-          [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
-          autocomplete="current-password"
-        />
-        @if (form.get('password')?.invalid && form.get('password')?.touched) {
-          <div class="invalid-feedback">{{ 'Login Password Required' | translate }}</div>
-        }
-      </div>
-
-      @if (errorMessage) {
-        <div class="auth-alert" role="alert">
-          {{ errorMessage }}
-        </div>
-      }
-
-      <button type="submit" class="btn btn-primary auth-submit" [disabled]="loading || loginDisabled">
-        @if (loading) {
-          <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-        }
-        {{ 'Login Submit' | translate }}
+  <header class="login-cyber__top login-cyber__top--minimal">
+    <div class="login-cyber__lang" role="group" [attr.aria-label]="'Login Language Toggle' | translate">
+      <button type="button" class="login-cyber__lang-btn" [class.is-active]="langUi() === 'en'" (click)="setLang('en')">
+        <i class="fa-solid fa-globe" aria-hidden="true"></i>
+        <span>{{ 'Login Language EN' | translate }}</span>
       </button>
-    </form>
+      <button type="button" class="login-cyber__lang-btn" [class.is-active]="langUi() === 'ar'" (click)="setLang('ar')">
+        <span>{{ 'Login Language AR' | translate }}</span>
+      </button>
+    </div>
+  </header>
 
-    <div class="auth-note">
-      <strong>© {{ 'Login Footnote Environment' | translate }}</strong>
-      <span>{{ 'Login Footnote Security' | translate }} · {{ currentYear }}</span>
+  <div class="login-cyber__grid">
+    <div class="login-cyber__aside-wrap">
+      <div class="login-cyber__brand-showcase" aria-labelledby="login-brand-wordmark login-brand-tagline">
+        <p id="login-brand-wordmark" class="login-cyber__brand-showcase__word">{{ 'Login Brand Kicker' | translate }}</p>
+        <p id="login-brand-tagline" class="login-cyber__brand-showcase__tagline">{{ 'Login Car Rental System' | translate }}</p>
+        <div class="login-cyber__brand-showcase__logos">
+          <div class="login-cyber__brand-showcase__logo">
+            <img
+              class="login-cyber__brand-showcase__img"
+              src="assets/images/logo/logo-icon.png"
+              alt=""
+            />
+          </div>
+          <div class="login-cyber__brand-showcase__logo login-cyber__brand-showcase__logo--secondary">
+            <img
+              class="login-cyber__brand-showcase__img login-cyber__brand-showcase__img--secondary"
+              src="assets/images/logo/rent%20app%20icon.png"
+              alt=""
+            />
+          </div>
+        </div>
+      </div>
+
+      <aside class="login-cyber__aside">
+        <div class="login-cyber__card">
+          <div class="login-cyber__card-badge" aria-hidden="true">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <h2 class="login-cyber__card-title">{{ 'Login Welcome Title' | translate }}</h2>
+          <p class="login-cyber__card-sub">{{ 'Login Welcome Subtitle' | translate }}</p>
+
+          <form class="login-cyber__form" [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="login-cyber__field">
+            <label class="visually-hidden" for="username">{{ 'Login Username Label' | translate }}</label>
+            <div class="login-cyber__input-wrap">
+              <span class="login-cyber__input-icon" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
+              <input
+                id="username"
+                type="text"
+                class="login-cyber__input"
+                #usernameInput
+                formControlName="username"
+                [placeholder]="'Login Username Placeholder' | translate"
+                [class.is-invalid]="form.get('username')?.invalid && form.get('username')?.touched"
+                autocomplete="username"
+              />
+            </div>
+            @if (form.get('username')?.invalid && form.get('username')?.touched) {
+              <div class="login-cyber__invalid">{{ 'Login Username Required' | translate }}</div>
+            }
+          </div>
+
+          <div class="login-cyber__field">
+            <label class="visually-hidden" for="password">{{ 'Login Password Label' | translate }}</label>
+            <div class="login-cyber__input-wrap">
+              <span class="login-cyber__input-icon" aria-hidden="true"><i class="fa-solid fa-lock"></i></span>
+              <input
+                id="password"
+                [type]="showPassword() ? 'text' : 'password'"
+                class="login-cyber__input login-cyber__input--has-toggle"
+                formControlName="password"
+                [placeholder]="'Login Password Placeholder' | translate"
+                [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="login-cyber__toggle-pass"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="(showPassword() ? 'Login Hide Password' : 'Login Show Password') | translate"
+                [attr.aria-pressed]="showPassword()"
+              >
+                <i class="fa-solid" [class.fa-eye]="!showPassword()" [class.fa-eye-slash]="showPassword()" aria-hidden="true"></i>
+              </button>
+            </div>
+            @if (form.get('password')?.invalid && form.get('password')?.touched) {
+              <div class="login-cyber__invalid">{{ 'Login Password Required' | translate }}</div>
+            }
+          </div>
+
+          <div class="login-cyber__row login-cyber__row--remember">
+            <label class="login-cyber__remember">
+              <input type="checkbox" formControlName="rememberMe" />
+              <span class="login-cyber__remember-ui"></span>
+              <span>{{ 'Login Remember me' | translate }}</span>
+            </label>
+          </div>
+
+          @if (errorMessage) {
+            <div class="login-cyber__alert" role="alert">
+              {{ errorMessage }}
+            </div>
+          }
+
+          <button type="submit" class="login-cyber__submit" [disabled]="loading || loginDisabled">
+            @if (loading) {
+              <span class="spinner-border spinner-border-sm login-cyber__spinner" role="status"></span>
+            }
+            <span>{{ 'Login Submit' | translate }}</span>
+            <i class="fa-solid fa-arrow-right login-cyber__submit-arrow" aria-hidden="true"></i>
+          </button>
+        </form>
+        </div>
+      </aside>
     </div>
   </div>
+
+  <footer class="login-cyber__footer">
+    <div class="login-cyber__footer-bottom">
+      <p class="login-cyber__copyright">
+        © {{ currentYear }} {{ 'Login Footnote Environment' | translate }} · {{ 'Login Footnote Security' | translate }}
+      </p>
+    </div>
+  </footer>
 </div>

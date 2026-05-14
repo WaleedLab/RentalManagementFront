@@ -82,5 +82,11 @@
   "Search vehicle...": "ابحث عن مركبة...",
   "Search customer...": "ابحث عن عميل...",
   "Vehicle ID": "معرف المركبة",
-  "Customer ID": "معرف العميل"
+  "Customer ID": "معرف العميل",
+  "Journals": "القيود اليومية",
+  "Journals list subtitle": "تتبع القيود اليومية المبسطة الناتجة عن النشاط التشغيلي والمالي.",
+  "Search journals": "ابحث في القيود",
+  "Name": "الاسم",
+  "View": "عرض",
+  "Print": "طباعة"
 }

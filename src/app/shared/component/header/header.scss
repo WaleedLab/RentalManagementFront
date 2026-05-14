@@ -123,6 +123,41 @@
   }
 }
 
+:host-context(body.dark-only) .header-datetime-panel,
+:host-context([data-bs-theme='dark']) .header-datetime-panel {
+  border-color: rgba(6, 182, 212, 0.14);
+  background: rgba(16, 36, 54, 0.55);
+  box-shadow:
+    0 12px 28px -22px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:host-context(body.dark-only) .header-datetime-label,
+:host-context([data-bs-theme='dark']) .header-datetime-label {
+  color: rgba(103, 232, 249, 0.55);
+}
+
+:host-context(body.dark-only) .header-datetime-value,
+:host-context([data-bs-theme='dark']) .header-datetime-value {
+  color: var(--app-dark-text, #ecfeff);
+}
+
+:host-context(body.dark-only) .header-datetime-value--numeric,
+:host-context([data-bs-theme='dark']) .header-datetime-value--numeric {
+  border-color: rgba(6, 182, 212, 0.22);
+  background: rgba(6, 182, 212, 0.08);
+  color: rgba(226, 232, 240, 0.95);
+}
+
+:host-context(body.dark-only) .header-time-row,
+:host-context([data-bs-theme='dark']) .header-time-row {
+  color: rgba(165, 243, 252, 0.95);
+
+  i {
+    color: rgba(6, 182, 212, 0.88);
+  }
+}
+
 :host-context(html[dir='rtl']) .header-datetime-panel {
   align-items: flex-end;
 }

@@ -55,5 +55,11 @@
   "Failed to create recommended accounts": "فشل إنشاء الحسابات الأساسية المقترحة",
   "Seed the recommended accounts once, then reuse them in vouchers, journals, cash, and bank flows.": "أنشئ الحسابات المقترحة مرة واحدة ثم أعد استخدامها في السندات والقيود والصندوق والبنك.",
   "Skipped {{count}} accounts because parent account was missing": "تم تخطي {{count}} حساب لأن الحساب الأب غير متاح",
-  "You cannot set the account as its own parent": "لا يمكن تعيين الحساب كحساب أب لنفسه"
+  "You cannot set the account as its own parent": "لا يمكن تعيين الحساب كحساب أب لنفسه",
+  "Counting tree levels legend": "مفتاح مستويات شجرة الحسابات",
+  "Counting Tree Level 1": "المستوى 1",
+  "Counting Tree Level 2": "المستوى 2",
+  "Counting Tree Level 3": "المستوى 3",
+  "Counting Tree Level 4": "المستوى 4",
+  "Counting Tree Level 5 Plus": "المستوى 5+"
 }

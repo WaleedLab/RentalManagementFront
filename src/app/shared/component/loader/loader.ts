@@ -32,7 +32,8 @@ export class Loader implements OnDestroy {
   private fadeTimer = 0;
   private bootFallbackTimer = 0;
 
-  readonly display = computed(() => this.boot() || this.shell.transitionActive());
+  /** Boot overlay only; post-login overlay removed so navigation does not flash the shell loader. */
+  readonly display = computed(() => this.boot());
 
   constructor() {
     this.router.events
@@ -77,6 +78,9 @@ export class Loader implements OnDestroy {
     }
   }
 
+  /** Keep in sync with `.loading-screen` transition duration in loader.scss. */
+  private static readonly dismissMs = 260;
+
   private beginDismiss(afterFade: () => void): void {
     if (this.hiding()) {
       return;
@@ -89,7 +93,7 @@ export class Loader implements OnDestroy {
       afterFade();
       this.hiding.set(false);
       this.fadeTimer = 0;
-    }, 520);
+    }, Loader.dismissMs);
   }
 
   private clearBootFallback(): void {

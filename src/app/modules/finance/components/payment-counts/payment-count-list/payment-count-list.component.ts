@@ -96,11 +96,15 @@ export class PaymentCountListComponent implements OnInit {
       iconOnly: true,
     },
   ];
-  readonly orderByOptions: SmoothSelectOption[] = [
-    { label: 'Created At', value: 'CreatedAt' },
-    { label: 'Paid', value: 'Paid' },
-    { label: 'Updated At', value: 'UpdatedAt' },
-  ];
+  readonly orderByOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('Created At'), value: 'CreatedAt' },
+      { label: t('Paid'), value: 'Paid' },
+      { label: t('Updated At'), value: 'UpdatedAt' },
+    ];
+  });
   readonly bondTypeFilterOptions = computed<SmoothSelectOption[]>(() => {
     this.languageTick();
     return [
@@ -109,16 +113,21 @@ export class PaymentCountListComponent implements OnInit {
       { label: this.translate.instant('Receipt Voucher'), value: 2 },
     ];
   });
-  readonly paymentTypeFilterOptions: SmoothSelectOption[] = [
-    { label: 'All payment types', value: '' },
-    { label: 'Cash', value: 1 },
-    { label: 'Network/POS', value: 2 },
-    { label: 'Cheque', value: 3 },
-    { label: 'Bank Transfer', value: 4 },
-    { label: 'Bank/Cash', value: 5 },
-  ];
+  readonly paymentTypeFilterOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('All payment types'), value: '' },
+      { label: t('Cash'), value: 1 },
+      { label: t('Network/POS'), value: 2 },
+      { label: t('Cheque'), value: 3 },
+      { label: t('Bank Transfer'), value: 4 },
+      { label: t('Bank/Cash'), value: 5 },
+    ];
+  });
   readonly branchFilterOptions = computed<SmoothSelectOption[]>(() => {
-    const options: SmoothSelectOption[] = [{ label: 'All branches', value: '' }];
+    this.languageTick();
+    const options: SmoothSelectOption[] = [{ label: this.translate.instant('All branches'), value: '' }];
     for (const [id, label] of Object.entries(this.branchNames())) {
       options.push({
         label: label || '-',

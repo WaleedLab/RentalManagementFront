@@ -59,31 +59,48 @@ export class JournalEntryListComponent implements OnInit {
   private searchInput$ = new Subject<string>();
   private languageTick = signal(0);
 
-  readonly orderByOptions: SmoothSelectOption[] = [
-    { label: 'Created At', value: 'CreatedAt' },
-    { label: 'Name', value: 'Name' },
-  ];
-  readonly statusFilterOptions: SmoothSelectOption[] = [
-    { label: 'All statuses', value: '' },
-    { label: 'Closed', value: 1 },
-    { label: 'Editable', value: 2 },
-  ];
-  readonly journalTypeFilterOptions: SmoothSelectOption[] = [
-    { label: 'All journal types', value: '' },
-    { label: 'General Journal', value: 'true' },
-    { label: 'Adjustment Journal', value: 'false' },
-  ];
-  readonly operationTypeFilterOptions: SmoothSelectOption[] = [
-    { label: 'All operation types', value: '' },
-    { label: 'Accounting Entry', value: 1 },
-    { label: 'Receipt', value: 2 },
-    { label: 'Payment Voucher', value: 3 },
-    { label: 'Opening', value: 4 },
-    { label: 'Expense Entry', value: 5 },
-    { label: 'Accidents Recorded', value: 6 },
-  ];
+  readonly orderByOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('Created At'), value: 'CreatedAt' },
+      { label: t('Name'), value: 'Name' },
+    ];
+  });
+  readonly statusFilterOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('All statuses'), value: '' },
+      { label: t('Closed'), value: 1 },
+      { label: t('Editable'), value: 2 },
+    ];
+  });
+  readonly journalTypeFilterOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('All journal types'), value: '' },
+      { label: t('General Journal'), value: 'true' },
+      { label: t('Adjustment Journal'), value: 'false' },
+    ];
+  });
+  readonly operationTypeFilterOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('All operation types'), value: '' },
+      { label: t('Accounting Entry'), value: 1 },
+      { label: t('Receipt'), value: 2 },
+      { label: t('Payment Voucher'), value: 3 },
+      { label: t('Opening'), value: 4 },
+      { label: t('Expense Entry'), value: 5 },
+      { label: t('Accidents Recorded'), value: 6 },
+    ];
+  });
   readonly branchFilterOptions = computed<SmoothSelectOption[]>(() => {
-    const options: SmoothSelectOption[] = [{ label: 'All branches', value: '' }];
+    this.languageTick();
+    const options: SmoothSelectOption[] = [{ label: this.translate.instant('All branches'), value: '' }];
     for (const [id, label] of Object.entries(this.branchNames())) {
       options.push({ label: label || '-', value: Number(id) });
     }
