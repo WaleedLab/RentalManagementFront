@@ -51,8 +51,8 @@
         </div>
       </div>
 
-      @if (loading()) {
-        <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+      @if (loading() || loadFailed()) {
+        <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
       } @else if (!customers().length) {
         <app-empty-state [title]="'No customers found' | translate" [description]="'Create a customer profile to use it in bookings.' | translate" />
       } @else {
@@ -116,7 +116,7 @@
         </div>
       }
 
-      @if (!loading() && totalCount() > 0) {
+      @if (!loading() && !loadFailed() && totalCount() > 0) {
         <app-pagination-bar
           [pageNumber]="pageNumber()"
           [totalPages]="totalPages()"

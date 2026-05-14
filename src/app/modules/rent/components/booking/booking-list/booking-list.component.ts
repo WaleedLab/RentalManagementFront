@@ -55,6 +55,7 @@ export class BookingListComponent implements OnInit {
   pageNumber = signal(1);
   pageSize = signal(BookingListComponent.DEFAULT_PAGE_SIZE);
   loading = signal(false);
+  loadFailed = signal(false);
   search = signal('');
   status = signal<BookingStatus | ''>('');
   branches = signal<Branch[]>([]);
@@ -372,6 +373,7 @@ export class BookingListComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    this.loadFailed.set(false);
     const fleetId = this.authState.fleetId() || undefined;
     this.bookingService
       .getPaginated({
@@ -392,6 +394,8 @@ export class BookingListComponent implements OnInit {
           this.pageNumber.set(page.pageNumber ?? this.pageNumber());
         },
         error: err => {
+          this.loadFailed.set(true);
+          this.loading.set(false);
           this.toast.error(this.bookingListLoadErrorMessage(err));
         },
         complete: () => this.loading.set(false),

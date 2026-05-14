@@ -23,8 +23,8 @@
         </div>
       </div>
 
-      @if (loading()) {
-        <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+      @if (loading() || loadFailed()) {
+        <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
       } @else if (!categories().length) {
         <app-empty-state [title]="'No categories found' | translate" [description]="'Create categories to classify sedans, SUVs, vans, and other rental vehicle types.' | translate" />
       } @else {

@@ -1,6 +1,7 @@
 <div class="empty-state text-center py-5">
-  <div class="empty-state__icon">+</div>
-  <h5 class="mb-2">{{ title }}</h5>
+  @if ((title || '').trim()) {
+    <h5 class="mb-2">{{ title }}</h5>
+  }
   @if (description) {
     <p class="mb-0">{{ description }}</p>
   }

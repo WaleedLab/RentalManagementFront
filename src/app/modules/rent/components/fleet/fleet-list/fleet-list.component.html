@@ -29,7 +29,11 @@
 
   <div class="row">
     <div class="col-12">
-      @if (!loading() && fleets().length === 0) {
+      @if (loading() || loadFailed()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
+        </div>
+      } @else if (!fleets().length) {
         <app-empty-state
           [title]="'No fleets found' | translate"
           [description]="'Create a fleet to start organizing branches and vehicles.' | translate"
@@ -51,47 +55,41 @@
             </tr>
           </thead>
           <tbody>
-            @if (fleets().length === 0 && !loading()) {
+            @for (f of fleets(); track f.id) {
               <tr>
-                <td colspan="9" class="text-center">{{ 'No fleets found' | translate }}</td>
+                <td>
+                  <img
+                    class="fleet-list-thumb"
+                    [src]="fleetImageUrl(f.url)"
+                    [alt]="f.name || ('Fleet Image' | translate)"
+                    loading="lazy"
+                  />
+                </td>
+                <td>{{ f.name || '-' }}</td>
+                <td>{{ f.fleetCode || '-' }}</td>
+                <td>{{ f.taxNumber || '-' }}</td>
+                <td>{{ f.location || '-' }}</td>
+                <td>{{ f.contactNumber || '-' }}</td>
+                <td>{{ f.email || '-' }}</td>
+                <td>
+                  <app-status-badge
+                    [label]="f.isActive ? ('Active' | translate) : ('Inactive' | translate)"
+                    [tone]="f.isActive ? 'success' : 'secondary'"
+                  />
+                </td>
+                <td class="text-end">
+                  <div class="table-actions">
+                    <a
+                      class="table-action-icon table-action-icon--primary"
+                      [routerLink]="['/fleet', f.id, 'edit']"
+                      [attr.aria-label]="'Edit' | translate"
+                      [title]="'Edit' | translate"
+                    >
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                  </div>
+                </td>
               </tr>
-            } @else {
-              @for (f of fleets(); track f.id) {
-                <tr>
-                  <td>
-                    <img
-                      class="fleet-list-thumb"
-                      [src]="fleetImageUrl(f.url)"
-                      [alt]="f.name || ('Fleet Image' | translate)"
-                      loading="lazy"
-                    />
-                  </td>
-                  <td>{{ f.name || '-' }}</td>
-                  <td>{{ f.fleetCode || '-' }}</td>
-                  <td>{{ f.taxNumber || '-' }}</td>
-                  <td>{{ f.location || '-' }}</td>
-                  <td>{{ f.contactNumber || '-' }}</td>
-                  <td>{{ f.email || '-' }}</td>
-                  <td>
-                    <app-status-badge
-                      [label]="f.isActive ? ('Active' | translate) : ('Inactive' | translate)"
-                      [tone]="f.isActive ? 'success' : 'secondary'"
-                    />
-                  </td>
-                  <td class="text-end">
-                    <div class="table-actions">
-                      <a
-                        class="table-action-icon table-action-icon--primary"
-                        [routerLink]="['/fleet', f.id, 'edit']"
-                        [attr.aria-label]="'Edit' | translate"
-                        [title]="'Edit' | translate"
-                      >
-                        <i class="fa-solid fa-pen-to-square"></i>
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              }
             }
           </tbody>
         </table>

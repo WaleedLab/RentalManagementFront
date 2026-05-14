@@ -43,6 +43,7 @@ export class CustomerListComponent implements OnInit {
   totalCount = signal(0);
   totalPages = signal(0);
   loading = signal(false);
+  loadFailed = signal(false);
   orderByFilterOptions = computed<SmoothSelectOption[]>(() => [
     { label: this.translate.instant('Created Date'), value: 'CreatedAt' },
     { label: this.translate.instant('Name'), value: 'Name' },
@@ -60,6 +61,7 @@ export class CustomerListComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    this.loadFailed.set(false);
     this.customerService
       .getPaginated({
         fleetId: this.authState.fleetId() || undefined,
@@ -77,7 +79,11 @@ export class CustomerListComponent implements OnInit {
           this.totalPages.set(page.totalPages ?? 0);
           this.pageNumber.set(page.pageNumber ?? this.pageNumber());
         },
-        error: err => this.toast.error(err?.message ?? this.translate.instant('Failed to load customers')),
+        error: err => {
+          this.loadFailed.set(true);
+          this.loading.set(false);
+          this.toast.error(err?.message ?? this.translate.instant('Failed to load customers'));
+        },
         complete: () => this.loading.set(false),
       });
   }

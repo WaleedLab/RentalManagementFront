@@ -186,9 +186,9 @@
           </div>
 
           <div class="counting-tree" role="tree">
-            @if (loading()) {
+            @if (loading() || loadError()) {
               <div class="counting-tree__state">
-                <span class="spinner-border spinner-border-sm me-2"></span>
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-live="polite"></span>
                 {{ 'Loading...' | translate }}
               </div>
             } @else if (visibleNodes().length === 0) {

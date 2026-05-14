@@ -52,6 +52,7 @@ export class PrivilegeListComponent implements OnInit {
             this.privileges.set(page?.items ?? []);
             this.totalCount.set(page?.totalCount ?? (page?.items?.length ?? 0));
             this.totalPages.set(page?.totalPages ?? 0);
+            this.loading.set(false);
             return;
           }
 
@@ -61,6 +62,7 @@ export class PrivilegeListComponent implements OnInit {
             this.privileges.set(items);
             this.totalCount.set(items.length);
             this.totalPages.set(items.length > 0 ? 1 : 0);
+            this.loading.set(false);
           });
         },
         error: () => {
@@ -73,9 +75,9 @@ export class PrivilegeListComponent implements OnInit {
             this.privileges.set(items);
             this.totalCount.set(items.length);
             this.totalPages.set(items.length > 0 ? 1 : 0);
+            this.loading.set(false);
           });
         },
-        complete: () => this.loading.set(false),
       });
   }
 

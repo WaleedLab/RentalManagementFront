@@ -105,6 +105,7 @@
   "Dashboard ops reset": "إعادة تعيين",
   "Dashboard ops refresh": "تحديث",
   "Dashboard ops fleet required": "اختر أسطولاً في ملفك لتحميل الرسوم.",
+  "DashboardChartLoadFromExistingGift": "تحميل من الهدية الموجودة",
   "Dashboard ops vehicle chart title status bar": "المركبات حسب الحالة (الأعداد)",
   "Dashboard ops vehicle chart title status donut": "توزيع حالات المركبات (حصّة من الأسطول)",
   "Dashboard ops booking chart title status bar": "الحجوزات حسب الحالة (الأعداد)",

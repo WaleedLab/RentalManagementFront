@@ -40,7 +40,7 @@ export class FinanceListShellComponent implements OnInit {
 
   @Input() title = '';
   @Input() subtitle = '';
-  @Input() emptyTitle = 'No records were returned for the current fleet context.';
+  @Input() emptyTitle = 'Table empty hint';
   @Input() emptyDescription = '';
   @Input() error: string | null = null;
   @Input() loading = false;
@@ -112,6 +112,11 @@ export class FinanceListShellComponent implements OnInit {
 
   emitRowAction(actionKey: string, rowIndex: number): void {
     this.rowAction.emit({ actionKey, rowIndex });
+  }
+
+  /** Treat non-empty `error` as a failed load: show loading state in the table area. */
+  hasBlockingError(): boolean {
+    return typeof this.error === 'string' && this.error.trim().length > 0;
   }
 }
 

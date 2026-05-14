@@ -32,6 +32,7 @@ export class UserListComponent implements OnInit {
   pageSize = signal(10);
   search = signal('');
   loading = signal(false);
+  loadFailed = signal(false);
   isSuperAdmin = computed(() => this.authState.isSuperAdmin());
   pageNumbers = computed(() => {
     const total = this.totalPages();
@@ -44,6 +45,7 @@ export class UserListComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    this.loadFailed.set(false);
     this.userService
       .getPaginated({
         pageNumber: this.pageNumber(),
@@ -61,8 +63,9 @@ export class UserListComponent implements OnInit {
           this.totalPages.set(pagesFromApi ?? calculatedPages);
         },
         error: err => {
-          this.toast.error(err?.message ?? 'Failed to load users');
+          this.loadFailed.set(true);
           this.loading.set(false);
+          this.toast.error(err?.message ?? 'Failed to load users');
         },
         complete: () => this.loading.set(false),
       });

@@ -42,6 +42,7 @@ export class BranchListComponent implements OnInit {
   fleetId = signal<string>('');
   branches = signal<Branch[]>([]);
   loading = signal(false);
+  loadFailed = signal(false);
   totalCount = signal(0);
   totalPages = signal(0);
   pageNumber = signal(1);
@@ -66,6 +67,7 @@ export class BranchListComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    this.loadFailed.set(false);
     this.branchApi.getPaginated(this.buildParams()).subscribe({
       next: res => {
         this.branches.set(res.items ?? []);
@@ -73,6 +75,7 @@ export class BranchListComponent implements OnInit {
         this.totalPages.set(res.totalPages ?? 0);
       },
       error: err => {
+        this.loadFailed.set(true);
         this.toast.error(err?.message ?? this.translate.instant('Failed to load branches'));
         this.loading.set(false);
       },

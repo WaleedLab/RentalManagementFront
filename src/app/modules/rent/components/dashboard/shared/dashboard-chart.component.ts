@@ -24,18 +24,20 @@ export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDest
   /** When set (same length as `values`), used as per-segment colors for bar/doughnut. */
   @Input() segmentColors: string[] = [];
   @Input() loading = false;
+  /** When true (e.g. API error), show the fallback hint instead of an empty chart. */
+  @Input() dataUnavailable = false;
 
   @ViewChild('canvasRef') canvasRef?: ElementRef<HTMLCanvasElement>;
   private chart?: Chart;
 
   constructor() {
     this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.renderChart();
+      queueMicrotask(() => this.renderChart());
     });
   }
 
   ngAfterViewInit(): void {
-    this.renderChart();
+    queueMicrotask(() => this.renderChart());
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -45,9 +47,10 @@ export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDest
       changes['type'] ||
       changes['loading'] ||
       changes['segmentColors'] ||
-      changes['title']
+      changes['title'] ||
+      changes['dataUnavailable']
     ) {
-      this.renderChart();
+      queueMicrotask(() => this.renderChart());
     }
   }
 
@@ -55,8 +58,31 @@ export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDest
     this.chart?.destroy();
   }
 
+  /** Shown when the backend returned nothing usable or the chart is marked unavailable. */
+  showChartFallback(): boolean {
+    if (this.loading) {
+      return false;
+    }
+    if (this.dataUnavailable) {
+      return true;
+    }
+    return !this.hasAlignedChartSeries();
+  }
+
+  private hasAlignedChartSeries(): boolean {
+    const labels = this.labels ?? [];
+    const values = this.values ?? [];
+    return labels.length > 0 && values.length > 0 && labels.length === values.length;
+  }
+
   private renderChart(): void {
-    if (!this.canvasRef || this.loading) {
+    if (this.loading || this.showChartFallback()) {
+      this.chart?.destroy();
+      this.chart = undefined;
+      return;
+    }
+
+    if (!this.canvasRef) {
       return;
     }
 

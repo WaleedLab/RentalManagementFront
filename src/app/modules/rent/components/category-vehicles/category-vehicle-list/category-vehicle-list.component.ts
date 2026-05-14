@@ -38,6 +38,7 @@ export class CategoryVehicleListComponent implements OnInit {
 
   categories = signal<CategoryVehicle[]>([]);
   loading = signal(false);
+  loadFailed = signal(false);
   totalCount = signal(0);
   totalPages = signal(0);
   pageNumber = signal(1);
@@ -51,6 +52,7 @@ export class CategoryVehicleListComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    this.loadFailed.set(false);
     this.categoryVehicleService
       .getPaginated({
         fleetId: this.authState.fleetId() ?? undefined,
@@ -65,10 +67,11 @@ export class CategoryVehicleListComponent implements OnInit {
           this.totalPages.set(response.totalPages ?? 0);
         },
         error: err => {
+          this.loadFailed.set(true);
+          this.loading.set(false);
           this.toast.error(
             err?.message ?? this.translate.instant('Failed to load vehicle categories'),
           );
-          this.loading.set(false);
         },
         complete: () => this.loading.set(false),
       });

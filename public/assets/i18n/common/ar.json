@@ -116,7 +116,7 @@
   "Next": "التالي",
   "No": "لا",
   "No records found": "لا توجد سجلات",
-  "No records were returned for the current fleet context.": "لم يتم إرجاع أي سجلات ضمن سياق الأسطول الحالي.",
+  "Table empty hint": "لا توجد صفوف للعرض.",
   "Notes": "ملاحظات",
   "Operations": "العمليات",
   "Security": "الأمان",

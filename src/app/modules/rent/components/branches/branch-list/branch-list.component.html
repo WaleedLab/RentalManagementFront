@@ -29,9 +29,9 @@
     </div>
   </div>
 
-  @if (loading()) {
+  @if (loading() || loadFailed()) {
     <div class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
+      <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
     </div>
   } @else if (!branches().length) {
     <app-empty-state

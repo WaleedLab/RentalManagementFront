@@ -32,6 +32,7 @@ export class FleetListComponent implements OnInit {
   pageSize = signal(10);
   search = signal('');
   loading = signal(false);
+  loadFailed = signal(false);
   pageNumbers = computed(() => {
     const total = this.totalPages();
     return Array.from({ length: total }, (_, i) => i + 1);
@@ -43,6 +44,7 @@ export class FleetListComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    this.loadFailed.set(false);
     this.fleetService
       .getPaginated({
         pageNumber: this.pageNumber(),
@@ -56,8 +58,9 @@ export class FleetListComponent implements OnInit {
           this.totalPages.set(res.totalPages ?? 0);
         },
         error: err => {
-          this.toast.error(err?.message ?? this.translate.instant('Failed to load fleets'));
+          this.loadFailed.set(true);
           this.loading.set(false);
+          this.toast.error(err?.message ?? this.translate.instant('Failed to load fleets'));
         },
         complete: () => this.loading.set(false),
       });

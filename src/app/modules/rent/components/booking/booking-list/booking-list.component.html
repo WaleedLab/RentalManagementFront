@@ -76,8 +76,8 @@
         }
       </div>
 
-      @if (loading()) {
-        <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+      @if (loading() || loadFailed()) {
+        <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
       } @else if (!bookings().length) {
         <app-empty-state [title]="'No bookings found' | translate" [description]="'Create a booking after selecting a customer and an available vehicle.' | translate" />
       } @else {
@@ -252,7 +252,7 @@
         </div>
       }
 
-      @if (!loading() && totalCount() > 0) {
+      @if (!loading() && !loadFailed() && totalCount() > 0) {
         <app-pagination-bar
           [pageNumber]="pageNumber()"
           [totalPages]="totalPages()"

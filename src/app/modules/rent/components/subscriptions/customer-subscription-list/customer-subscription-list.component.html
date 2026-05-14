@@ -33,9 +33,9 @@
         </div>
       </div>
 
-      @if (loading()) {
+      @if (loading() || loadFailed()) {
         <div class="text-center py-5">
-          <div class="spinner-border text-primary"></div>
+          <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
         </div>
       } @else if (!subscriptions().length) {
         <app-empty-state
@@ -88,7 +88,7 @@
         </div>
       }
 
-      @if (!loading() && totalCount() > 0) {
+      @if (!loading() && !loadFailed() && totalCount() > 0) {
         <app-pagination-bar
           [pageNumber]="currentPage()"
           [totalPages]="totalPages()"

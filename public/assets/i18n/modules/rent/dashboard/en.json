@@ -105,6 +105,7 @@
   "Dashboard ops reset": "Reset",
   "Dashboard ops refresh": "Refresh",
   "Dashboard ops fleet required": "Select a fleet in your profile to load charts.",
+  "DashboardChartLoadFromExistingGift": "Load from existing gift",
   "Dashboard ops vehicle chart title status bar": "Vehicles by status (counts)",
   "Dashboard ops vehicle chart title status donut": "Vehicle status mix (share of fleet)",
   "Dashboard ops booking chart title status bar": "Bookings by status (counts)",

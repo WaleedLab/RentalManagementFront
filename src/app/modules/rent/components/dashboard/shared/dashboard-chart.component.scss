@@ -42,6 +42,28 @@
   height: 280px;
 }
 
+.dashboard-widget__fallback {
+  margin-top: 12px;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--dashboard-text-muted);
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+}
+
+:host-context(body.dark-only) .dashboard-widget__fallback {
+  background: rgba(6, 182, 212, 0.06);
+  border-color: rgba(103, 232, 249, 0.22);
+}
+
 .skeleton--chart {
   margin-top: 12px;
   height: 280px;

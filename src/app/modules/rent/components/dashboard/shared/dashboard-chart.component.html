@@ -8,6 +8,10 @@
 
   @if (loading) {
     <div class="skeleton skeleton--chart"></div>
+  } @else if (showChartFallback()) {
+    <div class="dashboard-widget__fallback" role="status">
+      {{ 'DashboardChartLoadFromExistingGift' | translate }}
+    </div>
   } @else {
     <div class="dashboard-widget__chart">
       <canvas #canvasRef></canvas>

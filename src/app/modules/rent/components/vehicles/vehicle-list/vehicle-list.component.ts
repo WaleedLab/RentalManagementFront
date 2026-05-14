@@ -57,6 +57,8 @@ export class VehicleListComponent implements OnInit {
   orderBy = signal<VehicleOrderBy>('CreatedAt');
   orderByDirection = signal<VehicleOrderDirection>('DESC');
   loading = signal(false);
+  /** True after the main list request failed; keeps the list area on a spinner until the next successful load. */
+  loadFailed = signal(false);
   deletingIds = signal<Array<string | number>>([]);
   changingStatusIds = signal<Array<string | number>>([]);
   vehicleStatusCounts = signal<VehicleStatusCountItem[]>([]);
@@ -346,6 +348,7 @@ export class VehicleListComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    this.loadFailed.set(false);
     this.vehicleService
       .getPaginated({
         fleetId: this.authState.fleetId() || undefined,
@@ -366,7 +369,11 @@ export class VehicleListComponent implements OnInit {
           this.totalPages.set(page.totalPages ?? 0);
           this.pageNumber.set(page.pageNumber ?? this.pageNumber());
         },
-        error: err => this.toast.error(err?.message ?? this.translate.instant('Failed to load vehicles')),
+        error: err => {
+          this.loadFailed.set(true);
+          this.loading.set(false);
+          this.toast.error(err?.message ?? this.translate.instant('Failed to load vehicles'));
+        },
         complete: () => this.loading.set(false),
       });
   }

@@ -1,0 +1,15 @@
+Failed to load tests - Karma server quit unexpectedly: Process exited with non-zero status code 1
+
+
+Stacktrace: 
+	at S.syncTopLevel (c:\Users\DELL\.vscode\extensions\ms-vscode.test-adapter-converter-0.2.1\out\extension.js:6:3)
+	at lp.value (c:\Users\DELL\.vscode\extensions\ms-vscode.test-adapter-converter-0.2.1\out\extension.js:3:4541)
+	at E._deliver (file:///c:/Users/DELL/AppData/Local/Programs/Microsoft%20VS%20Code/0958016b2a/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:403:3244)
+	at E.fire (file:///c:/Users/DELL/AppData/Local/Programs/Microsoft%20VS%20Code/0958016b2a/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:403:3562)
+	at lp.value (c:\Users\DELL\.vscode\extensions\hbenl.vscode-test-explorer-2.22.1\out\hub\testHub.js:53:43)
+	at E._deliver (file:///c:/Users/DELL/AppData/Local/Programs/Microsoft%20VS%20Code/0958016b2a/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:403:3244)
+	at E.fire (file:///c:/Users/DELL/AppData/Local/Programs/Microsoft%20VS%20Code/0958016b2a/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:403:3562)
+	at KarmaTestExplorer.<anonymous> (c:\Users\DELL\.vscode\extensions\lucono.karma-test-explorer-0.8.2\dist\main.cjs:5:19751)
+	at Generator.throw (<anonymous>)
+	at rejected (c:\Users\DELL\.vscode\extensions\lucono.karma-test-explorer-0.8.2\dist\main.cjs:4:422292)
+	at process.processTicksAndRejections (node:internal/process/task_queues:103:5)

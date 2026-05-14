@@ -41,6 +41,7 @@ export class CustomerSubscriptionListComponent implements OnInit {
   totalCount = signal(0);
   totalPages = signal(1);
   loading = signal(false);
+  loadFailed = signal(false);
   canManage = computed(() => this.authState.hasAnyRole(TENANT_ADMIN_ROLES));
   currentPage = computed(() => this.pageNumber());
 
@@ -51,6 +52,7 @@ export class CustomerSubscriptionListComponent implements OnInit {
   load(): void {
     const fleetId = this.authState.fleetId();
     if (!fleetId) {
+      this.loadFailed.set(false);
       this.subscriptions.set([]);
       this.totalCount.set(0);
       this.totalPages.set(1);
@@ -58,6 +60,7 @@ export class CustomerSubscriptionListComponent implements OnInit {
     }
 
     this.loading.set(true);
+    this.loadFailed.set(false);
     this.subscriptionService.getPaginated({
       fleetId,
       pageNumber: this.pageNumber(),
@@ -72,10 +75,13 @@ export class CustomerSubscriptionListComponent implements OnInit {
         this.totalPages.set(Math.max(1, response.totalPages ?? 1));
         this.pageNumber.set(response.pageNumber || this.pageNumber());
       },
-      error: err =>
+      error: err => {
+        this.loadFailed.set(true);
+        this.loading.set(false);
         this.toast.error(
           err?.message ?? this.translate.instant('Failed to load subscription offers'),
-        ),
+        );
+      },
       complete: () => this.loading.set(false),
     });
   }

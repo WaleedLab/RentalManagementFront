@@ -95,6 +95,7 @@
           [labels]="chartLabels(vehicleStatusCounts())"
           [values]="chartValues(vehicleStatusCounts())"
           [loading]="vehicleLoading()"
+          [dataUnavailable]="!!authState.fleetId() && vehicleError()"
         />
         <dashboard-chart
           class="ops-chart"
@@ -103,6 +104,7 @@
           [labels]="chartLabels(vehicleStatusCounts())"
           [values]="chartValues(vehicleStatusCounts())"
           [loading]="vehicleLoading()"
+          [dataUnavailable]="!!authState.fleetId() && vehicleError()"
         />
         <dashboard-chart
           class="ops-chart"
@@ -111,6 +113,7 @@
           [labels]="chartLabels(vehicleByBranch())"
           [values]="chartValues(vehicleByBranch())"
           [loading]="vehicleLoading()"
+          [dataUnavailable]="!!authState.fleetId() && vehicleError()"
         />
         <dashboard-chart
           class="ops-chart"
@@ -119,6 +122,7 @@
           [labels]="chartLabels(vehicleByYear())"
           [values]="chartValues(vehicleByYear())"
           [loading]="vehicleLoading()"
+          [dataUnavailable]="!!authState.fleetId() && vehicleError()"
         />
       </div>
     </article>
@@ -196,6 +200,7 @@
           [labels]="chartLabels(bookingStatusCounts())"
           [values]="chartValues(bookingStatusCounts())"
           [loading]="bookingLoading()"
+          [dataUnavailable]="!!authState.fleetId() && bookingError()"
         />
         <dashboard-chart
           class="ops-chart"
@@ -204,6 +209,7 @@
           [labels]="chartLabels(bookingStatusCounts())"
           [values]="chartValues(bookingStatusCounts())"
           [loading]="bookingLoading()"
+          [dataUnavailable]="!!authState.fleetId() && bookingError()"
         />
         <dashboard-chart
           class="ops-chart"
@@ -212,6 +218,7 @@
           [labels]="chartLabels(bookingByBranch())"
           [values]="chartValues(bookingByBranch())"
           [loading]="bookingLoading()"
+          [dataUnavailable]="!!authState.fleetId() && bookingError()"
         />
         <dashboard-chart
           class="ops-chart"
@@ -220,6 +227,7 @@
           [labels]="chartLabels(bookingByStatusList())"
           [values]="chartValues(bookingByStatusList())"
           [loading]="bookingLoading()"
+          [dataUnavailable]="!!authState.fleetId() && bookingError()"
         />
       </div>
     </article>

@@ -29,6 +29,7 @@ export class RoleListComponent implements OnInit {
   pageSize = signal(10);
   search = signal('');
   loading = signal(false);
+  loadFailed = signal(false);
   pageNumbers = computed(() => Array.from({ length: this.totalPages() }, (_, index) => index + 1));
 
   ngOnInit(): void {
@@ -37,6 +38,7 @@ export class RoleListComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    this.loadFailed.set(false);
     this.roleService
       .getPaginated({
         pageNumber: this.pageNumber(),
@@ -50,7 +52,11 @@ export class RoleListComponent implements OnInit {
           this.totalCount.set(page?.totalCount ?? 0);
           this.totalPages.set(page?.totalPages ?? 0);
         },
-        error: err => this.toast.error(err?.message ?? this.translate.instant('Failed to load roles')),
+        error: err => {
+          this.loadFailed.set(true);
+          this.loading.set(false);
+          this.toast.error(err?.message ?? this.translate.instant('Failed to load roles'));
+        },
         complete: () => this.loading.set(false),
       });
   }

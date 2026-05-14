@@ -24,9 +24,9 @@
         </div>
       </div>
 
-      @if (loading()) {
+      @if (loading() || loadFailed()) {
         <div class="text-center py-5">
-          <div class="spinner-border text-primary" role="status"></div>
+          <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
         </div>
       } @else if (!roles().length) {
         <app-empty-state [title]="'No roles found' | translate" [description]="'Create your first role to assign security permissions.' | translate" />

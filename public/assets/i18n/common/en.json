@@ -116,7 +116,7 @@
   "Next": "Next",
   "No": "No",
   "No records found": "No records found",
-  "No records were returned for the current fleet context.": "No records were returned for the current fleet context.",
+  "Table empty hint": "No rows to display.",
   "Notes": "Notes",
   "Operations": "Operations",
   "Security": "Security",
