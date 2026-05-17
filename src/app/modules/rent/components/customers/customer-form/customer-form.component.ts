@@ -13,6 +13,7 @@ import { FieldValueStateDirective } from '../../../../../shared/directives/field
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-upload.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
@@ -34,6 +35,7 @@ import { CustomerSubscriptionService } from '../../../services/subscriptions/cus
     FileUploadComponent,
     PageHeaderComponent,
     SmoothSelectComponent,
+    DatePickerComponent,
   ],
   templateUrl: './customer-form.component.html',
   styleUrl: './customer-form.component.scss',

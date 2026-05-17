@@ -6,6 +6,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
+import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { CreateFinancialYearRequest } from '../../../models/financial-years/financial-year.model';
 import { FinancialYearService } from '../../../services/financial-years/financial-year.service';
@@ -14,7 +15,7 @@ import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-firs
 @Component({
   selector: 'app-financial-year-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, PageHeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, PageHeaderComponent, DatePickerComponent],
   templateUrl: './financial-year-form.component.html',
 })
 export class FinancialYearFormComponent implements OnInit {

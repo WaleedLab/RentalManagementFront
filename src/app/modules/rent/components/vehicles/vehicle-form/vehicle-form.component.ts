@@ -13,6 +13,7 @@ import { BranchService } from '../../../services/branches/branch.service';
 import { CategoryVehicleService } from '../../../services/category-vehicles/category-vehicle.service';
 import { VehicleService } from '../../../services/vehicles/vehicle.service';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
+import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-upload.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
@@ -30,6 +31,7 @@ import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-firs
     FileUploadComponent,
     PageHeaderComponent,
     SmoothSelectComponent,
+    DatePickerComponent,
   ],
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',

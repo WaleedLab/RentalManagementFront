@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -20,8 +20,6 @@ import {
 } from '../../../models/booking/booking-status.utils';
 import { BookingService } from '../../../services/booking/booking.service';
 import { BranchService } from '../../../services/branches/branch.service';
-
-type BookingCardAction = 'edit' | 'suspend' | 'closeContract' | 'extend' | 'pay' | 'print' | 'finish';
 
 @Component({
   selector: 'app-booking-list',
@@ -47,7 +45,6 @@ export class BookingListComponent implements OnInit {
   private authState = inject(AuthStateService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
-  private router = inject(Router);
 
   bookings = signal<Booking[]>([]);
   totalCount = signal(0);
@@ -192,46 +189,6 @@ export class BookingListComponent implements OnInit {
   /** عقد مصفى أو مغلق — يبقى العرض والطباعة فقط. */
   bookingCardActionsLocked(booking: Booking): boolean {
     return !this.canFinishBooking(booking);
-  }
-
-  onCardAction(
-    action: BookingCardAction,
-    booking: Booking,
-  ): void {
-    if (!this.canFinishBooking(booking) && action !== 'print') {
-      return;
-    }
-    if (action === 'edit') {
-      this.router.navigate(['/booking', booking.id, 'edit']);
-      return;
-    }
-    if (action === 'finish' && !this.canFinishBooking(booking)) {
-      return;
-    }
-    if (action === 'finish') {
-      this.router.navigate(['/booking', booking.id, 'finish']);
-      return;
-    }
-    if (action === 'closeContract' && !this.canFinishBooking(booking)) {
-      return;
-    }
-    if (action === 'closeContract') {
-      this.router.navigate(['/booking', booking.id, 'close']);
-      return;
-    }
-    const actionLabels: Record<BookingCardAction, string> = {
-      edit: 'تعديل',
-      suspend: 'تعليق',
-      closeContract: 'إغلاق',
-      extend: 'تمديد',
-      pay: 'دفع',
-      print: 'طباعة',
-      finish: 'إنهاء',
-    };
-    this.toast.info(`${actionLabels[action]}: ${this.translate.instant('Details')}`);
-    this.router.navigate(['/booking', booking.id, 'details'], {
-      queryParams: { action },
-    });
   }
 
   closeBookingCardMore(panel: HTMLDetailsElement | null): void {

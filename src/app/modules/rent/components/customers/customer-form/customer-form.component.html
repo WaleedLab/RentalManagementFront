@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container-fluid customer-form-page">
   <app-page-header
     [title]="(isEdit() ? 'Edit Customer' : 'Create Customer') | translate"
     [subtitle]="'Clean customer forms with image upload, identity, and license details.' | translate"
@@ -15,10 +15,10 @@
 
   <div class="row g-4 customer-form-layout">
     <div class="col-xl-8">
-      <div class="card customer-form-card">
+      <div class="card customer-form-card customer-form-card--main">
         <div class="card-body">
           <form class="app-form-value-state" [formGroup]="form" (ngSubmit)="save()">
-            <div class="customer-form-section">
+            <div class="customer-form-section light-card-gradient-soft-purple">
               <div class="customer-form-section__header">
                 <h6 class="mb-1">{{ 'Customer Section Identity Title' | translate }}</h6>
                 <p class="mb-0">{{ 'Customer Section Identity Subtitle' | translate }}</p>
@@ -55,8 +55,7 @@
                   }
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">{{ 'Date of Birth' | translate }}</label>
-                  <input class="form-control" type="date" formControlName="birthDay" />
+                  <app-date-picker formControlName="birthDay" label="Date of Birth" />
                   <div class="form-text">{{ 'Hint Date of Birth' | translate }}</div>
                 </div>
                 <div class="col-md-4">
@@ -68,8 +67,7 @@
                   }
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">{{ 'Identity Issue Date' | translate }}</label>
-                  <input class="form-control" type="date" formControlName="dateIdNationality" />
+                  <app-date-picker formControlName="dateIdNationality" label="Identity Issue Date" />
                   <div class="form-text">{{ 'Hint Identity Issue Date' | translate }}</div>
                   @if (form.controls.dateIdNationality.invalid && form.controls.dateIdNationality.touched) {
                     <div class="text-danger small mt-1">{{ 'Identity issue date is required.' | translate }}</div>
@@ -89,7 +87,7 @@
               </div>
             </div>
 
-            <div class="customer-form-section">
+            <div class="customer-form-section light-card-gradient-sky">
               <div class="customer-form-section__header">
                 <h6 class="mb-1">{{ 'Customer Section Contact Title' | translate }}</h6>
                 <p class="mb-0">{{ 'Customer Section Contact Subtitle' | translate }}</p>
@@ -126,7 +124,7 @@
               </div>
             </div>
 
-            <div class="customer-form-section">
+            <div class="customer-form-section light-card-gradient-soft-purple">
               <div class="customer-form-section__header">
                 <h6 class="mb-1">{{ 'Customer Section License Title' | translate }}</h6>
                 <p class="mb-0">{{ 'Customer Section License Subtitle' | translate }}</p>
@@ -141,16 +139,19 @@
                   }
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">{{ 'License Expiry Date' | translate }}</label>
-                  <input class="form-control" type="date" formControlName="dateDrivinglicense" />
+                  <app-date-picker formControlName="dateDrivinglicense" label="License Expiry Date" />
                   <div class="form-text">{{ 'Hint License Expiry Date' | translate }}</div>
                   @if (form.controls.dateDrivinglicense.invalid && form.controls.dateDrivinglicense.touched) {
                     <div class="text-danger small mt-1">{{ 'License expiry date is required.' | translate }}</div>
                   }
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">{{ 'License Hijri Date' | translate }}</label>
-                  <input class="form-control" formControlName="dateDrivinglicenseHajri" maxlength="20" [placeholder]="'Example License Hijri Date' | translate" />
+                  <app-date-picker
+                    formControlName="dateDrivinglicenseHajri"
+                    label="License Hijri Date"
+                    placeholder="Example License Hijri Date"
+                    valueFormat="hijri-slash"
+                  />
                   <div class="form-text">{{ 'Hint License Hijri Date' | translate }}</div>
                   @if (form.controls.dateDrivinglicenseHajri.invalid && form.controls.dateDrivinglicenseHajri.touched) {
                     <div class="text-danger small mt-1">{{ 'Hijri license date is required.' | translate }}</div>
@@ -170,7 +171,7 @@
               </div>
             </div>
 
-            <div class="customer-form-section">
+            <div class="customer-form-section light-card-gradient">
               <div class="customer-form-section__header">
                 <h6 class="mb-1">{{ 'Customer Section Extra Title' | translate }}</h6>
                 <p class="mb-0">{{ 'Customer Section Extra Subtitle' | translate }}</p>
@@ -247,7 +248,7 @@
               </div>
             </div>
 
-            <div class="mt-4 d-flex gap-2">
+            <div class="app-form-actions">
               <button class="btn btn-primary" type="submit" [disabled]="loading()">
                 {{ (isEdit() ? 'Update Customer' : 'Create Customer') | translate }}
               </button>
@@ -271,7 +272,7 @@
     </div>
 
     <div class="col-xl-4">
-      <div class="card customer-form-card customer-form-card--side">
+      <div class="card customer-form-card customer-form-card--side light-card-gradient">
         <div class="card-body">
           <app-file-upload [label]="'Customer Image' | translate" [previewUrl]="previewUrl()" (fileSelected)="onImageSelected($event)" />
           <div class="form-text mt-2">{{ 'Hint Customer Image' | translate }}</div>

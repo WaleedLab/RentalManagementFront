@@ -376,6 +376,22 @@
   color: #0b4aa8;
 }
 
+.contract-panel--photos {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+
+.contract-photos-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.contract-photos-group__title {
+  margin-bottom: 0;
+}
+
 .contract-photo-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

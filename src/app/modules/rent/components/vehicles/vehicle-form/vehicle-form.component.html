@@ -88,7 +88,7 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label">{{ 'Insurance Expiry Date' | translate }}</label>
-                <input class="form-control" type="date" formControlName="insuranceExpires" [readonly]="isViewMode()" />
+                <app-date-picker formControlName="insuranceExpires" label="Insurance Expiry Date" [disabled]="isViewMode()" />
                 <div class="form-text">{{ 'Hint Insurance Expiry Date' | translate }}</div>
                 @if (!isViewMode() && form.controls.insuranceExpires.invalid && form.controls.insuranceExpires.touched) {
                   <div class="text-danger small mt-1">{{ 'Insurance expiry date is required.' | translate }}</div>
@@ -96,7 +96,7 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label">{{ 'License Expiry Date' | translate }}</label>
-                <input class="form-control" type="date" formControlName="licenseExpirationDate" [readonly]="isViewMode()" />
+                <app-date-picker formControlName="licenseExpirationDate" label="License Expiration Date" [disabled]="isViewMode()" />
                 <div class="form-text">{{ 'Hint Vehicle License Expiry Date' | translate }}</div>
                 @if (!isViewMode() && form.controls.licenseExpirationDate.invalid && form.controls.licenseExpirationDate.touched) {
                   <div class="text-danger small mt-1">{{ 'License expiry date is required.' | translate }}</div>
@@ -112,7 +112,7 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label">{{ 'Operating Card Date' | translate }}</label>
-                <input class="form-control" type="date" formControlName="operatinCard" [readonly]="isViewMode()" />
+                <app-date-picker formControlName="operatinCard" label="Operating Card Expiry" [disabled]="isViewMode()" />
                 <div class="form-text">{{ 'Hint Operating Card Date' | translate }}</div>
                 @if (!isViewMode() && form.controls.operatinCard.invalid && form.controls.operatinCard.touched) {
                   <div class="text-danger small mt-1">{{ 'Operating card date is required.' | translate }}</div>
@@ -120,7 +120,7 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label">{{ 'Registration Validity Date' | translate }}</label>
-                <input class="form-control" type="date" formControlName="validityCarRegistration" [readonly]="isViewMode()" />
+                <app-date-picker formControlName="validityCarRegistration" label="Registration Validity" [disabled]="isViewMode()" />
                 <div class="form-text">{{ 'Hint Registration Validity Date' | translate }}</div>
                 @if (!isViewMode() && form.controls.validityCarRegistration.invalid && form.controls.validityCarRegistration.touched) {
                   <div class="text-danger small mt-1">{{ 'Registration validity date is required.' | translate }}</div>
@@ -150,7 +150,7 @@
             </div>
 
             @if (!isViewMode()) {
-              <div class="mt-4 d-flex gap-2">
+              <div class="app-form-actions">
                 <button class="btn btn-primary" type="submit" [disabled]="loading()">
                   {{ (isEdit() ? 'Update Vehicle' : 'Create Vehicle') | translate }}
                 </button>

@@ -23,13 +23,11 @@
               </div>
 
               <div class="col-md-6">
-                <label class="form-label">{{ 'Start Date' | translate }} <span class="text-danger">*</span></label>
-                <input type="date" class="form-control" formControlName="startDate" />
+                <app-date-picker formControlName="startDate" label="Start Date" />
               </div>
 
               <div class="col-md-6">
-                <label class="form-label">{{ 'End Date' | translate }} <span class="text-danger">*</span></label>
-                <input type="date" class="form-control" formControlName="endDate" />
+                <app-date-picker formControlName="endDate" label="End Date" />
               </div>
 
               <div class="col-md-6 d-flex align-items-end">
@@ -44,7 +42,7 @@
               <div class="text-danger small mt-3">{{ 'Required field' | translate }}</div>
             }
 
-            <div class="mt-4 d-flex gap-2">
+            <div class="app-form-actions">
               <button class="btn btn-primary" type="submit" [disabled]="loading() || form.invalid">
                 @if (loading()) {
                   <span class="spinner-border spinner-border-sm me-2"></span>

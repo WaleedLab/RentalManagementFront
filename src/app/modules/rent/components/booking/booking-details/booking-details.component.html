@@ -36,12 +36,11 @@
               <div class="col-md-6">
                 <div class="extend-payment-date-row">
                   <div class="extend-payment-date-row__date">
-                    <label class="form-label">تاريخ الدفعة</label>
-                    <input
-                      class="form-control"
-                      type="datetime-local"
+                    <app-date-picker
+                      mode="datetime"
+                      label="Payment date"
                       [value]="extendPaymentDate()"
-                      (input)="onExtendPaymentDateChange($any($event.target).value)"
+                      (dateChange)="onExtendPaymentDateChange($event ?? '')"
                     />
                   </div>
                   <div class="extend-payment-date-row__days">
@@ -64,7 +63,9 @@
                   type="number"
                   min="0"
                   step="0.01"
-                  [value]="extendCurrentPaymentAmount()"
+                  required
+                  placeholder="أدخل مبلغ الدفعة"
+                  [value]="extendCurrentPaymentAmount() ?? ''"
                   (input)="onExtendPaidAmountChange($any($event.target).value)"
                 />
               </div>
@@ -99,7 +100,7 @@
                       <app-smooth-select
                         [value]="extendBankCashAccount()"
                         [ariaLabel]="'Cash Account' | translate"
-                        [placeholder]="'Select cash account'"
+                        placeholder="اختر الصندوق"
                         [options]="extendCashAccountOptions()"
                         [disabled]="extendPaymentTypeIsBankOnly()"
                         (valueChange)="onExtendCashAccountChange('' + $any($event))"
@@ -277,9 +278,12 @@
           </div>
         </section>
 
-        <section class="contract-panel">
-          <h2 class="contract-panel__title">{{ 'Contract section photos checkout' | translate }}</h2>
-          <div class="contract-photo-grid">
+        <section class="contract-panel contract-panel--photos">
+          <div class="contract-photos-group">
+            <h2 class="contract-panel__title contract-photos-group__title">
+              {{ 'Contract section photos checkout' | translate }}
+            </h2>
+            <div class="contract-photo-grid">
             @for (angle of ['front', 'right', 'left', 'back', 'interior']; track angle) {
               <div class="contract-photo-slot">
                 @if (contractPhotoSlotUrl(item, 'checkout', angle); as imgUrl) {
@@ -290,6 +294,25 @@
                 <div class="contract-photo-slot__cap">{{ vehiclePhotoLabel(angle) }}</div>
               </div>
             }
+            </div>
+          </div>
+
+          <div class="contract-photos-group">
+            <h2 class="contract-panel__title contract-photos-group__title">
+              {{ 'Contract section photos return' | translate }}
+            </h2>
+            <div class="contract-photo-grid">
+              @for (angle of ['front', 'right', 'left', 'back', 'interior']; track angle) {
+                <div class="contract-photo-slot">
+                  @if (contractPhotoSlotUrl(item, 'return', angle); as imgUrl) {
+                    <img class="contract-photo-slot__img" [src]="imgUrl" alt="" />
+                  } @else {
+                    <div class="contract-photo-slot__ph">{{ 'Contract photo placeholder' | translate }}</div>
+                  }
+                  <div class="contract-photo-slot__cap">{{ vehiclePhotoLabel(angle) }}</div>
+                </div>
+              }
+            </div>
           </div>
         </section>
 
@@ -480,22 +503,6 @@
             <p class="contract-voucher-summary__decision">{{ decisionHintText(item) }}</p>
             @if (voucherPaidSumMismatch(item)) {
               <p class="contract-voucher-summary__warn">{{ 'Voucher paid sum mismatch hint' | translate }}</p>
-            }
-          </div>
-        </section>
-
-        <section class="contract-panel">
-          <h2 class="contract-panel__title">{{ 'Contract section photos return' | translate }}</h2>
-          <div class="contract-photo-grid">
-            @for (angle of ['front', 'right', 'left', 'back', 'interior']; track angle) {
-              <div class="contract-photo-slot">
-                @if (contractPhotoSlotUrl(item, 'return', angle); as imgUrl) {
-                  <img class="contract-photo-slot__img" [src]="imgUrl" alt="" />
-                } @else {
-                  <div class="contract-photo-slot__ph">{{ 'Contract photo placeholder' | translate }}</div>
-                }
-                <div class="contract-photo-slot__cap">{{ vehiclePhotoLabel(angle) }}</div>
-              </div>
             }
           </div>
         </section>

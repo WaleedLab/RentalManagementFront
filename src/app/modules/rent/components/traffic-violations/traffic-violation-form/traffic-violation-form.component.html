@@ -53,8 +53,7 @@
             }
           </div>
           <div class="col-md-6">
-            <label class="form-label">{{ 'trafficViolations.fieldDate' | translate }}</label>
-            <input class="form-control" type="datetime-local" formControlName="dateViolation" appFieldValueState />
+            <app-date-picker mode="datetime" formControlName="dateViolation" label="trafficViolations.fieldDate" />
           </div>
           <div class="col-md-6">
             <label class="form-label">{{ 'trafficViolations.fieldFine' | translate }}</label>
@@ -64,16 +63,15 @@
             <label class="form-label">{{ 'trafficViolations.fieldDescription' | translate }}</label>
             <textarea class="form-control" rows="3" formControlName="description" appFieldValueState></textarea>
           </div>
-          <div class="col-12 d-flex flex-wrap gap-2 justify-content-between pt-2">
-            <a class="btn btn-outline-secondary" routerLink="/traffic-violations">{{ 'Back' | translate }}</a>
-            <div class="d-flex gap-2">
-              <a class="btn btn-cancel" routerLink="/traffic-violations">{{ 'Cancel' | translate }}</a>
+          <div class="col-12">
+            <div class="app-form-actions">
               <button type="submit" class="btn btn-primary" [disabled]="saving()">
                 @if (saving()) {
                   <span class="spinner-border spinner-border-sm me-1" role="status"></span>
                 }
                 {{ 'Save' | translate }}
               </button>
+              <a class="btn btn-cancel" routerLink="/traffic-violations">{{ 'Cancel' | translate }}</a>
             </div>
           </div>
         </form>

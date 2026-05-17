@@ -1,25 +1,20 @@
 <div class="app-date-range-filter">
   <div class="app-date-range-filter__field">
-    <label class="app-filter-label">{{ fromLabel | translate }}</label>
-    <input
-      type="date"
-      class="form-control"
-      [ngModel]="from"
-      [placeholder]="fromPlaceholder | translate"
+    <app-date-picker
+      [label]="fromLabel"
+      [placeholder]="fromPlaceholder"
+      [value]="from"
       [disabled]="disabled"
-      (ngModelChange)="onFromChange($event)"
+      (dateChange)="onFromChange($event ?? '')"
     />
   </div>
-
   <div class="app-date-range-filter__field">
-    <label class="app-filter-label">{{ toLabel | translate }}</label>
-    <input
-      type="date"
-      class="form-control"
-      [ngModel]="to"
-      [placeholder]="toPlaceholder | translate"
+    <app-date-picker
+      [label]="toLabel"
+      [placeholder]="toPlaceholder"
+      [value]="to"
       [disabled]="disabled"
-      (ngModelChange)="onToChange($event)"
+      (dateChange)="onToChange($event ?? '')"
     />
   </div>
 </div>

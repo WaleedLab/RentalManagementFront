@@ -126,12 +126,10 @@
                 <div class="form-text nationality-field-hint">{{ 'Nationality type or pick suggestion' | translate }}</div>
               </div>
               <div class="col-md-4">
-                <label class="form-label">{{ 'Driving License Expiry Date' | translate }} <span class="text-danger">*</span></label>
-                <input class="form-control" type="date" formControlName="customerDateDrivinglicense" />
+                <app-date-picker formControlName="customerDateDrivinglicense" label="Driving License Expiry Date" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">{{ 'Date of Birth' | translate }} <span class="text-danger">*</span></label>
-                <input class="form-control" type="date" formControlName="customerBirthDay" />
+                <app-date-picker formControlName="customerBirthDay" label="Date of Birth" />
               </div>
               <div class="col-md-4">
                 <label class="form-label">{{ 'Address' | translate }}</label>
@@ -446,13 +444,11 @@
           </div>
           <input type="hidden" formControlName="branchId" />
           <div class="col-md-3 booking-key-field">
-            <label class="form-label">{{ 'Start Date' | translate }} <span class="text-danger">*</span></label>
-            <input class="form-control" type="datetime-local" formControlName="startDate" />
+            <app-date-picker mode="datetime" formControlName="startDate" label="Start Date" />
           </div>
           @if (!editMode()) {
             <div class="col-md-3">
-              <label class="form-label">{{ 'Vehicle Return Date' | translate }} <span class="text-danger">*</span></label>
-              <input class="form-control" type="datetime-local" formControlName="dateReturnVehical" readonly />
+              <app-date-picker mode="datetime" formControlName="dateReturnVehical" label="Vehicle Return Date" [disabled]="true" />
             </div>
           }
           @if (editMode()) {
@@ -682,7 +678,7 @@
           }
         </div>
 
-        <div class="mt-4 d-flex gap-2">
+        <div class="app-form-actions">
           <button class="btn btn-primary" type="submit" [disabled]="loading()">
             {{ (editMode() ? 'Update Booking' : 'Create Booking') | translate }}
           </button>

@@ -1,0 +1,56 @@
+:root {
+  --app-form-actions-border: rgba(148, 163, 184, 0.22);
+}
+
+body.dark-only {
+  --app-form-actions-border: rgba(6, 182, 212, 0.12);
+}
+
+.app-form-actions {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  border-top: 1px solid var(--app-form-actions-border);
+}
+
+html[dir='rtl'] .app-form-actions {
+  justify-content: flex-start;
+}
+
+html[dir='ltr'] .app-form-actions {
+  justify-content: flex-end;
+  flex-direction: row-reverse;
+}
+
+.app-form-actions--split {
+  justify-content: space-between;
+  width: 100%;
+}
+
+html[dir='ltr'] .app-form-actions--split {
+  flex-direction: row;
+}
+
+html[dir='rtl'] .app-form-actions--split {
+  flex-direction: row-reverse;
+}
+
+.app-form-actions__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.modal-footer {
+  gap: 0.65rem;
+  border-top: 1px solid var(--app-form-actions-border);
+}
+
+.modal-footer .btn {
+  min-height: 44px;
+  border-radius: 14px;
+}

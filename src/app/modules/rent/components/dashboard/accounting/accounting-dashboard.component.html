@@ -11,8 +11,8 @@
           }
         </select>
       </label>
-      <label><span>{{ 'Date From' | translate }}</span><input type="date" class="form-control" formControlName="startDate" [attr.placeholder]="'Day/Month/Year' | translate" /></label>
-      <label><span>{{ 'Date To' | translate }}</span><input type="date" class="form-control" formControlName="endDate" [attr.placeholder]="'Day/Month/Year' | translate" /></label>
+      <app-date-picker formControlName="startDate" label="Date From" />
+      <app-date-picker formControlName="endDate" label="Date To" />
       <label>
         <span>{{ 'Fleet' | translate }}</span>
         <select class="form-select" formControlName="fleet">

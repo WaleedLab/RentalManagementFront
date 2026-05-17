@@ -7,6 +7,7 @@ import { catchError, finalize, forkJoin, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { FieldValueStateDirective } from '../../../../../shared/directives/field-value-state.directive';
+import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import {
@@ -32,6 +33,7 @@ import { VehicleService } from '../../../services/vehicles/vehicle.service';
     FieldValueStateDirective,
     PageHeaderComponent,
     SmoothSelectComponent,
+    DatePickerComponent,
   ],
   templateUrl: './traffic-violation-form.component.html',
   styleUrl: './traffic-violation-form.component.scss',

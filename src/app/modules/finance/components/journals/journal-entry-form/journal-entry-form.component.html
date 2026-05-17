@@ -12,8 +12,7 @@
         <h6 class="journal-section-title">{{ 'Journal Header' | translate }}</h6>
         <div class="row g-3">
           <div class="col-lg-4">
-            <label class="form-label">{{ 'Date' | translate }} <span class="text-danger">*</span></label>
-            <input type="datetime-local" class="form-control" formControlName="date" [readonly]="isViewMode()" />
+            <app-date-picker mode="datetime" formControlName="date" label="Date" [disabled]="isViewMode()" />
           </div>
 
           <div class="col-lg-4">
@@ -256,7 +255,7 @@
       <div class="text-danger small mt-3">{{ 'Required field' | translate }}</div>
     }
 
-    <div class="journal-actions mt-4">
+    <div class="app-form-actions">
       @if (!isViewMode()) {
         <button class="btn btn-primary" type="submit" [disabled]="!canSave()">
           @if (loading()) {

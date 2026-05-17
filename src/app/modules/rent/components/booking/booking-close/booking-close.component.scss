@@ -30,12 +30,101 @@
   opacity: 1;
 }
 
-.contract-close-field--notes .form-control {
-  min-height: 6rem;
+.contract-close-data-block {
+  margin-top: 0.25rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(13, 148, 136, 0.35);
+  background: linear-gradient(140deg, rgba(236, 253, 245, 0.95), rgba(240, 253, 250, 0.88));
 }
 
-.contract-close-actions {
-  flex-direction: row-reverse;
+.contract-close-data-block__title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f766e;
+  margin-bottom: 0.5rem;
+}
+
+.contract-close-data-block__intro {
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+  color: #0f766e;
+  opacity: 0.92;
+}
+
+.contract-close-field-hint {
+  margin: 0.45rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.contract-close-field-hint--danger {
+  color: var(--bs-danger);
+}
+
+.contract-close-field-hint--muted {
+  color: #64748b;
+}
+
+.contract-close-field--date-locked {
+  opacity: 0.92;
+}
+
+.contract-close-data-block__grid {
+  display: grid;
+  gap: 1rem 1.25rem;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.contract-close-field--contract-input {
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(13, 148, 136, 0.45);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.contract-close-field--contract-input .form-label {
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.contract-close-field--contract-input .form-control:not([disabled]) {
+  border-width: 2px;
+  border-color: rgba(13, 148, 136, 0.55);
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(45, 212, 191, 0.2),
+    0 10px 26px -18px rgba(13, 148, 136, 0.45);
+}
+
+.contract-close-field--contract-input .form-control:focus:not([disabled]) {
+  border-color: rgba(13, 148, 136, 0.85);
+  box-shadow:
+    0 0 0 3px rgba(45, 212, 191, 0.28),
+    0 12px 28px -16px rgba(13, 148, 136, 0.5);
+}
+
+.contract-close-field--contract-input .form-control[disabled],
+.contract-close-field--contract-input .form-control[readonly] {
+  border-width: 2px;
+  border-color: rgba(13, 148, 136, 0.4);
+  background: rgba(240, 253, 250, 0.95);
+  color: var(--bs-body-color);
+  opacity: 1;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.contract-close-field--contract-input app-date-picker {
+  display: block;
+}
+
+.contract-close-field--notes .form-control {
+  min-height: 6rem;
 }
 
 .text-pre-wrap {
@@ -82,4 +171,53 @@
 :host-context(body.dark-only) .contract-close-field--readonly .form-control[disabled] {
   background-color: rgba(255, 255, 255, 0.06);
   color: var(--bs-body-color);
+}
+
+:host-context(body.dark-only) .contract-close-data-block {
+  border-color: rgba(52, 211, 153, 0.38);
+  background: linear-gradient(140deg, rgba(6, 78, 59, 0.35), rgba(15, 23, 42, 0.45));
+}
+
+:host-context(body.dark-only) .contract-close-data-block__title {
+  color: #5eead4;
+}
+
+:host-context(body.dark-only) .contract-close-data-block__intro {
+  color: #99f6e4;
+}
+
+:host-context(body.dark-only) .contract-close-field-hint--muted {
+  color: rgba(148, 163, 184, 0.95);
+}
+
+:host-context(body.dark-only) .contract-close-field--contract-input {
+  border-color: rgba(52, 211, 153, 0.42);
+  background: rgba(6, 78, 59, 0.28);
+}
+
+:host-context(body.dark-only) .contract-close-field--contract-input .form-label {
+  color: #5eead4;
+}
+
+:host-context(body.dark-only) .contract-close-field--contract-input .form-control:not([disabled]) {
+  background: rgba(6, 78, 59, 0.42);
+  color: #ecfdf5;
+  border-color: rgba(52, 211, 153, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, 0.22),
+    0 12px 30px -18px rgba(16, 185, 129, 0.4);
+}
+
+:host-context(body.dark-only) .contract-close-field--contract-input .form-control:focus:not([disabled]) {
+  border-color: rgba(110, 231, 183, 0.75);
+  box-shadow:
+    0 0 0 3px rgba(16, 185, 129, 0.2),
+    0 14px 32px -16px rgba(16, 185, 129, 0.45);
+}
+
+:host-context(body.dark-only) .contract-close-field--contract-input .form-control[disabled],
+:host-context(body.dark-only) .contract-close-field--contract-input .form-control[readonly] {
+  background: rgba(6, 78, 59, 0.42);
+  color: #ecfdf5;
+  border-color: rgba(52, 211, 153, 0.45);
 }

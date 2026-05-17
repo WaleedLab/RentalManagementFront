@@ -1,7 +1,8 @@
 :host {
   display: block;
   position: relative;
-  z-index: 120;
+  /* Keep below in-card menus; raise only when the page-size select is open. */
+  z-index: 10;
 }
 
 :host:has(app-smooth-select.app-smooth-select-host--open) {

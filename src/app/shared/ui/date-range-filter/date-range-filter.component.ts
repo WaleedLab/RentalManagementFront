@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
+
+import { DatePickerComponent } from '../date-picker/date-picker.component';
 
 export interface DateRangeValue {
   from: string;
@@ -11,7 +12,7 @@ export interface DateRangeValue {
 @Component({
   selector: 'app-date-range-filter',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, DatePickerComponent],
   templateUrl: './date-range-filter.component.html',
   styleUrl: './date-range-filter.component.scss',
 })
@@ -26,14 +27,14 @@ export class DateRangeFilterComponent {
 
   @Output() rangeChange = new EventEmitter<DateRangeValue>();
 
-  onFromChange(value: string): void {
+  onFromChange(value: string | null): void {
     this.rangeChange.emit({
       from: value ?? '',
       to: this.to ?? '',
     });
   }
 
-  onToChange(value: string): void {
+  onToChange(value: string | null): void {
     this.rangeChange.emit({
       from: this.from ?? '',
       to: value ?? '',

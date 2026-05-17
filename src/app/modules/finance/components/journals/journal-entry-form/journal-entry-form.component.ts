@@ -17,6 +17,7 @@ import { forkJoin } from 'rxjs';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
+import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import {
   SmoothSelectComponent,
@@ -48,6 +49,7 @@ import { BranchService } from '../../../../rent/services/branches/branch.service
     TranslateModule,
     PageHeaderComponent,
     SmoothSelectComponent,
+    DatePickerComponent,
   ],
   templateUrl: './journal-entry-form.component.html',
   styleUrl: './journal-entry-form.component.scss',

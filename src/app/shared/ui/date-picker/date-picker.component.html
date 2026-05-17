@@ -1,0 +1,129 @@
+<div
+  class="date-picker"
+  [class.open]="isOpen()"
+  [class.date-picker--datetime]="mode === 'datetime'"
+  [class.date-picker--hijri]="calendarModeState() === 'hijri'"
+>
+  @if (labelText()) {
+    <label class="date-label">{{ labelText() }}</label>
+  }
+
+  <button
+    type="button"
+    class="date-trigger"
+    [disabled]="isDisabled()"
+    [attr.aria-expanded]="isOpen()"
+    [attr.aria-haspopup]="'dialog'"
+    (click)="toggle()"
+  >
+    <span class="date-icon" aria-hidden="true">
+      <i class="fa-regular fa-calendar"></i>
+    </span>
+
+    <span class="date-value" [class.placeholder]="!selectedDate()">
+      {{ selectedDate() ? displayValue() : placeholderText() }}
+    </span>
+
+    <span class="calendar-type-badge">{{ calendarModeBadge() }}</span>
+
+    <span class="chevron" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
+  </button>
+
+  @if (isOpen()) {
+    <div class="calendar-panel" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      @if (!lockCalendarMode()) {
+        <div class="calendar-mode-switch">
+          <button
+            type="button"
+            [class.active]="calendarModeState() === 'gregorian'"
+            (click)="setCalendarMode('gregorian')"
+          >
+            {{ 'datePicker.gregorian' | translate }}
+          </button>
+          <button
+            type="button"
+            [class.active]="calendarModeState() === 'hijri'"
+            (click)="setCalendarMode('hijri')"
+          >
+            {{ 'datePicker.hijri' | translate }}
+          </button>
+        </div>
+      }
+
+      <div class="calendar-header">
+        <button type="button" class="nav-btn" (click)="prevMonth()" [attr.aria-label]="'datePicker.prevMonth' | translate">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        <strong>{{ monthLabel() }}</strong>
+        <button type="button" class="nav-btn" (click)="nextMonth()" [attr.aria-label]="'datePicker.nextMonth' | translate">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+      </div>
+
+      @if (mode === 'datetime') {
+        <div class="calendar-time">
+          <label class="calendar-time__label">{{ 'datePicker.time' | translate }}</label>
+          <div class="calendar-time__inputs">
+            <input
+              type="number"
+              class="calendar-time__input calendar-time__input--hour"
+              min="1"
+              max="12"
+              [value]="displayHour12()"
+              (change)="onHour12Change($any($event.target).value)"
+            />
+            <span class="calendar-time__sep">:</span>
+            <input
+              type="number"
+              class="calendar-time__input calendar-time__input--minute"
+              min="0"
+              max="59"
+              [value]="selectedMinute()"
+              (change)="onMinuteChange($any($event.target).value)"
+            />
+            <select
+              class="calendar-time__period"
+              [value]="displayPeriod()"
+              (change)="onPeriodChange($any($event.target).value)"
+            >
+              <option value="AM">{{ 'datePicker.am' | translate }}</option>
+              <option value="PM">{{ 'datePicker.pm' | translate }}</option>
+            </select>
+          </div>
+        </div>
+      }
+
+      <div class="week-days">
+        @for (day of weekDays(); track day) {
+          <span>{{ day }}</span>
+        }
+      </div>
+
+      <div class="days-grid">
+        @for (empty of emptyDays(); track $index) {
+          <button type="button" class="day empty" disabled aria-hidden="true"></button>
+        }
+        @for (day of daysInMonth(); track day) {
+          <button type="button" class="day" [class.today]="isToday(day)" [class.selected]="isSelected(day)" (click)="selectDay(day)">
+            <span>{{ day }}</span>
+            @if (calendarModeState() === 'hijri') {
+              <small>{{ getHijriDayNumber(day) }}</small>
+            }
+          </button>
+        }
+      </div>
+
+      @if (selectedDate()) {
+        <div class="selected-preview">
+          <span>{{ 'datePicker.previewGregorian' | translate }}: {{ formatGregorianDate(selectedDate()!) }}</span>
+          <span>{{ 'datePicker.previewHijri' | translate }}: {{ formatHijriDate(selectedDate()!) }}</span>
+        </div>
+      }
+
+      <div class="calendar-actions">
+        <button type="button" class="ghost-btn" (click)="clear()">{{ 'datePicker.clear' | translate }}</button>
+        <button type="button" class="primary-btn" (click)="selectToday()">{{ 'datePicker.today' | translate }}</button>
+      </div>
+    </div>
+  }
+</div>

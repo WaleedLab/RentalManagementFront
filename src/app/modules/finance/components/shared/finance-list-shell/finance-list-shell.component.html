@@ -102,21 +102,38 @@
                     <td class="text-end">
                       <div class="d-inline-flex gap-2">
                         @for (action of rowActions; track action.key) {
-                          <button
-                            type="button"
-                            class="btn btn-sm"
-                            [class]="'btn btn-sm btn-outline-' + (action.variant || 'secondary')"
-                            [title]="action.label | translate"
-                            [attr.aria-label]="action.label | translate"
-                            (click)="emitRowAction(action.key, rowIndex)"
-                          >
-                            @if (action.icon) {
-                              <i [class]="action.icon"></i>
-                            }
-                            @if (!action.iconOnly) {
-                              <span>{{ action.label | translate }}</span>
-                            }
-                          </button>
+                          @if (getActionRouterLink(action, row); as actionLink) {
+                            <a
+                              class="btn btn-sm"
+                              [class]="'btn btn-sm btn-outline-' + (action.variant || 'secondary')"
+                              [routerLink]="actionLink"
+                              [title]="action.label | translate"
+                              [attr.aria-label]="action.label | translate"
+                            >
+                              @if (action.icon) {
+                                <i [class]="action.icon"></i>
+                              }
+                              @if (!action.iconOnly) {
+                                <span>{{ action.label | translate }}</span>
+                              }
+                            </a>
+                          } @else {
+                            <button
+                              type="button"
+                              class="btn btn-sm"
+                              [class]="'btn btn-sm btn-outline-' + (action.variant || 'secondary')"
+                              [title]="action.label | translate"
+                              [attr.aria-label]="action.label | translate"
+                              (click)="emitRowAction(action.key, rowIndex)"
+                            >
+                              @if (action.icon) {
+                                <i [class]="action.icon"></i>
+                              }
+                              @if (!action.iconOnly) {
+                                <span>{{ action.label | translate }}</span>
+                              }
+                            </button>
+                          }
                         }
                       </div>
                     </td>

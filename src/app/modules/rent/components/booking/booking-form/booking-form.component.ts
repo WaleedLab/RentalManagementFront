@@ -20,6 +20,7 @@ import {
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
+import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import {
   SmoothSelectComponent,
@@ -65,6 +66,7 @@ import {
     TranslateModule,
     PageHeaderComponent,
     SmoothSelectComponent,
+    DatePickerComponent,
   ],
   templateUrl: './booking-form.component.html',
   styleUrl: './booking-form.component.scss',

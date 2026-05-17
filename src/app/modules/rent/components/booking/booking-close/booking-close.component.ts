@@ -8,14 +8,25 @@ import { catchError, forkJoin, of } from 'rxjs';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { Booking, BookingUpdateRequest, Setting } from '../../../models';
 import { BookingService } from '../../../services/booking/booking.service';
 import { SettingService } from '../../../services/settings/setting.service';
+import {
+  CloseRulesInput,
+  CloseRulesSettings,
+  drivenKmForClose,
+  kmCloseViolated,
+  minutesLateForClose,
+  resolveCheckoutMs,
+  resolvePlannedReturnEndMs,
+  timeCloseViolated,
+} from './booking-close-rules.util';
 
 @Component({
   selector: 'app-booking-close',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslateModule, PageHeaderComponent],
+  imports: [CommonModule, RouterLink, TranslateModule, PageHeaderComponent, DatePickerComponent],
   templateUrl: './booking-close.component.html',
   styleUrl: './booking-close.component.scss',
 })
@@ -33,6 +44,7 @@ export class BookingCloseComponent implements OnInit {
   loading = signal(false);
   saving = signal(false);
 
+  returnDateTime = signal('');
   returnOdometerText = signal('');
   notes = signal('');
   /** Non-null when the warning modal should show (plain translated text). */
@@ -143,44 +155,30 @@ export class BookingCloseComponent implements OnInit {
     return Number.isFinite(n) ? n : null;
   }
 
-  /** Minutes after scheduled contract end (`endDate`); 0 if still before/at end. */
-  minutesPastContractEnd(item: Booking): number {
-    const endMs = this.parseMs(item.endDate);
-    if (endMs === null) {
-      return 0;
-    }
-    const delta = Date.now() - endMs;
-    if (delta <= 0) {
-      return 0;
-    }
-    return delta / 60000;
+  private closeRulesSettings(s: Setting | null): CloseRulesSettings {
+    return {
+      allowedLateMinutes: Math.max(0, Number(s?.number_mints_late_forr_finshcontract) || 0),
+      allowedDrivenKm: Math.max(0, Number(s?.number_incres_km_for_finshcontract) || 0),
+    };
   }
 
-  timeCloseViolated(item: Booking, s: Setting | null): boolean {
-    if (!s) {
-      return false;
+  private buildCloseRulesInput(
+    item: Booking,
+    returnMs: number,
+    returnOdom: number,
+  ): CloseRulesInput | null {
+    const checkoutMs = resolveCheckoutMs(item.startDate, item.pickupDate);
+    if (checkoutMs === null) {
+      return null;
     }
-    const allowed = Math.max(0, Number(s.number_mints_late_forr_finshcontract) || 0);
-    if (allowed <= 0) {
-      return false;
-    }
-    return this.minutesPastContractEnd(item) > allowed;
-  }
-
-  kmCloseViolated(item: Booking, s: Setting | null, returnOdom: number): boolean {
-    if (!s) {
-      return false;
-    }
-    const limit = Math.max(0, Number(s.number_incres_km_for_finshcontract) || 0);
-    if (limit <= 0) {
-      return false;
-    }
-    const exit = Math.max(0, Number(item.checkoutCounter) || 0);
-    const totalAllow =
-      Math.max(0, Number(item.allowTo) || 0) * Math.max(0, Number(item.countOfDay) || 0);
-    const driven = returnOdom - exit;
-    const excess = Math.max(0, driven - totalAllow);
-    return excess > limit;
+    return {
+      checkoutMs,
+      returnMs,
+      checkoutOdom: Math.max(0, Math.trunc(Number(item.checkoutCounter) || 0)),
+      returnOdom,
+      bookedDays: Math.max(0, Math.trunc(Number(item.countOfDay) || 0)),
+      endDateIso: item.endDate,
+    };
   }
 
   closeDisabledReason = computed((): 'locked' | 'invalid_odom' | null => {
@@ -188,19 +186,72 @@ export class BookingCloseComponent implements OnInit {
     if (!item || !this.canClose(item)) {
       return 'locked';
     }
-    const ret = this.parsedReturnOdometer();
-    if (ret === null) {
-      return 'invalid_odom';
-    }
-    const exit = Math.max(0, Number(item.checkoutCounter) || 0);
-    if (ret < exit) {
+    if (!this.odometerKmTestPassed()) {
       return 'invalid_odom';
     }
     return null;
   });
 
+  /** Valid return odometer and within km close margin from fleet settings. */
+  odometerKmTestPassed = computed((): boolean => {
+    const item = this.booking();
+    if (!item) {
+      return false;
+    }
+    const ret = this.parsedReturnOdometer();
+    if (ret === null) {
+      return false;
+    }
+    const exit = Math.max(0, Number(item.checkoutCounter) || 0);
+    if (ret < exit) {
+      return false;
+    }
+    const rules = this.buildCloseRulesInput(item, Date.now(), ret);
+    const s = this.settings();
+    if (!rules || !s) {
+      return true;
+    }
+    return !kmCloseViolated(rules, this.closeRulesSettings(s));
+  });
+
+  returnDatePickerDisabled = computed(
+    () => this.closeLocked() || !this.odometerKmTestPassed(),
+  );
+
+  odometerKmViolationHint = computed((): string | null => {
+    const item = this.booking();
+    if (!item || this.closeLocked()) {
+      return null;
+    }
+    const ret = this.parsedReturnOdometer();
+    if (ret === null) {
+      return null;
+    }
+    const exit = Math.max(0, Number(item.checkoutCounter) || 0);
+    if (ret < exit) {
+      return this.translate.instant('Contract close odometer below checkout short');
+    }
+    const rules = this.buildCloseRulesInput(item, Date.now(), ret);
+    const s = this.settings();
+    if (!rules || !s || !kmCloseViolated(rules, this.closeRulesSettings(s))) {
+      return null;
+    }
+    const driven = drivenKmForClose(rules.checkoutOdom, rules.returnOdom);
+    return this.translate.instant('Contract close warning km detail', {
+      drivenKm: driven,
+      allowedKm: this.allowedCloseKmMargin(),
+    });
+  });
+
   dismissWarning(): void {
     this.warningMessage.set(null);
+  }
+
+  onReturnDateChange(value: unknown): void {
+    if (value === undefined || value === null) {
+      return;
+    }
+    this.returnDateTime.set(String(value ?? ''));
   }
 
   onReturnOdometerInput(value: string): void {
@@ -228,21 +279,27 @@ export class BookingCloseComponent implements OnInit {
       return;
     }
 
-    const parts: string[] = [];
-    if (s && this.timeCloseViolated(item, s)) {
-      parts.push(
-        this.translate.instant('Contract close warning time', {
-          minutes: this.allowedCloseMinutes(),
-        }),
-      );
+    const returnIso = this.dateTimeLocalToApi(this.returnDateTime());
+    if (!returnIso) {
+      this.toast.error(this.translate.instant('Contract close return time invalid'));
+      return;
     }
-    if (s && this.kmCloseViolated(item, s, ret)) {
-      parts.push(
-        this.translate.instant('Contract close warning km', {
-          km: this.allowedCloseKmMargin(),
-        }),
-      );
+    const returnMs = this.parseReturnDateTimeMs(this.returnDateTime());
+    if (returnMs === null) {
+      this.toast.error(this.translate.instant('Contract close return time invalid'));
+      return;
     }
+    const rules = this.buildCloseRulesInput(item, returnMs, ret);
+    if (!rules) {
+      this.toast.error(this.translate.instant('Contract finish missing context'));
+      return;
+    }
+    if (returnMs < rules.checkoutMs) {
+      this.toast.error(this.translate.instant('Contract finish return before checkout'));
+      return;
+    }
+
+    const parts: string[] = this.buildCloseWarningMessages(item, s, rules);
     if (parts.length > 0) {
       this.warningMessage.set(parts.join('\n\n'));
       return;
@@ -268,7 +325,6 @@ export class BookingCloseComponent implements OnInit {
       return;
     }
 
-    const returnIso = new Date().toISOString();
     const payload: BookingUpdateRequest = {
       id: idBooking,
       idCustomer,
@@ -349,7 +405,123 @@ export class BookingCloseComponent implements OnInit {
         this.returnOdometerText.set('');
       }
       this.notes.set(String(b.notes ?? ''));
+      this.returnDateTime.set(this.initialReturnDateTimeLocal(b));
     });
+  }
+
+  private buildCloseWarningMessages(
+    item: Booking,
+    s: Setting | null,
+    rules: CloseRulesInput,
+  ): string[] {
+    const parts: string[] = [];
+    if (!s) {
+      return parts;
+    }
+    const settings = this.closeRulesSettings(s);
+    if (kmCloseViolated(rules, settings)) {
+      parts.push(
+        this.translate.instant('Contract close warning km detail', {
+          drivenKm: drivenKmForClose(rules.checkoutOdom, rules.returnOdom),
+          allowedKm: settings.allowedDrivenKm,
+        }),
+      );
+    }
+    if (timeCloseViolated(rules, settings)) {
+      const plannedEndMs = resolvePlannedReturnEndMs(
+        rules.checkoutMs,
+        rules.bookedDays,
+        rules.endDateIso,
+      );
+      parts.push(
+        this.translate.instant('Contract close warning time detail', {
+          checkoutTime: this.formatDateTime(item.startDate ?? item.pickupDate),
+          plannedEnd: this.formatDateTime(new Date(plannedEndMs).toISOString()),
+          returnTime: this.formatDateTime(this.dateTimeLocalToApi(this.returnDateTime())),
+          lateMinutes: Math.ceil(minutesLateForClose(rules)),
+          allowedMinutes: settings.allowedLateMinutes,
+        }),
+      );
+    }
+    return parts;
+  }
+
+  private initialReturnDateTimeLocal(b: Booking): string {
+    const fromReturn = this.toDateTimeLocalValue(b.returnDate);
+    if (fromReturn) {
+      return fromReturn;
+    }
+    const fromEnd = this.toDateTimeLocalValue(b.endDate);
+    if (fromEnd) {
+      return fromEnd;
+    }
+    return this.nowDateTimeLocalValue();
+  }
+
+  private toDateTimeLocalValue(iso: string | undefined): string {
+    const text = String(iso ?? '').trim();
+    if (!text) {
+      return '';
+    }
+    const d = new Date(text);
+    if (Number.isNaN(d.getTime())) {
+      return '';
+    }
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+
+  private dateTimeLocalToApi(value: string): string {
+    const text = String(value ?? '').trim();
+    if (!text) {
+      return '';
+    }
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(text)) {
+      return `${text}:00`;
+    }
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(text)) {
+      return text;
+    }
+    const d = new Date(text);
+    return Number.isNaN(d.getTime()) ? '' : d.toISOString();
+  }
+
+  private nowDateTimeLocalValue(): string {
+    return this.toDateTimeLocalValue(new Date().toISOString());
+  }
+
+  private parseReturnDateTimeMs(value: string): number | null {
+    const text = String(value ?? '').trim();
+    if (!text) {
+      return null;
+    }
+    const parts = this.tryParseDateTimeLocalParts(text);
+    if (parts) {
+      const d = new Date(parts.y, parts.m - 1, parts.d, parts.hh, parts.mm, parts.ss);
+      const ms = d.getTime();
+      return Number.isNaN(ms) ? null : ms;
+    }
+    const ms = new Date(text).getTime();
+    return Number.isNaN(ms) ? null : ms;
+  }
+
+  private tryParseDateTimeLocalParts(
+    text: string,
+  ): { y: number; m: number; d: number; hh: number; mm: number; ss: number } | null {
+    const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/.exec(text);
+    if (!m) {
+      return null;
+    }
+    const y = Number(m[1]);
+    const mo = Number(m[2]);
+    const d = Number(m[3]);
+    const hh = Number(m[4]);
+    const mm = Number(m[5]);
+    const ss = m[6] !== undefined && m[6] !== '' ? Number(m[6]) : 0;
+    if (![y, mo, d, hh, mm, ss].every(n => Number.isFinite(n))) {
+      return null;
+    }
+    return { y, m: mo, d, hh, mm, ss };
   }
 
   private parseMs(iso: string | undefined): number | null {

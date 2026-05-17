@@ -9,6 +9,7 @@ import { RoleService } from '../../../services/roles/role.service';
 import { BranchService } from '../../../services/branches/branch.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { Branch, RoleLookup, UserCreateRequest } from '../../../models';
+import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
@@ -21,6 +22,7 @@ import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-firs
     RouterLink,
     TranslateModule,
     PageHeaderComponent,
+    DatePickerComponent,
   ],
   templateUrl: './user-form.component.html',
   styleUrl: './user-form.component.scss',

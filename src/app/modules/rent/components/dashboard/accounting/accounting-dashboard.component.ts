@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { finalize } from 'rxjs';
 
+import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import {
   AccountingAlert,
@@ -30,6 +31,7 @@ import { AccountingTableComponent } from './shared/accounting-table.component';
     AccountingChartComponent,
     AccountingTableComponent,
     AccountingAlertsComponent,
+    DatePickerComponent,
   ],
   templateUrl: './accounting-dashboard.component.html',
   styleUrl: './accounting-dashboard.component.scss',

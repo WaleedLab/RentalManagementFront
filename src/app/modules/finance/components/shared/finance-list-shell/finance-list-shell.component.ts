@@ -114,6 +114,10 @@ export class FinanceListShellComponent implements OnInit {
     this.rowAction.emit({ actionKey, rowIndex });
   }
 
+  getActionRouterLink(action: FinanceListAction, row: FinanceListRow): string[] | null {
+    return action.route?.(row) ?? null;
+  }
+
   /** Treat non-empty `error` as a failed load: show loading state in the table area. */
   hasBlockingError(): boolean {
     return typeof this.error === 'string' && this.error.trim().length > 0;

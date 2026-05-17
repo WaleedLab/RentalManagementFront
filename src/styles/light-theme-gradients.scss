@@ -1,0 +1,303 @@
+/* Light theme — soft inner-container gradients only (page background unchanged). */
+
+body.light-only {
+  .light-card-gradient {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(247, 250, 255, 0.95) 48%,
+      rgba(239, 244, 255, 0.88) 100%
+    );
+    border: 1px solid rgba(120, 145, 190, 0.18);
+    border-radius: 24px;
+    box-shadow: 0 18px 45px rgba(30, 55, 90, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .light-card-gradient-soft-purple {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(248, 250, 255, 0.95) 52%,
+      rgba(246, 239, 255, 0.75) 100%
+    );
+    border: 1px solid rgba(150, 130, 210, 0.16);
+    border-radius: 24px;
+    box-shadow: 0 18px 45px rgba(80, 70, 120, 0.07);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .light-card-gradient-sky {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(244, 249, 255, 0.95) 55%,
+      rgba(234, 244, 255, 0.88) 100%
+    );
+    border: 1px solid rgba(120, 160, 210, 0.16);
+    border-radius: 24px;
+    box-shadow: 0 18px 45px rgba(30, 55, 90, 0.07);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .light-section-title {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.96),
+      rgba(241, 247, 255, 0.92),
+      rgba(245, 239, 255, 0.78)
+    );
+    border: 1px solid rgba(120, 145, 190, 0.18);
+    border-radius: 22px;
+    box-shadow: 0 14px 35px rgba(30, 55, 90, 0.07);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .light-toolbar-gradient {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 255, 0.9));
+    border: 1px solid rgba(120, 145, 190, 0.16);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(30, 55, 90, 0.06);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .light-input-gradient {
+    background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 12px;
+    color: #1f2937;
+  }
+
+  .light-input-gradient:focus {
+    border-color: rgba(37, 99, 235, 0.45);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+    outline: none;
+  }
+
+  /* Shell: header datetime + breadcrumb */
+  .header-datetime-panel {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 255, 0.9)) !important;
+    border: 1px solid rgba(120, 145, 190, 0.16) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 10px 30px rgba(30, 55, 90, 0.06) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .page-title .breadcrumb-shell {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.96),
+      rgba(247, 250, 255, 0.92),
+      rgba(239, 244, 255, 0.85)
+    ) !important;
+    border: 1px solid rgba(120, 145, 190, 0.16) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 10px 30px rgba(30, 55, 90, 0.06) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .page-title .breadcrumb-item {
+    color: #6b7280;
+  }
+
+  .page-title .breadcrumb-item.active {
+    color: #1f2937;
+  }
+
+  .page-header-card.light-section-title {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.96),
+      rgba(241, 247, 255, 0.92),
+      rgba(245, 239, 255, 0.78)
+    ) !important;
+    border: 1px solid rgba(120, 145, 190, 0.18) !important;
+    border-radius: 22px !important;
+    box-shadow: 0 14px 35px rgba(30, 55, 90, 0.07) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    h3 {
+      color: #1f2937;
+    }
+  }
+
+  /* Date picker: gregorian / hijri toggle */
+  .date-picker .calendar-mode-switch {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.92),
+      rgba(244, 248, 255, 0.88)
+    );
+    border: 1px solid rgba(120, 145, 190, 0.14);
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(30, 55, 90, 0.05);
+  }
+
+  .date-picker .calendar-mode-switch button {
+    color: #6b7280;
+  }
+
+  .date-picker .calendar-mode-switch button.active {
+    color: #ffffff;
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.18);
+  }
+
+  .date-picker .date-trigger {
+    background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+    border-color: rgba(148, 163, 184, 0.24);
+    color: #1f2937;
+  }
+
+  .date-picker .date-label {
+    color: #6b7280;
+  }
+
+  .date-picker .calendar-type-badge {
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.08);
+    border-color: rgba(37, 99, 235, 0.2);
+  }
+
+  /* Customer form page */
+  .customer-form-page {
+    .customer-form-card--main {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+
+      > .card-body {
+        padding-inline: 0;
+        padding-top: 0;
+      }
+    }
+
+    .customer-form-section {
+      padding: 1.05rem 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .customer-form-section__header {
+      margin-bottom: 0.9rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 16px;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.72),
+        rgba(247, 250, 255, 0.55)
+      );
+      border: 1px solid rgba(120, 145, 190, 0.1);
+
+      h6 {
+        color: #1f2937;
+        font-weight: 700;
+      }
+
+      p {
+        color: #6b7280;
+      }
+    }
+
+    .form-label {
+      color: #1f2937;
+      font-weight: 600;
+    }
+
+    .form-text {
+      display: block;
+      margin-top: 0.35rem;
+      padding: 0.42rem 0.62rem;
+      border-radius: 10px;
+      color: #6b7280;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 255, 0.82));
+      border: 1px solid rgba(120, 145, 190, 0.1);
+    }
+
+    .form-control,
+    .form-select {
+      background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%) !important;
+      border-color: rgba(148, 163, 184, 0.24) !important;
+      color: #1f2937 !important;
+      border-radius: 12px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: rgba(37, 99, 235, 0.45) !important;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08) !important;
+    }
+
+    .subscription-offer-box,
+    .customer-active-switch,
+    .subscription-mode-toggle .form-check {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 255, 0.86));
+      border-color: rgba(120, 145, 190, 0.16);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border-color: rgba(37, 99, 235, 0.35);
+    }
+  }
+
+  /* Beat global `.card` light background without touching page shell background. */
+  .page-wrapper.compact-wrapper .page-body-wrapper {
+    .light-card-gradient,
+    .card.light-card-gradient {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.98) 0%,
+        rgba(247, 250, 255, 0.95) 48%,
+        rgba(239, 244, 255, 0.88) 100%
+      ) !important;
+      border: 1px solid rgba(120, 145, 190, 0.18) !important;
+      border-radius: 24px !important;
+      box-shadow: 0 18px 45px rgba(30, 55, 90, 0.08) !important;
+    }
+
+    .light-card-gradient-soft-purple,
+    .card.light-card-gradient-soft-purple {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.98) 0%,
+        rgba(248, 250, 255, 0.95) 52%,
+        rgba(246, 239, 255, 0.75) 100%
+      ) !important;
+      border: 1px solid rgba(150, 130, 210, 0.16) !important;
+      border-radius: 24px !important;
+      box-shadow: 0 18px 45px rgba(80, 70, 120, 0.07) !important;
+    }
+
+    .light-card-gradient-sky,
+    .card.light-card-gradient-sky {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.98) 0%,
+        rgba(244, 249, 255, 0.95) 55%,
+        rgba(234, 244, 255, 0.88) 100%
+      ) !important;
+      border: 1px solid rgba(120, 160, 210, 0.16) !important;
+      border-radius: 24px !important;
+      box-shadow: 0 18px 45px rgba(30, 55, 90, 0.07) !important;
+    }
+
+    .page-header-card.light-section-title {
+      border-radius: 22px !important;
+    }
+
+    .customer-form-card--main.card {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+  }
+}

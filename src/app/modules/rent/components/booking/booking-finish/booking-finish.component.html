@@ -45,17 +45,19 @@
               <input class="form-control" readonly disabled [value]="formatDateTime(item.startDate)" />
             </div>
             <div class="finish-field finish-val-cell finish-field--contract-input">
-              <label class="form-label">{{ 'Contract finish return time' | translate }}</label>
-              <input
-                class="form-control"
-                type="datetime-local"
+              <app-date-picker
+                mode="datetime"
+                label="Contract finish return time"
                 [disabled]="finishLocked()"
-                [ngModel]="returnDateTime()"
-                [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="onReturnDateChange($event)"
-                (change)="onReturnDateChange($any($event.target).value)"
-                (input)="onReturnDateChange($any($event.target).value)"
+                [value]="returnDateTime()"
+                (dateChange)="onReturnDateChange($event ?? '')"
               />
+            </div>
+            <div class="finish-field finish-field--readonly finish-val-cell">
+              <label class="form-label">{{ 'Contract finish late duration' | translate }}</label>
+              <div class="form-control finish-stat-display" aria-readonly="true">
+                {{ lateDurationDisplay() }}
+              </div>
             </div>
             <div class="finish-field finish-field--readonly finish-val-cell">
               <label class="form-label">{{ 'Contract finish extra hour price' | translate }}</label>
@@ -286,10 +288,7 @@
           ></textarea>
         </div>
 
-        <div class="finish-actions mt-4 d-flex flex-wrap gap-2 justify-content-between">
-          <a class="btn btn-outline-secondary" [routerLink]="['/booking', item.id, 'details']">
-            {{ 'Back' | translate }}
-          </a>
+        <div class="app-form-actions">
           <button
             type="button"
             class="btn btn-primary"
@@ -301,6 +300,9 @@
             }
             {{ 'Contract finish submit' | translate }}
           </button>
+          <a class="btn btn-cancel" [routerLink]="['/booking', item.id, 'details']">
+            {{ 'Back' | translate }}
+          </a>
         </div>
       </div>
     </div>
@@ -309,7 +311,7 @@
     <div class="card">
       <div class="card-body">
         <p class="text-muted mb-3">{{ 'Failed to load booking' | translate }}</p>
-        <a class="btn btn-outline-secondary" routerLink="/booking">{{ 'Back' | translate }}</a>
+        <a class="btn btn-cancel" routerLink="/booking">{{ 'Back' | translate }}</a>
       </div>
     </div>
   }

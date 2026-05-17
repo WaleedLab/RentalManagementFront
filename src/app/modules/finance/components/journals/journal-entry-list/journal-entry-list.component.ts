@@ -1,6 +1,5 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { Subject, catchError, debounceTime, distinctUntilChanged, of } from 'rxjs';
@@ -36,7 +35,6 @@ export class JournalEntryListComponent implements OnInit {
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
   private destroyRef = inject(DestroyRef);
-  private router = inject(Router);
 
   items = signal<JournalEntry[]>([]);
   financialYearNames = signal<Record<string, string>>({});
@@ -120,13 +118,27 @@ export class JournalEntryListComponent implements OnInit {
     { key: 'financialYear', label: 'Financial Year' },
   ];
   readonly rowActions: FinanceListAction[] = [
-    { key: 'view', label: 'View', icon: 'fa-solid fa-eye', variant: 'info', iconOnly: true },
+    {
+      key: 'view',
+      label: 'View',
+      icon: 'fa-solid fa-eye',
+      variant: 'info',
+      iconOnly: true,
+      route: row => {
+        const journalId = String(row['id'] ?? '').trim();
+        if (!journalId || journalId === 'undefined' || journalId === 'null') {
+          return null;
+        }
+        return ['/journals', journalId, 'view'];
+      },
+    },
     { key: 'print', label: 'Print', icon: 'fa-solid fa-print', variant: 'secondary', iconOnly: true },
   ];
 
   readonly rows = computed<FinanceListRow[]>(() => {
     this.languageTick();
     return this.items().map(item => ({
+      id: item.id,
       number: formatFinanceNumber(item.journalNumper, this.translate),
       date: formatFinanceDate(item.date, this.translate),
       status: this.formatStatus(item.status),
@@ -328,12 +340,6 @@ export class JournalEntryListComponent implements OnInit {
     }
 
     if (event.actionKey === 'view') {
-      const journalId = String(item.id ?? '').trim();
-      if (!journalId || journalId === 'undefined' || journalId === 'null') {
-        this.toast.error(this.translate.instant('Failed to load journals'));
-        return;
-      }
-      this.router.navigate(['/journals', item.id, 'view']);
       return;
     }
 

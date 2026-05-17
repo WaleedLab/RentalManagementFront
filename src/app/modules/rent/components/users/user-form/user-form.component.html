@@ -66,7 +66,7 @@
 
               <div class="col-md-6">
                 <label class="form-label">{{ 'Expiration Date' | translate }}</label>
-                <input type="date" class="form-control" formControlName="expirationDate" />
+                <app-date-picker formControlName="expirationDate" label="Expiration Date" />
                 <div class="form-text">{{ 'Hint User Expiration Date' | translate }}</div>
               </div>
 
@@ -174,7 +174,7 @@
               </div>
             </div>
 
-            <div class="mt-4 d-flex gap-2">
+            <div class="app-form-actions">
               <button type="submit" class="btn btn-primary" [disabled]="loading()">
                 @if (loading()) {
                   <span class="spinner-border spinner-border-sm me-2"></span>

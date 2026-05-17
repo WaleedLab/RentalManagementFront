@@ -139,13 +139,6 @@
   }
 }
 
-.journal-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  flex-wrap: wrap;
-}
-
 :host-context(body.dark-only) {
   .journal-line-validation td {
     color: #fecaca;

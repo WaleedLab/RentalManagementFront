@@ -1,7 +1,17 @@
 import { NgClass, NgTemplateOutlet } from '@angular/common';
-import { Component, HostBinding, HostListener, effect, inject, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  HostBinding,
+  HostListener,
+  effect,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
-
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthStateService } from '../../../core/auth/auth-state.service';
@@ -38,6 +48,8 @@ export class Sidebar implements OnInit {
   private sidebarService = inject(SidebarService);
   private authState = inject(AuthStateService);
   private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
 
   public menuItems: Menu[] = this.navServices.MENUITEMS;
   public margin: number = 0;
@@ -48,6 +60,8 @@ export class Sidebar implements OnInit {
   public screenHeight: number;
   public pined: boolean = false;
   public pinedItem: string[] = [];
+  /** Title of the only expanded level-1 menu; null = all sections folded. */
+  private readonly expandedMenuTitle = signal<string | null>(null);
 
   constructor() {
     effect(() => {
@@ -57,63 +71,29 @@ export class Sidebar implements OnInit {
       this.menuItems = this.sidebarService.filterMenu(baseItems as any, roles, privileges) as Menu[];
     });
 
-    this.navServices.item.subscribe((menuItems: Menu[]) => {
+    this.navServices.item.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(menuItems => {
       this.menuItems = menuItems;
-      this.router.events.subscribe(event => {
-        if (event instanceof NavigationEnd) {
-          menuItems.filter(items => {
-            if (items.path === event.url) {
-              this.setNavActive(items);
-            }
-            if (!items.children) {
-              return false;
-            }
-            items.children.filter((subItems: Menu) => {
-              if (subItems.path === event.url) {
-                this.setNavActive(subItems);
-              }
-              if (!subItems.children) {
-                return false;
-              }
-              subItems.children.filter(subSubItems => {
-                if (subSubItems.path === event.url) {
-                  this.setNavActive(subSubItems);
-                }
-              });
-              return;
-            });
-            return;
-          });
-        }
-      });
     });
   }
 
   ngOnInit() {
     this.screenWidth = window.innerWidth;
     this.screenHeight = window.innerHeight;
-  }
 
-  setNavActive(item: Menu) {
-    this.menuItems.filter(menuItem => {
-      if (menuItem !== item) {
-        menuItem.active = false;
-      }
-      if (menuItem.children && menuItem.children.includes(item)) {
-        menuItem.active = true;
-      }
-      if (menuItem.children) {
-        menuItem.children.filter(submenuItems => {
-          if (submenuItems.children && submenuItems.children.includes(item)) {
-            menuItem.active = true;
-            submenuItems.active = true;
-          } else {
-            submenuItems.active = false;
-          }
-        });
+    this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.syncExpandedMenuForUrl(event.urlAfterRedirects);
       }
     });
+
+    this.syncExpandedMenuForUrl(this.router.url);
   }
+
+  isMenuExpanded(item: Menu): boolean {
+    const title = item.title?.trim();
+    return !!title && this.expandedMenuTitle() === title;
+  }
+
 
   @HostListener('window:resize')
   onResize() {
@@ -125,43 +105,122 @@ export class Sidebar implements OnInit {
     this.navServices.isDisplay = !this.navServices.isDisplay;
   }
 
-  toggleMenu(item: Menu) {
-    if (!item.active) {
-      this.menuItems.forEach((a: Menu) => {
-        if (this.menuItems.includes(item)) {
-          a.active = false;
-        }
-        if (!a.children) {
-          return false;
-        }
-        a.children.forEach((b: Menu) => {
-          if (a.children?.includes(item)) {
-            b.active = false;
-          }
-        });
-        return;
-      });
-    }
-    item.active = !item.active;
-  }
-
-  navigateTo(item: Menu, event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (!item.path) {
+  toggleMenu(item: Menu, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    const title = item.title?.trim();
+    if (!title) {
       return;
     }
+    this.expandedMenuTitle.update(current => (current === title ? null : title));
+    this.syncMenuActiveFlags();
+    this.cdr.markForCheck();
+  }
 
-    this.router.navigateByUrl(item.path);
-
+  onSidebarNavigated(): void {
+    this.syncExpandedMenuForUrl(this.router.url);
     if (window.innerWidth < 992) {
       this.navServices.isDisplay = true;
     }
   }
 
+  /**
+   * Keep the level-1 section that contains the current route open; fold the others.
+   */
+  private syncExpandedMenuForUrl(url: string): void {
+    const activeItem = this.findMenuItemByUrl(this.menuItems, url);
+    if (!activeItem) {
+      this.collapseAllMenus();
+      return;
+    }
+
+    const parent = this.findLevel1Parent(this.menuItems, activeItem);
+    const nextTitle = parent?.title?.trim() ?? activeItem.title?.trim() ?? null;
+    this.expandedMenuTitle.set(nextTitle || null);
+    this.syncMenuActiveFlags();
+    this.cdr.markForCheck();
+  }
+
+  private findLevel1Parent(items: Menu[], target: Menu): Menu | null {
+    for (const level1 of items) {
+      if (level1 === target) {
+        return null;
+      }
+      if (level1.children?.length && this.menuTreeContains(level1, target)) {
+        return level1;
+      }
+    }
+    return null;
+  }
+
+  private menuTreeContains(root: Menu, target: Menu): boolean {
+    if (root === target) {
+      return true;
+    }
+    for (const child of root.children ?? []) {
+      if (this.menuTreeContains(child, target)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private collapseAllMenus(): void {
+    this.expandedMenuTitle.set(null);
+    this.collapseExpandableMenus();
+    this.cdr.markForCheck();
+  }
+
+  private syncMenuActiveFlags(items: Menu[] = this.menuItems): void {
+    const expanded = this.expandedMenuTitle();
+    for (const menuItem of items) {
+      if (menuItem.children?.length) {
+        menuItem.active = menuItem.title === expanded;
+        this.syncMenuActiveFlags(menuItem.children);
+      }
+    }
+  }
+
   isRouteActive(path?: string): boolean {
-    return !!path && this.router.url === path;
+    if (!path) {
+      return false;
+    }
+    const current = this.router.url.split('?')[0];
+    return current === path || current.startsWith(`${path}/`);
+  }
+
+  private collapseExpandableMenus(items: Menu[] = this.menuItems): void {
+    for (const menuItem of items) {
+      if (menuItem.children?.length) {
+        menuItem.active = false;
+        this.collapseExpandableMenus(menuItem.children);
+      }
+    }
+  }
+
+  private findMenuItemByUrl(items: Menu[], url: string): Menu | null {
+    const current = url.split('?')[0];
+    let bestMatch: Menu | null = null;
+    let bestLength = -1;
+
+    const visit = (nodes: Menu[]): void => {
+      for (const node of nodes) {
+        if (node.path) {
+          const path = node.path;
+          const matches = current === path || current.startsWith(`${path}/`);
+          if (matches && path.length > bestLength) {
+            bestMatch = node;
+            bestLength = path.length;
+          }
+        }
+        if (node.children?.length) {
+          visit(node.children);
+        }
+      }
+    };
+
+    visit(items);
+    return bestMatch;
   }
 
   scrollToLeft() {

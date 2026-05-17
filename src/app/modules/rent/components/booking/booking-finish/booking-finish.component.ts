@@ -8,6 +8,7 @@ import { catchError, forkJoin, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
+import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import {
   SmoothSelectComponent,
@@ -23,18 +24,20 @@ import { normalizeSetting } from '../../../models/settings/setting.normalizer';
 import { Setting } from '../../../models/settings/setting.model';
 import { BookingService } from '../../../services/booking/booking.service';
 import { SettingService } from '../../../services/settings/setting.service';
+import {
+  FinishBillingResult,
+  computeFinishBilling,
+  parseFinishWallTimeMs,
+} from './booking-finish-billing.util';
 
 @Component({
   selector: 'app-booking-finish',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, PageHeaderComponent, SmoothSelectComponent],
+  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, PageHeaderComponent, SmoothSelectComponent, DatePickerComponent],
   templateUrl: './booking-finish.component.html',
   styleUrl: './booking-finish.component.scss',
 })
 export class BookingFinishComponent implements OnInit {
-  private static readonly MS_PER_DAY = 86_400_000;
-  private static readonly MS_PER_HOUR = 3_600_000;
-
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authState = inject(AuthStateService);
@@ -124,79 +127,39 @@ export class BookingFinishComponent implements OnInit {
     return Math.round(perDay * days * 100) / 100;
   });
 
-  /**
-   * أيام المدة من (الإرجاع − الخروج) بـ **أرض** 24 ساعة: `max(1, floor(المدة ÷ 24h))`.
-   * لا نستخدم `ceil` هنا حتى لا يُحسب يوم كامل لبضع دقائق/ساعات دون قاعدة الساعات الزائدة؛ **زيادة يوم** تُضاف فقط في {@link billingElapsedDays} عندما `L >` حد الساعات المتأخرة لليوم.
-   */
+  /** Checkout → return billing (days, late display, chargeable hours/minutes). */
+  finishBilling = computed((): FinishBillingResult | null => {
+    const b = this.booking();
+    if (!b) {
+      return null;
+    }
+    const checkoutMs = parseFinishWallTimeMs(this.toDateTimeLocalValue(b.startDate));
+    const returnMs = parseFinishWallTimeMs(this.returnDateTime());
+    if (checkoutMs === null || returnMs === null) {
+      return null;
+    }
+    const s = this.settings();
+    return computeFinishBilling(checkoutMs, returnMs, {
+      freeLateHours: Math.max(0, Math.trunc(Number(s?.number_hour_latefree ?? 0) || 0)),
+      lateHoursPerDayCap: Math.max(0, Math.trunc(Number(s?.number_hour_late_forr_finshinday ?? 0) || 0)),
+    });
+  });
+
   billingElapsedDaysFromSpanFloor = computed(() => {
+    const fb = this.finishBilling();
+    if (fb) {
+      return fb.spanFloorDays;
+    }
     const b = this.booking();
-    if (!b) {
-      return 1;
-    }
-    const startMs = this.parseBookingInstantMs(b.startDate);
-    const retMs = this.parseReturnDateTimeMs(this.returnDateTime());
-    if (startMs === null || retMs === null) {
-      return Math.max(1, Math.trunc(Number(b.countOfDay ?? 0) || 1));
-    }
-    if (retMs < startMs) {
-      return 1;
-    }
-    const elapsedMs = Math.max(0, retMs - startMs);
-    return Math.max(1, Math.floor(elapsedMs / BookingFinishComponent.MS_PER_DAY));
+    return Math.max(1, Math.trunc(Number(b?.countOfDay ?? 0) || 1));
   });
 
-  /**
-   * ساعات زائدة من الفرونت:
-   * - **ما دامت المدة ≤ أيام العقد المحجوزة ×24:** التأخر عن **نهاية العقد** (`endDate` من الـ API إن صالحاً، وإلا خروج + محجوز ×24).
-   * - **بعد تجاوز المحجوز وما دامت المدة ≤ عدد أيام الأرض ×24:** الباقي داخل آخر سلّة 24 ساعة من وقت الخروج (`phase % 24h`) — يُستخدم {@link billingElapsedDaysFromSpanFloor} هنا حتى لا يتداخل مع يوم «قاعدة الساعات» في {@link billingElapsedDays}.
-   * - **إن تجاوزت المدة سقف التقويم ×24:** الباقي بعد السقف.
-   * ثم دقائق السماح → `L` بالساعات (كسور) للمقارنة مع المجانية وحد اليوم.
-   */
-  lateHoursAfterGraceDecimal = computed((): number => {
-    const b = this.booking();
-    if (!b) {
-      return 0;
-    }
-    const exitMs = this.parseBookingInstantMs(b.startDate);
-    const retMs = this.parseReturnDateTimeMs(this.returnDateTime());
-    if (exitMs === null || retMs === null || retMs <= exitMs) {
-      return 0;
-    }
-    const phaseMs = retMs - exitMs;
-    const bookedDays = Math.max(0, Math.trunc(Number(b.countOfDay ?? 0) || 0));
-    const bookedWallMs = bookedDays <= 0 ? BookingFinishComponent.MS_PER_DAY : bookedDays * BookingFinishComponent.MS_PER_DAY;
-
-    let rawLateMs: number;
-    if (phaseMs <= bookedWallMs) {
-      const baselineMs = this.resolvePlannedReturnBaselineMs(b, exitMs);
-      rawLateMs = Math.max(0, retMs - baselineMs);
-    } else {
-      const n = this.billingElapsedDaysFromSpanFloor();
-      const paidCoverMs = n * BookingFinishComponent.MS_PER_DAY;
-      if (phaseMs <= paidCoverMs) {
-        rawLateMs = phaseMs % BookingFinishComponent.MS_PER_DAY;
-      } else {
-        rawLateMs = Math.max(0, phaseMs - paidCoverMs);
-      }
-    }
-
-    const s = this.settings();
-    const graceM = Math.max(0, Math.trunc(Number(s?.number_mints_late_forr_finshcontract ?? 0) || 0));
-    const afterGraceMs = Math.max(0, rawLateMs - graceM * 60_000);
-    return afterGraceMs / BookingFinishComponent.MS_PER_HOUR;
-  });
-
-  /**
-   * «الأيام المفوترة حتى الإرجاع»: **أرض** مدة (الإرجاع − الخروج) ÷24h + **يوم واحد** فقط إذا `L` (بعد السماح) **أكبر من** حد «الساعات المتأخرة لليوم» (`number_hour_late_forr_finshinday`) وكان الحد > 0.
-   * لا يُضاف يوم من `ceil` لبقايا دقائق؛ الزيادة من قاعدة الساعات فقط.
-   */
   billingElapsedDays = computed(() => {
-    const base = this.billingElapsedDaysFromSpanFloor();
-    const L = this.lateHoursAfterGraceDecimal();
-    const s = this.settings();
-    const cap = Math.max(0, Math.trunc(Number(s?.number_hour_late_forr_finshinday ?? 0) || 0));
-    const hourRuleAddsDay = cap > 0 && L > cap;
-    return base + (hourRuleAddsDay ? 1 : 0);
+    const fb = this.finishBilling();
+    if (fb) {
+      return fb.billableDays;
+    }
+    return this.billingElapsedDaysFromSpanFloor();
   });
 
   dayExcessComputed = computed(() => {
@@ -208,54 +171,23 @@ export class BookingFinishComponent implements OnInit {
     return Math.max(0, this.billingElapsedDays() - booked);
   });
 
-  /**
-   * ساعات تُحاسب بسعر الساعة الزائدة وتُعرض وتُرسل كـ `numberOfHoursExcess` — تُحدَّث مباشرة مع `returnDateTime` و`settings`:
-   * — إذا `L ≤` الساعات المجانية (`number_hour_latefree`) → **0** (سعر كل ساعة زائدة = 0).
-   * — إذا `L >` المجانية و`L ≤` حد الساعات المتأخرة لليوم (`number_hour_late_forr_finshinday`) → **`floor(L − المجانية)`** × سعر الساعة من العقد.
-   * — إذا `L >` حد اليوم (وكان الحد > 0) → **0** ساعات بالسعر الساعي، ويُزاد **يوم** في {@link billingElapsedDays}.
-   * إذا حد اليوم = 0: كل الساعات فوق المجانية تُحسب بالسعر الساعي (بدون قاعدة اليوم).
-   */
-  chargeableLateHoursCeiled = computed(() => {
-    const L = this.lateHoursAfterGraceDecimal();
-    const s = this.settings();
-    const freeHr = Math.max(0, Math.trunc(Number(s?.number_hour_latefree ?? 0) || 0));
-    const cap = Math.max(0, Math.trunc(Number(s?.number_hour_late_forr_finshinday ?? 0) || 0));
-
-    if (L <= 0 || L <= freeHr) {
-      return 0;
+  /** Remainder hours after full rental days (display only). */
+  lateDurationDisplay = computed(() => {
+    const fb = this.finishBilling();
+    if (!fb || fb.remainderDisplayHours <= 0) {
+      return '—';
     }
-
-    if (cap > 0 && L > cap) {
-      return 0;
-    }
-
-    return Math.max(0, Math.floor(L - freeHr));
+    return String(fb.remainderDisplayHours);
   });
+
+  /** Sent as `numberOfHoursExcess` and used for hourly amount. */
+  chargeableLateHoursCeiled = computed(() => this.finishBilling()?.chargeableHours ?? 0);
 
   hoursBilledAtLateHourlyRate = computed(() => this.chargeableLateHoursCeiled());
 
-  /**
-   * ساعات التأخر بعد السماح (عرض فقط، `floor`) — تتحرك مع وقت/تاريخ الإرجاع قبل تطبيق شرائح المجانية وحد اليوم على المبلغ.
-   * الحقل «الساعات الزائدة» في الواجهة؛ الإرسال يستخدم {@link hoursBilledAtLateHourlyRate}.
-   */
-  extraLateHoursDisplayFloor = computed((): number => {
-    const L = this.lateHoursAfterGraceDecimal();
-    if (L <= 0) {
-      return 0;
-    }
-    return Math.floor(L);
-  });
+  numberOfHoursExcessComputed = computed(() => this.chargeableLateHoursCeiled());
 
-  /**
-   * كان يُضاف كسطر منفصل؛ اليوم الإضافي عند تجاوز حد الساعات أصبح في {@link billingElapsedDays} فقط — يبقى **0** لتفادي الازدواجية في الإجمالي.
-   */
-  lateHourExtraFullDayPenalty = computed(() => 0);
-
-  /** أيام زائدة عن المحجوز (يوم قاعدة الساعات يُحسب ضمن {@link billingElapsedDays}). */
   dayExcessWithLatePenalty = computed(() => this.dayExcessComputed());
-
-  /** ما يُعرض تحت «الساعات الزائدة» — بعد السماح، يتبع وقت الإرجاع مباشرة. */
-  numberOfHoursExcessComputed = computed(() => this.extraLateHoursDisplayFloor());
 
   /** Parsed return odometer; `null` if user has not entered a valid integer. */
   returnOdometerParsed = computed((): number | null => {
@@ -300,7 +232,7 @@ export class BookingFinishComponent implements OnInit {
     if (!b) {
       return 0;
     }
-    const hours = this.hoursBilledAtLateHourlyRate();
+    const hours = this.chargeableLateHoursCeiled();
     const rate = Number(b.priceHoureExtra ?? 0) || 0;
     return Math.round(Math.max(0, hours) * Math.max(0, rate) * 100) / 100;
   });
@@ -839,16 +771,6 @@ export class BookingFinishComponent implements OnInit {
     }
     const ms = new Date(t).getTime();
     return Number.isNaN(ms) ? null : ms;
-  }
-
-  /** نهاية الإيجار المتفق عليها لحساب التأخر داخل أيام المحجوز. */
-  private resolvePlannedReturnBaselineMs(b: Booking, exitMs: number): number {
-    const endMs = this.parseBookingInstantMs(b.endDate);
-    if (endMs !== null && endMs >= exitMs) {
-      return endMs;
-    }
-    const bookedDays = Math.max(1, Math.trunc(Number(b.countOfDay ?? 0) || 1));
-    return exitMs + bookedDays * BookingFinishComponent.MS_PER_DAY;
   }
 
   private parseReturnDateTimeMs(value: string): number | null {

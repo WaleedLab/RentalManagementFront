@@ -57,9 +57,9 @@
               [ngClass]="{
                       'sidebar-link sidebar-title': item.level === 1,
                       'submenu-title': item.level === 2,
-                      activated: item.active && item.level === 1,
+                      activated: isMenuExpanded(item) && item.level === 1,
                     }"
-              (click)="toggleMenu(item)"
+              (click)="toggleMenu(item, $event)"
               href="javascript:void(0)"
             >
               @if (item.imageIcon && item.level === 1) {
@@ -74,7 +74,7 @@
 
               <div class="according-menu">
                 @if (item.children) {
-                <i class="fa fa-angle-{{ item.active ? 'down' : 'right' }} pull-right"></i>
+                <i class="fa fa-angle-{{ isMenuExpanded(item) ? 'down' : 'right' }} pull-right"></i>
                 }
               </div>
             </a>
@@ -83,10 +83,10 @@
               [ngClass]="{
                       'sidebar-link sidebar-title': item.level === 1,
                       'submenu-title': item.level === 2,
-                      activated: (item.active || isRouteActive(item.path)) && item.level === 1,
+                      activated: isRouteActive(item.path),
                     }"
-              href="javascript:void(0)"
-              (click)="navigateTo(item, $event)"
+              [routerLink]="item.path"
+              (click)="onSidebarNavigated()"
             >
               @if (item.imageIcon && (item.level === 1 || item.level === 2)) {
               <img class="menu-image-icon" [src]="item.imageIcon" [alt]="item.title || ''" />
@@ -106,8 +106,9 @@
               [ngClass]="{
                     'sidebar-submenu': item.level === 1,
                     'submenu-content opensubmegamenu': item.level === 2,
+                    'menu-expanded': isMenuExpanded(item),
                   }"
-              [style.display]="item.active ? 'block' : 'none'"
+              [class.opensubmenu]="isMenuExpanded(item)"
             >
               <ng-container
                 *ngTemplateOutlet="recursiveMenu; context: { $implicit: item.children }"

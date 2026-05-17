@@ -31,15 +31,6 @@
             <input class="form-control" readonly disabled [value]="checkoutTimeDisplay(item)" />
           </div>
           <div class="contract-close-field contract-close-field--readonly">
-            <label class="form-label">{{ 'Contract close return time' | translate }}</label>
-            <input
-              class="form-control"
-              readonly
-              disabled
-              [value]="formatDateTime(item.returnDate || item.endDate)"
-            />
-          </div>
-          <div class="contract-close-field contract-close-field--readonly">
             <label class="form-label">{{ 'Contract finish days' | translate }}</label>
             <input class="form-control" readonly disabled [value]="numberOrDash(item.countOfDay)" />
           </div>
@@ -51,18 +42,53 @@
             <label class="form-label">{{ 'Contract finish odometer checkout' | translate }}</label>
             <input class="form-control" readonly disabled [value]="numberOrDash(item.checkoutCounter)" />
           </div>
-          <div class="contract-close-field">
-            <label class="form-label">{{ 'Contract finish odometer return' | translate }}</label>
-            <input
-              class="form-control"
-              type="number"
-              inputmode="numeric"
-              min="0"
-              step="1"
-              [disabled]="closeLocked()"
-              [value]="returnOdometerText()"
-              (input)="onReturnOdometerInput($any($event.target).value)"
-            />
+        </div>
+
+        <div class="contract-close-data-block">
+          <div class="contract-close-data-block__title">
+            {{ 'Contract close return fields section' | translate }}
+          </div>
+          <p class="contract-close-data-block__intro">
+            {{ 'Contract close odometer step hint' | translate }}
+          </p>
+          <div class="contract-close-data-block__grid">
+            <div class="contract-close-field contract-close-field--contract-input">
+              <label class="form-label">
+                {{ 'Contract finish odometer return' | translate }} <span class="text-danger">*</span>
+              </label>
+              <input
+                class="form-control"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                step="1"
+                [disabled]="closeLocked()"
+                [value]="returnOdometerText()"
+                (input)="onReturnOdometerInput($any($event.target).value)"
+              />
+              @if (odometerKmViolationHint(); as odomHint) {
+                <p class="contract-close-field-hint contract-close-field-hint--danger text-pre-wrap">
+                  {{ odomHint }}
+                </p>
+              }
+            </div>
+            <div
+              class="contract-close-field contract-close-field--contract-input"
+              [class.contract-close-field--date-locked]="returnDatePickerDisabled()"
+            >
+              <app-date-picker
+                mode="datetime"
+                label="Contract close return time"
+                [disabled]="returnDatePickerDisabled()"
+                [value]="returnDateTime()"
+                (dateChange)="onReturnDateChange($event ?? '')"
+              />
+              @if (returnDatePickerDisabled() && !closeLocked()) {
+                <p class="contract-close-field-hint contract-close-field-hint--muted">
+                  {{ 'Contract close date locked hint' | translate }}
+                </p>
+              }
+            </div>
           </div>
         </div>
 
@@ -77,9 +103,9 @@
           ></textarea>
         </div>
 
-        <div class="contract-close-actions mt-4 d-flex flex-wrap gap-2 justify-content-between">
-          <a class="btn btn-secondary" routerLink="/booking">{{ 'Back to Bookings' | translate }}</a>
-          <div class="d-flex flex-wrap gap-2">
+        <div class="app-form-actions app-form-actions--split">
+          <a class="btn btn-cancel" routerLink="/booking">{{ 'Back to Bookings' | translate }}</a>
+          <div class="app-form-actions__group">
             <a class="btn btn-outline-secondary" [routerLink]="['/booking', item.id, 'details']">
               {{ 'Contract close go back' | translate }}
             </a>
@@ -100,7 +126,7 @@
     <div class="card">
       <div class="card-body">
         <p class="text-muted mb-0">{{ 'Failed to load booking' | translate }}</p>
-        <a class="btn btn-secondary mt-3" routerLink="/booking">{{ 'Back to Bookings' | translate }}</a>
+        <a class="btn btn-cancel mt-3" routerLink="/booking">{{ 'Back to Bookings' | translate }}</a>
       </div>
     </div>
   }

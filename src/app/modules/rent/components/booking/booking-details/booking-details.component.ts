@@ -7,6 +7,7 @@ import { catchError, forkJoin, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
+import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import {
   SmoothSelectComponent,
@@ -39,6 +40,7 @@ type BookingDetailsToolbarAction = 'suspend' | 'extend' | 'print' | 'finish' | '
     PageHeaderComponent,
     StatusBadgeComponent,
     SmoothSelectComponent,
+    DatePickerComponent,
   ],
   templateUrl: './booking-details.component.html',
   styleUrl: './booking-details.component.scss',
@@ -69,7 +71,7 @@ export class BookingDetailsComponent implements OnInit {
   isExtendMode = signal(false);
   extendPaymentDate = signal(BookingDetailsComponent.toDateTimeLocalInputValue());
   extendRequiredAmountValue = signal<number>(0);
-  extendCurrentPaymentAmount = signal<number>(0);
+  extendCurrentPaymentAmount = signal<number | null>(null);
   /** Mirrors backend PaymentTypePaymentcountEnum: 1..5 */
   extendPaymentMethod = signal<number>(1);
   extendBanks = signal<Bank[]>([]);
@@ -384,13 +386,18 @@ export class BookingDetailsComponent implements OnInit {
     this.extendPaymentDate.set(String(value ?? ''));
     if (this.isExtendMode() && this.booking()) {
       this.setExtendRequiredAmountFromBooking(this.booking()!);
-      this.extendCurrentPaymentAmount.set(this.extendRequiredAmount());
-      this.syncExtendAmountsFromType();
     }
   }
 
   onExtendPaidAmountChange(value: string): void {
-    const parsed = Number(value);
+    const trimmed = String(value ?? '').trim();
+    if (!trimmed) {
+      this.extendCurrentPaymentAmount.set(null);
+      this.extendPaidCash.set(0);
+      this.extendPaidBank.set(0);
+      return;
+    }
+    const parsed = Number(trimmed);
     const paid = Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
     this.extendCurrentPaymentAmount.set(paid);
     this.syncExtendAmountsFromType();
@@ -498,7 +505,7 @@ export class BookingDetailsComponent implements OnInit {
       return;
     }
     if (paymentType === 1 && !cashId) {
-      this.toast.error('الرجاء اختيار البنك النقدي');
+      this.toast.error('الرجاء اختيار الصندوق');
       return;
     }
     if (paymentType === 5 && (!bankId || !cashId)) {
@@ -583,15 +590,10 @@ export class BookingDetailsComponent implements OnInit {
 
   private applyExtendPaymentTypeRules(type: number): void {
     const banks = this.extendBanks();
-    const cashAccounts = this.extendCashAccounts();
     const firstBankId = banks.length > 0 ? String(banks[0].id ?? '').trim() : '';
-    const firstCashId = cashAccounts.length > 0 ? String(cashAccounts[0].id ?? '').trim() : '';
 
     if (type === 1) {
       this.extendBankAccount.set('');
-      if (!this.extendBankCashAccount() && firstCashId) {
-        this.extendBankCashAccount.set(firstCashId);
-      }
       this.extendPaidBank.set(0);
       return;
     }
@@ -607,9 +609,6 @@ export class BookingDetailsComponent implements OnInit {
 
     if (!this.extendBankAccount() && firstBankId) {
       this.extendBankAccount.set(firstBankId);
-    }
-    if (!this.extendBankCashAccount() && firstCashId) {
-      this.extendBankCashAccount.set(firstCashId);
     }
   }
 
@@ -913,10 +912,13 @@ export class BookingDetailsComponent implements OnInit {
     this.paymentRows.set([]);
     this.paymentCountSum.set(null);
     this.extendPaymentDate.set(BookingDetailsComponent.toDateTimeLocalInputValue());
-    this.loadExtendLookupData();
+    this.extendBankCashAccount.set('');
+    this.extendBankAccount.set('');
+    this.extendCurrentPaymentAmount.set(null);
+    this.extendPaidCash.set(0);
+    this.extendPaidBank.set(0);
     this.setExtendRequiredAmountFromBooking(item);
-    this.extendCurrentPaymentAmount.set(this.extendRequiredAmount());
-    this.syncExtendAmountsFromType();
+    this.loadExtendLookupData();
     this.loadPaymentSummaryForBooking(item);
   }
 
