@@ -32,6 +32,14 @@ import {
   isReturnTimeAfterCheckout,
   parseReturnDateTimeLocalMs,
 } from '../booking-return-checkout.util';
+import {
+  canBookingCloseAction,
+  canBookingEditAction,
+  canBookingExtendAction,
+  canBookingFinishAction,
+  canBookingPrintAction,
+  canBookingSuspendAction,
+} from '../booking-card-actions.util';
 
 type BookingDetailsToolbarAction = 'suspend' | 'extend' | 'print' | 'finish' | 'closeContract';
 
@@ -896,45 +904,44 @@ export class BookingDetailsComponent implements OnInit {
     });
   }
 
-  canFinishBooking(booking: Booking): boolean {
-    return booking.status !== 'finsh' && booking.status !== 'close';
-  }
-
-  canSuspendBooking(booking: Booking): boolean {
-    if (booking.status === 'finsh' || booking.status === 'close') {
-      return false;
-    }
-    if (
-      booking.status === 'Suspended_due_to_accident' ||
-      booking.status === 'Suspended_due_to_sum_money'
-    ) {
-      return false;
-    }
-    return true;
-  }
+  canCloseAction = canBookingCloseAction;
+  canEditAction = canBookingEditAction;
+  canFinishAction = canBookingFinishAction;
+  canPrintAction = canBookingPrintAction;
+  canSuspendAction = canBookingSuspendAction;
+  canExtendAction = canBookingExtendAction;
 
   /** Toolbar actions: suspend, extend, print, close contract, finish (edit uses routerLink in template). */
   onDetailsToolbarAction(action: BookingDetailsToolbarAction, item: Booking): void {
-    if (action === 'finish' && !this.canFinishBooking(item)) {
+    if (action === 'finish' && !this.canFinishAction(item)) {
       return;
     }
     if (action === 'finish') {
       this.router.navigate(['/booking', item.id, 'finish']);
       return;
     }
-    if (action === 'closeContract' && !this.canFinishBooking(item)) {
+    if (action === 'closeContract' && !this.canCloseAction(item)) {
       return;
     }
     if (action === 'closeContract') {
       this.router.navigate(['/booking', item.id, 'close']);
       return;
     }
-    if (action === 'extend') {
-      this.enterExtendModeFromToolbar(item);
+    if (action === 'suspend' && !this.canSuspendAction(item)) {
       return;
     }
     if (action === 'suspend') {
       this.router.navigate(['/booking', item.id, 'suspend']);
+      return;
+    }
+    if (action === 'extend' && !this.canExtendAction(item)) {
+      return;
+    }
+    if (action === 'extend') {
+      this.enterExtendModeFromToolbar(item);
+      return;
+    }
+    if (action === 'print' && !this.canPrintAction(item)) {
       return;
     }
     if (action === 'print') {

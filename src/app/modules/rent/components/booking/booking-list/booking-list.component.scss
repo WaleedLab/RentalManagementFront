@@ -803,30 +803,6 @@
   word-break: break-word;
 }
 
-.booking-fact--total {
-  border-inline-start-width: 3px;
-  border-inline-start-color: color-mix(in srgb, var(--booking-status-accent) 52%, #94a3b8 48%);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--booking-status-accent) 6%, #ffffff 94%) 0%,
-    color-mix(in srgb, var(--booking-status-accent) 3%, #f8fafc 97%) 100%
-  );
-}
-
-.booking-fact__icon--total {
-  background: color-mix(in srgb, var(--booking-status-accent) 14%, #ecfdf5 86%);
-  color: color-mix(in srgb, var(--booking-status-accent) 78%, #047857 22%);
-}
-
-.booking-fact__value--amount {
-  font-size: 0.92rem;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  color: color-mix(in srgb, var(--booking-status-accent) 55%, #0f172a 45%);
-  -webkit-line-clamp: 1;
-}
-
 .booking-card__actions {
   margin-top: auto;
   padding-top: 0.5rem;
@@ -1233,18 +1209,6 @@ a.booking-card__menu-item {
 
   .booking-fact__value {
     color: #f1f5f9;
-  }
-
-  .booking-fact--total {
-    background: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--booking-status-accent) 10%, rgba(30, 41, 59, 0.94) 90%) 0%,
-      color-mix(in srgb, var(--booking-status-accent) 5%, rgba(15, 23, 42, 0.96) 95%) 100%
-    );
-  }
-
-  .booking-fact__value--amount {
-    color: color-mix(in srgb, var(--booking-status-accent) 48%, #f8fafc 52%);
   }
 
   .booking-fact--tooltip::after {

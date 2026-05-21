@@ -20,6 +20,14 @@ import {
 } from '../../../models/booking/booking-status.utils';
 import { BookingService } from '../../../services/booking/booking.service';
 import { BranchService } from '../../../services/branches/branch.service';
+import {
+  canBookingCloseAction,
+  canBookingEditAction,
+  canBookingExtendAction,
+  canBookingFinishAction,
+  canBookingPrintAction,
+  canBookingSuspendAction,
+} from '../booking-card-actions.util';
 
 @Component({
   selector: 'app-booking-list',
@@ -182,47 +190,12 @@ export class BookingListComponent implements OnInit {
     return booking.branchId ? `#${booking.branchId}` : '—';
   }
 
-  bookingTotalLabel(booking: Booking): string {
-    return this.moneyOrDash(booking.totalAmount);
-  }
-
-  moneyOrDash(value: unknown): string {
-    if (value === null || value === undefined || value === '') {
-      return '—';
-    }
-    const parsed = Number(value);
-    if (!Number.isFinite(parsed)) {
-      return '—';
-    }
-    const lang = this.translate.currentLang || this.translate.getDefaultLang() || 'ar';
-    return new Intl.NumberFormat(lang, { maximumFractionDigits: 2 }).format(parsed);
-  }
-
-  canFinishBooking(booking: Booking): boolean {
-    return booking.status !== 'finsh' && booking.status !== 'close';
-  }
-
-  canSuspendBooking(booking: Booking): boolean {
-    if (booking.status === 'finsh' || booking.status === 'close') {
-      return false;
-    }
-    if (
-      booking.status === 'Suspended_due_to_accident' ||
-      booking.status === 'Suspended_due_to_sum_money'
-    ) {
-      return false;
-    }
-    return true;
-  }
-
-  /** عقد مصفى أو مغلق — يبقى العرض والطباعة فقط. */
-  bookingCardActionsLocked(booking: Booking): boolean {
-    return !this.canFinishBooking(booking);
-  }
-
-  suspendMenuLocked(booking: Booking): boolean {
-    return !this.canSuspendBooking(booking);
-  }
+  canCloseAction = canBookingCloseAction;
+  canEditAction = canBookingEditAction;
+  canFinishAction = canBookingFinishAction;
+  canPrintAction = canBookingPrintAction;
+  canSuspendAction = canBookingSuspendAction;
+  canExtendAction = canBookingExtendAction;
 
   closeBookingCardMore(panel: HTMLDetailsElement | null): void {
     if (panel) {
