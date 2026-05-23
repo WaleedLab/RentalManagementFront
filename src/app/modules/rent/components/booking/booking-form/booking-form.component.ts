@@ -26,6 +26,7 @@ import {
 } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
+import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch-id.util';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
@@ -427,6 +428,10 @@ export class BookingFormComponent implements OnInit {
 
     const fleetId = this.authState.fleetId() || undefined;
     const branchId = Number(this.authState.branchId() || 0) || undefined;
+    const cashBranchId = resolveContractPaymentBranch({
+      bookingBranchId: branchId,
+      loginBranchId: this.authState.branchId(),
+    });
     forkJoin({
       // customers: this.customerService.getPaginated({
       //   fleetId,
@@ -441,7 +446,7 @@ export class BookingFormComponent implements OnInit {
       }),
       categories: this.categoryVehicleService.getList(fleetId).pipe(catchError(() => of([]))),
       banks: this.bankService.getList(fleetId).pipe(catchError(() => of([]))),
-      cashAccounts: this.cashAccountService.getList(fleetId).pipe(catchError(() => of([]))),
+      cashAccounts: this.cashAccountService.getList(fleetId, cashBranchId).pipe(catchError(() => of([]))),
       countingEntries: this.countingEntryService.getList(fleetId).pipe(catchError(() => of([]))),
       settings: this.settingsApi.getCurrent(fleetId).pipe(
         catchError(() =>
@@ -798,7 +803,12 @@ export class BookingFormComponent implements OnInit {
 
     const idVehicle = this.parseFormNumber(raw.vehicleId);
     const idCustomer = idCustomerOut;
-    const idBranch = this.parseFormNumber(raw.branchId);
+    const selectedVehicle = this.selectedVehicle();
+    const idBranch = resolveContractPaymentBranch({
+      vehicleBranchId: selectedVehicle?.branchId,
+      bookingBranchId: this.parseFormNumber(raw.branchId),
+      loginBranchId: this.authState.branchId(),
+    });
     const idBank = this.normalizeGuidOrUndefined(raw.idBank.trim());
     const idCash = this.normalizeGuidOrUndefined(raw.idCash.trim());
     const idCountingCustVehicle =
@@ -814,7 +824,6 @@ export class BookingFormComponent implements OnInit {
     }
 
     const settingsForRestrictions = this.bookingSettings();
-    const selectedVehicle = this.selectedVehicle();
     const vehicleRegistrationIso = this.customerDateFieldToApi(
       selectedVehicle?.validityCarRegistration ??
         selectedVehicle?.operatinCard ??

@@ -14,5 +14,11 @@ export interface CreateBankRequest {
   description?: string;
   code?: string;
   fleetId: string;
+  /** Branch registered at login; `0` when absent. */
+  idBranch: number;
+}
+
+export interface UpdateBankRequest extends CreateBankRequest {
+  id: string;
 }
 

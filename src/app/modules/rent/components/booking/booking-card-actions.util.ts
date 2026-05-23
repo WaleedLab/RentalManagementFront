@@ -52,3 +52,23 @@ export function canBookingSuspendAction(booking: Booking): boolean {
 export function canBookingExtendAction(booking: Booking): boolean {
   return isBookingFullActions(booking);
 }
+
+/** طباعة في الشريط الرئيسي (معلق / منتهٍ / مغلق). */
+export function bookingCardPrintInMain(booking: Booking): boolean {
+  return canBookingPrintAction(booking) && !isBookingFullActions(booking);
+}
+
+/** طباعة داخل قائمة ⋯ (مفتوح / ممدد). */
+export function bookingCardPrintInMenu(booking: Booking): boolean {
+  return canBookingPrintAction(booking) && isBookingFullActions(booking);
+}
+
+/** إظهار قائمة ⋯ فقط عند وجود إجراء واحد على الأقل. */
+export function bookingCardMoreMenuVisible(booking: Booking): boolean {
+  return (
+    canBookingSuspendAction(booking) ||
+    canBookingEditAction(booking) ||
+    canBookingExtendAction(booking) ||
+    bookingCardPrintInMenu(booking)
+  );
+}

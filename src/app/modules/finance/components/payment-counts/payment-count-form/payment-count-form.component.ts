@@ -14,6 +14,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { catchError, forkJoin, of, startWith } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
+import { loginBranchId } from '../../../../../shared/utils/branch-id.util';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
@@ -510,10 +511,11 @@ export class PaymentCountFormComponent implements OnInit {
 
   private loadChannels(): void {
     const fleetId = this.authState.fleetId();
+    const idBranch = loginBranchId(this.authState.branchId());
     this.loadingChannels.set(true);
     forkJoin({
       banks: this.bankService.getList(fleetId).pipe(catchError(() => of([]))),
-      cashAccounts: this.cashService.getList(fleetId).pipe(catchError(() => of([]))),
+      cashAccounts: this.cashService.getList(fleetId, idBranch).pipe(catchError(() => of([]))),
     }).subscribe({
       next: ({ banks, cashAccounts }) => {
         if (banks.length > 0 || cashAccounts.length > 0) {
@@ -524,7 +526,7 @@ export class PaymentCountFormComponent implements OnInit {
 
         forkJoin({
           banks: this.bankService.getList(null).pipe(catchError(() => of([]))),
-          cashAccounts: this.cashService.getList(null).pipe(catchError(() => of([]))),
+          cashAccounts: this.cashService.getList(null, idBranch).pipe(catchError(() => of([]))),
         }).subscribe({
           next: fallback => {
             this.banks.set(fallback.banks);

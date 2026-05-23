@@ -4,6 +4,7 @@ export interface CashAccount {
   name: string;
   description?: string;
   fleetId?: string;
+  idBranch?: number | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -15,5 +16,7 @@ export interface CreateCashAccountRequest {
   description?: string;
   createdBy: string;
   fleetId: string;
+  /** Branch registered at login; `0` when absent. */
+  idBranch: number;
 }
 
