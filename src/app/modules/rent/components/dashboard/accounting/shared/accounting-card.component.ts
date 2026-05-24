@@ -18,4 +18,6 @@ export class AccountingCardComponent {
   @Input() format: 'currency' | 'number' = 'currency';
   @Input() tone: AccountingAlertTone = 'good';
   @Input() loading = false;
+  @Input() unavailable = false;
+  @Input() unavailableHint = 'Balance requires aggregation API';
 }

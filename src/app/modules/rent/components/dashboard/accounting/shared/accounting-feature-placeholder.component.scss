@@ -1,0 +1,29 @@
+.fin-placeholder {
+  text-align: center;
+  padding: 28px 20px;
+  border-radius: 18px;
+  background: var(--fin-placeholder-bg);
+  border: 1px dashed var(--fin-border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.fin-placeholder__art {
+  font-size: 2rem;
+  opacity: 0.45;
+  margin-bottom: 10px;
+}
+
+.fin-placeholder h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--fin-text);
+}
+
+.fin-placeholder p {
+  margin: 8px auto 0;
+  max-width: 280px;
+  font-size: 0.8rem;
+  color: var(--fin-muted);
+  line-height: 1.5;
+}

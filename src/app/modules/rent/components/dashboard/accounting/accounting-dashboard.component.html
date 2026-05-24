@@ -1,70 +1,121 @@
-<div class="container-fluid accounting-dashboard">
-  <app-page-header [title]="'Accounting Dashboard' | translate"></app-page-header>
+<div class="fin-dashboard">
+  <accounting-command-bar
+    [form]="filtersForm"
+    [financialYears]="summary()?.filters?.financialYears ?? []"
+    [fleets]="summary()?.filters?.fleets ?? []"
+    [branches]="summary()?.filters?.branches ?? []"
+    [loading]="filtersLoading()"
+    (apply)="applyFilters()"
+    (reset)="resetFilters()"
+    (preset)="applyDatePreset($event)"
+  />
 
-  <form class="accounting-filters" [formGroup]="filtersForm">
-    <div class="accounting-filters__grid">
-      <label>
-        <span>{{ 'Financial Year' | translate }}</span>
-        <select class="form-select" formControlName="financialYearId">
-          @for (year of (summary()?.filters?.financialYears ?? []); track year.value) {
-            <option [value]="year.value">{{ year.label | translate }}</option>
-          }
-        </select>
-      </label>
-      <app-date-picker formControlName="startDate" label="Date From" />
-      <app-date-picker formControlName="endDate" label="Date To" />
-      <label>
-        <span>{{ 'Fleet' | translate }}</span>
-        <select class="form-select" formControlName="fleet">
-          @for (fleet of (summary()?.filters?.fleets ?? []); track fleet.value) {
-            <option [value]="fleet.value">{{ fleet.label | translate }}</option>
-          }
-        </select>
-      </label>
-      <label>
-        <span>{{ 'Branch' | translate }}</span>
-        <select class="form-select" formControlName="branch">
-          @for (branch of (summary()?.filters?.branches ?? []); track branch.value) {
-            <option [value]="branch.value">{{ branch.label | translate }}</option>
-          }
-        </select>
-      </label>
-    </div>
-    <div class="accounting-filters__actions">
-      <button type="button" class="btn btn-primary" (click)="applyFilters()">{{ 'Apply Filters' | translate }}</button>
-      <button type="button" class="btn btn-outline-secondary" (click)="resetFilters()">{{ 'Reset' | translate }}</button>
-    </div>
-  </form>
-
-  @if (loadError()) {
-    <section class="accounting-state accounting-state--error" role="alert">
-      <h4>{{ 'Accounting summary failed to load' | translate }}</h4>
-      <p>{{ 'Please try again or change filters.' | translate }}</p>
+  @if (fleetRequiredError()) {
+    <section class="fin-banner fin-banner--error" role="alert">
+      <h4>{{ 'Fleet required for dashboard' | translate }}</h4>
+      <p>{{ 'Please select a fleet to load financial intelligence.' | translate }}</p>
     </section>
   }
 
-  @if (!loading() && !loadError() && hasNoData()) {
-    <section class="accounting-state accounting-state--empty">
-      <h4>{{ 'No accounting data for selected filters' | translate }}</h4>
-      <p>{{ 'Try adjusting date range, fleet, branch, or financial year.' | translate }}</p>
+  <div class="fin-layout">
+    <!-- 1. Financial Status -->
+    <section class="fin-layout__hero">
+      <accounting-hero-status
+        [hero]="heroStatus()"
+        [loading]="heroLoading()"
+        [error]="heroError()"
+      />
+      @if (heroError()) {
+        <button type="button" class="fin-retry" (click)="retrySection('hero')">
+          {{ 'Retry section' | translate }}
+        </button>
+      }
     </section>
-  }
 
-  <section class="accounting-kpi-grid">
-    <accounting-card [label]="'Total Revenue'" [value]="summary()?.kpis?.totalRevenue ?? 0" [tone]="'good'" [loading]="loading()" />
-    <accounting-card [label]="'Total Expenses'" [value]="summary()?.kpis?.totalExpenses ?? 0" [tone]="'warning'" [loading]="loading()" />
-    <accounting-card [label]="'Net Profit'" [value]="summary()?.kpis?.netProfit ?? 0" [tone]="(summary()?.kpis?.netProfit ?? 0) >= 0 ? 'good' : 'risk'" [loading]="loading()" />
-    <accounting-card [label]="'Cash Balance'" [value]="summary()?.kpis?.cashBalance ?? 0" [tone]="(summary()?.kpis?.cashBalance ?? 0) >= 0 ? 'good' : 'risk'" [loading]="loading()" />
-    <accounting-card [label]="'Bank Balance'" [value]="summary()?.kpis?.bankBalance ?? 0" [tone]="'good'" [loading]="loading()" />
-    <accounting-card [label]="'Outstanding Receivables'" [value]="summary()?.kpis?.receivables ?? 0" [tone]="'risk'" [loading]="loading()" />
-  </section>
+    <!-- 2. Insights -->
+    <section class="fin-layout__insights">
+      <accounting-insight-strip [insights]="insights()" [loading]="heroLoading() || trendsLoading()" />
+    </section>
 
-  <section class="accounting-grid">
-    <accounting-chart class="accounting-grid__cashflow" [title]="'Cash Flow'" [subtitle]="'Daily inflow vs outflow'" [type]="'line'" [labels]="cashFlowLabels()" [series]="cashFlowSeries()" [loading]="loading()" />
-    <accounting-chart class="accounting-grid__revexp" [title]="'Revenue vs Expenses'" [subtitle]="'Period comparison'" [type]="'bar'" [labels]="revenueExpenseLabels()" [series]="revenueExpenseSeries()" [loading]="loading()" />
-    <accounting-chart class="accounting-grid__profit" [title]="'Monthly Profit Trend'" [subtitle]="'Net trend by month'" [type]="'line'" [labels]="profitTrendLabels()" [series]="profitTrendSeries()" [loading]="loading()" />
-    <accounting-table class="accounting-grid__debtors" [title]="'Top Debtors'" [subtitle]="'Customers with highest receivables'" [columns]="topDebtorsColumns" [rows]="topDebtors()" [loading]="loading()" />
-    <accounting-table class="accounting-grid__journals" [title]="'Recent Journals'" [subtitle]="'Latest journal activity'" [columns]="recentJournalColumns" [rows]="recentJournals()" [loading]="loading()" />
-    <accounting-alerts class="accounting-grid__alerts" [title]="'Alerts Panel'" [subtitle]="'Financial compliance monitoring'" [alerts]="alerts()" [loading]="loading()" />
-  </section>
+    <!-- 3. Trends -->
+    <section class="fin-layout__trends">
+      <header class="fin-section-head">
+        <h3>{{ 'Financial trends' | translate }}</h3>
+        <p>{{ 'How activity moves over time' | translate }}</p>
+      </header>
+      <div class="fin-trends-grid">
+        <accounting-chart
+          class="fin-trends-grid__wide"
+          [title]="'Revenue vs Expenses'"
+          [subtitle]="'Smooth period comparison'"
+          [type]="'area'"
+          [labels]="revenueExpenseLabels()"
+          [series]="revenueExpenseSeries()"
+          [loading]="trendsLoading()"
+        />
+        <accounting-chart
+          [title]="'Cash Flow'"
+          [subtitle]="'Daily inflow vs outflow'"
+          [type]="'area'"
+          [labels]="cashFlowLabels()"
+          [series]="cashFlowSeries()"
+          [loading]="trendsLoading()"
+        />
+        <accounting-chart
+          [title]="'Monthly Profit Trend'"
+          [subtitle]="'Net trend by month'"
+          [type]="'area'"
+          [labels]="profitTrendLabels()"
+          [series]="profitTrendSeries()"
+          [loading]="trendsLoading()"
+        />
+      </div>
+      @if (trendsError()) {
+        <button type="button" class="fin-retry" (click)="retrySection('trends')">
+          {{ 'Retry section' | translate }}
+        </button>
+      }
+    </section>
+
+    <!-- 4. Recent Activity + Alerts -->
+    <section class="fin-layout__activity">
+      <accounting-activity-feed
+        [items]="feedItems()"
+        [loading]="activityLoading()"
+        [postedCount]="timelineSummary().postedCount"
+        [pendingCount]="timelineSummary().pendingCount"
+      />
+      <accounting-alert-stack
+        [alerts]="summary()?.alerts ?? []"
+        [loading]="activityLoading()"
+        [error]="activityError()"
+        (retry)="retrySection('activity')"
+      />
+    </section>
+
+    <!-- 5. Details / Coming soon -->
+    <section class="fin-layout__details">
+      <header class="fin-section-head">
+        <h3>{{ 'Extended balances' | translate }}</h3>
+        <p>{{ 'Activated when backend APIs are ready' | translate }}</p>
+      </header>
+      <div class="fin-details-grid">
+        <accounting-feature-placeholder
+          icon="💵"
+          titleKey="Cash balance coming soon"
+          bodyKey="Cash balance placeholder body"
+        />
+        <accounting-feature-placeholder
+          icon="🏦"
+          titleKey="Bank balance coming soon"
+          bodyKey="Bank balance placeholder body"
+        />
+        <accounting-feature-placeholder
+          icon="📋"
+          titleKey="Top debtors coming soon"
+          bodyKey="Top debtors placeholder body"
+        />
+      </div>
+    </section>
+  </div>
 </div>

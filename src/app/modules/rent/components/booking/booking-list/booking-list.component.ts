@@ -21,6 +21,9 @@ import {
 import { BookingService } from '../../../services/booking/booking.service';
 import { BranchService } from '../../../services/branches/branch.service';
 import {
+  bookingCardActionInMain,
+  bookingCardCloseInMenu,
+  bookingCardFinishInMenu,
   bookingCardMoreMenuVisible,
   bookingCardPrintInMain,
   bookingCardPrintInMenu,
@@ -197,8 +200,10 @@ export class BookingListComponent implements OnInit {
   canFinishAction = canBookingFinishAction;
   canSuspendAction = canBookingSuspendAction;
   canExtendAction = canBookingExtendAction;
+  cardActionInMain = bookingCardActionInMain;
+  cardCloseInMenu = bookingCardCloseInMenu;
+  cardFinishInMenu = bookingCardFinishInMenu;
   cardMoreMenuVisible = bookingCardMoreMenuVisible;
-  cardPrintInMain = bookingCardPrintInMain;
   cardPrintInMenu = bookingCardPrintInMenu;
 
   closeBookingCardMore(panel: HTMLDetailsElement | null): void {

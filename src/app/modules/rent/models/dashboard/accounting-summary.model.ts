@@ -12,6 +12,10 @@ export interface AccountingKpis {
   cashBalance: number;
   bankBalance: number;
   receivables: number;
+  /** No balance API yet — show placeholder on card. */
+  cashBalanceUnavailable?: boolean;
+  bankBalanceUnavailable?: boolean;
+  receivablesUnavailable?: boolean;
 }
 
 export interface AccountingCashFlowPoint {

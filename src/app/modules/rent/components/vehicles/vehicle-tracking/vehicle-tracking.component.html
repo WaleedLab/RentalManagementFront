@@ -1,0 +1,8 @@
+@if (context(); as ctx) {
+  <app-tracking-workspace [context]="ctx" />
+} @else if (loading()) {
+  <div class="tracking-boot">
+    <div class="tracking-boot__spinner" role="status" aria-label="Loading"></div>
+    <p>{{ 'Tracking workspace loading' | translate }}</p>
+  </div>
+}

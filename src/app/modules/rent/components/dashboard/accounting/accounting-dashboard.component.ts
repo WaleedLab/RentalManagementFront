@@ -2,22 +2,40 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { finalize } from 'rxjs';
+import { catchError, of } from 'rxjs';
 
-import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { AuthStateService } from '../../../../../core/auth/auth-state.service';
+import { FinancialYearService } from '../../../../finance/services/financial-years/financial-year.service';
+import { FinancialYear } from '../../../../finance/models/financial-years/financial-year.model';
 import {
-  AccountingAlert,
-  AccountingRecentJournal,
+  AccountingInsight,
+  AccountingSectionKey,
+  AccountingSectionState,
+  FinancialFeedItem,
+  FinancialHeroStatus,
+} from '../../../models/dashboard/accounting-intelligence.model';
+import {
   AccountingSummaryFilters,
   AccountingSummaryResponse,
-  AccountingTopDebtor,
 } from '../../../models';
 import { AccountingDashboardService } from '../../../services/dashboard/accounting-dashboard.service';
-import { AccountingAlertsComponent } from './shared/accounting-alerts.component';
-import { AccountingCardComponent } from './shared/accounting-card.component';
+import {
+  buildAccountingInsights,
+  buildFinancialFeed,
+  buildFinancialHeroStatus,
+  buildTimelineSummary,
+} from '../../../services/dashboard/accounting-intelligence.util';
+import { resolveDatePreset, DatePresetKey } from '../../../services/dashboard/accounting-date-presets.util';
+import { AccountingDashboardQueryContext } from '../../../services/dashboard/accounting-queries/accounting-dashboard-context.model';
+import { toDateOnlyInput } from '../../../services/dashboard/accounting-queries/accounting-date.utils';
+import { DatePresetKey as CommandPresetKey } from './shared/accounting-command-bar.component';
+import { AccountingCommandBarComponent } from './shared/accounting-command-bar.component';
+import { AccountingHeroStatusComponent } from './shared/accounting-hero-status.component';
+import { AccountingInsightStripComponent } from './shared/accounting-insight-strip.component';
 import { AccountingChartComponent } from './shared/accounting-chart.component';
-import { AccountingTableComponent } from './shared/accounting-table.component';
+import { AccountingActivityFeedComponent } from './shared/accounting-activity-feed.component';
+import { AccountingFeaturePlaceholderComponent } from './shared/accounting-feature-placeholder.component';
+import { AccountingAlertStackComponent } from './shared/accounting-alert-stack.component';
 
 @Component({
   selector: 'app-accounting-dashboard',
@@ -26,12 +44,13 @@ import { AccountingTableComponent } from './shared/accounting-table.component';
     CommonModule,
     ReactiveFormsModule,
     TranslateModule,
-    PageHeaderComponent,
-    AccountingCardComponent,
+    AccountingCommandBarComponent,
+    AccountingHeroStatusComponent,
+    AccountingInsightStripComponent,
     AccountingChartComponent,
-    AccountingTableComponent,
-    AccountingAlertsComponent,
-    DatePickerComponent,
+    AccountingActivityFeedComponent,
+    AccountingFeaturePlaceholderComponent,
+    AccountingAlertStackComponent,
   ],
   templateUrl: './accounting-dashboard.component.html',
   styleUrl: './accounting-dashboard.component.scss',
@@ -39,11 +58,21 @@ import { AccountingTableComponent } from './shared/accounting-table.component';
 export class AccountingDashboardComponent implements OnInit {
   private fb = inject(FormBuilder);
   private accountingService = inject(AccountingDashboardService);
+  private financialYearService = inject(FinancialYearService);
+  private authState = inject(AuthStateService);
   private translate = inject(TranslateService);
 
-  loading = signal(false);
-  loadError = signal(false);
+  private financialYearsCache: FinancialYear[] = [];
+
   summary = signal<AccountingSummaryResponse | null>(null);
+  fleetRequiredError = signal(false);
+
+  sectionState = signal<Record<AccountingSectionKey, AccountingSectionState>>({
+    filters: 'idle',
+    hero: 'idle',
+    trends: 'idle',
+    activity: 'idle',
+  });
 
   filtersForm = this.fb.nonNullable.group({
     financialYearId: [''],
@@ -53,31 +82,40 @@ export class AccountingDashboardComponent implements OnInit {
     branch: [''],
   });
 
-  topDebtors = computed<AccountingTopDebtor[]>(() => this.summary()?.topDebtors ?? []);
-  recentJournals = computed<AccountingRecentJournal[]>(() => this.summary()?.recentJournals ?? []);
-  alerts = computed<AccountingAlert[]>(() => this.summary()?.alerts ?? []);
-
-  hasNoData = computed(() => {
+  heroStatus = computed<FinancialHeroStatus | null>(() => {
     const summary = this.summary();
-    if (!summary) {
-      return false;
-    }
-    return (
-      summary.cashFlow.length === 0 &&
-      summary.revenueVsExpenses.length === 0 &&
-      summary.profitTrend.length === 0 &&
-      summary.topDebtors.length === 0 &&
-      summary.recentJournals.length === 0 &&
-      summary.alerts.length === 0
-    );
+    return summary ? buildFinancialHeroStatus(summary) : null;
   });
+
+  insights = computed<AccountingInsight[]>(() => {
+    const summary = this.summary();
+    return summary ? buildAccountingInsights(summary) : [];
+  });
+
+  feedItems = computed<FinancialFeedItem[]>(() => {
+    const summary = this.summary();
+    return summary ? buildFinancialFeed(summary) : [];
+  });
+
+  timelineSummary = computed(() => {
+    const summary = this.summary();
+    return summary ? buildTimelineSummary(summary) : { postedCount: 0, pendingCount: 0, netFlow: 0 };
+  });
+
+  filtersLoading = computed(() => this.sectionState().filters === 'loading');
+  heroLoading = computed(() => this.sectionState().hero === 'loading');
+  trendsLoading = computed(() => this.sectionState().trends === 'loading');
+  activityLoading = computed(() => this.sectionState().activity === 'loading');
+  heroError = computed(() => this.sectionState().hero === 'error');
+  trendsError = computed(() => this.sectionState().trends === 'error');
+  activityError = computed(() => this.sectionState().activity === 'error');
 
   cashFlowLabels = computed(() => (this.summary()?.cashFlow ?? []).map(item => item.label));
   cashFlowSeries = computed(() => {
     const points = this.summary()?.cashFlow ?? [];
     return [
-      { label: this.translate.instant('Inflow'), values: points.map(item => item.inflow), color: '#22c55e' },
-      { label: this.translate.instant('Outflow'), values: points.map(item => item.outflow), color: '#ef4444' },
+      { label: this.translate.instant('Inflow'), values: points.map(item => item.inflow) },
+      { label: this.translate.instant('Outflow'), values: points.map(item => item.outflow) },
     ];
   });
 
@@ -85,35 +123,36 @@ export class AccountingDashboardComponent implements OnInit {
   revenueExpenseSeries = computed(() => {
     const points = this.summary()?.revenueVsExpenses ?? [];
     return [
-      { label: this.translate.instant('Revenue'), values: points.map(item => item.revenue), color: '#7f1d3f' },
-      { label: this.translate.instant('Expenses'), values: points.map(item => item.expenses), color: '#f59e0b' },
+      { label: this.translate.instant('Revenue'), values: points.map(item => item.revenue) },
+      { label: this.translate.instant('Expenses'), values: points.map(item => item.expenses) },
     ];
   });
 
   profitTrendLabels = computed(() => (this.summary()?.profitTrend ?? []).map(item => item.label));
   profitTrendSeries = computed(() => [
-    { label: this.translate.instant('Net Profit'), values: (this.summary()?.profitTrend ?? []).map(item => item.value), color: '#22c55e' },
+    {
+      label: this.translate.instant('Net Profit'),
+      values: (this.summary()?.profitTrend ?? []).map(item => item.value),
+    },
   ]);
 
-  topDebtorsColumns = [
-    { key: 'customerName', label: 'Customer Name', format: 'text' as const },
-    { key: 'debtAmount', label: 'Debt Amount', format: 'currency' as const },
-  ];
-
-  recentJournalColumns = [
-    { key: 'journalNumber', label: 'Journal Number', format: 'text' as const },
-    { key: 'date', label: 'Date', format: 'date' as const },
-    { key: 'debit', label: 'Debit', format: 'currency' as const },
-    { key: 'credit', label: 'Credit', format: 'currency' as const },
-    { key: 'isBalanced', label: 'Balance Status', format: 'balance' as const },
-  ];
-
   ngOnInit(): void {
-    this.loadSummary();
+    this.filtersForm.patchValue({
+      fleet: this.authState.fleetId() ?? '',
+      branch: this.authState.branchId() ? String(this.authState.branchId()) : '',
+    });
+
+    this.filtersForm.controls.financialYearId.valueChanges.subscribe(yearId => {
+      if (yearId) {
+        this.syncDatesFromFinancialYear(yearId);
+      }
+    });
+
+    this.loadDashboard();
   }
 
   applyFilters(): void {
-    this.loadSummary();
+    this.loadDashboard();
   }
 
   resetFilters(): void {
@@ -121,57 +160,183 @@ export class AccountingDashboardComponent implements OnInit {
       financialYearId: '',
       startDate: '',
       endDate: '',
-      fleet: '',
-      branch: '',
+      fleet: this.authState.fleetId() ?? '',
+      branch: this.authState.branchId() ? String(this.authState.branchId()) : '',
     });
-    this.loadSummary();
+    this.loadDashboard();
   }
 
-  private loadSummary(): void {
-    this.loading.set(true);
-    this.loadError.set(false);
-    const form = this.filtersForm.getRawValue();
-    const filters: AccountingSummaryFilters = {
-      financialYearId: form.financialYearId || undefined,
-      startDate: form.startDate || undefined,
-      endDate: form.endDate || undefined,
-      fleet: form.fleet || undefined,
-      branch: form.branch || undefined,
-    };
+  applyDatePreset(preset: CommandPresetKey): void {
+    const range = resolveDatePreset(preset as DatePresetKey);
+    this.filtersForm.patchValue(range);
+    this.loadDashboard();
+  }
+
+  retrySection(section: AccountingSectionKey): void {
+    const filters = this.buildFilters();
+    const ctx = this.accountingService.buildQueryContext(filters);
+    if (!ctx) {
+      return;
+    }
+
+    if (section === 'hero') {
+      this.loadHero(ctx);
+    } else if (section === 'trends') {
+      this.loadTrends(ctx);
+    } else if (section === 'activity') {
+      this.loadActivity(ctx);
+    }
+  }
+
+  private loadDashboard(): void {
+    const filters = this.buildFilters();
+    const ctx = this.accountingService.buildQueryContext(filters);
+
+    if (!ctx) {
+      this.fleetRequiredError.set(true);
+      this.summary.set(this.createEmptySummary());
+      this.setSection('filters', 'error');
+      return;
+    }
+
+    this.fleetRequiredError.set(false);
+    this.summary.set(this.createEmptySummary());
+    this.setSection('filters', 'loading');
+    this.setSection('hero', 'loading');
+    this.setSection('trends', 'loading');
+    this.setSection('activity', 'loading');
 
     this.accountingService
-      .getSummary(filters)
-      .pipe(finalize(() => this.loading.set(false)))
+      .loadFilterOptions(filters)
+      .pipe(catchError(() => of(this.createEmptySummary().filters)))
       .subscribe({
-        next: response => this.summary.set(this.normalizeSummary(response)),
-        error: () => {
-          this.summary.set(this.createEmptySummary());
-          this.loadError.set(true);
+        next: filterOptions => {
+          this.summary.update(current => ({
+            ...(current ?? this.createEmptySummary()),
+            filters: filterOptions,
+          }));
+          this.setSection('filters', 'ready');
         },
+        error: () => this.setSection('filters', 'error'),
+      });
+
+    this.loadHero(ctx);
+    this.loadTrends(ctx);
+    this.loadActivity(ctx);
+  }
+
+  private loadHero(ctx: AccountingDashboardQueryContext): void {
+    this.setSection('hero', 'loading');
+    this.accountingService
+      .loadHeroSection(ctx)
+      .pipe(catchError(() => of(null)))
+      .subscribe({
+        next: hero => {
+          if (!hero) {
+            this.setSection('hero', 'error');
+            return;
+          }
+          this.summary.update(current => ({
+            ...(current ?? this.createEmptySummary()),
+            kpis: hero.kpis,
+          }));
+          this.setSection('hero', 'ready');
+        },
+        error: () => this.setSection('hero', 'error'),
       });
   }
 
-  private normalizeSummary(summary: AccountingSummaryResponse | null | undefined): AccountingSummaryResponse {
-    if (!summary) {
-      return this.createEmptySummary();
-    }
-    const defaults = this.createEmptySummary();
+  private loadTrends(ctx: AccountingDashboardQueryContext): void {
+    this.setSection('trends', 'loading');
+    this.accountingService
+      .loadTrendsSection(ctx)
+      .pipe(catchError(() => of(null)))
+      .subscribe({
+        next: trends => {
+          if (!trends) {
+            this.setSection('trends', 'error');
+            return;
+          }
+          this.summary.update(current => ({
+            ...(current ?? this.createEmptySummary()),
+            cashFlow: trends.cashFlow,
+            revenueVsExpenses: trends.revenueVsExpenses,
+            profitTrend: trends.profitTrend,
+          }));
+          this.setSection('trends', 'ready');
+        },
+        error: () => this.setSection('trends', 'error'),
+      });
+  }
+
+  private loadActivity(ctx: AccountingDashboardQueryContext): void {
+    this.setSection('activity', 'loading');
+    this.accountingService
+      .loadActivitySection(ctx)
+      .pipe(catchError(() => of(null)))
+      .subscribe({
+        next: activity => {
+          if (!activity) {
+            this.setSection('activity', 'error');
+            return;
+          }
+          this.summary.update(current => ({
+            ...(current ?? this.createEmptySummary()),
+            recentJournals: activity.recentJournals,
+            alerts: activity.alerts,
+          }));
+          this.setSection('activity', 'ready');
+        },
+        error: () => this.setSection('activity', 'error'),
+      });
+  }
+
+  private buildFilters(): AccountingSummaryFilters {
+    const form = this.filtersForm.getRawValue();
+    const fleet = form.fleet?.trim() || this.authState.fleetId()?.trim() || '';
     return {
-      ...defaults,
-      ...summary,
-      kpis: summary.kpis ?? defaults.kpis,
-      cashFlow: summary.cashFlow ?? defaults.cashFlow,
-      revenueVsExpenses: summary.revenueVsExpenses ?? defaults.revenueVsExpenses,
-      profitTrend: summary.profitTrend ?? defaults.profitTrend,
-      topDebtors: summary.topDebtors ?? defaults.topDebtors,
-      recentJournals: summary.recentJournals ?? defaults.recentJournals,
-      alerts: summary.alerts ?? defaults.alerts,
-      filters: {
-        financialYears: summary.filters?.financialYears?.length ? summary.filters.financialYears : defaults.filters.financialYears,
-        fleets: summary.filters?.fleets?.length ? summary.filters.fleets : defaults.filters.fleets,
-        branches: summary.filters?.branches?.length ? summary.filters.branches : defaults.filters.branches,
-      },
+      financialYearId: form.financialYearId || undefined,
+      startDate: form.startDate || undefined,
+      endDate: form.endDate || undefined,
+      fleet: fleet || undefined,
+      branch: form.branch || undefined,
     };
+  }
+
+  private setSection(key: AccountingSectionKey, state: AccountingSectionState): void {
+    this.sectionState.update(current => ({ ...current, [key]: state }));
+  }
+
+  private syncDatesFromFinancialYear(yearId: string): void {
+    const fleetId = this.filtersForm.controls.fleet.value?.trim();
+    if (!fleetId || !yearId) {
+      return;
+    }
+
+    const apply = (years: FinancialYear[]) => {
+      const year = years.find(item => String(item.id) === yearId);
+      if (year?.startDate && year?.endDate) {
+        this.filtersForm.patchValue(
+          {
+            startDate: toDateOnlyInput(year.startDate),
+            endDate: toDateOnlyInput(year.endDate),
+          },
+          { emitEvent: false },
+        );
+      }
+    };
+
+    if (this.financialYearsCache.length) {
+      apply(this.financialYearsCache);
+      return;
+    }
+
+    this.financialYearService.getList(fleetId).subscribe({
+      next: years => {
+        this.financialYearsCache = years;
+        apply(years);
+      },
+    });
   }
 
   private createEmptySummary(): AccountingSummaryResponse {
@@ -183,6 +348,9 @@ export class AccountingDashboardComponent implements OnInit {
         cashBalance: 0,
         bankBalance: 0,
         receivables: 0,
+        cashBalanceUnavailable: true,
+        bankBalanceUnavailable: true,
+        receivablesUnavailable: true,
       },
       cashFlow: [],
       revenueVsExpenses: [],

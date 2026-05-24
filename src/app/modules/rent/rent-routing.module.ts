@@ -148,6 +148,14 @@ const routes: Routes = [
         loadComponent: () => import('./components/vehicles/vehicle-form/vehicle-form.component').then(m => m.VehicleFormComponent),
         data: { title: 'Vehicle Preview', breadcrumb: 'Vehicle Preview', viewOnly: true },
       },
+      {
+        path: ':id/track',
+        loadComponent: () =>
+          import('./components/vehicles/vehicle-tracking/vehicle-tracking.component').then(
+            m => m.VehicleTrackingComponent,
+          ),
+        data: { title: 'Vehicle tracking title', breadcrumb: 'Vehicle tracking title' },
+      },
     ],
   },
   {
@@ -258,6 +266,14 @@ const routes: Routes = [
       {
         path: ':id/details',
         loadComponent: () => import('./components/booking/booking-details/booking-details.component').then(m => m.BookingDetailsComponent),
+      },
+      {
+        path: ':id/track',
+        loadComponent: () =>
+          import('./components/booking/booking-tracking/booking-tracking.component').then(
+            m => m.BookingTrackingComponent,
+          ),
+        data: { title: 'Booking tracking title', breadcrumb: 'Booking tracking title' },
       },
     ],
   },

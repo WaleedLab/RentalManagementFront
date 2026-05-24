@@ -1,0 +1,59 @@
+<div class="fin-command" [formGroup]="form">
+  <div class="fin-command__row">
+    <div class="fin-command__brand">
+      <span class="fin-command__eyebrow">{{ 'Financial Operations Center' | translate }}</span>
+      <h2 class="fin-command__title">{{ 'Accounting Dashboard' | translate }}</h2>
+    </div>
+    <div class="fin-command__actions">
+      <button type="button" class="fin-btn fin-btn--ghost" [disabled]="loading" (click)="reset.emit()">
+        {{ 'Reset' | translate }}
+      </button>
+      <button type="button" class="fin-btn fin-btn--primary" [disabled]="loading" (click)="apply.emit()">
+        {{ 'Apply Filters' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <div class="fin-command__toolbar">
+    <label class="fin-field">
+      <span>{{ 'Financial Year' | translate }}</span>
+      <select class="fin-select" formControlName="financialYearId">
+        @for (year of financialYears; track year.value) {
+          <option [value]="year.value">{{ year.label | translate }}</option>
+        }
+      </select>
+    </label>
+    <label class="fin-field">
+      <span>{{ 'Fleet' | translate }}</span>
+      <select class="fin-select" formControlName="fleet">
+        @for (fleet of fleets; track fleet.value) {
+          <option [value]="fleet.value">{{ fleet.label | translate }}</option>
+        }
+      </select>
+    </label>
+    <label class="fin-field">
+      <span>{{ 'Branch' | translate }}</span>
+      <select class="fin-select" formControlName="branch">
+        @for (branch of branches; track branch.value) {
+          <option [value]="branch.value">{{ branch.label | translate }}</option>
+        }
+      </select>
+    </label>
+    <label class="fin-field fin-field--date">
+      <span>{{ 'Date From' | translate }}</span>
+      <input class="fin-input" type="date" formControlName="startDate" />
+    </label>
+    <label class="fin-field fin-field--date">
+      <span>{{ 'Date To' | translate }}</span>
+      <input class="fin-input" type="date" formControlName="endDate" />
+    </label>
+  </div>
+
+  <div class="fin-command__presets">
+    @for (item of presets; track item.key) {
+      <button type="button" class="fin-pill" [disabled]="loading" (click)="preset.emit(item.key)">
+        {{ item.label | translate }}
+      </button>
+    }
+  </div>
+</div>

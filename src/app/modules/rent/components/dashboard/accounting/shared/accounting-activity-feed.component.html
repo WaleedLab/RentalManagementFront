@@ -1,0 +1,40 @@
+<section class="fin-feed">
+  <header class="fin-section-head">
+    <h3>{{ 'Recent activity' | translate }}</h3>
+    <p>{{ 'Financial feed' | translate }}</p>
+  </header>
+
+  <div class="fin-feed__timeline">
+    <span>{{ 'Today' | translate }}</span>
+    <ul>
+      <li>{{ 'Timeline posted journals' | translate: { count: postedCount } }}</li>
+      <li>{{ 'Timeline pending review' | translate: { count: pendingCount } }}</li>
+    </ul>
+  </div>
+
+  @if (loading) {
+    <div class="fin-feed__skeleton"></div>
+  } @else {
+    <div class="fin-feed__list">
+      @for (item of items; track item.id) {
+        <article class="fin-feed__item" [attr.data-tone]="item.tone">
+          <span class="fin-feed__icon">{{ item.icon }}</span>
+          <div class="fin-feed__body">
+            <h4>{{ item.titleKey | translate: item.titleParams }}</h4>
+            <p>{{ item.subtitleKey | translate: item.subtitleParams }}</p>
+            @if (item.date) {
+              <time>{{ item.date | date: 'mediumDate' }}</time>
+            }
+          </div>
+          @if (item.amount != null && item.amount > 0) {
+            <strong class="fin-feed__amount">
+              {{ item.amount | currency: 'SAR' : 'symbol-narrow' : '1.0-0' }}
+            </strong>
+          }
+        </article>
+      } @empty {
+        <p class="fin-feed__empty">{{ 'No activity in this period' | translate }}</p>
+      }
+    </div>
+  }
+</section>

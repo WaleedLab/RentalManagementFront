@@ -1,0 +1,21 @@
+<section class="fin-insights">
+  <header class="fin-section-head">
+    <h3>{{ 'Smart insights' | translate }}</h3>
+    <p>{{ 'What needs attention' | translate }}</p>
+  </header>
+  @if (loading) {
+    <div class="fin-insights__skeleton"></div>
+  } @else {
+    <div class="fin-insights__grid">
+      @for (insight of insights; track insight.id) {
+        <article class="fin-insight" [attr.data-tone]="insight.tone">
+          <span class="fin-insight__icon" aria-hidden="true">{{ insight.icon }}</span>
+          <div>
+            <h4>{{ insight.titleKey | translate: insight.titleParams }}</h4>
+            <p>{{ insight.descriptionKey | translate: insight.descriptionParams }}</p>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
