@@ -809,10 +809,10 @@
   border-top: 1px dashed rgba(148, 163, 184, 0.34);
   display: flex !important;
   width: 100% !important;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  justify-content: space-between !important;
-  gap: 0.4rem;
+  justify-content: flex-start;
+  gap: 0.34rem;
   overflow: visible;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -821,12 +821,13 @@
 
 .booking-card__actions-main {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-start;
   gap: 0.34rem;
   flex: 1 1 auto;
   min-width: 0;
+  width: 100%;
 }
 
 html[dir='rtl'] .booking-card__actions {
@@ -861,6 +862,7 @@ a.booking-card__action {
 .booking-card__more {
   position: relative;
   flex: 0 0 auto;
+  margin-inline-start: auto;
 }
 
 .booking-card__more > summary {
@@ -1481,8 +1483,8 @@ a.booking-card__menu-item {
     padding-top: 0.46rem;
     display: flex !important;
     width: 100% !important;
-    justify-content: space-between !important;
-    flex-wrap: wrap;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
     align-items: center;
     overflow: visible;
     scrollbar-width: none;

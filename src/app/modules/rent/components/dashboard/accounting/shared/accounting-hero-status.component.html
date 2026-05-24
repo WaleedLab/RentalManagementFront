@@ -1,0 +1,47 @@
+<section class="fin-hero" [attr.data-health]="hero?.healthTone ?? 'muted'">
+  @if (loading) {
+    <div class="fin-hero__skeleton"></div>
+  } @else if (error) {
+    <div class="fin-hero__error">
+      <p>{{ 'Hero section failed to load' | translate }}</p>
+    </div>
+  } @else if (hero) {
+    <div class="fin-hero__grid">
+      <div class="fin-hero__main">
+        <p class="fin-hero__label">{{ 'Current financial position' | translate }}</p>
+        <p class="fin-hero__profit">
+          {{ hero.netProfit | currency: 'SAR' : 'symbol-narrow' : '1.0-0' }}
+        </p>
+        <p class="fin-hero__sub">{{ 'Net Profit' | translate }}</p>
+        <div class="fin-hero__meta">
+          <span class="fin-hero__growth" [class.fin-hero__growth--up]="(hero.growthPercent ?? 0) > 0" [class.fin-hero__growth--down]="(hero.growthPercent ?? 0) < 0">
+            {{ growthArrow() }}
+            {{ hero.growthLabelKey | translate: hero.growthLabelParams }}
+          </span>
+          <span class="fin-hero__badge">{{ hero.healthLabelKey | translate }}</span>
+        </div>
+        <div class="fin-hero__stats">
+          <div>
+            <span>{{ 'Total Revenue' | translate }}</span>
+            <strong>{{ hero.revenue | currency: 'SAR' : 'symbol-narrow' : '1.0-0' }}</strong>
+          </div>
+          <div>
+            <span>{{ 'Total Expenses' | translate }}</span>
+            <strong>{{ hero.expenses | currency: 'SAR' : 'symbol-narrow' : '1.0-0' }}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="fin-hero__chart">
+        <accounting-chart
+          [title]="'Monthly Profit Trend'"
+          [subtitle]="'Net trend by month'"
+          [type]="'area'"
+          [compact]="true"
+          [labels]="hero.sparklineLabels"
+          [series]="[{ label: 'Net Profit', values: hero.sparklineValues }]"
+          [loading]="false"
+        />
+      </div>
+    </div>
+  }
+</section>

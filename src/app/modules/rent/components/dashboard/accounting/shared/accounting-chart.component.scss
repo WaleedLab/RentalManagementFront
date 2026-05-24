@@ -1,20 +1,60 @@
 .accounting-widget {
   border-radius: 16px;
   padding: 16px;
-  background: var(--acc-surface);
-  box-shadow: var(--acc-shadow);
-  border: 1px solid var(--acc-border);
+  background: var(--fin-glass, var(--acc-surface, #fff));
+  box-shadow: var(--fin-shadow, var(--acc-shadow, none));
+  border: 1px solid var(--fin-border, var(--acc-border, #e2e8f0));
 }
-.accounting-widget__header h3 { margin: 0; font-size: 1rem; }
-.accounting-widget__header p { margin: 6px 0 0; color: var(--acc-text-muted); font-size: 0.83rem; }
-.accounting-widget__chart { margin-top: 12px; height: 280px; }
+
+.accounting-widget__header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--fin-chart-legend, var(--fin-text, inherit));
+}
+
+.accounting-widget__header p {
+  margin: 6px 0 0;
+  color: var(--fin-chart-tick, var(--fin-muted, #334155));
+  font-size: 0.83rem;
+  font-weight: 500;
+}
+
+.accounting-widget__chart {
+  margin-top: 12px;
+  height: 280px;
+}
+
+.accounting-widget--compact {
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.accounting-widget--compact .accounting-widget__header {
+  display: none;
+}
+
+.accounting-widget--compact .accounting-widget__chart {
+  margin-top: 0;
+  height: 200px;
+}
 
 .skeleton--chart {
   margin-top: 12px;
   height: 280px;
   border-radius: 12px;
-  background: linear-gradient(90deg, rgba(148, 163, 184, 0.16), rgba(148, 163, 184, 0.32), rgba(148, 163, 184, 0.16));
+  background: linear-gradient(90deg, var(--fin-shimmer-a, rgba(148, 163, 184, 0.16)), var(--fin-shimmer-b, rgba(148, 163, 184, 0.32)), var(--fin-shimmer-a, rgba(148, 163, 184, 0.16)));
   background-size: 200% 100%;
-  animation: shimmer 1.1s infinite;
+  animation: fin-shimmer 1.1s infinite;
 }
-@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+@keyframes fin-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}

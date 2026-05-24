@@ -1,0 +1,33 @@
+<section class="fin-alerts">
+  <header class="fin-section-head fin-section-head--row">
+    <div>
+      <h3>{{ 'Compliance alerts' | translate }}</h3>
+      <p>{{ 'Pending and high priority' | translate }}</p>
+    </div>
+    @if (error) {
+      <button type="button" class="fin-btn fin-btn--ghost fin-btn--sm" (click)="retry.emit()">
+        {{ 'Retry section' | translate }}
+      </button>
+    }
+  </header>
+
+  @if (loading) {
+    <div class="fin-alerts__skeleton"></div>
+  } @else if (error) {
+    <p class="fin-alerts__error">{{ 'Alerts section failed to load' | translate }}</p>
+  } @else {
+    <div class="fin-alerts__stack">
+      @for (alert of alerts; track $index) {
+        <article class="fin-alert" [attr.data-priority]="alert.type === 'risk' ? 'high' : alert.type === 'warning' ? 'medium' : 'low'">
+          <span class="fin-alert__dot"></span>
+          <div>
+            <h4>{{ alert.title | translate }}</h4>
+            <p>{{ alert.description }}</p>
+          </div>
+        </article>
+      } @empty {
+        <p class="fin-alerts__clear">{{ 'No pending alerts' | translate }}</p>
+      }
+    </div>
+  }
+</section>

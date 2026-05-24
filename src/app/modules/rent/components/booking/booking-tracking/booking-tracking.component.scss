@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+
+.tracking-boot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 50vh;
+  color: rgba(15, 23, 42, 0.58);
+}
+
+:host-context(body.dark-only) .tracking-boot {
+  color: color-mix(in srgb, var(--app-dark-text) 62%, transparent);
+}
+
+.tracking-boot__spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  border: 3px solid rgba(34, 197, 94, 0.18);
+  border-top-color: #22c55e;
+  animation: tracking-spin 0.9s linear infinite;
+}
+
+@keyframes tracking-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

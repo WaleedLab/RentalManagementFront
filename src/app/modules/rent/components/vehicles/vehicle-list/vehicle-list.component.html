@@ -163,6 +163,14 @@
                     <i class="fa-solid fa-eye"></i>
                   </a>
                   <a
+                    class="table-action-icon table-action-icon--secondary vehicle-card__action"
+                    [routerLink]="['/vehicles', vehicle.id, 'track']"
+                    [attr.aria-label]="'Vehicle card track' | translate"
+                    [title]="'Vehicle card track' | translate"
+                  >
+                    <i class="fa-solid fa-location-dot"></i>
+                  </a>
+                  <a
                     class="table-action-icon table-action-icon--primary vehicle-card__action"
                     [routerLink]="['/vehicles', vehicle.id, 'edit']"
                     [attr.aria-label]="'Edit' | translate"
