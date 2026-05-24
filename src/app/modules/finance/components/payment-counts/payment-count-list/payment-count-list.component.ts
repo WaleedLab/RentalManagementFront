@@ -5,6 +5,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { Subject, catchError, debounceTime, distinctUntilChanged, forkJoin, map, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
+import { loginBranchId } from '../../../../../shared/utils/branch-id.util';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import {
   SmoothSelectOption,
@@ -211,7 +212,7 @@ export class PaymentCountListComponent implements OnInit {
         .pipe(map(items => ({ items })))
         .pipe(catchError(() => of({ items: [] }))),
       banks: this.bankService.getList(fleetId).pipe(catchError(() => of([]))),
-      cash: this.cashAccountService.getList(fleetId).pipe(catchError(() => of([]))),
+      cash: this.cashAccountService.getList(fleetId, loginBranchId(this.authState.branchId())).pipe(catchError(() => of([]))),
     }).subscribe({
       next: ({ customers, vehicles, branches, bookings, banks, cash }) => {
         const isArabic = this.translate.currentLang?.startsWith('ar');

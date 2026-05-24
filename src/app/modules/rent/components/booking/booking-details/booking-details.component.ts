@@ -6,6 +6,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { catchError, forkJoin, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
+import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch-id.util';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
@@ -27,6 +28,7 @@ import {
   bookingStatusTranslationKey,
 } from '../../../models/booking/booking-status.utils';
 import { BookingService } from '../../../services/booking/booking.service';
+import { VehicleService } from '../../../services/vehicles/vehicle.service';
 import {
   bookingCheckoutMs,
   isReturnTimeAfterCheckout,
@@ -71,6 +73,7 @@ export class BookingDetailsComponent implements OnInit {
   private router = inject(Router);
   private authState = inject(AuthStateService);
   private bookingService = inject(BookingService);
+  private vehicleService = inject(VehicleService);
   private paymentCountService = inject(PaymentCountService);
   private bankService = inject(BankService);
   private cashAccountService = inject(CashAccountService);
@@ -78,6 +81,7 @@ export class BookingDetailsComponent implements OnInit {
   private translate = inject(TranslateService);
 
   booking = signal<Booking | null>(null);
+  vehicleBranchId = signal<number | null>(null);
   loading = signal(false);
   paymentCountSum = signal<number | null>(null);
   paymentRows = signal<PaymentCount[]>([]);
@@ -515,7 +519,11 @@ export class BookingDetailsComponent implements OnInit {
     }
     const fleetId = this.authState.fleetId() ?? '';
     const idBooking = this.toBookingNumericId(item.id);
-    const idBranch = Number(item.branchId ?? this.authState.branchId() ?? 0);
+    const idBranch = resolveContractPaymentBranch({
+      vehicleBranchId: this.vehicleBranchId(),
+      bookingBranchId: item.branchId,
+      loginBranchId: this.authState.branchId(),
+    });
     const paid = Math.max(0, Number(this.extendCurrentPaymentAmount()) || 0);
     if (!fleetId || !idBooking || !Number.isFinite(idBranch) || idBranch <= 0) {
       this.toast.error('تعذر تنفيذ التمديد: بيانات العقد غير مكتملة');
@@ -601,9 +609,14 @@ export class BookingDetailsComponent implements OnInit {
 
   private loadExtendLookupData(): void {
     const fleetId = this.authState.fleetId() || undefined;
+    const idBranch = resolveContractPaymentBranch({
+      vehicleBranchId: this.vehicleBranchId(),
+      bookingBranchId: this.booking()?.branchId,
+      loginBranchId: this.authState.branchId(),
+    });
     forkJoin({
       banks: this.bankService.getList(fleetId).pipe(catchError(() => of([]))),
-      cashAccounts: this.cashAccountService.getList(fleetId).pipe(catchError(() => of([]))),
+      cashAccounts: this.cashAccountService.getList(fleetId, idBranch).pipe(catchError(() => of([]))),
     }).subscribe(({ banks, cashAccounts }) => {
       this.extendBanks.set(banks ?? []);
       this.extendCashAccounts.set(cashAccounts ?? []);
@@ -1116,6 +1129,7 @@ export class BookingDetailsComponent implements OnInit {
     this.bookingService.getById(id, this.authState.fleetId() ?? '').subscribe({
       next: booking => {
         this.booking.set(booking);
+        this.loadVehicleBranch(booking);
         if (extendFromQuery) {
           this.enterExtendModeFromToolbar(booking);
           return;
@@ -1132,6 +1146,33 @@ export class BookingDetailsComponent implements OnInit {
         this.toast.error(this.translate.instant('Failed to load booking'));
       },
       complete: () => this.loading.set(false),
+    });
+  }
+
+  private loadVehicleBranch(booking: Booking): void {
+    const fleetId = this.authState.fleetId() ?? '';
+    const vehicleId = String(booking.vehicleId ?? '').trim();
+    if (!fleetId || !vehicleId) {
+      this.vehicleBranchId.set(null);
+      if (this.isExtendMode()) {
+        this.loadExtendLookupData();
+      }
+      return;
+    }
+    this.vehicleService.getById(vehicleId, fleetId).subscribe({
+      next: vehicle => {
+        const branch = Number(vehicle?.branchId ?? 0);
+        this.vehicleBranchId.set(Number.isFinite(branch) && branch > 0 ? branch : null);
+        if (this.isExtendMode()) {
+          this.loadExtendLookupData();
+        }
+      },
+      error: () => {
+        this.vehicleBranchId.set(null);
+        if (this.isExtendMode()) {
+          this.loadExtendLookupData();
+        }
+      },
     });
   }
 }

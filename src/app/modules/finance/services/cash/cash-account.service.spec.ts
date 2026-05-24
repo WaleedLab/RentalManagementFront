@@ -56,8 +56,8 @@ describe('CashAccountService', () => {
     httpMock.verify();
   });
 
-  it('gets all cash accounts and sends fleet query params correctly', () => {
-    service.getList(fleetId).subscribe(accounts => {
+  it('gets all cash accounts and sends fleet + branch query params correctly', () => {
+    service.getList(fleetId, 12).subscribe(accounts => {
       expect(accounts).toEqual([
         jasmine.objectContaining({
           id: cashId,
@@ -73,10 +73,25 @@ describe('CashAccountService', () => {
       request.url === `${apiBase}/Cash/List` &&
       request.params.get('FleetId') === fleetId &&
       request.params.get('IdFleet') === fleetId &&
-      request.params.get('Fleetid') === null,
+      request.params.get('Fleetid') === null &&
+      request.params.get('IdBranch') === '12' &&
+      request.params.get('idBranch') === '12',
     );
 
     req.flush({ data: [apiCashAccount], succeeded: true, errors: [], propertyErrors: {}, httpStatusCode: 200 });
+  });
+
+  it('defaults branch query param to 0 when idBranch is omitted', () => {
+    service.getList(fleetId).subscribe();
+
+    const req = httpMock.expectOne(request =>
+      request.method === 'GET' &&
+      request.url === `${apiBase}/Cash/List` &&
+      request.params.get('IdBranch') === '0' &&
+      request.params.get('idBranch') === '0',
+    );
+
+    req.flush({ data: [], succeeded: true, errors: [], propertyErrors: {}, httpStatusCode: 200 });
   });
 
   it('gets an empty cash account list when the API returns null data', () => {

@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
+import { loginBranchId } from '../../../../../shared/utils/branch-id.util';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { CashAccount } from '../../../models/cash/cash-account.model';
 import { FinanceListColumn, FinanceListRow } from '../../../models/shared/finance-list.model';
@@ -57,7 +58,7 @@ export class CashAccountListComponent implements OnInit {
     this.loading.set(true);
     this.loadError.set(null);
 
-    this.cashService.getList(fleetId).subscribe({
+    this.cashService.getList(fleetId, loginBranchId(this.authState.branchId())).subscribe({
       next: items => this.items.set(items),
       error: err => {
         const message = err?.message ?? this.translate.instant('No records found');

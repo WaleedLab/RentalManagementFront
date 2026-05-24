@@ -180,18 +180,7 @@
                       <i class="fa-solid fa-eye" aria-hidden="true"></i>
                       <span class="booking-card__action-label">{{ 'Booking card view' | translate }}</span>
                     </a>
-                    @if (!canCloseAction(booking)) {
-                      <button
-                        class="table-action-icon booking-card__action booking-card__action--labeled booking-card__action--close-contract booking-card__action--tooltip"
-                        type="button"
-                        disabled
-                        [attr.aria-label]="'Booking card close contract' | translate"
-                        [attr.data-action-tooltip]="'Booking card close contract' | translate"
-                      >
-                        <i class="fa-solid fa-lock" aria-hidden="true"></i>
-                        <span class="booking-card__action-label">{{ 'Booking card close contract' | translate }}</span>
-                      </button>
-                    } @else {
+                    @if (canCloseAction(booking)) {
                       <a
                         class="table-action-icon booking-card__action booking-card__action--labeled booking-card__action--close-contract booking-card__action--tooltip"
                         [routerLink]="['/booking', booking.id, 'close']"
@@ -202,18 +191,7 @@
                         <span class="booking-card__action-label">{{ 'Booking card close contract' | translate }}</span>
                       </a>
                     }
-                    @if (!canFinishAction(booking)) {
-                      <button
-                        class="table-action-icon booking-card__action booking-card__action--labeled booking-card__action--finish booking-card__action--tooltip"
-                        type="button"
-                        disabled
-                        [attr.aria-label]="'Booking card finish' | translate"
-                        [attr.data-action-tooltip]="'Booking card finish' | translate"
-                      >
-                        <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i>
-                        <span class="booking-card__action-label">{{ 'Booking card finish' | translate }}</span>
-                      </button>
-                    } @else {
+                    @if (canFinishAction(booking)) {
                       <a
                         class="table-action-icon booking-card__action booking-card__action--labeled booking-card__action--finish booking-card__action--tooltip"
                         [routerLink]="['/booking', booking.id, 'finish']"
@@ -224,112 +202,82 @@
                         <span class="booking-card__action-label">{{ 'Booking card finish' | translate }}</span>
                       </a>
                     }
+                    @if (cardPrintInMain(booking)) {
+                      <a
+                        class="table-action-icon booking-card__action booking-card__action--labeled booking-card__action--print booking-card__action--tooltip"
+                        [routerLink]="['/booking', booking.id, 'details']"
+                        [queryParams]="{ action: 'print' }"
+                        [attr.aria-label]="'Booking card menu print' | translate"
+                        [attr.data-action-tooltip]="'Booking card menu print' | translate"
+                      >
+                        <i class="fa-solid fa-print" aria-hidden="true"></i>
+                        <span class="booking-card__action-label">{{ 'Booking card menu print' | translate }}</span>
+                      </a>
+                    }
                   </div>
-                  <details class="booking-card__more" #bookingCardMore>
-                    <summary
-                      class="table-action-icon booking-card__action booking-card__action--more booking-card__action--tooltip"
-                      [attr.aria-label]="'Booking card more' | translate"
-                      [attr.data-action-tooltip]="'Booking card more' | translate"
-                    >
-                      <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
-                    </summary>
-                    <div class="booking-card__more-menu" role="menu" (click)="$event.stopPropagation()">
-                      @if (!canSuspendAction(booking)) {
-                        <button
-                          class="booking-card__menu-item booking-card__menu-item--suspend booking-card__action--tooltip"
-                          type="button"
-                          role="menuitem"
-                          disabled
-                          [attr.data-action-tooltip]="'Booking card menu suspend' | translate"
-                        >
-                          <i class="fa-solid fa-comment-slash" aria-hidden="true"></i>
-                          <span>{{ 'Booking card menu suspend' | translate }}</span>
-                        </button>
-                      } @else {
-                        <a
-                          class="booking-card__menu-item booking-card__menu-item--suspend booking-card__action--tooltip"
-                          role="menuitem"
-                          [routerLink]="['/booking', booking.id, 'suspend']"
-                          [attr.data-action-tooltip]="'Booking card menu suspend' | translate"
-                          (click)="closeBookingCardMore(bookingCardMore)"
-                        >
-                          <i class="fa-solid fa-comment-slash" aria-hidden="true"></i>
-                          <span>{{ 'Booking card menu suspend' | translate }}</span>
-                        </a>
-                      }
-                      @if (!canEditAction(booking)) {
-                        <button
-                          class="booking-card__menu-item booking-card__menu-item--edit booking-card__action--tooltip"
-                          type="button"
-                          role="menuitem"
-                          disabled
-                          [attr.data-action-tooltip]="'Booking card menu edit' | translate"
-                        >
-                          <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-                          <span>{{ 'Booking card menu edit' | translate }}</span>
-                        </button>
-                      } @else {
-                        <a
-                          class="booking-card__menu-item booking-card__menu-item--edit booking-card__action--tooltip"
-                          role="menuitem"
-                          [routerLink]="['/booking', booking.id, 'edit']"
-                          [attr.data-action-tooltip]="'Booking card menu edit' | translate"
-                          (click)="closeBookingCardMore(bookingCardMore)"
-                        >
-                          <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-                          <span>{{ 'Booking card menu edit' | translate }}</span>
-                        </a>
-                      }
-                      @if (!canExtendAction(booking)) {
-                        <button
-                          class="booking-card__menu-item booking-card__menu-item--extend booking-card__action--tooltip"
-                          type="button"
-                          role="menuitem"
-                          disabled
-                          [attr.data-action-tooltip]="'Booking card menu extend' | translate"
-                        >
-                          <i class="fa-solid fa-up-right-and-down-left-from-center" aria-hidden="true"></i>
-                          <span>{{ 'Booking card menu extend' | translate }}</span>
-                        </button>
-                      } @else {
-                        <a
-                          class="booking-card__menu-item booking-card__menu-item--extend booking-card__action--tooltip"
-                          role="menuitem"
-                          [routerLink]="['/booking', booking.id, 'details']"
-                          [queryParams]="{ action: 'extend' }"
-                          [attr.data-action-tooltip]="'Booking card menu extend' | translate"
-                          (click)="closeBookingCardMore(bookingCardMore)"
-                        >
-                          <i class="fa-solid fa-up-right-and-down-left-from-center" aria-hidden="true"></i>
-                          <span>{{ 'Booking card menu extend' | translate }}</span>
-                        </a>
-                      }
-                      @if (!canPrintAction(booking)) {
-                        <button
-                          class="booking-card__menu-item booking-card__menu-item--print booking-card__action--tooltip"
-                          type="button"
-                          role="menuitem"
-                          disabled
-                          [attr.data-action-tooltip]="'Booking card menu print' | translate"
-                        >
-                          <i class="fa-solid fa-print" aria-hidden="true"></i>
-                          <span>{{ 'Booking card menu print' | translate }}</span>
-                        </button>
-                      } @else {
-                        <a
-                          class="booking-card__menu-item booking-card__menu-item--print booking-card__action--tooltip"
-                          role="menuitem"
-                          [routerLink]="['/booking', booking.id, 'details']"
-                          [queryParams]="{ action: 'print' }"
-                          [attr.data-action-tooltip]="'Booking card menu print' | translate"
-                          (click)="closeBookingCardMore(bookingCardMore)"
-                        >
-                          <i class="fa-solid fa-print" aria-hidden="true"></i>
-                          <span>{{ 'Booking card menu print' | translate }}</span>
-                        </a>
-                      }
-                    </div>
-                  </details>
+                  @if (cardMoreMenuVisible(booking)) {
+                    <details class="booking-card__more" #bookingCardMore>
+                      <summary
+                        class="table-action-icon booking-card__action booking-card__action--more booking-card__action--tooltip"
+                        [attr.aria-label]="'Booking card more' | translate"
+                        [attr.data-action-tooltip]="'Booking card more' | translate"
+                      >
+                        <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+                      </summary>
+                      <div class="booking-card__more-menu" role="menu" (click)="$event.stopPropagation()">
+                        @if (canSuspendAction(booking)) {
+                          <a
+                            class="booking-card__menu-item booking-card__menu-item--suspend booking-card__action--tooltip"
+                            role="menuitem"
+                            [routerLink]="['/booking', booking.id, 'suspend']"
+                            [attr.data-action-tooltip]="'Booking card menu suspend' | translate"
+                            (click)="closeBookingCardMore(bookingCardMore)"
+                          >
+                            <i class="fa-solid fa-comment-slash" aria-hidden="true"></i>
+                            <span>{{ 'Booking card menu suspend' | translate }}</span>
+                          </a>
+                        }
+                        @if (canEditAction(booking)) {
+                          <a
+                            class="booking-card__menu-item booking-card__menu-item--edit booking-card__action--tooltip"
+                            role="menuitem"
+                            [routerLink]="['/booking', booking.id, 'edit']"
+                            [attr.data-action-tooltip]="'Booking card menu edit' | translate"
+                            (click)="closeBookingCardMore(bookingCardMore)"
+                          >
+                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                            <span>{{ 'Booking card menu edit' | translate }}</span>
+                          </a>
+                        }
+                        @if (canExtendAction(booking)) {
+                          <a
+                            class="booking-card__menu-item booking-card__menu-item--extend booking-card__action--tooltip"
+                            role="menuitem"
+                            [routerLink]="['/booking', booking.id, 'details']"
+                            [queryParams]="{ action: 'extend' }"
+                            [attr.data-action-tooltip]="'Booking card menu extend' | translate"
+                            (click)="closeBookingCardMore(bookingCardMore)"
+                          >
+                            <i class="fa-solid fa-up-right-and-down-left-from-center" aria-hidden="true"></i>
+                            <span>{{ 'Booking card menu extend' | translate }}</span>
+                          </a>
+                        }
+                        @if (cardPrintInMenu(booking)) {
+                          <a
+                            class="booking-card__menu-item booking-card__menu-item--print booking-card__action--tooltip"
+                            role="menuitem"
+                            [routerLink]="['/booking', booking.id, 'details']"
+                            [queryParams]="{ action: 'print' }"
+                            [attr.data-action-tooltip]="'Booking card menu print' | translate"
+                            (click)="closeBookingCardMore(bookingCardMore)"
+                          >
+                            <i class="fa-solid fa-print" aria-hidden="true"></i>
+                            <span>{{ 'Booking card menu print' | translate }}</span>
+                          </a>
+                        }
+                      </div>
+                    </details>
+                  }
                 </div>
               </div>
             </article>

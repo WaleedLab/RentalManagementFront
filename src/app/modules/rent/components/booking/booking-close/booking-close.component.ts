@@ -6,12 +6,14 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { catchError, forkJoin, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
+import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch-id.util';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { Booking, BookingUpdateRequest, Setting } from '../../../models';
 import { BookingService } from '../../../services/booking/booking.service';
 import { SettingService } from '../../../services/settings/setting.service';
+import { VehicleService } from '../../../services/vehicles/vehicle.service';
 import {
   CloseRulesInput,
   CloseRulesSettings,
@@ -42,11 +44,13 @@ export class BookingCloseComponent implements OnInit {
   private router = inject(Router);
   private authState = inject(AuthStateService);
   private bookingService = inject(BookingService);
+  private vehicleService = inject(VehicleService);
   private settingService = inject(SettingService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
 
   booking = signal<Booking | null>(null);
+  vehicleBranchId = signal<number | null>(null);
   settings = signal<Setting | null>(null);
   loading = signal(false);
   saving = signal(false);
@@ -348,7 +352,11 @@ export class BookingCloseComponent implements OnInit {
 
     const fleetId = this.authState.fleetId() ?? '';
     const idBooking = this.toBookingNumericId(item.id);
-    const idBranch = Number(item.branchId ?? this.authState.branchId() ?? 0);
+    const idBranch = resolveContractPaymentBranch({
+      vehicleBranchId: this.vehicleBranchId(),
+      bookingBranchId: item.branchId,
+      loginBranchId: this.authState.branchId(),
+    });
     if (!fleetId || !idBooking || !Number.isFinite(idBranch) || idBranch <= 0) {
       this.toast.error(this.translate.instant('Contract finish missing context'));
       return;
@@ -430,10 +438,12 @@ export class BookingCloseComponent implements OnInit {
       this.loading.set(false);
       if (!b) {
         this.toast.error(this.translate.instant('Failed to load booking'));
+        this.vehicleBranchId.set(null);
         return;
       }
       this.booking.set(b);
       this.settings.set(st);
+      this.loadVehicleBranch(b, fleetId);
       const existing = Number(b.checkinCounter);
       if (Number.isFinite(existing) && existing > 0) {
         this.returnOdometerText.set(String(Math.trunc(existing)));
@@ -442,6 +452,21 @@ export class BookingCloseComponent implements OnInit {
       }
       this.notes.set(String(b.notes ?? ''));
       this.returnDateTime.set(this.initialReturnDateTimeLocal(b));
+    });
+  }
+
+  private loadVehicleBranch(booking: Booking, fleetId: string): void {
+    const vehicleId = String(booking.vehicleId ?? '').trim();
+    if (!vehicleId) {
+      this.vehicleBranchId.set(null);
+      return;
+    }
+    this.vehicleService.getById(vehicleId, fleetId).subscribe({
+      next: vehicle => {
+        const branch = Number(vehicle?.branchId ?? 0);
+        this.vehicleBranchId.set(Number.isFinite(branch) && branch > 0 ? branch : null);
+      },
+      error: () => this.vehicleBranchId.set(null),
     });
   }
 

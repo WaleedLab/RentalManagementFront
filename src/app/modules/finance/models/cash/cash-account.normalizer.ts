@@ -9,6 +9,7 @@ export function normalizeCashAccount(raw: unknown): CashAccount {
     name: String(pick(source, 'name', 'Name') ?? ''),
     description: pick<string>(source, 'description', 'Description'),
     fleetId: pick<string>(source, 'fleetId', 'FleetId'),
+    idBranch: pick<number>(source, 'idBranch', 'IdBranch', 'branchId', 'BranchId') ?? null,
     createdAt: pick<string>(source, 'createdAt', 'CreatedAt'),
     updatedAt: pick<string>(source, 'updatedAt', 'UpdatedAt'),
   };
