@@ -34,7 +34,7 @@ export interface CategoryVehicleFilters {
 }
 
 export interface CategoryVehicleUpsertRequest {
-  id?: string;
+  id?: string | number;
   fleetId: string;
   nameAr: string;
   nameEn?: string;

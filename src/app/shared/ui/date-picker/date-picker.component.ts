@@ -15,7 +15,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NavigationStart, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -53,7 +53,7 @@ const YEAR_RANGE_FUTURE = 15;
 @Component({
   selector: 'app-date-picker',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, FormsModule],
   templateUrl: './date-picker.component.html',
   styleUrl: './date-picker.component.scss',
   host: {
@@ -81,6 +81,11 @@ export class DatePickerComponent implements ControlValueAccessor, OnInit, OnChan
   @Input() disabled = false;
   /** Compact layout for filter toolbars (hides calendar badge, tighter trigger). */
   @Input() compact = false;
+  /**
+   * When opening an empty picker, pre-fill with now (datetime) or today (date).
+   * `null` → datetime only; set `false` on filters / optional dates (e.g. birth date).
+   */
+  @Input() defaultToNowOnOpen: boolean | null = null;
 
   @Input() set calendarMode(next: CalendarMode) {
     this.calendarModeState.set(next === 'hijri' ? 'hijri' : 'gregorian');
@@ -181,6 +186,7 @@ export class DatePickerComponent implements ControlValueAccessor, OnInit, OnChan
     this.onTouched();
     this.isOpen.update(open => !open);
     if (this.isOpen()) {
+      this.ensureDefaultOnOpen();
       const selected = this.selectedDate();
       if (selected) {
         this.currentYear.set(selected.getFullYear());
@@ -244,8 +250,8 @@ export class DatePickerComponent implements ControlValueAccessor, OnInit, OnChan
     return new Intl.DateTimeFormat(locale, { month: 'long' }).format(anchor);
   }
 
-  onGregorianMonthChange(raw: string): void {
-    const month = Number.parseInt(raw, 10);
+  onGregorianMonthChange(raw: string | number): void {
+    const month = typeof raw === 'number' ? raw : Number.parseInt(raw, 10);
     if (!Number.isFinite(month) || month < 0 || month > 11) {
       return;
     }
@@ -253,8 +259,8 @@ export class DatePickerComponent implements ControlValueAccessor, OnInit, OnChan
     this.buildCalendar();
   }
 
-  onGregorianYearChange(raw: string): void {
-    const year = Number.parseInt(raw, 10);
+  onGregorianYearChange(raw: string | number): void {
+    const year = typeof raw === 'number' ? raw : Number.parseInt(raw, 10);
     if (!Number.isFinite(year)) {
       return;
     }
@@ -262,16 +268,16 @@ export class DatePickerComponent implements ControlValueAccessor, OnInit, OnChan
     this.buildCalendar();
   }
 
-  onHijriMonthChange(raw: string): void {
-    const month = Number.parseInt(raw, 10);
+  onHijriMonthChange(raw: string | number): void {
+    const month = typeof raw === 'number' ? raw : Number.parseInt(raw, 10);
     if (!Number.isFinite(month) || month < 1 || month > 12) {
       return;
     }
     this.applyHijriAnchor(this.viewHijriYear(), month);
   }
 
-  onHijriYearChange(raw: string): void {
-    const year = Number.parseInt(raw, 10);
+  onHijriYearChange(raw: string | number): void {
+    const year = typeof raw === 'number' ? raw : Number.parseInt(raw, 10);
     if (!Number.isFinite(year)) {
       return;
     }
@@ -463,6 +469,34 @@ export class DatePickerComponent implements ControlValueAccessor, OnInit, OnChan
   @HostListener('document:keydown.escape')
   onEscape(): void {
     this.close();
+  }
+
+  private ensureDefaultOnOpen(): void {
+    if (this.selectedDate() || !this.shouldDefaultToNowOnOpen()) {
+      return;
+    }
+
+    const now = new Date();
+    if (this.mode === 'datetime') {
+      this.selectedDate.set(now);
+      this.selectedHour.set(now.getHours());
+      this.selectedMinute.set(now.getMinutes());
+    } else {
+      this.selectedDate.set(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0));
+      this.selectedHour.set(0);
+      this.selectedMinute.set(0);
+    }
+
+    this.currentYear.set(now.getFullYear());
+    this.currentMonth.set(now.getMonth());
+    this.emitValue();
+  }
+
+  private shouldDefaultToNowOnOpen(): boolean {
+    if (this.defaultToNowOnOpen !== null) {
+      return this.defaultToNowOnOpen;
+    }
+    return this.mode === 'datetime';
   }
 
   private formatTime12Label(hour24: number, minute: number): string {
