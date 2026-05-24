@@ -72,8 +72,12 @@ export class CategoryVehicleFormComponent implements OnInit {
 
     this.isEdit.set(true);
     this.categoryId.set(id);
+    this.loadCategory(id);
+  }
+
+  private loadCategory(id: string): void {
     this.loading.set(true);
-    this.categoryVehicleService.getById(id, this.authState.fleetId() ?? '').subscribe({
+    this.categoryVehicleService.getById(id, this.resolveFleetId() ?? undefined).subscribe({
       next: category => {
         const fleetIdFromCategory = (category.fleetId ?? '').trim();
         if (fleetIdFromCategory) {

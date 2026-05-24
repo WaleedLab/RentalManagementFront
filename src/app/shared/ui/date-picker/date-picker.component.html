@@ -63,8 +63,8 @@
             <select
               class="calendar-header__select"
               [attr.aria-label]="'datePicker.selectMonth' | translate"
-              [value]="viewHijriMonth()"
-              (change)="onHijriMonthChange($any($event.target).value)"
+              [ngModel]="viewHijriMonth()"
+              (ngModelChange)="onHijriMonthChange($event)"
             >
               @for (month of hijriMonthIndices; track month) {
                 <option [value]="month">{{ hijriMonthLabel(month) }}</option>
@@ -73,8 +73,8 @@
             <select
               class="calendar-header__select calendar-header__select--year"
               [attr.aria-label]="'datePicker.selectYear' | translate"
-              [value]="viewHijriYear()"
-              (change)="onHijriYearChange($any($event.target).value)"
+              [ngModel]="viewHijriYear()"
+              (ngModelChange)="onHijriYearChange($event)"
             >
               @for (year of hijriYearOptions(); track year) {
                 <option [value]="year">{{ year }}</option>
@@ -84,8 +84,8 @@
             <select
               class="calendar-header__select"
               [attr.aria-label]="'datePicker.selectMonth' | translate"
-              [value]="currentMonth()"
-              (change)="onGregorianMonthChange($any($event.target).value)"
+              [ngModel]="currentMonth()"
+              (ngModelChange)="onGregorianMonthChange($event)"
             >
               @for (month of gregorianMonthIndices; track month) {
                 <option [value]="month">{{ 'datePicker.month.' + month | translate }}</option>
@@ -94,8 +94,8 @@
             <select
               class="calendar-header__select calendar-header__select--year"
               [attr.aria-label]="'datePicker.selectYear' | translate"
-              [value]="currentYear()"
-              (change)="onGregorianYearChange($any($event.target).value)"
+              [ngModel]="currentYear()"
+              (ngModelChange)="onGregorianYearChange($event)"
             >
               @for (year of gregorianYearOptions(); track year) {
                 <option [value]="year">{{ year }}</option>
@@ -132,8 +132,8 @@
             />
             <select
               class="calendar-time__period"
-              [value]="displayPeriod()"
-              (change)="onPeriodChange($any($event.target).value)"
+              [ngModel]="displayPeriod()"
+              (ngModelChange)="onPeriodChange($event)"
             >
               <option value="AM">{{ 'datePicker.am' | translate }}</option>
               <option value="PM">{{ 'datePicker.pm' | translate }}</option>

@@ -43,24 +43,46 @@ export class CategoryVehicleService {
     }).pipe(map(response => normalizePaginatedResponse(response, normalizeCategoryVehicle)));
   }
 
+  /**
+   * `GET CategoryVehicle/{id:long}/{fleetid:guid}` — see `CategoryVehicleRouting.GetById`.
+   */
   getById(id: string, fleetId?: string | null): Observable<CategoryVehicle> {
+    const normalizedId = String(id ?? '').trim();
+    const numericId = this.toNumericId(normalizedId);
     const normalizedFleetId = normalizeFleetId(fleetId);
-    if (!normalizedFleetId) {
-      return this.getByIdFromList(id);
+
+    if (!normalizedId) {
+      return throwError(() => new Error('Category vehicle id is required'));
     }
 
-    return this.api.getData<unknown>(`${this.base}/${id}/${normalizedFleetId}`).pipe(
-      map(normalizeCategoryVehicle),
-      catchError(error => this.getByIdFromList(id, normalizedFleetId, error)),
-    );
+    if (!numericId || !normalizedFleetId) {
+      return this.getByIdFromList(normalizedId, normalizedFleetId);
+    }
+
+    return this.api
+      .getData<unknown>(
+        `${this.base}/${numericId}/${encodeURIComponent(normalizedFleetId)}`,
+        undefined,
+        { suppressErrorToast: true },
+      )
+      .pipe(
+        map(normalizeCategoryVehicle),
+        catchError(error => this.getByIdFromList(normalizedId, normalizedFleetId, error)),
+      );
   }
 
   create(body: CategoryVehicleUpsertRequest): Observable<unknown> {
-    return this.api.postData(this.base, body);
+    return this.api.postData(this.base, this.toCommandPayload(body));
   }
 
+  /** `PUT CategoryVehicle/{id:long}` */
   update(body: CategoryVehicleUpsertRequest): Observable<unknown> {
-    return this.api.putData(`${this.base}/${body.id}`, body);
+    const id = this.toNumericId(body.id);
+    if (id == null) {
+      return throwError(() => new Error('Id is required for update'));
+    }
+
+    return this.api.putData(`${this.base}/${id}`, this.toCommandPayload({ ...body, id }));
   }
 
   private getByIdFromList(
@@ -84,7 +106,46 @@ export class CategoryVehicleService {
         catchError(error => throwError(() => sourceError ?? error)),
       );
   }
-}
 
+  private toNumericId(value: string | number | null | undefined): number | null {
+    const n = Number(String(value ?? '').trim());
+    return Number.isFinite(n) && n > 0 ? Math.trunc(n) : null;
+  }
+
+  /** ASP.NET command binding — send both PascalCase and camelCase keys. */
+  private toCommandPayload(body: CategoryVehicleUpsertRequest): Record<string, unknown> {
+    const id = this.toNumericId(body.id);
+    const fleetId = normalizeFleetId(body.fleetId);
+
+    return {
+      ...(id != null ? { Id: id, id } : {}),
+      ...(fleetId ? { FleetId: fleetId, fleetId } : {}),
+      NameAr: body.nameAr,
+      nameAr: body.nameAr,
+      NameEn: body.nameEn,
+      nameEn: body.nameEn,
+      Price_day_low: body.price_day_low,
+      price_day_low: body.price_day_low,
+      Price_day_high: body.price_day_high,
+      price_day_high: body.price_day_high,
+      Price_month_low: body.price_month_low,
+      price_month_low: body.price_month_low,
+      Price_month_high: body.price_month_high,
+      price_month_high: body.price_month_high,
+      PriceHoureExtraLow: body.priceHoureExtraLow,
+      priceHoureExtraLow: body.priceHoureExtraLow,
+      PriceHoureExtraHigh: body.priceHoureExtraHigh,
+      priceHoureExtraHigh: body.priceHoureExtraHigh,
+      CountKMExtraLow: body.countKMExtraLow,
+      countKMExtraLow: body.countKMExtraLow,
+      CountKMExtraHigh: body.countKMExtraHigh,
+      countKMExtraHigh: body.countKMExtraHigh,
+      AllowToLow: body.allowToLow,
+      allowToLow: body.allowToLow,
+      AllowToHigh: body.allowToHigh,
+      allowToHigh: body.allowToHigh,
+    };
+  }
+}
 
 
