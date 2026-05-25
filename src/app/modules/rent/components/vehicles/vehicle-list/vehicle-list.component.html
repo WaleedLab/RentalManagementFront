@@ -69,6 +69,42 @@
     </ng-container>
   </app-list-command-bar>
 
+  <section
+    class="vehicle-expiration-bar"
+    [attr.aria-label]="'Vehicle expiration counts' | translate"
+    [attr.aria-busy]="expirationCountsLoading()"
+  >
+    @if (expirationCountsLoading()) {
+      <div class="vehicle-expiration-bar__loading">
+        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+        <span>{{ 'Loading expiration counts' | translate }}</span>
+      </div>
+    } @else {
+      <div class="vehicle-expiration-bar__grid">
+        @for (item of expirationBarItems(); track item.key) {
+          <article class="vehicle-expiration-card" [ngClass]="'vehicle-expiration-card--' + item.tone">
+            <div class="vehicle-expiration-card__head">
+              <span class="vehicle-expiration-card__icon" aria-hidden="true">
+                <i [class]="item.iconClass"></i>
+              </span>
+              <span class="vehicle-expiration-card__title">{{ item.label }}</span>
+            </div>
+            <div class="vehicle-expiration-card__counts">
+              <div class="vehicle-expiration-stat vehicle-expiration-stat--expired">
+                <span class="vehicle-expiration-stat__value">{{ item.expiredCount }}</span>
+                <span class="vehicle-expiration-stat__label">{{ 'Expired' | translate }}</span>
+              </div>
+              <div class="vehicle-expiration-stat vehicle-expiration-stat--soon">
+                <span class="vehicle-expiration-stat__value">{{ item.expiringSoonCount }}</span>
+                <span class="vehicle-expiration-stat__label">{{ expirationSoonLabel() }}</span>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
   <app-list-content-shell>
     @if (loading() || loadFailed()) {
       <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>

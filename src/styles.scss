@@ -1123,18 +1123,17 @@ thead th,
   overflow: visible;
 }
 
-/* Lift the whole filter cell while its smooth-select is open so the panel clears sibling fields (grid overlap). */
-.app-filters-toolbar .app-filter-field:has(app-smooth-select.app-smooth-select-host--open) {
-  position: relative;
-  z-index: 110;
-  overflow: visible;
+.app-filters-toolbar:has(app-smooth-select.app-smooth-select-host--open),
+.app-filters-toolbar:has(.date-picker-host--open) {
+  z-index: 500010;
 }
 
-/* Date range calendar extends into the row below — lift the cell above later grid siblings. */
+/* Lift the whole filter cell while its smooth-select is open so the panel clears sibling fields (grid overlap). */
+.app-filters-toolbar .app-filter-field:has(app-smooth-select.app-smooth-select-host--open),
 .app-filters-toolbar .app-filter-field:has(.date-picker-host--open),
 .app-filters-toolbar .finance-filter-range:has(.date-picker-host--open) {
   position: relative;
-  z-index: 300;
+  z-index: 500020;
   overflow: visible;
 }
 

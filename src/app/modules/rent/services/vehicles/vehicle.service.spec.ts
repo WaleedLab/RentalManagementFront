@@ -211,6 +211,27 @@ describe('VehicleService', () => {
     });
   });
 
+  describe('getExpirationCounts', () => {
+    it('should request expiration counts with fleet and branch params', (done) => {
+      const mockResponse = {
+        nextDays: 15,
+        items: [{ key: 'insurance', label: 'Insurance', expiredCount: 1, expiringSoonCount: 2 }],
+      };
+      baseServiceSpy.getData.and.returnValue(of(mockResponse));
+
+      service.getExpirationCounts({ fleetId: 'fleet-1', branchId: 3, nextDays: 15 }).subscribe(response => {
+        expect(baseServiceSpy.getData).toHaveBeenCalledWith(
+          'Vehicle/ExpirationCounts',
+          jasmine.objectContaining({ FleetId: 'fleet-1', BranchId: 3, NextDays: 15 }),
+          jasmine.any(Object),
+        );
+        expect(response.items.length).toBe(1);
+        expect(response.items[0].expiredCount).toBe(1);
+        done();
+      });
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle vehicles with high mileage', (done) => {
       const highMileageVehicle = { ...mockVehicle, mileage: 500000 };

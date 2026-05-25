@@ -20,6 +20,7 @@ import {
 } from '../../../models/booking/booking-status.utils';
 import { BookingService } from '../../../services/booking/booking.service';
 import { BranchService } from '../../../services/branches/branch.service';
+import { buildBookingTrackingQueryParams } from '../../../utils/booking-tracking-params.util';
 import {
   bookingCardActionInMain,
   bookingCardCloseInMenu,
@@ -201,6 +202,10 @@ export class BookingListComponent implements OnInit {
   canSuspendAction = canBookingSuspendAction;
   canExtendAction = canBookingExtendAction;
   cardActionInMain = bookingCardActionInMain;
+
+  bookingTrackQueryParams(booking: Booking): Record<string, string> {
+    return buildBookingTrackingQueryParams(booking);
+  }
   cardCloseInMenu = bookingCardCloseInMenu;
   cardFinishInMenu = bookingCardFinishInMenu;
   cardMoreMenuVisible = bookingCardMoreMenuVisible;

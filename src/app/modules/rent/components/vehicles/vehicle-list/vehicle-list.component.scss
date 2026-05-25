@@ -2,6 +2,140 @@
   padding-bottom: 1rem;
 }
 
+.vehicle-expiration-bar {
+  margin: 0.65rem 0 0.85rem;
+}
+
+.vehicle-expiration-bar__loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 54px;
+  padding: 0.45rem 0.2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.vehicle-expiration-bar__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.vehicle-expiration-card {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.62rem 0.72rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(165deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 8px 18px -16px rgba(15, 23, 42, 0.22);
+}
+
+.vehicle-expiration-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.vehicle-expiration-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.14);
+  color: #334155;
+  flex-shrink: 0;
+
+  i {
+    font-size: 0.82rem;
+  }
+}
+
+.vehicle-expiration-card__title {
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #0f172a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vehicle-expiration-card__counts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.42rem;
+}
+
+.vehicle-expiration-stat {
+  display: grid;
+  gap: 0.08rem;
+  padding: 0.34rem 0.42rem;
+  border-radius: 9px;
+  border: 1px solid transparent;
+}
+
+.vehicle-expiration-stat__value {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.vehicle-expiration-stat__label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.25;
+  opacity: 0.86;
+}
+
+.vehicle-expiration-stat--expired {
+  border-color: rgba(220, 38, 38, 0.22);
+  background: rgba(254, 226, 226, 0.55);
+  color: #991b1b;
+}
+
+.vehicle-expiration-stat--soon {
+  border-color: rgba(217, 119, 6, 0.24);
+  background: rgba(254, 243, 199, 0.62);
+  color: #92400e;
+}
+
+.vehicle-expiration-card--insurance .vehicle-expiration-card__icon {
+  background: rgba(59, 130, 246, 0.14);
+  color: #1d4ed8;
+}
+
+.vehicle-expiration-card--inspection .vehicle-expiration-card__icon {
+  background: rgba(14, 165, 233, 0.14);
+  color: #0369a1;
+}
+
+.vehicle-expiration-card--operating .vehicle-expiration-card__icon {
+  background: rgba(99, 102, 241, 0.14);
+  color: #4338ca;
+}
+
+.vehicle-expiration-card--registration .vehicle-expiration-card__icon {
+  background: rgba(16, 185, 129, 0.14);
+  color: #047857;
+}
+
+@media (max-width: 1199.98px) {
+  .vehicle-expiration-bar__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575.98px) {
+  .vehicle-expiration-bar__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 :host ::ng-deep .vehicle-command__toolbar {
   grid-template-columns: minmax(200px, 272px) repeat(5, minmax(108px, 1fr));
 }
@@ -426,6 +560,37 @@
 
 :host-context(body.dark-only),
 :host-context([data-bs-theme='dark']) {
+  .vehicle-expiration-bar__loading {
+    color: #94a3b8;
+  }
+
+  .vehicle-expiration-card {
+    border-color: rgba(100, 116, 139, 0.32);
+    background: linear-gradient(165deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.9) 100%);
+    box-shadow: 0 10px 20px -14px rgba(2, 6, 23, 0.45);
+  }
+
+  .vehicle-expiration-card__title {
+    color: #e2e8f0;
+  }
+
+  .vehicle-expiration-card__icon {
+    background: rgba(51, 65, 85, 0.65);
+    color: #cbd5e1;
+  }
+
+  .vehicle-expiration-stat--expired {
+    border-color: rgba(248, 113, 113, 0.28);
+    background: rgba(127, 29, 29, 0.35);
+    color: #fecaca;
+  }
+
+  .vehicle-expiration-stat--soon {
+    border-color: rgba(251, 191, 36, 0.28);
+    background: rgba(120, 53, 15, 0.35);
+    color: #fde68a;
+  }
+
   .vehicle-legend-item {
     background: #111827;
     border-color: #374151;

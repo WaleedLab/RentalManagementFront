@@ -185,6 +185,7 @@
                       <a
                         class="table-action-icon table-action-icon--secondary booking-card__action booking-card__action--labeled booking-card__action--track booking-card__action--tooltip"
                         [routerLink]="['/booking', booking.id, 'track']"
+                        [queryParams]="bookingTrackQueryParams(booking)"
                         [attr.aria-label]="'Booking card track' | translate"
                         [attr.data-action-tooltip]="'Booking card track' | translate"
                       >

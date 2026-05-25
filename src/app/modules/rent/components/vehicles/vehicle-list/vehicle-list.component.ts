@@ -13,7 +13,11 @@ import { BranchService } from '../../../services/branches/branch.service';
 import { CategoryVehicleService } from '../../../services/category-vehicles/category-vehicle.service';
 import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
-import { VehicleService, VehicleStatusCountItem } from '../../../services/vehicles/vehicle.service';
+import {
+  VehicleExpirationCountItem,
+  VehicleService,
+  VehicleStatusCountItem,
+} from '../../../services/vehicles/vehicle.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
 import { ListCommandBarComponent } from '../../../../../shared/ui/list-command-bar/list-command-bar.component';
 import { ListSearchFieldComponent } from '../../../../../shared/ui/list-search-field/list-search-field.component';
@@ -77,6 +81,15 @@ export class VehicleListComponent implements OnInit {
   changingStatusIds = signal<Array<string | number>>([]);
   vehicleStatusCounts = signal<VehicleStatusCountItem[]>([]);
   vehicleStatusTotalCount = signal(0);
+  expirationCounts = signal<VehicleExpirationCountItem[]>([]);
+  expirationNextDays = signal(15);
+  expirationCountsLoading = signal(false);
+  private readonly expirationBarConfig = [
+    { key: 'insurance', labelEn: 'Insurance', iconClass: 'fa-solid fa-shield-halved', tone: 'insurance' },
+    { key: 'periodicInspection', labelEn: 'Periodic inspection', iconClass: 'fa-solid fa-clipboard-check', tone: 'inspection' },
+    { key: 'operatingCard', labelEn: 'Operating card', iconClass: 'fa-solid fa-id-card', tone: 'operating' },
+    { key: 'carRegistration', labelEn: 'Car registration', iconClass: 'fa-solid fa-file-lines', tone: 'registration' },
+  ] as const;
   private readonly vehicleStatusLegendConfig = [
     { key: 'IsAvalible', labelAr: 'متاحة', labelEn: 'Available', iconClass: 'fa-solid fa-circle-check', iconColor: '#16A34A' },
     { key: 'IsBooking', labelAr: 'محجوزة', labelEn: 'Booked', iconClass: 'fa-solid fa-calendar-check', iconColor: '#F59E0B' },
@@ -135,6 +148,29 @@ export class VehicleListComponent implements OnInit {
       })),
     ];
   });
+  expirationSoonLabel = computed(() => {
+    this.languageTick();
+    const days = this.expirationNextDays();
+    return this.translate.instant('Expiring within days', { days });
+  });
+  expirationBarItems = computed(() => {
+    const counts = this.expirationCounts();
+    const useApiLabel = this.isArabicUi();
+
+    return this.expirationBarConfig.map(config => {
+      const matched = counts.find(item => (item.key ?? '').toLowerCase() === config.key.toLowerCase());
+      return {
+        key: config.key,
+        label: useApiLabel
+          ? matched?.label || config.labelEn
+          : config.labelEn,
+        iconClass: config.iconClass,
+        tone: config.tone,
+        expiredCount: matched?.expiredCount ?? 0,
+        expiringSoonCount: matched?.expiringSoonCount ?? 0,
+      };
+    });
+  });
   vehicleLegendItems = computed(() => {
     const counts = this.vehicleStatusCounts();
     const items = this.vehicleStatusLegendConfig.map(item => ({
@@ -182,6 +218,7 @@ export class VehicleListComponent implements OnInit {
     });
     this.loadReferenceData();
     this.loadStatusCounts();
+    this.loadExpirationCounts();
     this.load();
   }
 
@@ -320,6 +357,7 @@ export class VehicleListComponent implements OnInit {
       this.pageNumber.set(1);
     }
     this.loadStatusCounts();
+    this.loadExpirationCounts();
     this.load();
   }
 
@@ -333,6 +371,7 @@ export class VehicleListComponent implements OnInit {
       this.pageNumber.set(1);
     }
     this.loadStatusCounts();
+    this.loadExpirationCounts();
     this.load();
   }
 
@@ -410,6 +449,27 @@ export class VehicleListComponent implements OnInit {
           this.vehicleStatusCounts.set([]);
           this.vehicleStatusTotalCount.set(0);
         },
+      });
+  }
+
+  private loadExpirationCounts(): void {
+    this.expirationCountsLoading.set(true);
+    this.vehicleService
+      .getExpirationCounts({
+        fleetId: this.authState.fleetId() || undefined,
+        branchId: Number(this.branchId() || 0) || undefined,
+        nextDays: 15,
+      })
+      .subscribe({
+        next: response => {
+          this.expirationCounts.set(response.items ?? []);
+          this.expirationNextDays.set(response.nextDays ?? 15);
+        },
+        error: () => {
+          this.expirationCounts.set([]);
+          this.expirationNextDays.set(15);
+        },
+        complete: () => this.expirationCountsLoading.set(false),
       });
   }
 

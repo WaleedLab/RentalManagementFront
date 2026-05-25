@@ -10,6 +10,8 @@
 }
 
 .list-content-shell {
+  position: relative;
+  z-index: 1;
   border-radius: 20px;
   border: 1px solid var(--fin-border);
   background: var(--fin-glass);

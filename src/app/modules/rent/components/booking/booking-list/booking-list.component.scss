@@ -64,6 +64,8 @@
 }
 
 .booking-list-shell {
+  position: relative;
+  z-index: 1;
   border-radius: 20px;
   border: 1px solid var(--fin-border);
   background: var(--fin-glass);
@@ -87,10 +89,16 @@
   font-size: 0.84rem;
 }
 
-:host ::ng-deep .booking-command .fin-field:has(app-smooth-select.app-smooth-select-host--open) {
+:host ::ng-deep .booking-command .fin-field:has(app-smooth-select.app-smooth-select-host--open),
+:host ::ng-deep .booking-command .fin-field:has(.date-picker-host--open) {
   position: relative;
-  z-index: 110;
+  z-index: 500020;
   overflow: visible;
+}
+
+:host ::ng-deep .booking-command:has(.app-smooth-select-host--open),
+:host ::ng-deep .booking-command:has(.date-picker-host--open) {
+  z-index: 500010;
 }
 
 @media (max-width: 1199.98px) {

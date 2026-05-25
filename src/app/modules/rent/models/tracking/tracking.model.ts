@@ -76,10 +76,16 @@ export interface TrackingWorkspaceContext {
   backLink: string[];
   detailsLink?: string[];
   vehicleInfo: TrackingVehicleInfo;
+  /** Booking mode: vehicle id sent to `Tracking/GetApi` as `IdVehicle`. */
+  trackingVehicleId?: string;
+  /** Pre-filled date range (checkout → expected return). */
+  initialFilters?: TrackingFilterForm;
 }
 
 export interface TrackingWorkspaceSession {
   iframeUrl: string | null;
+  /** Raw HTML from tracking API when response is not a URL. */
+  iframeSrcdoc?: string | null;
   liveStatus: TrackingAvailability;
   lastUpdated?: string;
   stats: TrackingStatItem[];
@@ -94,4 +100,10 @@ export interface TrackingWorkspaceRequest {
   vehicleId: string;
   bookingId?: string;
   filters: TrackingFilterForm;
+  /** When set, skips `Vehicle/GetById` and uses this snapshot for UI only. */
+  vehicleStub?: {
+    plateNumber: string;
+    vehicleLabel: string;
+    branchName?: string;
+  };
 }
