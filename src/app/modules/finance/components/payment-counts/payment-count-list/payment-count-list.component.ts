@@ -25,6 +25,7 @@ import { BankService } from '../../../services/banks/bank.service';
 import { CashAccountService } from '../../../services/cash/cash-account.service';
 import { PaymentCountService } from '../../../services/payment-counts/payment-count.service';
 import { formatFinanceNumber } from '../../shared/finance-list-formatters';
+import { FINANCE_MENU_ICONS } from '../../../common/finance.constants';
 import { FinanceListShellComponent } from '../../shared/finance-list-shell/finance-list-shell.component';
 
 @Component({
@@ -35,6 +36,8 @@ import { FinanceListShellComponent } from '../../shared/finance-list-shell/finan
   styleUrl: './payment-count-list.component.scss',
 })
 export class PaymentCountListComponent implements OnInit {
+  readonly financeIcons = FINANCE_MENU_ICONS;
+
   private authState = inject(AuthStateService);
   private paymentCountService = inject(PaymentCountService);
   private customerService = inject(CustomerService);

@@ -25,6 +25,7 @@
   "Fleet email must be valid.": "البريد الإلكتروني يجب أن يكون صالحًا.",
   "Fleet Name": "اسم الأسطول",
   "Fleet name is required and must be valid.": "اسم الأسطول مطلوب ويجب أن يكون صالحًا.",
+  "Fleet operations center": "عمليات الأساطيل",
   "Fleets": "الأساطيل",
   "Hint Fleet Code": "اختياري، ويُفضّل استخدام رمز مختصر وفريد للأسطول.",
   "Hint Fleet Contact Number": "أدخل رقم التواصل الرئيسي الخاص بالأسطول أو الإدارة.",

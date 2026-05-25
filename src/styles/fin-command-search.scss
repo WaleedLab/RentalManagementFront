@@ -1,0 +1,135 @@
+/* Search bar inside fin-command toolbars (works with projected ng-content). */
+.fin-command .fin-search-group,
+.fin-command .list-search,
+.fin-command .booking-search {
+  display: flex;
+  align-items: stretch;
+  min-height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--fin-border, rgba(71, 85, 105, 0.14));
+  background: var(--fin-input-bg, #fff);
+  overflow: hidden;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.fin-command .fin-search-group:focus-within,
+.fin-command .list-search:focus-within,
+.fin-command .booking-search:focus-within {
+  border-color: color-mix(in srgb, var(--fin-accent, #059669) 45%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--fin-accent, #059669) 18%, transparent);
+}
+
+.fin-command .fin-search-group__lead {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding-inline: 12px 6px;
+  color: var(--fin-muted, #64748b);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.fin-command .fin-search-group .fin-input,
+.fin-command .list-search .fin-input,
+.fin-command .booking-search .fin-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding-block: 8px;
+  padding-inline: 4px 8px;
+  color: var(--fin-text, #0f172a);
+}
+
+.fin-command .fin-search-group .fin-input::placeholder,
+.fin-command .list-search .fin-input::placeholder,
+.fin-command .booking-search .fin-input::placeholder {
+  color: color-mix(in srgb, var(--fin-muted, #64748b) 82%, transparent);
+}
+
+.fin-command .fin-search-group .fin-input:focus,
+.fin-command .list-search .fin-input:focus,
+.fin-command .booking-search .fin-input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.fin-command .fin-search-group__btn,
+.fin-command .list-search .fin-btn,
+.fin-command .booking-search .fin-btn {
+  flex: 0 0 auto;
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  min-height: 100%;
+  min-width: 4.5rem;
+  border: 0;
+  border-radius: 0;
+  border-inline-start: 1px solid var(--fin-border, rgba(71, 85, 105, 0.14));
+  padding-inline: 12px;
+  white-space: nowrap;
+}
+
+.fin-command .fin-search-group__btn.fin-btn--primary {
+  background: var(--fin-btn-primary-bg);
+  color: var(--fin-btn-primary-fg, #fff);
+  font-weight: 700;
+  border: 0;
+  border-inline-start: 1px solid var(--fin-btn-primary-border, var(--fin-border, rgba(71, 85, 105, 0.14)));
+  box-shadow: none;
+}
+
+.fin-command .fin-search-group__btn.fin-btn--primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.fin-command .fin-search-group__lead {
+  padding-inline: 10px 4px;
+}
+
+.fin-command app-list-search-field,
+.fin-command .fin-field--search {
+  min-width: 0;
+  max-width: 272px;
+  width: 100%;
+}
+
+.fin-command app-list-search-field {
+  display: block;
+}
+
+.fin-command .fin-search-group__label {
+  display: inline;
+}
+
+.fin-command .fin-search-group__btn-icon {
+  display: none;
+}
+
+@media (max-width: 575.98px) {
+  .fin-command .fin-search-group__label,
+  .fin-command .list-search .fin-btn .fin-search-group__label,
+  .fin-command .booking-search .fin-btn .fin-search-group__label {
+    display: none;
+  }
+
+  .fin-command .fin-search-group__btn-icon {
+    display: inline-block;
+  }
+
+  .fin-command .fin-search-group__btn,
+  .fin-command .list-search .fin-btn,
+  .fin-command .booking-search .fin-btn {
+    min-width: 2.75rem;
+    padding-inline: 12px;
+  }
+}

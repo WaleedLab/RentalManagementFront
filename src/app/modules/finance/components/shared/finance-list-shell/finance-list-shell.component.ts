@@ -11,7 +11,9 @@ import {
   FinanceListRow,
 } from '../../../models/shared/finance-list.model';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { ListCommandBarComponent } from '../../../../../shared/ui/list-command-bar/list-command-bar.component';
+import { ListSearchFieldComponent } from '../../../../../shared/ui/list-search-field/list-search-field.component';
+import { ListContentShellComponent } from '../../../../../shared/ui/list-content-shell/list-content-shell.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { DateRangeFilterComponent, DateRangeValue } from '../../../../../shared/ui/date-range-filter/date-range-filter.component';
@@ -24,7 +26,9 @@ import { DateRangeFilterComponent, DateRangeValue } from '../../../../../shared/
     FormsModule,
     TranslateModule,
     RouterLink,
-    PageHeaderComponent,
+    ListCommandBarComponent,
+    ListSearchFieldComponent,
+    ListContentShellComponent,
     EmptyStateComponent,
     PaginationBarComponent,
     SmoothSelectComponent,
@@ -40,6 +44,7 @@ export class FinanceListShellComponent implements OnInit {
 
   @Input() title = '';
   @Input() subtitle = '';
+  @Input() iconSrc = '';
   @Input() emptyTitle = 'Table empty hint';
   @Input() emptyDescription = '';
   @Input() error: string | null = null;

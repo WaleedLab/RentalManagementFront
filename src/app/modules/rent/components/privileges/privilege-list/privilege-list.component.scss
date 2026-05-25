@@ -1,0 +1,18 @@
+.privilege-list-page {
+  padding-bottom: 1rem;
+}
+
+.privilege-command__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+:host ::ng-deep .privilege-command__toolbar {
+  grid-template-columns: minmax(200px, 272px);
+}
+
+:host ::ng-deep .privilege-command__toolbar app-list-search-field {
+  max-width: 272px;
+}

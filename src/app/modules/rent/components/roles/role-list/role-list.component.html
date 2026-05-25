@@ -1,80 +1,72 @@
-<div class="container-fluid">
-  <app-page-header [title]="'Roles' | translate" [subtitle]="'Manage security roles, role names, and attached privileges.' | translate">
-    <div class="list-header-actions">
-      <a class="btn btn-primary" routerLink="/roles/create">{{ 'Create Role' | translate }}</a>
-    </div>
-  </app-page-header>
+<div class="container-fluid role-list-page">
+  <app-list-command-bar
+    [title]="'Roles'"
+    iconSrc="assets/images/rent_icon/Roles.png"
+    toolbarClass="role-command__toolbar"
+  >
+    <a commandActions class="fin-btn fin-btn--primary" routerLink="/roles/create">{{ 'Create Role' | translate }}</a>
 
-  <div class="card">
-    <div class="card-body">
-      <div class="app-filters-toolbar">
-        <div class="app-filter-field app-filter-field--search">
-          <label class="app-filter-label">{{ 'Search' | translate }}</label>
-          <div class="app-search-control">
-            <input
-              type="text"
-              class="form-control"
-              [placeholder]="'Search roles...' | translate"
-              [ngModel]="search()"
-              (ngModelChange)="search.set($event)"
-              (keyup.enter)="onSearch()"
-            />
-            <button class="btn app-search-btn" type="button" (click)="onSearch()">{{ 'Search' | translate }}</button>
-          </div>
-        </div>
-      </div>
-
-      @if (loading() || loadFailed()) {
-        <div class="text-center py-5">
-          <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
-        </div>
-      } @else if (!roles().length) {
-        <app-empty-state [title]="'No roles found' | translate" [description]="'Create your first role to assign security permissions.' | translate" />
-      } @else {
-        <div class="table-responsive">
-          <table class="table table-striped align-middle">
-            <thead>
-              <tr>
-                <th>{{ 'Role Name' | translate }}</th>
-                <th>{{ 'Display Name' | translate }}</th>
-                <th>{{ 'Privileges' | translate }}</th>
-                <th class="text-end">{{ 'Actions' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (role of roles(); track role.id) {
-                <tr>
-                  <td>{{ role.name }}</td>
-                  <td>{{ role.displayName || role.displayNameEn || '-' }}</td>
-                  <td>{{ role.privilegeTypeIds?.length ?? role.privilegeTypeRoles?.length ?? 0 }}</td>
-                  <td class="text-end">
-                    <div class="table-actions">
-                      <a
-                        class="table-action-icon table-action-icon--primary"
-                        [routerLink]="['/roles/edit', role.id]"
-                        [attr.aria-label]="'Edit' | translate"
-                        [title]="'Edit' | translate"
-                      >
-                        <i class="fa-solid fa-pen-to-square"></i>
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
-
-      <app-pagination-bar
-        [pageNumber]="pageNumber()"
-        [totalPages]="totalPages()"
-        [totalCount]="totalCount()"
-        [pageSize]="pageSize()"
-        [pageSizeOptions]="[10, 25, 50]"
-        (pageChange)="goToPage($event)"
-        (pageSizeChange)="changePageSize($event)"
+    <ng-container commandToolbar>
+      <app-list-search-field
+        [placeholder]="'Search roles...'"
+        [value]="search()"
+        (valueChange)="search.set($event)"
+        (search)="onSearch()"
       />
-    </div>
-  </div>
+    </ng-container>
+  </app-list-command-bar>
+
+  <app-list-content-shell>
+    @if (loading() || loadFailed()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
+      </div>
+    } @else if (!roles().length) {
+      <app-empty-state [title]="'No roles found' | translate" [description]="'Create your first role to assign security permissions.' | translate" />
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>{{ 'Role Name' | translate }}</th>
+              <th>{{ 'Display Name' | translate }}</th>
+              <th>{{ 'Privileges' | translate }}</th>
+              <th class="text-end">{{ 'Actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (role of roles(); track role.id) {
+              <tr>
+                <td>{{ role.name }}</td>
+                <td>{{ role.displayName || role.displayNameEn || '-' }}</td>
+                <td>{{ role.privilegeTypeIds?.length ?? role.privilegeTypeRoles?.length ?? 0 }}</td>
+                <td class="text-end">
+                  <div class="table-actions">
+                    <a
+                      class="table-action-icon table-action-icon--primary"
+                      [routerLink]="['/roles/edit', role.id]"
+                      [attr.aria-label]="'Edit' | translate"
+                      [title]="'Edit' | translate"
+                    >
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <app-pagination-bar
+      [pageNumber]="pageNumber()"
+      [totalPages]="totalPages()"
+      [totalCount]="totalCount()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[10, 25, 50]"
+      (pageChange)="goToPage($event)"
+      (pageSizeChange)="changePageSize($event)"
+    />
+  </app-list-content-shell>
 </div>

@@ -1,3 +1,5 @@
+@use '../../../../../shared/styles/fin-command-button-tokens';
+
 /* Financial dashboard tokens — light default, dark via body.dark-only (Midnight Cyber Emerald). */
 :host {
   --fin-bg: transparent;
@@ -13,8 +15,7 @@
   --fin-input-bg: #ffffff;
   --fin-pill-bg: rgba(5, 150, 105, 0.08);
   --fin-pill-bg-hover: rgba(5, 150, 105, 0.14);
-  --fin-btn-primary-bg: linear-gradient(135deg, #10b981 0%, #059669 52%, #047857 100%);
-  --fin-btn-primary-fg: #ffffff;
+  @include fin-command-button-tokens.fin-command-btn-primary-light;
   --fin-success: #059669;
   --fin-warning: #d97706;
   --fin-danger: #dc2626;
@@ -52,13 +53,7 @@
   --fin-input-bg: color-mix(in srgb, var(--app-dark-card) 88%, transparent);
   --fin-pill-bg: color-mix(in srgb, var(--app-dark-accent-emerald) 14%, transparent);
   --fin-pill-bg-hover: color-mix(in srgb, var(--app-dark-accent-emerald) 22%, transparent);
-  --fin-btn-primary-bg: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--app-dark-accent-emerald) 95%, #fff) 0%,
-    var(--app-dark-accent-emerald) 52%,
-    #047857 100%
-  );
-  --fin-btn-primary-fg: #04120e;
+  @include fin-command-button-tokens.fin-command-btn-primary-dark;
   --fin-success: var(--app-dark-accent-emerald);
   --fin-warning: #ffb547;
   --fin-danger: #ff5a5a;

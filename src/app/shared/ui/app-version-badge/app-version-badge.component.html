@@ -1,0 +1,6 @@
+<span class="app-version-badge" [class]="'app-version-badge--' + variant()">
+  @if (showLabel()) {
+    <span class="app-version-badge__label">{{ 'App version label' | translate }}</span>
+  }
+  <span class="app-version-badge__value">{{ displayVersion }}</span>
+</span>

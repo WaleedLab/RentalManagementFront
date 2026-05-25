@@ -47,6 +47,8 @@ export class CustomerSubscriptionFormComponent implements OnInit {
   loading = signal(false);
   subscriptionId = signal<number | null>(null);
   subscriptions = signal<CustomerSubscription[]>([]);
+  /** Preserved on edit; not editable in the form UI. */
+  private readonly preservedIsOld = signal(false);
 
   form = this.fb.group({
     nameAr: [
@@ -68,7 +70,6 @@ export class CustomerSubscriptionFormComponent implements OnInit {
     description: ['', [Validators.maxLength(500)]],
     discount: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0, max: 100 })]),
     subscriptionApprovedAfter: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
-    isOld: [false],
   });
 
   ngOnInit(): void {
@@ -90,13 +91,13 @@ export class CustomerSubscriptionFormComponent implements OnInit {
     this.loading.set(true);
     this.subscriptionService.getById(id, fleetId).subscribe({
       next: subscription => {
+        this.preservedIsOld.set(!!subscription.isOld);
         this.form.patchValue({
           nameAr: subscription.nameAr,
           nameEn: subscription.nameEn || '',
           description: subscription.description || '',
           discount: subscription.discount ?? 0,
           subscriptionApprovedAfter: subscription.subscriptionApprovedAfter ?? 0,
-          isOld: subscription.isOld,
         });
       },
       error: err =>
@@ -139,7 +140,7 @@ export class CustomerSubscriptionFormComponent implements OnInit {
       nameEn: raw.nameEn.trim(),
       description: raw.description?.trim() || undefined,
       discount,
-      isOld: raw.isOld,
+      isOld: this.isEdit() ? this.preservedIsOld() : false,
       subscriptionApprovedAfter,
       fleetId,
     };

@@ -1,1 +1,11 @@
+.branch-list-page {
+  padding-bottom: 1rem;
+}
 
+:host ::ng-deep .branch-command__toolbar {
+  grid-template-columns: minmax(200px, 272px);
+}
+
+:host ::ng-deep .branch-command__toolbar app-list-search-field {
+  max-width: 272px;
+}

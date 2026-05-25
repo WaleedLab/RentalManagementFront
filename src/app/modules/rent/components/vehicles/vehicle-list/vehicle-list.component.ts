@@ -15,7 +15,9 @@ import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { VehicleService, VehicleStatusCountItem } from '../../../services/vehicles/vehicle.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { ListCommandBarComponent } from '../../../../../shared/ui/list-command-bar/list-command-bar.component';
+import { ListSearchFieldComponent } from '../../../../../shared/ui/list-search-field/list-search-field.component';
+import { ListContentShellComponent } from '../../../../../shared/ui/list-content-shell/list-content-shell.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 import { SmoothSelectOption, SmoothSelectComponent } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
@@ -24,7 +26,19 @@ import { VehicleStatusDialogComponent } from '../../../../../shared/component/ve
 @Component({
   selector: 'app-vehicle-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, PageHeaderComponent, EmptyStateComponent, PaginationBarComponent, SmoothSelectComponent, StatusBadgeComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    TranslateModule,
+    ListCommandBarComponent,
+    ListSearchFieldComponent,
+    ListContentShellComponent,
+    EmptyStateComponent,
+    PaginationBarComponent,
+    SmoothSelectComponent,
+    StatusBadgeComponent,
+  ],
   templateUrl: './vehicle-list.component.html',
   styleUrl: './vehicle-list.component.scss',
 })

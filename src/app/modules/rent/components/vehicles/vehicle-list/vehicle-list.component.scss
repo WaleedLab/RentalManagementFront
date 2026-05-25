@@ -1,49 +1,29 @@
-.app-filters-toolbar--vehicles {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: end;
-
-  .app-filter-field {
-    grid-column: span 1;
-    height: 100%;
-  }
-
-  .app-filter-field--search {
-    grid-column: span 1;
-  }
-
-  .app-filter-field--narrow {
-    grid-column: span 1;
-  }
+.vehicle-list-page {
+  padding-bottom: 1rem;
 }
 
-@media (max-width: 1399.98px) {
-  .app-filters-toolbar--vehicles {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+:host ::ng-deep .vehicle-command__toolbar {
+  grid-template-columns: minmax(200px, 272px) repeat(5, minmax(108px, 1fr));
+}
+
+:host ::ng-deep .vehicle-command__toolbar app-list-search-field {
+  max-width: 272px;
 }
 
 @media (max-width: 1199.98px) {
-  .app-filters-toolbar--vehicles {
+  :host ::ng-deep .vehicle-command__toolbar {
     grid-template-columns: repeat(3, minmax(0, 1fr));
 
-    .app-filter-field--search {
-      grid-column: span 3;
+    .fin-field--search {
+      grid-column: 1 / -1;
     }
 
-    .app-filter-field--narrow {
-      grid-column: span 1;
-    }
   }
 }
 
 @media (max-width: 767.98px) {
-  .app-filters-toolbar--vehicles {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-
-    .app-filter-field--search,
-    .app-filter-field--narrow {
-      grid-column: span 1;
-    }
+  :host ::ng-deep .vehicle-command__toolbar {
+    grid-template-columns: 1fr;
   }
 }
 

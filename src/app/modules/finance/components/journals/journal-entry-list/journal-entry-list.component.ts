@@ -16,6 +16,7 @@ import {
 } from '../../../models/shared/finance-list.model';
 import { FinancialYearService } from '../../../services/financial-years/financial-year.service';
 import { JournalEntryService } from '../../../services/journals/journal-entry.service';
+import { FINANCE_MENU_ICONS } from '../../../common/finance.constants';
 import { FinanceListShellComponent } from '../../shared/finance-list-shell/finance-list-shell.component';
 import { formatFinanceDate, formatFinanceNumber } from '../../shared/finance-list-formatters';
 import { SmoothSelectComponent } from '../../../../../shared/ui/smooth-select/smooth-select.component';
@@ -28,6 +29,8 @@ import { SmoothSelectComponent } from '../../../../../shared/ui/smooth-select/sm
   styleUrl: './journal-entry-list.component.scss',
 })
 export class JournalEntryListComponent implements OnInit {
+  readonly financeIcons = FINANCE_MENU_ICONS;
+
   private authState = inject(AuthStateService);
   private journalService = inject(JournalEntryService);
   private financialYearService = inject(FinancialYearService);

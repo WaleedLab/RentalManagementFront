@@ -1,0 +1,28 @@
+/// Primary action buttons in fin-command toolbars (dark → teal, inline-end glow).
+@mixin fin-command-btn-primary-light() {
+  --fin-btn-primary-bg: linear-gradient(
+    to inline-end,
+    #1e293b 0%,
+    #134e4a 42%,
+    #0f766e 72%,
+    #14b8a6 100%
+  );
+  --fin-btn-primary-fg: #ffffff;
+  --fin-btn-primary-border: rgba(45, 212, 191, 0.45);
+  --fin-btn-primary-shadow: 0 4px 20px rgba(13, 148, 136, 0.3);
+}
+
+@mixin fin-command-btn-primary-dark() {
+  --fin-btn-primary-bg: linear-gradient(
+    to inline-end,
+    #050816 0%,
+    #0a1628 28%,
+    #065f46 62%,
+    #10b981 100%
+  );
+  --fin-btn-primary-fg: #ffffff;
+  --fin-btn-primary-border: color-mix(in srgb, var(--app-dark-accent-cyan) 58%, #10b981 42%);
+  --fin-btn-primary-shadow:
+    0 0 24px color-mix(in srgb, var(--app-dark-accent-emerald) 34%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}

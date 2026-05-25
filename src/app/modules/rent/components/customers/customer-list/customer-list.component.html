@@ -1,133 +1,126 @@
-<div class="container-fluid">
-  <app-page-header [title]="'Customers' | translate" [subtitle]="'Customer records with identity, contact, license, and profile image support.' | translate">
-    <div class="list-header-actions">
-      <div class="d-flex gap-2">
+<div class="container-fluid customer-list-page">
+  <app-list-command-bar
+    [title]="'Customers'"
+    iconSrc="assets/images/rent_icon/Customers.png"
+    toolbarClass="customer-command__toolbar"
+  >
+    <ng-container commandActions>
+      <div class="customer-command__actions">
         @if (canManageSubscriptions()) {
-          <a class="btn btn-outline-primary" routerLink="/customer-subscriptions">
+          <a class="fin-btn fin-btn--ghost" routerLink="/customer-subscriptions">
             {{ 'Subscription Offers' | translate }}
           </a>
         }
-        <a class="btn btn-primary" routerLink="/customers/create">{{ 'Create Customer' | translate }}</a>
+        <a class="fin-btn fin-btn--primary" routerLink="/customers/create">{{ 'Create Customer' | translate }}</a>
       </div>
-    </div>
-  </app-page-header>
+    </ng-container>
 
-  <div class="card">
-    <div class="card-body">
-      <div class="app-filters-toolbar app-filters-toolbar--customers">
-        <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Sort by' | translate }}</label>
-          <app-smooth-select
-            [ariaLabel]="'Sort by' | translate"
-            [options]="orderByFilterOptions()"
-            [value]="orderBy()"
-            (valueChange)="onOrderByChange($any($event))"
-          />
-        </div>
-        <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Order direction' | translate }}</label>
-          <app-smooth-select
-            [ariaLabel]="'Order direction' | translate"
-            [options]="orderDirectionFilterOptions()"
-            [value]="orderByDirection()"
-            (valueChange)="onOrderDirectionChange($any($event))"
-          />
-        </div>
-        <div class="app-filter-field app-filter-field--search">
-          <label class="app-filter-label">{{ 'Search' | translate }}</label>
-          <div class="app-search-control">
-            <input
-              class="form-control"
-              [placeholder]="'Search customers...' | translate"
-              [ngModel]="search()"
-              (ngModelChange)="search.set($event)"
-              (keyup.enter)="onSearchSubmit()"
-            />
-            <button class="btn app-search-btn customer-search-btn" type="button" (click)="onSearchSubmit()">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <span>{{ 'Search' | translate }}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      @if (loading() || loadFailed()) {
-        <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
-      } @else if (!customers().length) {
-        <app-empty-state [title]="'No customers found' | translate" [description]="'Create a customer profile to use it in bookings.' | translate" />
-      } @else {
-        <div class="table-responsive">
-          <table class="table table-striped align-middle customer-grid">
-            <thead>
-              <tr>
-                <th>{{ 'Subscription' | translate }}</th>
-                <th>{{ 'Arabic Name' | translate }}</th>
-                <th>{{ 'Phone' | translate }}</th>
-                <th>{{ 'License Expiry Date' | translate }}</th>
-                <th>{{ 'Identity' | translate }}</th>
-                <th>{{ 'License' | translate }}</th>
-                <th>{{ 'Birth Date' | translate }}</th>
-                <th class="text-end customer-actions-head">{{ 'Actions' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (customer of customers(); track customer.id) {
-                <tr>
-                  <td>{{ getSubscriptionName(customer) }}</td>
-                  <td>{{ getArabicName(customer) }}</td>
-                  <td>{{ getPhone(customer) }}</td>
-                  <td>{{ getLicenseExpiry(customer) }}</td>
-                  <td>{{ getIdentity(customer) }}</td>
-                  <td>{{ getLicense(customer) }}</td>
-                  <td>{{ getBirthDate(customer) }}</td>
-                  <td class="text-end">
-                    <div class="table-actions">
-                      <a
-                        class="table-action-icon table-action-icon--primary"
-                        [routerLink]="['/customers', customer.id, 'edit']"
-                        [attr.aria-label]="'Edit' | translate"
-                        [title]="'Edit' | translate"
-                      >
-                        <i class="fa-solid fa-pen-to-square"></i>
-                      </a>
-                      <button
-                        class="table-action-icon table-action-icon--danger"
-                        type="button"
-                        (click)="deleteCustomer(customer)"
-                        [attr.aria-label]="'Delete' | translate"
-                        [title]="'Delete' | translate"
-                      >
-                        <i class="fa-solid fa-trash"></i>
-                      </button>
-                      <a
-                        class="table-action-icon table-action-icon--info"
-                        [routerLink]="['/customers', customer.id, 'details']"
-                        [attr.aria-label]="'Details' | translate"
-                        [title]="'Details' | translate"
-                      >
-                        <i class="fa-solid fa-eye"></i>
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
-
-      @if (!loading() && !loadFailed() && totalCount() > 0) {
-        <app-pagination-bar
-          [pageNumber]="pageNumber()"
-          [totalPages]="totalPages()"
-          [totalCount]="totalCount()"
-          [pageSize]="pageSize()"
-          [pageSizeOptions]="[10, 20, 50, 100]"
-          (pageChange)="goToPage($event)"
-          (pageSizeChange)="changePageSize($event)"
+    <ng-container commandToolbar>
+      <label class="fin-field">
+        <span>{{ 'Sort by' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Sort by' | translate"
+          [options]="orderByFilterOptions()"
+          [value]="orderBy()"
+          (valueChange)="onOrderByChange($any($event))"
         />
-      }
-    </div>
-  </div>
-</div>
+      </label>
 
+      <label class="fin-field">
+        <span>{{ 'Order direction' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Order direction' | translate"
+          [options]="orderDirectionFilterOptions()"
+          [value]="orderByDirection()"
+          (valueChange)="onOrderDirectionChange($any($event))"
+        />
+      </label>
+
+      <app-list-search-field
+        [placeholder]="'Search customers...'"
+        [value]="search()"
+        (valueChange)="search.set($event)"
+        (search)="onSearchSubmit()"
+      />
+    </ng-container>
+  </app-list-command-bar>
+
+  <app-list-content-shell>
+    @if (loading() || loadFailed()) {
+      <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
+    } @else if (!customers().length) {
+      <app-empty-state [title]="'No customers found' | translate" [description]="'Create a customer profile to use it in bookings.' | translate" />
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle customer-grid">
+          <thead>
+            <tr>
+              <th>{{ 'Subscription' | translate }}</th>
+              <th>{{ 'Arabic Name' | translate }}</th>
+              <th>{{ 'Phone' | translate }}</th>
+              <th>{{ 'License Expiry Date' | translate }}</th>
+              <th>{{ 'Identity' | translate }}</th>
+              <th>{{ 'License' | translate }}</th>
+              <th>{{ 'Birth Date' | translate }}</th>
+              <th class="text-end customer-actions-head">{{ 'Actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (customer of customers(); track customer.id) {
+              <tr>
+                <td>{{ getSubscriptionName(customer) }}</td>
+                <td>{{ getArabicName(customer) }}</td>
+                <td>{{ getPhone(customer) }}</td>
+                <td>{{ getLicenseExpiry(customer) }}</td>
+                <td>{{ getIdentity(customer) }}</td>
+                <td>{{ getLicense(customer) }}</td>
+                <td>{{ getBirthDate(customer) }}</td>
+                <td class="text-end">
+                  <div class="table-actions">
+                    <a
+                      class="table-action-icon table-action-icon--primary"
+                      [routerLink]="['/customers', customer.id, 'edit']"
+                      [attr.aria-label]="'Edit' | translate"
+                      [title]="'Edit' | translate"
+                    >
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <button
+                      class="table-action-icon table-action-icon--danger"
+                      type="button"
+                      (click)="deleteCustomer(customer)"
+                      [attr.aria-label]="'Delete' | translate"
+                      [title]="'Delete' | translate"
+                    >
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                    <a
+                      class="table-action-icon table-action-icon--info"
+                      [routerLink]="['/customers', customer.id, 'details']"
+                      [attr.aria-label]="'Details' | translate"
+                      [title]="'Details' | translate"
+                    >
+                      <i class="fa-solid fa-eye"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (!loading() && !loadFailed() && totalCount() > 0) {
+      <app-pagination-bar
+        [pageNumber]="pageNumber()"
+        [totalPages]="totalPages()"
+        [totalCount]="totalCount()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[10, 20, 50, 100]"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="changePageSize($event)"
+      />
+    }
+  </app-list-content-shell>
+</div>

@@ -10,7 +10,7 @@ import { normalizeApiError } from '../../../../../core/api/api-response.utils';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { ListSearchFieldComponent } from '../../../../../shared/ui/list-search-field/list-search-field.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { Booking, BookingStatus, Branch } from '../../../models';
@@ -42,9 +42,9 @@ import {
     FormsModule,
     RouterLink,
     TranslateModule,
-    PageHeaderComponent,
     PaginationBarComponent,
     EmptyStateComponent,
+    ListSearchFieldComponent,
     SmoothSelectComponent,
   ],
   templateUrl: './booking-list.component.html',

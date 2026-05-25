@@ -14,7 +14,6 @@ import {
   buildTrackingWorkspaceSession,
 } from '../../models/tracking/tracking.normalizer';
 import { isValidTrackingUrl } from '../../utils/tracking-url.utils';
-import { formatTrackingVehicleCaption } from '../../utils/tracking-display.utils';
 import { VehicleService } from '../vehicles/vehicle.service';
 
 function toDateOnlyInput(value: string | Date): string {
@@ -54,8 +53,8 @@ export class VehicleTrackingService {
           mode: 'vehicle' as const,
           entityId: vehicle.id,
           fleetId,
-          title: vehicle.plateNumber || vehicleLabel,
-          subtitle: formatTrackingVehicleCaption(vehicle.plateNumber, vehicleLabel),
+          title: '',
+          subtitle: '',
           backLink: ['/vehicles'],
           detailsLink: ['/vehicles', vehicle.id, 'details'],
           vehicleInfo: {

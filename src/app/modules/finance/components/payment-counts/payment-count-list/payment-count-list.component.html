@@ -1,5 +1,6 @@
 <app-finance-list-shell
   [title]="'Vouchers'"
+  [iconSrc]="financeIcons.paymentCounts"
   [subtitle]="'Vouchers list subtitle'"
   [columns]="columns"
   [rows]="rows()"
@@ -27,8 +28,8 @@
   [rowActions]="rowActions"
   (rowAction)="onRowAction($event)"
 >
-  <div finance-extra-filters class="app-filter-field app-filter-field--narrow">
-    <label class="app-filter-label">{{ 'Bond Type' | translate }}</label>
+  <label finance-extra-filters class="fin-field">
+    <span>{{ 'Bond Type' | translate }}</span>
     <app-smooth-select
       [ariaLabel]="'Bond Type' | translate"
       [placeholder]="'All bond types' | translate"
@@ -36,10 +37,10 @@
       [value]="bondTypeFilter()"
       (valueChange)="onBondTypeFilterChange($any($event))"
     />
-  </div>
+  </label>
 
-  <div finance-extra-filters class="app-filter-field app-filter-field--narrow">
-    <label class="app-filter-label">{{ 'Payment Type' | translate }}</label>
+  <label finance-extra-filters class="fin-field">
+    <span>{{ 'Payment Type' | translate }}</span>
     <app-smooth-select
       [ariaLabel]="'Payment Type' | translate"
       [placeholder]="'All payment types' | translate"
@@ -47,10 +48,10 @@
       [value]="paymentTypeFilter()"
       (valueChange)="onPaymentTypeFilterChange($any($event))"
     />
-  </div>
+  </label>
 
-  <div finance-extra-filters class="app-filter-field app-filter-field--narrow">
-    <label class="app-filter-label">{{ 'Branch' | translate }}</label>
+  <label finance-extra-filters class="fin-field">
+    <span>{{ 'Branch' | translate }}</span>
     <app-smooth-select
       [ariaLabel]="'Branch' | translate"
       [placeholder]="'All branches' | translate"
@@ -58,5 +59,5 @@
       [value]="branchFilter()"
       (valueChange)="onBranchFilterChange($any($event))"
     />
-  </div>
+  </label>
 </app-finance-list-shell>

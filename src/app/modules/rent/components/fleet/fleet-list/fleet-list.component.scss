@@ -1,3 +1,15 @@
+.fleet-list-page {
+  padding-bottom: 1rem;
+}
+
+:host ::ng-deep .fleet-command__toolbar {
+  grid-template-columns: minmax(200px, 272px);
+}
+
+:host ::ng-deep .fleet-command__toolbar app-list-search-field {
+  max-width: 272px;
+}
+
 .fleet-list-thumb {
   width: 52px;
   height: 52px;

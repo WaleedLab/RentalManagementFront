@@ -1,3 +1,15 @@
+.traffic-violation-list-page {
+  padding-bottom: 1rem;
+}
+
+:host ::ng-deep .traffic-violation-command__toolbar {
+  grid-template-columns: minmax(200px, 272px);
+}
+
+:host ::ng-deep .traffic-violation-command__toolbar app-list-search-field {
+  max-width: 272px;
+}
+
 .traffic-violation-table {
   th,
   td {

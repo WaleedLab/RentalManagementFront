@@ -8,6 +8,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { AppVersionBadgeComponent } from '../../../../../shared/ui/app-version-badge/app-version-badge.component';
 import { Setting, SettingUpsertRequest } from '../../../models/settings/setting.model';
 import { SettingService } from '../../../services/settings/setting.service';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
@@ -15,7 +16,7 @@ import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-firs
 @Component({
   selector: 'app-settings-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule, PageHeaderComponent, ...SHARED_FORM_FIELD_DIRECTIVES],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule, PageHeaderComponent, AppVersionBadgeComponent, ...SHARED_FORM_FIELD_DIRECTIVES],
   templateUrl: './settings-form.component.html',
   styleUrl: './settings-form.component.scss',
 })

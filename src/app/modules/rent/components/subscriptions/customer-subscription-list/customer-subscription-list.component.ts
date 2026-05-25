@@ -10,7 +10,9 @@ import { CustomerSubscription } from '../../../models/subscriptions/customer-sub
 import { CustomerSubscriptionService } from '../../../services/subscriptions/customer-subscription.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { ListCommandBarComponent } from '../../../../../shared/ui/list-command-bar/list-command-bar.component';
+import { ListContentShellComponent } from '../../../../../shared/ui/list-content-shell/list-content-shell.component';
+import { ListSearchFieldComponent } from '../../../../../shared/ui/list-search-field/list-search-field.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 
 @Component({
@@ -22,7 +24,9 @@ import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/
     RouterLink,
     TranslateModule,
     EmptyStateComponent,
-    PageHeaderComponent,
+    ListCommandBarComponent,
+    ListSearchFieldComponent,
+    ListContentShellComponent,
     PaginationBarComponent,
   ],
   templateUrl: './customer-subscription-list.component.html',

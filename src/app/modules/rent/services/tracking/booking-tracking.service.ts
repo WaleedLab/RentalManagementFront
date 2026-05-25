@@ -10,7 +10,6 @@ import {
 } from '../../models/tracking/tracking.model';
 import { BookingService } from '../booking/booking.service';
 import { VehicleTrackingService } from './vehicle-tracking.service';
-import { formatTrackingVehicleCaption } from '../../utils/tracking-display.utils';
 
 @Injectable({ providedIn: 'root' })
 export class BookingTrackingService {
@@ -35,8 +34,8 @@ export class BookingTrackingService {
           mode: 'booking' as const,
           entityId: booking.id,
           fleetId,
-          title: booking.numberBookingINBasame || booking.bookingNumber || booking.id,
-          subtitle: formatTrackingVehicleCaption(vehicleInfo.plateNumber, vehicleInfo.vehicleLabel),
+          title: '',
+          subtitle: '',
           backLink: ['/booking'],
           detailsLink: ['/booking', booking.id, 'details'],
           vehicleInfo,

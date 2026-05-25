@@ -127,6 +127,14 @@
                 </div>
               </section>
 
+              <section class="settings-section settings-section--about">
+                <div class="settings-section__head">
+                  <h5 class="settings-section-title">{{ 'App about title' | translate }}</h5>
+                  <p class="settings-section-subtitle mb-0">{{ 'App about description' | translate }}</p>
+                </div>
+                <app-version-badge variant="settings" [showLabel]="true" />
+              </section>
+
               <div class="app-form-actions">
                 <button class="btn btn-primary" type="submit" [disabled]="form.invalid || saving()">
                   @if (saving()) {

@@ -10,6 +10,7 @@ import { AuthService } from '../../shared/services/auth/auth.service';
 import { LayoutService } from '../../shared/services/layout/layout.service';
 import { TokenService } from '../../shared/services/storage/token.service';
 import { ToastService } from '../../shared/services/toast.service';
+import { AppVersionBadgeComponent } from '../../shared/ui/app-version-badge/app-version-badge.component';
 import { focusFirstInvalidControl } from '../../shared/utils/focus-first-invalid-control.util';
 
 const REMEMBER_USERNAME_KEY = 'ewecar_login_remember_username';
@@ -26,7 +27,7 @@ function noWhitespaceValidator(control: AbstractControl): ValidationErrors | nul
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule, AppVersionBadgeComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })

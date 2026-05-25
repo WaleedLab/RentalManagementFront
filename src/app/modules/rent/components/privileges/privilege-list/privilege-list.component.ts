@@ -9,14 +9,27 @@ import { PrivilegeTypeLookup } from '../../../models';
 import { PrivilegeService } from '../../../services/privileges/privilege.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { ListCommandBarComponent } from '../../../../../shared/ui/list-command-bar/list-command-bar.component';
+import { ListContentShellComponent } from '../../../../../shared/ui/list-content-shell/list-content-shell.component';
+import { ListSearchFieldComponent } from '../../../../../shared/ui/list-search-field/list-search-field.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 
 @Component({
   selector: 'app-privilege-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, TranslateModule, EmptyStateComponent, PageHeaderComponent, PaginationBarComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    FormsModule,
+    TranslateModule,
+    EmptyStateComponent,
+    ListCommandBarComponent,
+    ListSearchFieldComponent,
+    ListContentShellComponent,
+    PaginationBarComponent,
+  ],
   templateUrl: './privilege-list.component.html',
+  styleUrl: './privilege-list.component.scss',
 })
 export class PrivilegeListComponent implements OnInit {
   private privilegeService = inject(PrivilegeService);

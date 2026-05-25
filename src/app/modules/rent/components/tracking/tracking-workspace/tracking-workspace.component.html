@@ -2,29 +2,29 @@
   class="tw"
   [class.tw--fullscreen]="fullscreen()"
   [class.tw--loading]="loading()"
+  [formGroup]="filtersForm"
 >
-  <header class="tw-topbar">
-    <div class="tw-topbar__start">
-      <a class="tw-back" [routerLink]="context().backLink">
-        <i class="fa-solid fa-arrow-right-long" aria-hidden="true"></i>
-      </a>
-      <div class="tw-topbar__titles">
-        <h1>{{ context().title }}</h1>
-        <p>{{ context().subtitle }}</p>
+  <app-list-command-bar
+    [title]="pageTitleKey()"
+    [subtitle]="pageSubtitle()"
+    [iconSrc]="pageIconSrc"
+    commandClass="tw-command"
+    toolbarClass="tw-command__toolbar"
+  >
+    <a commandLeading class="tw-back" [routerLink]="context().backLink">
+      <i class="fa-solid fa-arrow-right-long" aria-hidden="true"></i>
+    </a>
+
+    <ng-container commandActions>
+      <div class="tw-topbar__status" [class]="liveClass()">
+        <span class="tw-live-dot" aria-hidden="true"></span>
+        <span>{{ liveLabel() | translate }}</span>
+        @if (session()?.lastUpdated) {
+          <span class="tw-topbar__updated">
+            · {{ session()?.lastUpdated | date: 'short' }}
+          </span>
+        }
       </div>
-    </div>
-
-    <div class="tw-topbar__status" [class]="liveClass()">
-      <span class="tw-live-dot" aria-hidden="true"></span>
-      <span>{{ liveLabel() | translate }}</span>
-      @if (session()?.lastUpdated) {
-        <span class="tw-topbar__updated">
-          · {{ session()?.lastUpdated | date: 'short' }}
-        </span>
-      }
-    </div>
-
-    <div class="tw-topbar__actions">
       @if (context().detailsLink) {
         <a class="tw-icon-btn" [routerLink]="context().detailsLink!" [title]="'Details' | translate">
           <i class="fa-solid fa-eye"></i>
@@ -33,126 +33,53 @@
       <button class="tw-icon-btn" type="button" (click)="toggleTheme()" [title]="'Tracking toggle theme' | translate">
         <i class="fa-solid" [class.fa-moon]="isDarkTheme()" [class.fa-sun]="!isDarkTheme()"></i>
       </button>
-      <button class="tw-icon-btn" type="button" (click)="exportSession()" [title]="'Tracking export' | translate">
-        <i class="fa-solid fa-file-export"></i>
-      </button>
       <button class="tw-icon-btn" type="button" (click)="refresh()" [disabled]="loading()" [title]="'Refresh tracking' | translate">
         <i class="fa-solid fa-rotate" [class.fa-spin]="loading()"></i>
       </button>
       <button class="tw-icon-btn" type="button" (click)="toggleFullscreen()" [title]="'Tracking fullscreen' | translate">
         <i class="fa-solid" [class.fa-compress]="fullscreen()" [class.fa-expand]="!fullscreen()"></i>
       </button>
-    </div>
-  </header>
+    </ng-container>
 
-  <form class="tw-filters" [formGroup]="filtersForm" (ngSubmit)="trackNow()">
-    <label class="tw-field tw-field--vehicle">
-      <span><i class="fa-solid fa-car-side"></i> {{ 'Vehicle' | translate }}</span>
-      <input class="tw-input" readonly [value]="vehicleCaption()" />
-    </label>
-    <label class="tw-field">
-      <span><i class="fa-regular fa-calendar"></i> {{ 'Date From' | translate }}</span>
-      <input class="tw-input" type="date" formControlName="dateFrom" />
-    </label>
-    <label class="tw-field">
-      <span><i class="fa-regular fa-calendar"></i> {{ 'Date To' | translate }}</span>
-      <input class="tw-input" type="date" formControlName="dateTo" />
-    </label>
-    <label class="tw-field tw-field--url">
-      <span><i class="fa-solid fa-link"></i> {{ 'Tracking paste URL' | translate }}</span>
-      <input class="tw-input" type="url" formControlName="trackingUrl" [placeholder]="'Tracking URL placeholder' | translate" />
-    </label>
-    <button class="tw-track-btn" type="submit" [disabled]="loading()">
-      <i class="fa-solid fa-location-crosshairs"></i>
-      {{ 'Tracking track now' | translate }}
-    </button>
-  </form>
+    <ng-container commandToolbar>
+      <label class="fin-field">
+        <span>{{ 'Date From' | translate }}</span>
+        <input class="fin-input" type="date" formControlName="dateFrom" />
+      </label>
+      <label class="fin-field">
+        <span>{{ 'Date To' | translate }}</span>
+        <input class="fin-input" type="date" formControlName="dateTo" />
+      </label>
+    </ng-container>
+  </app-list-command-bar>
 
-  <div class="tw-body">
-    <aside
-      #timelineSheet
-      class="tw-timeline"
-      [class.tw-timeline--expanded]="sheetExpanded()"
-    >
-      <button type="button" class="tw-sheet-handle" (click)="toggleSheet()">
-        <span></span>
-      </button>
-
-      <section class="tw-panel tw-panel--vehicle">
-        <h3>{{ 'Tracking vehicle info' | translate }}</h3>
-        <div class="tw-vehicle-card">
-          <strong>{{ context().vehicleInfo.plateNumber }}</strong>
-          @if (vehicleSecondary()) {
-            <p>{{ vehicleSecondary() }}</p>
-          }
-          @if (context().vehicleInfo.branchName) {
-            <span class="tw-muted">{{ context().vehicleInfo.branchName }}</span>
-          }
-          @for (line of extraLines(); track line.labelKey) {
-            <div class="tw-vehicle-line">
-              <span>{{ line.labelKey | translate }}</span>
-              <strong>{{ line.value }}</strong>
-            </div>
-          }
+  <section class="tw-map-stage" #mapHost>
+    <div class="tw-map-shell">
+      @if (mapLoading() || loading()) {
+        <div class="tw-map-loader">
+          <div class="tw-map-loader__blur"></div>
+          <div class="tw-map-loader__skeleton"></div>
+          <p>{{ 'Tracking map loading' | translate }}</p>
         </div>
-      </section>
+      }
 
-      <section class="tw-panel tw-panel--timeline">
-        <h3>{{ 'Tracking timeline' | translate }}</h3>
-        @if (loading()) {
-          <div class="tw-skeleton tw-skeleton--timeline"></div>
-        } @else if ((session()?.timeline?.length ?? 0) === 0) {
-          <div class="tw-empty">
-            <i class="fa-solid fa-route"></i>
-            <p>{{ 'Tracking timeline empty' | translate }}</p>
-          </div>
-        } @else {
-          <ol class="tw-events">
-            @for (event of session()?.timeline ?? []; track event.id) {
-              <li class="tw-event" [class]="eventTone(event)">
-                <span class="tw-event__dot"><i [class]="eventIcon(event)"></i></span>
-                <div class="tw-event__body">
-                  <time>{{ event.time | date: 'shortTime' }}</time>
-                  <strong>{{ event.titleText || (event.titleKey | translate: event.titleParams) }}</strong>
-                  @if (event.descriptionText || event.descriptionKey) {
-                    <p>{{ event.descriptionText || (event.descriptionKey! | translate: event.descriptionParams) }}</p>
-                  }
-                </div>
-              </li>
-            }
-          </ol>
-        }
-      </section>
-    </aside>
-
-    <section class="tw-map-stage" #mapHost>
-      <div class="tw-map-shell">
-        @if (mapLoading() || loading()) {
-          <div class="tw-map-loader">
-            <div class="tw-map-loader__blur"></div>
-            <div class="tw-map-loader__skeleton"></div>
-            <p>{{ 'Tracking map loading' | translate }}</p>
-          </div>
-        }
-
-        @if (safeIframeUrl(); as iframeUrl) {
-          <iframe
-            class="tw-map-frame"
-            [src]="iframeUrl"
-            [class.tw-map-frame--hidden]="mapLoading()"
-            title="{{ 'Live map' | translate }}"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            (load)="onIframeLoad()"
-          ></iframe>
-        } @else if (!loading()) {
-          <div class="tw-map-empty">
-            <i class="fa-solid fa-satellite-dish"></i>
-            <h4>{{ 'Tracking map unavailable' | translate }}</h4>
-            <p>{{ 'Tracking map unavailable hint' | translate }}</p>
-          </div>
-        }
-      </div>
-    </section>
-  </div>
+      @if (safeIframeUrl(); as iframeUrl) {
+        <iframe
+          class="tw-map-frame"
+          [src]="iframeUrl"
+          [class.tw-map-frame--hidden]="mapLoading()"
+          [title]="'Live map' | translate"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          (load)="onIframeLoad()"
+        ></iframe>
+      } @else if (!loading()) {
+        <div class="tw-map-empty">
+          <i class="fa-solid fa-satellite-dish"></i>
+          <h4>{{ 'Tracking map unavailable' | translate }}</h4>
+          <p>{{ 'Tracking map unavailable hint' | translate }}</p>
+        </div>
+      }
+    </div>
+  </section>
 </div>

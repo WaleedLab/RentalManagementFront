@@ -1,137 +1,132 @@
-<div class="container-fluid">
-  <app-page-header [title]="'Vehicle Categories' | translate" [subtitle]="'Manage reusable vehicle classes used across fleet inventory and booking flows.' | translate">
-    <div class="list-header-actions">
-      <a class="btn btn-primary" routerLink="/category-vehicles/create">{{ 'Create Category' | translate }}</a>
-    </div>
-  </app-page-header>
+<div class="container-fluid category-vehicle-list-page">
+  <app-list-command-bar
+    [title]="'Vehicle Categories'"
+    iconSrc="assets/images/rent_icon/Vehicle_Category.png"
+    toolbarClass="category-command__toolbar"
+  >
+    <a commandActions class="fin-btn fin-btn--primary" routerLink="/category-vehicles/create">{{ 'Create Category' | translate }}</a>
 
-  <div class="card">
-    <div class="card-body">
-      <div class="app-filters-toolbar">
-        <div class="app-filter-field app-filter-field--search">
-          <label class="app-filter-label">{{ 'Search' | translate }}</label>
-          <div class="app-search-control">
-            <input
-              class="form-control"
-              [placeholder]="'Search categories...' | translate"
-              [ngModel]="search()"
-              (ngModelChange)="search.set($event)"
-              (keyup.enter)="onSearch()"
-            />
-            <button class="btn app-search-btn" type="button" (click)="onSearch()">{{ 'Search' | translate }}</button>
-          </div>
-        </div>
-      </div>
+    <ng-container commandToolbar>
+      <app-list-search-field
+        [placeholder]="'Search categories...'"
+        [value]="search()"
+        (valueChange)="search.set($event)"
+        (search)="onSearch()"
+      />
+    </ng-container>
+  </app-list-command-bar>
 
-      @if (loading() || loadFailed()) {
-        <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
-      } @else if (!categories().length) {
-        <app-empty-state [title]="'No categories found' | translate" [description]="'Create categories to classify sedans, SUVs, vans, and other rental vehicle types.' | translate" />
-      } @else {
-        <div class="table-responsive">
-          <table class="table table-striped align-middle category-vehicle-table">
-            <thead>
+  <app-list-content-shell>
+    @if (loading() || loadFailed()) {
+      <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
+    } @else if (!categories().length) {
+      <app-empty-state [title]="'No categories found' | translate" [description]="'Create categories to classify sedans, SUVs, vans, and other rental vehicle types.' | translate" />
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle category-vehicle-table">
+          <thead>
+            <tr>
+              <th>{{ 'Name (AR)' | translate }}</th>
+              <th>{{ 'Name (EN)' | translate }}</th>
+              <th>{{ 'Code' | translate }}</th>
+              <th class="text-nowrap">{{ 'Daily Price Range' | translate }}</th>
+              <th class="text-nowrap">{{ 'Monthly Price Range' | translate }}</th>
+              <th class="text-nowrap">{{ 'Extra Hour Price Range' | translate }}</th>
+              <th class="text-nowrap">{{ 'Extra KM Price Range' | translate }}</th>
+              <th class="text-nowrap">{{ 'Allowed Limit Range' | translate }}</th>
+              <th>{{ 'Status' | translate }}</th>
+              <th class="text-end">{{ 'Actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (category of categories(); track category.id) {
               <tr>
-                <th>{{ 'Name (AR)' | translate }}</th>
-                <th>{{ 'Name (EN)' | translate }}</th>
-                <th>{{ 'Code' | translate }}</th>
-                <th class="text-nowrap">{{ 'Daily Price Range' | translate }}</th>
-                <th class="text-nowrap">{{ 'Monthly Price Range' | translate }}</th>
-                <th class="text-nowrap">{{ 'Extra Hour Price Range' | translate }}</th>
-                <th class="text-nowrap">{{ 'Extra KM Price Range' | translate }}</th>
-                <th class="text-nowrap">{{ 'Allowed Limit Range' | translate }}</th>
-                <th>{{ 'Status' | translate }}</th>
-                <th class="text-end">{{ 'Actions' | translate }}</th>
+                <td>{{ category.nameAr }}</td>
+                <td>{{ category.nameEn || '-' }}</td>
+                <td>{{ category.code || '-' }}</td>
+                <td class="category-vehicle-table__range">
+                  <div class="range-cell">
+                    <div class="range-cell__row range-cell__row--from">
+                      <span class="range-cell__label">{{ 'From' | translate }}</span>
+                      <span class="range-cell__value">{{ formatRangeValue(category.price_day_low) }}</span>
+                    </div>
+                    <div class="range-cell__row range-cell__row--to">
+                      <span class="range-cell__label">{{ 'To' | translate }}</span>
+                      <span class="range-cell__value">{{ formatRangeValue(category.price_day_high) }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="category-vehicle-table__range">
+                  <div class="range-cell">
+                    <div class="range-cell__row range-cell__row--from">
+                      <span class="range-cell__label">{{ 'From' | translate }}</span>
+                      <span class="range-cell__value">{{ formatRangeValue(category.price_month_low) }}</span>
+                    </div>
+                    <div class="range-cell__row range-cell__row--to">
+                      <span class="range-cell__label">{{ 'To' | translate }}</span>
+                      <span class="range-cell__value">{{ formatRangeValue(category.price_month_high) }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="category-vehicle-table__range">
+                  <div class="range-cell">
+                    <div class="range-cell__row range-cell__row--from">
+                      <span class="range-cell__label">{{ 'From' | translate }}</span>
+                      <span class="range-cell__value">{{ formatRangeValue(category.priceHoureExtraLow) }}</span>
+                    </div>
+                    <div class="range-cell__row range-cell__row--to">
+                      <span class="range-cell__label">{{ 'To' | translate }}</span>
+                      <span class="range-cell__value">{{ formatRangeValue(category.priceHoureExtraHigh) }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="category-vehicle-table__range">
+                  <div class="range-cell">
+                    <div class="range-cell__row range-cell__row--from">
+                      <span class="range-cell__label">{{ 'From' | translate }}</span>
+                      <span class="range-cell__value">{{ formatRangeValue(category.countKMExtraLow) }}</span>
+                    </div>
+                    <div class="range-cell__row range-cell__row--to">
+                      <span class="range-cell__label">{{ 'To' | translate }}</span>
+                      <span class="range-cell__value">{{ formatRangeValue(category.countKMExtraHigh) }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="category-vehicle-table__range">
+                  <div class="range-cell">
+                    <div class="range-cell__row range-cell__row--from">
+                      <span class="range-cell__label">{{ 'From' | translate }}</span>
+                      <span class="range-cell__value">{{ formatRangeValue(category.allowToLow) }}</span>
+                    </div>
+                    <div class="range-cell__row range-cell__row--to">
+                      <span class="range-cell__label">{{ 'To' | translate }}</span>
+                      <span class="range-cell__value">{{ formatRangeValue(category.allowToHigh) }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <app-status-badge [label]="category.isActive ? ('Active' | translate) : ('Inactive' | translate)" [tone]="category.isActive ? 'success' : 'secondary'" />
+                </td>
+                <td class="text-end">
+                  <div class="table-actions">
+                    <a
+                      class="table-action-icon table-action-icon--primary"
+                      [routerLink]="['/category-vehicles', category.id, 'edit']"
+                      [attr.aria-label]="'Edit' | translate"
+                      [title]="'Edit' | translate"
+                    >
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              @for (category of categories(); track category.id) {
-                <tr>
-                  <td>{{ category.nameAr }}</td>
-                  <td>{{ category.nameEn || '-' }}</td>
-                  <td>{{ category.code || '-' }}</td>
-                  <td class="category-vehicle-table__range">
-                    <div class="range-cell">
-                      <div class="range-cell__row range-cell__row--from">
-                        <span class="range-cell__label">{{ 'From' | translate }}</span>
-                        <span class="range-cell__value">{{ formatRangeValue(category.price_day_low) }}</span>
-                      </div>
-                      <div class="range-cell__row range-cell__row--to">
-                        <span class="range-cell__label">{{ 'To' | translate }}</span>
-                        <span class="range-cell__value">{{ formatRangeValue(category.price_day_high) }}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="category-vehicle-table__range">
-                    <div class="range-cell">
-                      <div class="range-cell__row range-cell__row--from">
-                        <span class="range-cell__label">{{ 'From' | translate }}</span>
-                        <span class="range-cell__value">{{ formatRangeValue(category.price_month_low) }}</span>
-                      </div>
-                      <div class="range-cell__row range-cell__row--to">
-                        <span class="range-cell__label">{{ 'To' | translate }}</span>
-                        <span class="range-cell__value">{{ formatRangeValue(category.price_month_high) }}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="category-vehicle-table__range">
-                    <div class="range-cell">
-                      <div class="range-cell__row range-cell__row--from">
-                        <span class="range-cell__label">{{ 'From' | translate }}</span>
-                        <span class="range-cell__value">{{ formatRangeValue(category.priceHoureExtraLow) }}</span>
-                      </div>
-                      <div class="range-cell__row range-cell__row--to">
-                        <span class="range-cell__label">{{ 'To' | translate }}</span>
-                        <span class="range-cell__value">{{ formatRangeValue(category.priceHoureExtraHigh) }}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="category-vehicle-table__range">
-                    <div class="range-cell">
-                      <div class="range-cell__row range-cell__row--from">
-                        <span class="range-cell__label">{{ 'From' | translate }}</span>
-                        <span class="range-cell__value">{{ formatRangeValue(category.countKMExtraLow) }}</span>
-                      </div>
-                      <div class="range-cell__row range-cell__row--to">
-                        <span class="range-cell__label">{{ 'To' | translate }}</span>
-                        <span class="range-cell__value">{{ formatRangeValue(category.countKMExtraHigh) }}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="category-vehicle-table__range">
-                    <div class="range-cell">
-                      <div class="range-cell__row range-cell__row--from">
-                        <span class="range-cell__label">{{ 'From' | translate }}</span>
-                        <span class="range-cell__value">{{ formatRangeValue(category.allowToLow) }}</span>
-                      </div>
-                      <div class="range-cell__row range-cell__row--to">
-                        <span class="range-cell__label">{{ 'To' | translate }}</span>
-                        <span class="range-cell__value">{{ formatRangeValue(category.allowToHigh) }}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <app-status-badge [label]="category.isActive ? ('Active' | translate) : ('Inactive' | translate)" [tone]="category.isActive ? 'success' : 'secondary'" />
-                  </td>
-                  <td class="text-end">
-                    <div class="table-actions">
-                      <a
-                        class="table-action-icon table-action-icon--primary"
-                        [routerLink]="['/category-vehicles', category.id, 'edit']"
-                        [attr.aria-label]="'Edit' | translate"
-                        [title]="'Edit' | translate"
-                      >
-                        <i class="fa-solid fa-pen-to-square"></i>
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
 
+    @if (!loading() && !loadFailed() && totalCount() > 0) {
       <app-pagination-bar
         [pageNumber]="pageNumber()"
         [totalPages]="totalPages()"
@@ -141,7 +136,6 @@
         (pageChange)="goToPage($event)"
         (pageSizeChange)="changePageSize($event)"
       />
-    </div>
-  </div>
+    }
+  </app-list-content-shell>
 </div>
-

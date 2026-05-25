@@ -1,160 +1,149 @@
-<div class="container-fluid">
-  <app-page-header [title]="title | translate" [subtitle]="subtitle | translate">
-    <div class="finance-list-shell__header-actions list-header-actions">
+<div class="container-fluid finance-list-page">
+  <app-list-command-bar
+    [title]="title"
+    [iconSrc]="iconSrc"
+    toolbarClass="finance-command__toolbar"
+  >
+    <ng-container commandActions>
       @if (createLink) {
-        <a class="btn btn-primary" [routerLink]="createLink">{{ createLabel | translate }}</a>
+        <a class="fin-btn fin-btn--primary" [routerLink]="createLink">{{ createLabel | translate }}</a>
       }
-    </div>
-  </app-page-header>
+    </ng-container>
 
-  <div class="card finance-list-shell__card">
-    <div class="card-body">
+    <ng-container commandToolbar>
       @if (enableSearch || enableSorting || enableDateRangeFilter) {
-        <div class="app-filters-toolbar">
-          @if (enableSearch) {
-            <div class="app-filter-field app-filter-field--search">
-              <label class="app-filter-label">{{ 'Search' | translate }}</label>
-              <div class="app-search-control">
-                <input
-                  type="search"
-                  class="form-control"
-                  [placeholder]="searchPlaceholder | translate"
-                  [ngModel]="searchValue"
-                  (ngModelChange)="onSearchChange($event)"
-                />
-                <button
-                  class="btn app-search-btn finance-search-btn"
-                  type="button"
-                  (click)="onSearchChange(searchValue)"
-                >
-                  <i class="fa-solid fa-magnifying-glass"></i>
-                  <span>{{ 'Search' | translate }}</span>
-                </button>
-              </div>
-            </div>
-          }
+        @if (enableSearch) {
+          <app-list-search-field
+            [placeholder]="searchPlaceholder"
+            [value]="searchValue"
+            (valueChange)="onSearchChange($event)"
+            (search)="onSearchChange(searchValue)"
+          />
+        }
 
-          @if (enableSorting) {
-            <div class="app-filter-field app-filter-field--narrow">
-              <label class="app-filter-label">{{ 'Sort by' | translate }}</label>
-              <app-smooth-select
-                [options]="orderByOptions"
-                [value]="orderByValue"
-                [placeholder]="'Sort by' | translate"
-                (valueChange)="onOrderByChange($event)"
-              />
-            </div>
-            <div class="app-filter-field app-filter-field--narrow">
-              <label class="app-filter-label">{{ 'Direction' | translate }}</label>
-              <app-smooth-select
-                [options]="orderByDirectionOptions()"
-                [value]="orderByDirectionValue"
-                [placeholder]="'Direction' | translate"
-                (valueChange)="onOrderByDirectionChange($event)"
-              />
-            </div>
-          }
+        @if (enableSorting) {
+          <label class="fin-field">
+            <span>{{ 'Sort by' | translate }}</span>
+            <app-smooth-select
+              [options]="orderByOptions"
+              [value]="orderByValue"
+              [placeholder]="'Sort by' | translate"
+              (valueChange)="onOrderByChange($event)"
+            />
+          </label>
+          <label class="fin-field">
+            <span>{{ 'Direction' | translate }}</span>
+            <app-smooth-select
+              [options]="orderByDirectionOptions()"
+              [value]="orderByDirectionValue"
+              [placeholder]="'Direction' | translate"
+              (valueChange)="onOrderByDirectionChange($event)"
+            />
+          </label>
+        }
 
-          @if (enableDateRangeFilter) {
-            <div class="app-filter-field app-filter-field--wide finance-filter-range">
-              <app-date-range-filter
-                [from]="dateFrom"
-                [to]="dateTo"
-                [fromLabel]="'From date'"
-                [toLabel]="'To date'"
-                [fromPlaceholder]="'From date'"
-                [toPlaceholder]="'To date'"
-                (rangeChange)="onDateRangeChange($event)"
-              />
-            </div>
-          }
+        @if (enableDateRangeFilter) {
+          <label class="fin-field fin-field--range">
+            <span>{{ 'Date range' | translate }}</span>
+            <app-date-range-filter
+              [from]="dateFrom"
+              [to]="dateTo"
+              [fromLabel]="'From date'"
+              [toLabel]="'To date'"
+              [fromPlaceholder]="'From date'"
+              [toPlaceholder]="'To date'"
+              (rangeChange)="onDateRangeChange($event)"
+            />
+          </label>
+        }
 
-          <ng-content select="[finance-extra-filters]" />
-        </div>
+        <ng-content select="[finance-extra-filters]" />
       }
+    </ng-container>
+  </app-list-command-bar>
 
-      @if (loading || hasBlockingError()) {
-        <div class="text-center py-5">
-          <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
-        </div>
-      } @else if (rows.length === 0) {
-        <app-empty-state [title]="emptyTitle | translate" [description]="emptyDescription | translate" />
-      } @else {
-        <div class="table-responsive">
-          <table class="table table-striped mb-0">
-            <thead>
+  <app-list-content-shell shellClass="finance-list-shell__card">
+    @if (loading || hasBlockingError()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
+      </div>
+    } @else if (rows.length === 0) {
+      <app-empty-state [title]="emptyTitle | translate" [description]="emptyDescription | translate" />
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-striped mb-0 finance-list-table">
+          <thead>
+            <tr>
+              @for (column of columns; track column.key) {
+                <th [class.text-end]="column.align === 'end'">{{ column.label | translate }}</th>
+              }
+              @if (rowActions.length > 0) {
+                <th class="text-end">{{ 'Actions' | translate }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows; track trackByIndex($index); let rowIndex = $index) {
               <tr>
                 @for (column of columns; track column.key) {
-                  <th [class.text-end]="column.align === 'end'">{{ column.label | translate }}</th>
+                  <td [class.text-end]="column.align === 'end'">{{ row[column.key] ?? '-' }}</td>
                 }
                 @if (rowActions.length > 0) {
-                  <th class="text-end">{{ 'Actions' | translate }}</th>
+                  <td class="text-end">
+                    <div class="d-inline-flex gap-2">
+                      @for (action of rowActions; track action.key) {
+                        @if (getActionRouterLink(action, row); as actionLink) {
+                          <a
+                            class="btn btn-sm"
+                            [class]="'btn btn-sm btn-outline-' + (action.variant || 'secondary')"
+                            [routerLink]="actionLink"
+                            [title]="action.label | translate"
+                            [attr.aria-label]="action.label | translate"
+                          >
+                            @if (action.icon) {
+                              <i [class]="action.icon"></i>
+                            }
+                            @if (!action.iconOnly) {
+                              <span>{{ action.label | translate }}</span>
+                            }
+                          </a>
+                        } @else {
+                          <button
+                            type="button"
+                            class="btn btn-sm"
+                            [class]="'btn btn-sm btn-outline-' + (action.variant || 'secondary')"
+                            [title]="action.label | translate"
+                            [attr.aria-label]="action.label | translate"
+                            (click)="emitRowAction(action.key, rowIndex)"
+                          >
+                            @if (action.icon) {
+                              <i [class]="action.icon"></i>
+                            }
+                            @if (!action.iconOnly) {
+                              <span>{{ action.label | translate }}</span>
+                            }
+                          </button>
+                        }
+                      }
+                    </div>
+                  </td>
                 }
               </tr>
-            </thead>
-            <tbody>
-              @for (row of rows; track trackByIndex($index); let rowIndex = $index) {
-                <tr>
-                  @for (column of columns; track column.key) {
-                    <td [class.text-end]="column.align === 'end'">{{ row[column.key] ?? '-' }}</td>
-                  }
-                  @if (rowActions.length > 0) {
-                    <td class="text-end">
-                      <div class="d-inline-flex gap-2">
-                        @for (action of rowActions; track action.key) {
-                          @if (getActionRouterLink(action, row); as actionLink) {
-                            <a
-                              class="btn btn-sm"
-                              [class]="'btn btn-sm btn-outline-' + (action.variant || 'secondary')"
-                              [routerLink]="actionLink"
-                              [title]="action.label | translate"
-                              [attr.aria-label]="action.label | translate"
-                            >
-                              @if (action.icon) {
-                                <i [class]="action.icon"></i>
-                              }
-                              @if (!action.iconOnly) {
-                                <span>{{ action.label | translate }}</span>
-                              }
-                            </a>
-                          } @else {
-                            <button
-                              type="button"
-                              class="btn btn-sm"
-                              [class]="'btn btn-sm btn-outline-' + (action.variant || 'secondary')"
-                              [title]="action.label | translate"
-                              [attr.aria-label]="action.label | translate"
-                              (click)="emitRowAction(action.key, rowIndex)"
-                            >
-                              @if (action.icon) {
-                                <i [class]="action.icon"></i>
-                              }
-                              @if (!action.iconOnly) {
-                                <span>{{ action.label | translate }}</span>
-                              }
-                            </button>
-                          }
-                        }
-                      </div>
-                    </td>
-                  }
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+            }
+          </tbody>
+        </table>
+      </div>
 
-        <app-pagination-bar
-          [pageNumber]="pageNumber"
-          [totalPages]="totalPages"
-          [totalCount]="count"
-          [pageSize]="pageSize"
-          [showPageSize]="showPageSize"
-          [pageSizeOptions]="pageSizeOptions"
-          (pageChange)="pageChange.emit($event)"
-          (pageSizeChange)="pageSizeChange.emit($event)"
-        />
-      }
-    </div>
-  </div>
+      <app-pagination-bar
+        [pageNumber]="pageNumber"
+        [totalPages]="totalPages"
+        [totalCount]="count"
+        [pageSize]="pageSize"
+        [showPageSize]="showPageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        (pageChange)="pageChange.emit($event)"
+        (pageSizeChange)="pageSizeChange.emit($event)"
+      />
+    }
+  </app-list-content-shell>
 </div>

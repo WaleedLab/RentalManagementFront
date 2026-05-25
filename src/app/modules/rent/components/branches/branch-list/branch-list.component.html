@@ -1,115 +1,106 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="'Branches' | translate"
-    [subtitle]="'Branch operations, availability, and fleet distribution.' | translate"
+<div class="container-fluid branch-list-page">
+  <app-list-command-bar
+    [title]="'Branches'"
+    iconSrc="assets/images/rent_icon/Branches.png"
+    toolbarClass="branch-command__toolbar"
   >
-    <div class="list-header-actions">
-      <a class="btn btn-primary" routerLink="/branches/create" hasPrivilege="CreateBranch">
-        {{ 'Create Branch' | translate }}
-      </a>
-    </div>
-  </app-page-header>
+    <a commandActions class="fin-btn fin-btn--primary" routerLink="/branches/create" hasPrivilege="CreateBranch">
+      {{ 'Create Branch' | translate }}
+    </a>
 
-  <div class="app-filters-toolbar">
-    <div class="app-filter-field app-filter-field--search">
-      <label class="app-filter-label">{{ 'Search' | translate }}</label>
-      <div class="app-search-control">
-        <input
-          type="text"
-          class="form-control"
-          [placeholder]="'Search branches...' | translate"
-          [ngModel]="search()"
-          (ngModelChange)="search.set($event)"
-          (keyup.enter)="onSearch()"
-        />
-        <button class="btn app-search-btn" type="button" (click)="onSearch()">
-          {{ 'Search' | translate }}
-        </button>
+    <ng-container commandToolbar>
+      <app-list-search-field
+        [placeholder]="'Search branches...'"
+        [value]="search()"
+        (valueChange)="search.set($event)"
+        (search)="onSearch()"
+      />
+    </ng-container>
+  </app-list-command-bar>
+
+  <app-list-content-shell>
+    @if (loading() || loadFailed()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
       </div>
-    </div>
-  </div>
-
-  @if (loading() || loadFailed()) {
-    <div class="text-center py-5">
-      <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
-    </div>
-  } @else if (!branches().length) {
-    <app-empty-state
-      [title]="'No branches found' | translate"
-      [description]="'Create a branch to assign staff, vehicles, and bookings to operational locations.' | translate"
-    />
-  } @else {
-    <div class="table-responsive">
-      <table class="table table-striped align-middle">
-        <thead>
-          <tr>
-            <th>{{ 'Name (AR)' | translate }}</th>
-            <th>{{ 'Name (EN)' | translate }}</th>
-            <th>{{ 'Code' | translate }}</th>
-            <th>{{ 'City' | translate }}</th>
-            <th>{{ 'Street' | translate }}</th>
-            <th>{{ 'Contact Number' | translate }}</th>
-            <th>{{ 'Active' | translate }}</th>
-            <th class="text-end">{{ 'Actions' | translate }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (branch of branches(); track branch.id) {
+    } @else if (!branches().length) {
+      <app-empty-state
+        [title]="'No branches found' | translate"
+        [description]="'Create a branch to assign staff, vehicles, and bookings to operational locations.' | translate"
+      />
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
             <tr>
-              <td>{{ branch.nameAr || '-' }}</td>
-              <td>{{ branch.nameEn || '-' }}</td>
-              <td>{{ branch.code || '-' }}</td>
-              <td>{{ branch.city || '-' }}</td>
-              <td>{{ branch.street || '-' }}</td>
-              <td>{{ branch.contactNumber || '-' }}</td>
-              <td>
-                <app-status-badge
-                  [label]="branch.isActive ? ('Active' | translate) : ('Inactive' | translate)"
-                  [tone]="branch.isActive ? 'success' : 'secondary'"
-                />
-              </td>
-              <td class="text-end">
-                <div class="table-actions">
-                  <a
-                    class="table-action-icon table-action-icon--primary"
-                    [routerLink]="['/branches', branch.id, 'edit']"
-                    hasPrivilege="UpdateBranch"
-                    [attr.aria-label]="'Edit' | translate"
-                    [title]="'Edit' | translate"
-                  >
-                    <i class="fa-solid fa-pen-to-square"></i>
-                  </a>
-                  <button
-                    class="table-action-icon table-action-icon--danger"
-                    type="button"
-                    (click)="delete(branch)"
-                    [disabled]="isDeleting(branch.id)"
-                    hasPrivilege="DeleteBranch"
-                    [attr.aria-label]="'Delete' | translate"
-                    [title]="'Delete' | translate"
-                  >
-                    @if (isDeleting(branch.id)) {
-                      <span class="spinner-border spinner-border-sm" role="status"></span>
-                    } @else {
-                      <i class="fa-solid fa-trash-can"></i>
-                    }
-                  </button>
-                </div>
-              </td>
+              <th>{{ 'Name (AR)' | translate }}</th>
+              <th>{{ 'Name (EN)' | translate }}</th>
+              <th>{{ 'Code' | translate }}</th>
+              <th>{{ 'City' | translate }}</th>
+              <th>{{ 'Street' | translate }}</th>
+              <th>{{ 'Contact Number' | translate }}</th>
+              <th>{{ 'Active' | translate }}</th>
+              <th class="text-end">{{ 'Actions' | translate }}</th>
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (branch of branches(); track branch.id) {
+              <tr>
+                <td>{{ branch.nameAr || '-' }}</td>
+                <td>{{ branch.nameEn || '-' }}</td>
+                <td>{{ branch.code || '-' }}</td>
+                <td>{{ branch.city || '-' }}</td>
+                <td>{{ branch.street || '-' }}</td>
+                <td>{{ branch.contactNumber || '-' }}</td>
+                <td>
+                  <app-status-badge
+                    [label]="branch.isActive ? ('Active' | translate) : ('Inactive' | translate)"
+                    [tone]="branch.isActive ? 'success' : 'secondary'"
+                  />
+                </td>
+                <td class="text-end">
+                  <div class="table-actions">
+                    <a
+                      class="table-action-icon table-action-icon--primary"
+                      [routerLink]="['/branches', branch.id, 'edit']"
+                      hasPrivilege="UpdateBranch"
+                      [attr.aria-label]="'Edit' | translate"
+                      [title]="'Edit' | translate"
+                    >
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <button
+                      class="table-action-icon table-action-icon--danger"
+                      type="button"
+                      (click)="delete(branch)"
+                      [disabled]="isDeleting(branch.id)"
+                      hasPrivilege="DeleteBranch"
+                      [attr.aria-label]="'Delete' | translate"
+                      [title]="'Delete' | translate"
+                    >
+                      @if (isDeleting(branch.id)) {
+                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                      } @else {
+                        <i class="fa-solid fa-trash-can"></i>
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
-    <app-pagination-bar
-      [pageNumber]="pageNumber()"
-      [totalPages]="totalPages()"
-      [totalCount]="totalCount()"
-      [pageSize]="pageSize()"
-      [pageSizeOptions]="[5, 10, 25, 50]"
-      (pageChange)="goToPage($event)"
-      (pageSizeChange)="changePageSize($event)"
-    />
-  }
+      <app-pagination-bar
+        [pageNumber]="pageNumber()"
+        [totalPages]="totalPages()"
+        [totalCount]="totalCount()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="changePageSize($event)"
+      />
+    }
+  </app-list-content-shell>
 </div>

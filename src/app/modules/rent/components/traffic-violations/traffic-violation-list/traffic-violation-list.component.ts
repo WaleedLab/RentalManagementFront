@@ -9,7 +9,9 @@ import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { ListCommandBarComponent } from '../../../../../shared/ui/list-command-bar/list-command-bar.component';
+import { ListContentShellComponent } from '../../../../../shared/ui/list-content-shell/list-content-shell.component';
+import { ListSearchFieldComponent } from '../../../../../shared/ui/list-search-field/list-search-field.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 import { TrafficViolation } from '../../../models/traffic-violations/traffic-violation.model';
 import { TrafficViolationService } from '../../../services/traffic-violations/traffic-violation.service';
@@ -23,7 +25,9 @@ import { TrafficViolationService } from '../../../services/traffic-violations/tr
     RouterLink,
     TranslateModule,
     EmptyStateComponent,
-    PageHeaderComponent,
+    ListCommandBarComponent,
+    ListSearchFieldComponent,
+    ListContentShellComponent,
     PaginationBarComponent,
   ],
   templateUrl: './traffic-violation-list.component.html',

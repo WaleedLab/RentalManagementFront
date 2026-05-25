@@ -1,0 +1,32 @@
+@use './fin-command-button-tokens';
+
+@mixin list-command-tokens() {
+  --fin-bg: transparent;
+  --fin-glass: #ffffff;
+  --fin-border: rgba(71, 85, 105, 0.14);
+  --fin-glow: rgba(5, 150, 105, 0.14);
+  --fin-text: #0f172a;
+  --fin-muted: #64748b;
+  --fin-accent: #059669;
+  --fin-accent-secondary: #2563eb;
+  --fin-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  --fin-input-bg: #ffffff;
+  --fin-pill-bg: rgba(5, 150, 105, 0.08);
+  --fin-pill-bg-hover: rgba(5, 150, 105, 0.14);
+  @include fin-command-button-tokens.fin-command-btn-primary-light;
+}
+
+@mixin list-command-tokens-dark() {
+  --fin-glass: color-mix(in srgb, var(--app-dark-card) 72%, transparent);
+  --fin-border: color-mix(in srgb, var(--app-dark-accent-cyan) 14%, transparent);
+  --fin-glow: color-mix(in srgb, var(--app-dark-accent-emerald) 24%, transparent);
+  --fin-text: var(--app-dark-text);
+  --fin-muted: var(--app-dark-text-secondary);
+  --fin-accent: var(--app-dark-accent-emerald);
+  --fin-accent-secondary: var(--app-dark-accent-cyan);
+  --fin-shadow: 0 24px 60px rgba(0, 0, 0, 0.48);
+  --fin-input-bg: color-mix(in srgb, var(--app-dark-card) 88%, transparent);
+  --fin-pill-bg: color-mix(in srgb, var(--app-dark-accent-emerald) 14%, transparent);
+  --fin-pill-bg-hover: color-mix(in srgb, var(--app-dark-accent-emerald) 22%, transparent);
+  @include fin-command-button-tokens.fin-command-btn-primary-dark;
+}

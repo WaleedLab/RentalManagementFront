@@ -1,0 +1,21 @@
+@use '../../styles/list-command-tokens';
+
+:host {
+  display: block;
+  @include list-command-tokens.list-command-tokens;
+}
+
+:host-context(body.dark-only) {
+  @include list-command-tokens.list-command-tokens-dark;
+}
+
+.list-content-shell {
+  border-radius: 20px;
+  border: 1px solid var(--fin-border);
+  background: var(--fin-glass);
+  box-shadow: var(--fin-shadow);
+}
+
+.list-content-shell__body {
+  padding: 1rem 1.1rem 1.15rem;
+}

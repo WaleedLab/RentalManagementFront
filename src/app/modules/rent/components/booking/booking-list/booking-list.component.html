@@ -1,81 +1,80 @@
-<div class="container-fluid">
-  <app-page-header [title]="'Bookings' | translate" [subtitle]="'Reservations across fleets, branches, customers, and vehicles.' | translate">
-    <div class="list-header-actions">
-      <a class="btn btn-primary" routerLink="/booking/create">{{ 'Create Booking' | translate }}</a>
+<div class="container-fluid booking-list-page">
+  <section class="fin-command booking-command">
+    <div class="fin-command__row">
+      <div class="fin-command__brand">
+        <div class="fin-command__title-row">
+          <img class="fin-command__icon" src="assets/images/rent_icon/Booking.png" alt="" />
+          <h2 class="fin-command__title">{{ 'Bookings' | translate }}</h2>
+        </div>
+      </div>
+      <div class="fin-command__actions">
+        <a class="fin-btn fin-btn--primary" routerLink="/booking/create">{{ 'Create Booking' | translate }}</a>
+      </div>
     </div>
-  </app-page-header>
 
-  <div class="card">
-    <div class="card-body">
-      <div class="app-filters-toolbar app-filters-toolbar--bookings">
-        <div class="app-filter-field app-filter-field--search">
-          <label class="app-filter-label">{{ 'Search' | translate }}</label>
-          <div class="app-search-control">
-            <input
-              class="form-control"
-              [placeholder]="'Search booking/customer/vehicle...' | translate"
-              [ngModel]="search()"
-              (ngModelChange)="search.set($event)"
-              (keyup.enter)="onSearchSubmit()"
-            />
-            <button class="btn app-search-btn" type="button" (click)="onSearchSubmit()">
-              {{ 'Search' | translate }}
-            </button>
-          </div>
-        </div>
+    <div class="fin-command__toolbar booking-command__toolbar">
+      <app-list-search-field
+        [placeholder]="'Search booking/customer/vehicle...'"
+        [value]="search()"
+        (valueChange)="search.set($event)"
+        (search)="onSearchSubmit()"
+      />
 
-        <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Status' | translate }}</label>
-          <app-smooth-select
-            [ariaLabel]="'Status' | translate"
-            [placeholder]="'All statuses'"
-            [options]="statusFilterOptions()"
-            [value]="status()"
-            (valueChange)="onStatusFilterChange($any($event))"
-          />
-        </div>
+      <label class="fin-field">
+        <span>{{ 'Status' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Status' | translate"
+          [placeholder]="'All statuses'"
+          [options]="statusFilterOptions()"
+          [value]="status()"
+          (valueChange)="onStatusFilterChange($any($event))"
+        />
+      </label>
 
-        <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Branch' | translate }}</label>
-          <app-smooth-select
-            [ariaLabel]="'Branch' | translate"
-            [placeholder]="'All branches'"
-            [options]="branchFilterOptions()"
-            [value]="branchId()"
-            (valueChange)="onBranchFilterChange($any($event))"
-          />
-        </div>
+      <label class="fin-field">
+        <span>{{ 'Branch' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Branch' | translate"
+          [placeholder]="'All branches'"
+          [options]="branchFilterOptions()"
+          [value]="branchId()"
+          (valueChange)="onBranchFilterChange($any($event))"
+        />
+      </label>
 
-        <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Sort by' | translate }}</label>
-          <app-smooth-select
-            [ariaLabel]="'Sort by' | translate"
-            [options]="orderByOptions()"
-            [value]="orderBy()"
-            (valueChange)="onOrderByChange($any($event))"
-          />
-        </div>
+      <label class="fin-field">
+        <span>{{ 'Sort by' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Sort by' | translate"
+          [options]="orderByOptions()"
+          [value]="orderBy()"
+          (valueChange)="onOrderByChange($any($event))"
+        />
+      </label>
 
-        <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Order direction' | translate }}</label>
-          <app-smooth-select
-            [ariaLabel]="'Order direction' | translate"
-            [options]="orderDirectionOptions()"
-            [value]="orderByDirection()"
-            (valueChange)="onOrderDirectionChange($any($event))"
-          />
-        </div>
+      <label class="fin-field">
+        <span>{{ 'Order direction' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Order direction' | translate"
+          [options]="orderDirectionOptions()"
+          [value]="orderByDirection()"
+          (valueChange)="onOrderDirectionChange($any($event))"
+        />
+      </label>
+    </div>
 
-      </div>
-      <div class="booking-legend" aria-label="Booking color guide">
-        @for (guide of colorGuide; track guide.key) {
-          <div class="booking-legend-item">
-            <span class="booking-legend-dot" [style.background]="guide.color"></span>
-            <span class="booking-legend-label">{{ guide.label }}</span>
-          </div>
-        }
-      </div>
+    <div class="fin-command__presets booking-command__legend" aria-label="Booking color guide">
+      @for (guide of colorGuide; track guide.key) {
+        <span class="booking-legend-pill">
+          <span class="booking-legend-dot" [style.background]="guide.color"></span>
+          <span>{{ guide.label }}</span>
+        </span>
+      }
+    </div>
+  </section>
 
+  <div class="booking-list-shell">
+    <div class="booking-list-shell__body">
       @if (loading() || loadFailed()) {
         <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
       } @else if (!bookings().length) {

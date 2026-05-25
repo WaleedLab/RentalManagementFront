@@ -25,6 +25,7 @@
   "Fleet email must be valid.": "Fleet email must be valid.",
   "Fleet Name": "Fleet Name",
   "Fleet name is required and must be valid.": "Fleet name is required and must be valid.",
+  "Fleet operations center": "Fleet operations",
   "Fleets": "Fleets",
   "Hint Fleet Code": "Optional, but it is best to use a short unique code for the fleet.",
   "Hint Fleet Contact Number": "Enter the main contact number for the fleet or its administration.",
