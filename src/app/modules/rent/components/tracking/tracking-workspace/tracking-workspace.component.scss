@@ -100,8 +100,16 @@
 }
 
 :host ::ng-deep .tw-command__toolbar {
-  grid-template-columns: minmax(140px, 1fr) minmax(140px, 1fr);
+  grid-template-columns: minmax(280px, 1fr);
   align-items: end;
+}
+
+:host ::ng-deep .tw-command__toolbar .tw-command__dates {
+  min-width: 0;
+}
+
+:host ::ng-deep .tw-command__toolbar .tw-command__dates .app-date-range-filter {
+  width: 100%;
 }
 
 .tw-topbar__status {

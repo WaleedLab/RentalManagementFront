@@ -42,13 +42,16 @@
     </ng-container>
 
     <ng-container commandToolbar>
-      <label class="fin-field">
-        <span>{{ 'Date From' | translate }}</span>
-        <input class="fin-input" type="date" formControlName="dateFrom" />
-      </label>
-      <label class="fin-field">
-        <span>{{ 'Date To' | translate }}</span>
-        <input class="fin-input" type="date" formControlName="dateTo" />
+      <label class="fin-field fin-field--range tw-command__dates">
+        <app-date-range-filter
+          [from]="filtersForm.controls.dateFrom.value"
+          [to]="filtersForm.controls.dateTo.value"
+          [fromLabel]="'From date'"
+          [toLabel]="'To date'"
+          [fromPlaceholder]="'From date'"
+          [toPlaceholder]="'To date'"
+          (rangeChange)="onDateRangeChange($event)"
+        />
       </label>
     </ng-container>
   </app-list-command-bar>
@@ -63,7 +66,16 @@
         </div>
       }
 
-      @if (safeIframeUrl(); as iframeUrl) {
+      @if (safeIframeSrcdoc(); as srcdoc) {
+        <iframe
+          class="tw-map-frame"
+          [srcdoc]="srcdoc"
+          [class.tw-map-frame--hidden]="mapLoading()"
+          [title]="'Live map' | translate"
+          loading="lazy"
+          (load)="onIframeLoad()"
+        ></iframe>
+      } @else if (safeIframeUrl(); as iframeUrl) {
         <iframe
           class="tw-map-frame"
           [src]="iframeUrl"

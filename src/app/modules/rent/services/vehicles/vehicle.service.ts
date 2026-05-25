@@ -107,6 +107,29 @@ export class VehicleService {
       .pipe(map(response => normalizePaginatedResponse(response, normalizeVehicle)));
   }
 
+  getExpirationCounts(params: {
+    fleetId?: string | null;
+    branchId?: number | null;
+    nextDays?: number;
+  } = {}): Observable<VehicleExpirationCountsResponse> {
+    const normalizedFleetId = normalizeFleetId(params.fleetId);
+    const requestParams = this.typeSafeParams({
+      FleetId: normalizedFleetId ?? undefined,
+      BranchId: params.branchId ?? undefined,
+      NextDays: params.nextDays ?? 15,
+    });
+
+    // `VehicleRouting.ExpirationCounts` → GET `Vehicle/ExpirationCounts`.
+    return this.api
+      .getData<VehicleExpirationCountsResponse>(`${this.base}/ExpirationCounts`, requestParams, {
+        suppressErrorToast: true,
+      })
+      .pipe(
+        map(response => normalizeVehicleExpirationCountsResponse(response)),
+        catchError(() => of({ nextDays: params.nextDays ?? 15, items: [] })),
+      );
+  }
+
   getStatusCounts(params: {
     fleetId?: string | null;
     branchId?: number | null;
@@ -359,4 +382,33 @@ export interface VehicleStatusCountItem {
   statusDisplayName: string;
   count: number;
   includedStatuses: string[];
+}
+
+export interface VehicleExpirationCountsResponse {
+  nextDays: number;
+  items: VehicleExpirationCountItem[];
+}
+
+export interface VehicleExpirationCountItem {
+  key: string;
+  label: string;
+  expiredCount: number;
+  expiringSoonCount: number;
+}
+
+function normalizeVehicleExpirationCountsResponse(
+  raw: VehicleExpirationCountsResponse | Record<string, unknown> | null | undefined,
+): VehicleExpirationCountsResponse {
+  const source = (raw ?? {}) as Record<string, unknown>;
+  const itemsRaw = (source['items'] ?? source['Items'] ?? []) as Array<Record<string, unknown>>;
+
+  return {
+    nextDays: Number(source['nextDays'] ?? source['NextDays'] ?? 15) || 15,
+    items: itemsRaw.map(item => ({
+      key: String(item['key'] ?? item['Key'] ?? ''),
+      label: String(item['label'] ?? item['Label'] ?? ''),
+      expiredCount: Number(item['expiredCount'] ?? item['ExpiredCount'] ?? 0) || 0,
+      expiringSoonCount: Number(item['expiringSoonCount'] ?? item['ExpiringSoonCount'] ?? 0) || 0,
+    })),
+  };
 }

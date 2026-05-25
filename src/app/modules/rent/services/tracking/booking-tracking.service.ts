@@ -1,76 +1,46 @@
-import { Injectable, inject } from '@angular/core';
-import { Observable, map, switchMap } from 'rxjs';
+import { Injectable } from '@angular/core';
 
+import { BookingTrackingRouteParams } from '../../utils/booking-tracking-params.util';
 import {
   TrackingFilterForm,
-  TrackingVehicleInfo,
   TrackingWorkspaceContext,
-  TrackingWorkspaceRequest,
-  TrackingWorkspaceSession,
 } from '../../models/tracking/tracking.model';
-import { BookingService } from '../booking/booking.service';
-import { VehicleTrackingService } from './vehicle-tracking.service';
 
 @Injectable({ providedIn: 'root' })
 export class BookingTrackingService {
-  private readonly bookingService = inject(BookingService);
-  private readonly vehicleTrackingService = inject(VehicleTrackingService);
-
-  loadContext(bookingId: string, fleetId: string): Observable<TrackingWorkspaceContext> {
-    return this.bookingService.getById(bookingId, fleetId).pipe(
-      map(booking => {
-        const vehicleInfo: TrackingVehicleInfo = {
-          plateNumber: booking.vehiclePlateNumber || '—',
-          vehicleLabel: booking.vehicleName || booking.vehicleCategoryLabel || '—',
-          branchName: booking.branchName,
-          extraLines: [
-            { labelKey: 'Customer', value: booking.customerName || '—' },
-            { labelKey: 'Contract Number', value: booking.numberBookingINBasame || booking.bookingNumber || '—' },
-            { labelKey: 'Status', value: booking.statusDisplayName || booking.status },
-          ],
-        };
-
-        return {
-          mode: 'booking' as const,
-          entityId: booking.id,
-          fleetId,
-          title: '',
-          subtitle: '',
-          backLink: ['/booking'],
-          detailsLink: ['/booking', booking.id, 'details'],
-          vehicleInfo,
-        };
-      }),
-    );
-  }
-
-  loadWorkspace(
+  buildContext(
     bookingId: string,
     fleetId: string,
-    filters: TrackingFilterForm,
-  ): Observable<TrackingWorkspaceSession> {
-    return this.bookingService.getById(bookingId, fleetId).pipe(
-      switchMap(booking => {
-        const request: TrackingWorkspaceRequest = {
-          fleetId,
-          vehicleId: booking.vehicleId,
-          bookingId,
-          filters,
-        };
-        return this.vehicleTrackingService.loadWorkspace(request).pipe(
-          map(session => ({
-            ...session,
-            vehicleInfo: {
-              ...session.vehicleInfo,
-              extraLines: [
-                { labelKey: 'Customer', value: booking.customerName || '—' },
-                { labelKey: 'Contract Number', value: booking.numberBookingINBasame || booking.bookingNumber || '—' },
-                { labelKey: 'Status', value: booking.statusDisplayName || booking.status },
-              ],
-            },
-          })),
-        );
-      }),
-    );
+    params: BookingTrackingRouteParams,
+  ): TrackingWorkspaceContext {
+    const initialFilters: TrackingFilterForm = {
+      dateFrom: params.dateFrom,
+      dateTo: params.dateTo,
+      trackingUrl: '',
+    };
+
+    const vehicleInfo = {
+      plateNumber: params.plate?.trim() || '—',
+      vehicleLabel: params.vehicleLabel?.trim() || '—',
+      branchName: params.branchName,
+      extraLines: [
+        { labelKey: 'Customer', value: params.customerName?.trim() || '—' },
+        { labelKey: 'Contract Number', value: params.contractNumber?.trim() || '—' },
+        { labelKey: 'Status', value: params.bookingStatus?.trim() || '—' },
+      ],
+    };
+
+    return {
+      mode: 'booking',
+      entityId: bookingId,
+      fleetId,
+      title: '',
+      subtitle: '',
+      backLink: ['/booking'],
+      detailsLink: ['/booking', bookingId, 'details'],
+      trackingVehicleId: params.vehicleId,
+      initialFilters,
+      vehicleInfo,
+    };
   }
 }

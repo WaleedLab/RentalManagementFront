@@ -53,8 +53,24 @@ describe('VehicleListComponent', () => {
     ],
   };
 
+  const mockExpirationCountsResponse = {
+    nextDays: 15,
+    items: [
+      { key: 'insurance', label: 'Insurance expired', expiredCount: 2, expiringSoonCount: 1 },
+      { key: 'periodicInspection', label: 'Inspection expired', expiredCount: 0, expiringSoonCount: 3 },
+      { key: 'operatingCard', label: 'Operating card expired', expiredCount: 1, expiringSoonCount: 0 },
+      { key: 'carRegistration', label: 'Registration expired', expiredCount: 4, expiringSoonCount: 2 },
+    ],
+  };
+
   beforeEach(async () => {
-    const vehicleServiceMock = jasmine.createSpyObj('VehicleService', ['getPaginated', 'getStatusCounts', 'changeStatus', 'softDelete']);
+    const vehicleServiceMock = jasmine.createSpyObj('VehicleService', [
+      'getPaginated',
+      'getStatusCounts',
+      'getExpirationCounts',
+      'changeStatus',
+      'softDelete',
+    ]);
     const branchServiceMock = jasmine.createSpyObj('BranchService', ['getPaginated']);
     const categoryVehicleServiceMock = jasmine.createSpyObj('CategoryVehicleService', ['getPaginated']);
     const authStateMock = jasmine.createSpyObj('AuthStateService', [], {
@@ -109,6 +125,7 @@ describe('VehicleListComponent', () => {
     it('should load vehicles, branches, categories, and status counts on init', (done) => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
+      vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
       branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
       categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
 
@@ -117,6 +134,7 @@ describe('VehicleListComponent', () => {
       setTimeout(() => {
         expect(vehicleServiceSpy.getPaginated).toHaveBeenCalled();
         expect(vehicleServiceSpy.getStatusCounts).toHaveBeenCalled();
+        expect(vehicleServiceSpy.getExpirationCounts).toHaveBeenCalled();
         expect(branchServiceSpy.getPaginated).toHaveBeenCalled();
         expect(categoryVehicleServiceSpy.getPaginated).toHaveBeenCalled();
         done();
@@ -128,6 +146,7 @@ describe('VehicleListComponent', () => {
     it('should load vehicle list', (done) => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
+      vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
       branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
       categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
 
@@ -144,6 +163,7 @@ describe('VehicleListComponent', () => {
     it('should handle load error', (done) => {
       vehicleServiceSpy.getPaginated.and.returnValue(throwError(() => new Error('Load failed')));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
+      vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
       branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
       categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
       translateServiceSpy.instant.and.returnValue('Failed to load vehicles');
@@ -160,6 +180,7 @@ describe('VehicleListComponent', () => {
     it('should navigate to page', (done) => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
+      vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
       branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
       categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
       component.totalPages.set(3);
@@ -175,6 +196,7 @@ describe('VehicleListComponent', () => {
     it('should change page size', (done) => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
+      vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
       branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
       categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
 
@@ -192,6 +214,7 @@ describe('VehicleListComponent', () => {
     it('should search vehicles', (done) => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
+      vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
       branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
       categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
 
@@ -210,6 +233,7 @@ describe('VehicleListComponent', () => {
     it('should filter by status', (done) => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
+      vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
       branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
       categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
 
@@ -225,6 +249,7 @@ describe('VehicleListComponent', () => {
     it('should sort by year', (done) => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
+      vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
       branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
       categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
 
@@ -239,6 +264,7 @@ describe('VehicleListComponent', () => {
     it('should sort in ascending order', (done) => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
+      vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
       branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
       categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
 
@@ -369,6 +395,7 @@ describe('VehicleListComponent', () => {
   describe('status counts', () => {
     it('should load status counts', (done) => {
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
+      vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
       branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
       categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
@@ -378,6 +405,25 @@ describe('VehicleListComponent', () => {
       setTimeout(() => {
         expect(component.vehicleStatusTotalCount()).toBe(5);
         expect(component.vehicleStatusCounts().length).toBeGreaterThan(0);
+        done();
+      }, 100);
+    });
+  });
+
+  describe('expiration counts', () => {
+    it('should load expiration counts on init', (done) => {
+      vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
+      vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
+      vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
+      branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
+      categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
+
+      component.ngOnInit();
+
+      setTimeout(() => {
+        expect(component.expirationBarItems().length).toBe(4);
+        expect(component.expirationBarItems()[0].expiredCount).toBe(2);
+        expect(component.expirationNextDays()).toBe(15);
         done();
       }, 100);
     });

@@ -12,21 +12,31 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import { debounceTime, finalize, skip } from 'rxjs';
 
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { LayoutService } from '../../../../../shared/services/layout/layout.service';
 import { ListCommandBarComponent } from '../../../../../shared/ui/list-command-bar/list-command-bar.component';
+import {
+  DateRangeFilterComponent,
+  DateRangeValue,
+} from '../../../../../shared/ui/date-range-filter/date-range-filter.component';
 import { TrackingWorkspaceContext, TrackingWorkspaceSession } from '../../../models/tracking/tracking.model';
 import { VehicleTrackingService } from '../../../services/tracking/vehicle-tracking.service';
-import { BookingTrackingService } from '../../../services/tracking/booking-tracking.service';
 
 @Component({
   selector: 'app-tracking-workspace',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, ListCommandBarComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    TranslateModule,
+    ListCommandBarComponent,
+    DateRangeFilterComponent,
+  ],
   templateUrl: './tracking-workspace.component.html',
   styleUrl: './tracking-workspace.component.scss',
 })
@@ -36,7 +46,6 @@ export class TrackingWorkspaceComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly layoutService = inject(LayoutService);
   private readonly vehicleTrackingService = inject(VehicleTrackingService);
-  private readonly bookingTrackingService = inject(BookingTrackingService);
 
   context = input.required<TrackingWorkspaceContext>();
 
@@ -56,6 +65,11 @@ export class TrackingWorkspaceComponent implements OnInit {
   safeIframeUrl = computed<SafeResourceUrl | null>(() => {
     const url = this.session()?.iframeUrl;
     return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
+
+  safeIframeSrcdoc = computed<SafeHtml | null>(() => {
+    const html = this.session()?.iframeSrcdoc;
+    return html ? this.sanitizer.bypassSecurityTrustHtml(html) : null;
   });
 
   liveLabel = computed(() => {
@@ -96,7 +110,9 @@ export class TrackingWorkspaceComponent implements OnInit {
   readonly pageIconSrc = 'assets/images/rent_icon/car_tracking.png';
 
   ngOnInit(): void {
-    const defaults = this.vehicleTrackingService.createDefaultFilters();
+    const ctx = this.context();
+    const defaults =
+      ctx.initialFilters ?? this.vehicleTrackingService.createDefaultFilters();
     this.filtersForm.patchValue(
       { dateFrom: defaults.dateFrom, dateTo: defaults.dateTo },
       { emitEvent: false },
@@ -113,23 +129,55 @@ export class TrackingWorkspaceComponent implements OnInit {
     this.loading.set(true);
     this.mapLoading.set(true);
 
-    const request$ =
-      ctx.mode === 'booking'
-        ? this.bookingTrackingService.loadWorkspace(ctx.entityId, ctx.fleetId, filters)
-        : this.vehicleTrackingService.loadWorkspace({
-            fleetId: ctx.fleetId,
-            vehicleId: ctx.entityId,
-            filters,
-          });
+    const vehicleId =
+      ctx.mode === 'booking' ? (ctx.trackingVehicleId ?? '').trim() : ctx.entityId.trim();
+
+    if (!vehicleId) {
+      this.loading.set(false);
+      this.mapLoading.set(false);
+      this.toast.error('Tracking load failed');
+      return;
+    }
+
+    const request$ = this.vehicleTrackingService.loadWorkspace({
+      fleetId: ctx.fleetId,
+      vehicleId,
+      bookingId: ctx.mode === 'booking' ? ctx.entityId : undefined,
+      filters,
+      vehicleStub:
+        ctx.mode === 'booking'
+          ? {
+              plateNumber: ctx.vehicleInfo.plateNumber,
+              vehicleLabel: ctx.vehicleInfo.vehicleLabel,
+              branchName: ctx.vehicleInfo.branchName,
+            }
+          : undefined,
+    });
 
     request$.pipe(finalize(() => this.loading.set(false))).subscribe({
-      next: session => this.session.set(session),
+      next: session => {
+        const merged =
+          ctx.mode === 'booking' && ctx.vehicleInfo.extraLines?.length
+            ? {
+                ...session,
+                vehicleInfo: {
+                  ...session.vehicleInfo,
+                  extraLines: ctx.vehicleInfo.extraLines,
+                },
+              }
+            : session;
+        this.session.set(merged);
+      },
       error: () => this.toast.error('Tracking load failed'),
     });
   }
 
   refresh(): void {
     this.trackNow();
+  }
+
+  onDateRangeChange(range: DateRangeValue): void {
+    this.filtersForm.patchValue({ dateFrom: range.from, dateTo: range.to });
   }
 
   onIframeLoad(): void {

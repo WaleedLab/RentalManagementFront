@@ -42,9 +42,10 @@
   font-size: 0.84rem;
 }
 
-:host ::ng-deep .list-command .fin-field:has(app-smooth-select.app-smooth-select-host--open) {
+:host ::ng-deep .list-command .fin-field:has(app-smooth-select.app-smooth-select-host--open),
+:host ::ng-deep .list-command .fin-field:has(.date-picker-host--open) {
   position: relative;
-  z-index: 110;
+  z-index: 500020;
   overflow: visible;
 }
 

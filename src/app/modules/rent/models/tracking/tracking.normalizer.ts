@@ -209,6 +209,104 @@ export function normalizeVehicleTrackingResponse(
   };
 }
 
+function tryParseJsonPayload(raw: string): unknown {
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
+    return null;
+  }
+  try {
+    return JSON.parse(trimmed) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+/** Resolves map URL or HTML from GetTrackingQuery `Result<string>.data`. */
+export function resolveTrackingMapDisplay(raw: unknown): { iframeUrl: string | null; iframeSrcdoc: string | null } {
+  if (raw == null) {
+    return { iframeUrl: null, iframeSrcdoc: null };
+  }
+
+  if (typeof raw === 'string') {
+    const text = raw.trim();
+    if (!text) {
+      return { iframeUrl: null, iframeSrcdoc: null };
+    }
+    if (isValidTrackingUrl(text)) {
+      return { iframeUrl: normalizeTrackingUrl(text), iframeSrcdoc: null };
+    }
+    if (text.startsWith('<')) {
+      return { iframeUrl: null, iframeSrcdoc: text };
+    }
+    const parsed = tryParseJsonPayload(text);
+    if (parsed != null) {
+      return resolveTrackingMapDisplay(parsed);
+    }
+    return { iframeUrl: null, iframeSrcdoc: null };
+  }
+
+  if (typeof raw === 'object') {
+    const item = raw as Record<string, unknown>;
+    const nested = item['data'] ?? item['Data'] ?? item['result'] ?? item['Result'];
+    if (nested != null && nested !== raw) {
+      const fromNested = resolveTrackingMapDisplay(nested);
+      if (fromNested.iframeUrl || fromNested.iframeSrcdoc) {
+        return fromNested;
+      }
+    }
+    const url = pickString(
+      item,
+      'iframeUrl',
+      'IframeUrl',
+      'trackingUrl',
+      'TrackingUrl',
+      'mapUrl',
+      'MapUrl',
+      'url',
+      'Url',
+      'viewUrl',
+      'ViewUrl',
+    );
+    if (url && isValidTrackingUrl(url)) {
+      return { iframeUrl: normalizeTrackingUrl(url), iframeSrcdoc: null };
+    }
+  }
+
+  return { iframeUrl: null, iframeSrcdoc: null };
+}
+
+/**
+ * Builds session from API payload (string URL/HTML from SHowView, or structured JSON).
+ */
+export function buildTrackingWorkspaceSessionFromApi(
+  raw: unknown,
+  vehicle: Vehicle,
+  fleetId: string,
+  filters: TrackingFilterForm,
+): TrackingWorkspaceSession {
+  const map = resolveTrackingMapDisplay(raw);
+
+  if (map.iframeUrl || map.iframeSrcdoc) {
+    return {
+      iframeUrl: map.iframeUrl,
+      iframeSrcdoc: map.iframeSrcdoc,
+      liveStatus: 'live',
+      lastUpdated: new Date().toISOString(),
+      stats: buildStats({}),
+      timeline: [],
+      vehicleInfo: buildVehicleInfo(vehicle),
+      source: 'api',
+      exportPayload: { filters, vehicleId: vehicle.id, fleetId, raw },
+    };
+  }
+
+  if (raw != null && typeof raw === 'object') {
+    return buildTrackingWorkspaceSession(raw, { ...vehicle, fleetId }, filters);
+  }
+
+  return buildEmptyWorkspaceSession({ ...vehicle, fleetId }, filters);
+}
+
 export function buildTrackingWorkspaceSession(
   raw: unknown,
   vehicle: Vehicle,
@@ -225,6 +323,7 @@ export function buildTrackingWorkspaceSession(
 
   return {
     iframeUrl: iframeUrl ?? null,
+    iframeSrcdoc: null,
     liveStatus: pastedUrl ? 'live' : snapshot.status,
     lastUpdated: snapshot.lastUpdated,
     stats: buildStats(statsRaw, snapshot),
@@ -249,6 +348,7 @@ export function buildEmptyWorkspaceSession(
   if (pastedUrl && isValidTrackingUrl(pastedUrl)) {
     return {
       iframeUrl: normalizeTrackingUrl(pastedUrl),
+      iframeSrcdoc: null,
       liveStatus: 'live',
       stats: buildStats({}),
       timeline: [],
@@ -261,6 +361,7 @@ export function buildEmptyWorkspaceSession(
   const fallback = buildVehicleTrackingFallback(vehicle, vehicle.fleetId);
   return {
     iframeUrl: fallback.mapsEmbedUrl ?? null,
+    iframeSrcdoc: null,
     liveStatus: 'offline',
     stats: buildStats({}, fallback),
     timeline: [],

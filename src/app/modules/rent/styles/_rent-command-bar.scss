@@ -176,6 +176,20 @@
 .fin-command__actions a.fin-btn--primary {
   border-radius: 999px;
   padding-inline: 16px;
+  background: var(--fin-btn-action-bg, #ffffff);
+  color: var(--fin-btn-action-fg, #0d9488);
+  border: 1px solid var(--fin-btn-action-border, rgba(45, 212, 191, 0.55));
+  box-shadow: var(--fin-btn-action-shadow);
+  filter: none;
+}
+
+.fin-command__actions .fin-btn--primary:hover:not(:disabled),
+.fin-command__actions a.fin-btn--primary:hover {
+  background: var(--fin-btn-action-bg-hover, #f0fdfa);
+  color: var(--fin-btn-action-fg-hover, #0f766e);
+  border-color: var(--fin-btn-action-border-hover, rgba(45, 212, 191, 0.72));
+  box-shadow: var(--fin-btn-action-shadow-hover, var(--fin-btn-action-shadow));
+  filter: none;
 }
 
 .fin-btn--compact {

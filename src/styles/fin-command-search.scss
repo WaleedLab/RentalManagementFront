@@ -1,4 +1,144 @@
-/* Search bar inside fin-command toolbars (works with projected ng-content). */
+@use '../app/shared/styles/fin-command-button-tokens' as fin-btn;
+@use '../app/shared/styles/list-command-tokens' as fin-tokens;
+
+/* Toolbar tokens + primary buttons (global — covers projected ng-content). */
+.fin-command {
+  @include fin-tokens.list-command-tokens;
+  position: relative;
+  /* Above list/cards below (later DOM siblings paint on top at z-index:auto). */
+  z-index: 40;
+}
+
+body.dark-only .fin-command {
+  @include fin-tokens.list-command-tokens-dark;
+}
+
+/* Smooth-select inside command bars — align with fin-command tokens */
+.fin-command app-smooth-select {
+  --ss-trigger-border: var(--fin-border);
+  --ss-trigger-fg: var(--fin-text);
+  --ss-menu-border: var(--fin-border);
+  --ss-menu-fg: var(--fin-text);
+  --ss-search-border: var(--fin-border);
+  --ss-search-fg: var(--fin-text);
+  --ss-option-hover-bg: var(--fin-pill-bg);
+  --ss-option-hover-border: color-mix(in srgb, var(--fin-accent) 35%, transparent);
+  --ss-trigger-hover-border: color-mix(in srgb, var(--fin-accent) 45%, transparent);
+  --ss-trigger-focus-ring: color-mix(in srgb, var(--fin-accent) 18%, transparent);
+}
+
+/* Light theme — force readable text (beats global button/input resets). */
+body.light-only .fin-command .app-soft-select__trigger,
+body.light-only .fin-command .app-soft-select__trigger .app-soft-select__label {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+body.light-only .fin-command .app-soft-select__menu {
+  color: #0f172a !important;
+}
+
+body.light-only .fin-command .app-soft-select__option:not(.is-selected) {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+body.light-only .fin-command .app-soft-select__option.is-selected {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background-color: #0f766e !important;
+  background-image: linear-gradient(
+    to inline-end,
+    #1e293b 0%,
+    #134e4a 40%,
+    #0f766e 70%,
+    #14b8a6 100%
+  ) !important;
+}
+
+body.light-only .fin-command .app-soft-select__search {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  background: #ffffff !important;
+}
+
+body.light-only .fin-command .app-soft-select__search::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+body.light-only .app-soft-select__trigger,
+body.light-only .app-soft-select__trigger .app-soft-select__label {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+body.light-only .app-soft-select__option:not(.is-selected) {
+  color: #0f172a !important;
+}
+
+body.light-only .app-soft-select__option.is-selected {
+  color: #ffffff !important;
+  background-color: #0f766e !important;
+}
+
+body.light-only .app-soft-select__search {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+.fin-command:has(app-smooth-select.app-smooth-select-host--open),
+.fin-command:has(.date-picker-host--open) {
+  z-index: 500010;
+}
+
+.fin-command .fin-command__toolbar,
+.fin-command .list-command__toolbar {
+  overflow: visible;
+}
+
+.fin-command .fin-field:has(app-smooth-select.app-smooth-select-host--open),
+.fin-command .fin-field:has(.date-picker-host--open),
+.fin-command .app-filter-field:has(app-smooth-select.app-smooth-select-host--open),
+.fin-command .app-filter-field:has(.date-picker-host--open) {
+  position: relative;
+  z-index: 500020;
+  overflow: visible;
+}
+
+.fin-command .fin-btn--primary {
+  font-weight: 700;
+  transition:
+    filter 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Add / Create — pill; colors from --fin-btn-action-* per theme (search keeps --fin-btn-primary-*). */
+.fin-command .fin-command__actions .fin-btn--primary,
+.fin-command .fin-command__actions a.fin-btn--primary {
+  border-radius: 999px;
+  padding-inline: 16px;
+  text-decoration: none;
+  background: var(--fin-btn-action-bg, #ffffff) !important;
+  color: var(--fin-btn-action-fg, #0d9488) !important;
+  border: 1px solid var(--fin-btn-action-border, rgba(45, 212, 191, 0.55)) !important;
+  box-shadow: var(--fin-btn-action-shadow) !important;
+  filter: none !important;
+}
+
+.fin-command .fin-command__actions .fin-btn--primary:hover:not(:disabled),
+.fin-command .fin-command__actions a.fin-btn--primary:hover {
+  background: var(--fin-btn-action-bg-hover, var(--fin-btn-action-bg, #f0fdfa)) !important;
+  color: var(--fin-btn-action-fg-hover, var(--fin-btn-action-fg, #0f766e)) !important;
+  border-color: var(--fin-btn-action-border-hover, var(--fin-btn-action-border)) !important;
+  box-shadow: var(--fin-btn-action-shadow-hover, var(--fin-btn-action-shadow)) !important;
+  filter: none !important;
+}
+
+/* Search bar inside fin-command toolbars. */
 .fin-command .fin-search-group,
 .fin-command .list-search,
 .fin-command .booking-search {
@@ -72,24 +212,50 @@
   margin: 0;
   min-height: 100%;
   min-width: 4.5rem;
-  border: 0;
   border-radius: 0;
-  border-inline-start: 1px solid var(--fin-border, rgba(71, 85, 105, 0.14));
   padding-inline: 12px;
   white-space: nowrap;
 }
 
-.fin-command .fin-search-group__btn.fin-btn--primary {
-  background: var(--fin-btn-primary-bg);
-  color: var(--fin-btn-primary-fg, #fff);
-  font-weight: 700;
+.fin-command .fin-search-group__btn.fin-btn--primary,
+.fin-command .list-search .fin-btn.fin-btn--primary,
+.fin-command .booking-search .fin-btn.fin-btn--primary {
+  background-color: #0f766e !important;
+  background-image: var(--fin-btn-search-bg, var(--fin-btn-primary-bg)) !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  color: var(--fin-btn-search-fg, var(--fin-btn-primary-fg, #fff)) !important;
   border: 0;
-  border-inline-start: 1px solid var(--fin-btn-primary-border, var(--fin-border, rgba(71, 85, 105, 0.14)));
-  box-shadow: none;
+  border-inline-start: 1px solid var(--fin-btn-search-border, var(--fin-btn-primary-border, rgba(45, 212, 191, 0.45))) !important;
+  box-shadow: var(--fin-btn-search-shadow, none);
 }
 
-.fin-command .fin-search-group__btn.fin-btn--primary:hover:not(:disabled) {
-  filter: brightness(1.06);
+.fin-command .fin-search-group__btn.fin-btn--primary:hover:not(:disabled),
+.fin-command .list-search .fin-btn.fin-btn--primary:hover:not(:disabled),
+.fin-command .booking-search .fin-btn.fin-btn--primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow: var(--fin-btn-search-shadow, 0 2px 10px rgba(13, 148, 136, 0.28));
+}
+
+.fin-command .fin-search-group__btn.fin-btn--primary .fin-search-group__label,
+.fin-command .fin-search-group__btn.fin-btn--primary .fin-search-group__btn-icon {
+  color: inherit;
+}
+
+body.light-only .fin-command .fin-search-group__btn.fin-btn--primary,
+body.light-only .fin-command .list-search .fin-btn.fin-btn--primary,
+body.light-only .fin-command .booking-search .fin-btn.fin-btn--primary {
+  background-color: #0f766e !important;
+  background-image: linear-gradient(
+    to inline-end,
+    #1e293b 0%,
+    #134e4a 38%,
+    #0f766e 68%,
+    #14b8a6 100%
+  ) !important;
+  color: #ffffff !important;
+  border-inline-start-color: rgba(45, 212, 191, 0.55) !important;
+  box-shadow: 0 2px 10px rgba(13, 148, 136, 0.28) !important;
 }
 
 .fin-command .fin-search-group__lead {
@@ -113,6 +279,7 @@
 
 .fin-command .fin-search-group__btn-icon {
   display: none;
+  color: inherit;
 }
 
 @media (max-width: 575.98px) {

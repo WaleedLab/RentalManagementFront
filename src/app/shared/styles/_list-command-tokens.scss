@@ -14,6 +14,8 @@
   --fin-pill-bg: rgba(5, 150, 105, 0.08);
   --fin-pill-bg-hover: rgba(5, 150, 105, 0.14);
   @include fin-command-button-tokens.fin-command-btn-primary-light;
+  @include fin-command-button-tokens.fin-command-btn-search-light;
+  @include fin-command-button-tokens.fin-command-btn-action-light;
 }
 
 @mixin list-command-tokens-dark() {
@@ -29,4 +31,6 @@
   --fin-pill-bg: color-mix(in srgb, var(--app-dark-accent-emerald) 14%, transparent);
   --fin-pill-bg-hover: color-mix(in srgb, var(--app-dark-accent-emerald) 22%, transparent);
   @include fin-command-button-tokens.fin-command-btn-primary-dark;
+  @include fin-command-button-tokens.fin-command-btn-search-dark;
+  @include fin-command-button-tokens.fin-command-btn-action-dark;
 }
