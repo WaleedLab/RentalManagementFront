@@ -1,6 +1,20 @@
-.card-body {
-  h5 {
-    margin-bottom: 0.5rem;
-  }
+.security-overview-page {
+  padding-bottom: 1rem;
 }
 
+.security-command__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.security-overview__section-title {
+  color: var(--fin-text, inherit);
+}
+
+:host ::ng-deep .security-overview__list .list-group-item {
+  background: color-mix(in srgb, var(--fin-input-bg, #fff) 88%, transparent);
+  border-color: var(--fin-border, rgba(71, 85, 105, 0.14));
+  color: var(--fin-text, inherit);
+}

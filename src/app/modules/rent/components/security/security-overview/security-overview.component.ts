@@ -4,13 +4,15 @@ import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { ListCommandBarComponent } from '../../../../../shared/ui/list-command-bar/list-command-bar.component';
+import { ListContentShellComponent } from '../../../../../shared/ui/list-content-shell/list-content-shell.component';
 
 @Component({
   selector: 'app-security-overview',
   standalone: true,
-  imports: [CommonModule, TranslateModule, RouterLink, PageHeaderComponent],
+  imports: [CommonModule, TranslateModule, RouterLink, ListCommandBarComponent, ListContentShellComponent],
   templateUrl: './security-overview.component.html',
+  styleUrl: './security-overview.component.scss',
 })
 export class SecurityOverviewComponent implements OnInit {
   private authState = inject(AuthStateService);

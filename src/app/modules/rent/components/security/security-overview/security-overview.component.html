@@ -1,60 +1,59 @@
-<div class="container-fluid">
-  <app-page-header [title]="'Security Overview' | translate" [subtitle]="'Current user access, roles, and privilege visibility across the admin system.' | translate">
-    <div class="d-flex gap-2">
-      <a class="btn btn-outline-primary" routerLink="/roles">{{ 'Roles' | translate }}</a>
-      <a class="btn btn-outline-primary" routerLink="/privileges">{{ 'Privileges' | translate }}</a>
+<div class="container-fluid security-overview-page">
+  <app-list-command-bar
+    [title]="'Security Overview'"
+    iconSrc="assets/images/rent_icon/My_Access.png"
+  >
+    <ng-container commandActions>
+      <div class="security-command__actions">
+        <a class="fin-btn fin-btn--ghost" routerLink="/roles">{{ 'Roles' | translate }}</a>
+        <a class="fin-btn fin-btn--ghost" routerLink="/privileges">{{ 'Privileges' | translate }}</a>
+      </div>
+    </ng-container>
+  </app-list-command-bar>
+
+  <app-list-content-shell>
+    <div class="mb-3">
+      <h5 class="mb-1 security-overview__section-title">{{ 'User' | translate }}</h5>
+      <p class="mb-0">
+        <strong>{{ 'Username:' | translate }}</strong>
+        {{ userName() || ('Unknown' | translate) }}
+      </p>
+      <p class="mb-0">
+        <strong>{{ 'Email:' | translate }}</strong>
+        {{ email() || ('Unknown' | translate) }}
+      </p>
     </div>
-  </app-page-header>
 
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-body">
-          <div class="mb-3">
-            <h5 class="mb-1">{{ 'User' | translate }}</h5>
-            <p class="mb-0">
-              <strong>{{ 'Username:' | translate }}</strong>
-              {{ userName() || ('Unknown' | translate) }}
-            </p>
-            <p class="mb-0">
-              <strong>{{ 'Email:' | translate }}</strong>
-              {{ email() || ('Unknown' | translate) }}
-            </p>
-          </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <h5 class="security-overview__section-title">{{ 'Roles' | translate }}</h5>
+        @if (roles().length === 0) {
+          <p class="text-muted mb-0">{{ 'No roles found for the current session.' | translate }}</p>
+        } @else {
+          <ul class="list-group security-overview__list">
+            @for (role of roles(); track role) {
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ role }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
 
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <h5>{{ 'Roles' | translate }}</h5>
-              @if (roles().length === 0) {
-                <p class="text-muted mb-0">{{ 'No roles found for the current session.' | translate }}</p>
-              } @else {
-                <ul class="list-group">
-                  @for (role of roles(); track role) {
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                      <span>{{ role }}</span>
-                    </li>
-                  }
-                </ul>
-              }
-            </div>
-
-            <div class="col-md-6 mb-3">
-              <h5>{{ 'Privileges' | translate }}</h5>
-              @if (privileges().length === 0) {
-                <p class="text-muted mb-0">{{ 'No privileges found for the current session.' | translate }}</p>
-              } @else {
-                <ul class="list-group">
-                  @for (p of privileges(); track p) {
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                      <span>{{ p }}</span>
-                    </li>
-                  }
-                </ul>
-              }
-            </div>
-          </div>
-        </div>
+      <div class="col-md-6 mb-3">
+        <h5 class="security-overview__section-title">{{ 'Privileges' | translate }}</h5>
+        @if (privileges().length === 0) {
+          <p class="text-muted mb-0">{{ 'No privileges found for the current session.' | translate }}</p>
+        } @else {
+          <ul class="list-group security-overview__list">
+            @for (p of privileges(); track p) {
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ p }}</span>
+              </li>
+            }
+          </ul>
+        }
       </div>
     </div>
-  </div>
+  </app-list-content-shell>
 </div>

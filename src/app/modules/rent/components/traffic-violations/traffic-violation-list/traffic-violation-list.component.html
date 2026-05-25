@@ -1,94 +1,88 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="'trafficViolations.title' | translate"
-    [subtitle]="'trafficViolations.subtitle' | translate"
+<div class="container-fluid traffic-violation-list-page">
+  <app-list-command-bar
+    [title]="'trafficViolations.title'"
+    iconSrc="assets/images/rent_icon/Traffic-violations.png"
+    toolbarClass="traffic-violation-command__toolbar"
   >
-    <div class="list-header-actions">
-      <a class="btn btn-primary" routerLink="/traffic-violations/create">{{ 'trafficViolations.create' | translate }}</a>
-    </div>
-  </app-page-header>
+    <a commandActions class="fin-btn fin-btn--primary" routerLink="/traffic-violations/create">
+      {{ 'trafficViolations.create' | translate }}
+    </a>
 
-  <div class="card">
-    <div class="card-body">
-      <div class="app-filters-toolbar">
-        <div class="app-filter-field app-filter-field--search">
-          <label class="app-filter-label">{{ 'Search' | translate }}</label>
-          <div class="app-search-control">
-            <input
-              class="form-control"
-              [placeholder]="'trafficViolations.searchPlaceholder' | translate"
-              [ngModel]="search()"
-              (ngModelChange)="search.set($event)"
-              (keyup.enter)="onSearch()"
-            />
-            <button class="btn app-search-btn" type="button" (click)="onSearch()">{{ 'Search' | translate }}</button>
-          </div>
-        </div>
-      </div>
+    <ng-container commandToolbar>
+      <app-list-search-field
+        [placeholder]="'trafficViolations.searchPlaceholder'"
+        [value]="search()"
+        (valueChange)="search.set($event)"
+        (search)="onSearch()"
+      />
+    </ng-container>
+  </app-list-command-bar>
 
-      @if (loading() || loadFailed()) {
-        <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
-      } @else if (!rows().length) {
-        <app-empty-state
-          [title]="'trafficViolations.emptyTitle' | translate"
-          [description]="'trafficViolations.emptyDescription' | translate"
-        />
-      } @else {
-        <div class="table-responsive">
-          <table class="table table-striped align-middle traffic-violation-table">
-            <thead>
+  <app-list-content-shell>
+    @if (loading() || loadFailed()) {
+      <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
+    } @else if (!rows().length) {
+      <app-empty-state
+        [title]="'trafficViolations.emptyTitle' | translate"
+        [description]="'trafficViolations.emptyDescription' | translate"
+      />
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle traffic-violation-table">
+          <thead>
+            <tr>
+              <th>{{ 'trafficViolations.colViolation' | translate }}</th>
+              <th>{{ 'trafficViolations.colBooking' | translate }}</th>
+              <th>{{ 'trafficViolations.colVehicle' | translate }}</th>
+              <th class="text-nowrap">{{ 'trafficViolations.colDate' | translate }}</th>
+              <th class="text-end text-nowrap">{{ 'trafficViolations.colFine' | translate }}</th>
+              <th class="text-end">{{ 'trafficViolations.colNumber' | translate }}</th>
+              <th class="text-end">{{ 'Actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.id) {
               <tr>
-                <th>{{ 'trafficViolations.colViolation' | translate }}</th>
-                <th>{{ 'trafficViolations.colBooking' | translate }}</th>
-                <th>{{ 'trafficViolations.colVehicle' | translate }}</th>
-                <th class="text-nowrap">{{ 'trafficViolations.colDate' | translate }}</th>
-                <th class="text-end text-nowrap">{{ 'trafficViolations.colFine' | translate }}</th>
-                <th class="text-end">{{ 'trafficViolations.colNumber' | translate }}</th>
-                <th class="text-end">{{ 'Actions' | translate }}</th>
+                <td>{{ row.nameViolation || '-' }}</td>
+                <td>{{ bookingCell(row) }}</td>
+                <td>{{ vehicleCell(row) }}</td>
+                <td>{{ formatDate(row.dateViolation) }}</td>
+                <td class="text-end">{{ formatMoney(row.violationFine) }}</td>
+                <td class="text-end">{{ row.numberViolation }}</td>
+                <td class="text-end">
+                  <div class="table-actions">
+                    <a
+                      class="table-action-icon table-action-icon--primary"
+                      [routerLink]="['/traffic-violations', row.id, 'edit']"
+                      [attr.aria-label]="'Edit' | translate"
+                      [title]="'Edit' | translate"
+                    >
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <button
+                      type="button"
+                      class="table-action-icon table-action-icon--danger"
+                      [disabled]="isDeleting(row.id)"
+                      (click)="deleteRow(row)"
+                      [attr.aria-label]="'Delete' | translate"
+                      [title]="'Delete' | translate"
+                    >
+                      @if (isDeleting(row.id)) {
+                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                      } @else {
+                        <i class="fa-solid fa-trash"></i>
+                      }
+                    </button>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              @for (row of rows(); track row.id) {
-                <tr>
-                  <td>{{ row.nameViolation || '-' }}</td>
-                  <td>{{ bookingCell(row) }}</td>
-                  <td>{{ vehicleCell(row) }}</td>
-                  <td>{{ formatDate(row.dateViolation) }}</td>
-                  <td class="text-end">{{ formatMoney(row.violationFine) }}</td>
-                  <td class="text-end">{{ row.numberViolation }}</td>
-                  <td class="text-end">
-                    <div class="table-actions">
-                      <a
-                        class="table-action-icon table-action-icon--primary"
-                        [routerLink]="['/traffic-violations', row.id, 'edit']"
-                        [attr.aria-label]="'Edit' | translate"
-                        [title]="'Edit' | translate"
-                      >
-                        <i class="fa-solid fa-pen-to-square"></i>
-                      </a>
-                      <button
-                        type="button"
-                        class="table-action-icon table-action-icon--danger"
-                        [disabled]="isDeleting(row.id)"
-                        (click)="deleteRow(row)"
-                        [attr.aria-label]="'Delete' | translate"
-                        [title]="'Delete' | translate"
-                      >
-                        @if (isDeleting(row.id)) {
-                          <span class="spinner-border spinner-border-sm" role="status"></span>
-                        } @else {
-                          <i class="fa-solid fa-trash"></i>
-                        }
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
 
+    @if (!loading() && !loadFailed() && totalCount() > 0) {
       <app-pagination-bar
         [pageNumber]="pageNumber()"
         [totalPages]="totalPages()"
@@ -98,6 +92,6 @@
         (pageChange)="goToPage($event)"
         (pageSizeChange)="changePageSize($event)"
       />
-    </div>
-  </div>
+    }
+  </app-list-content-shell>
 </div>

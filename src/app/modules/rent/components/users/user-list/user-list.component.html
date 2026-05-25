@@ -1,104 +1,96 @@
-<div class="container-fluid">
-  <app-page-header [title]="'Users' | translate">
-    <div class="list-header-actions">
-      <a class="btn btn-primary" routerLink="/users/create">{{ 'Create User' | translate }}</a>
-    </div>
-  </app-page-header>
+<div class="container-fluid user-list-page">
+  <app-list-command-bar
+    [title]="'Users'"
+    iconSrc="assets/images/rent_icon/users.png"
+    toolbarClass="user-command__toolbar"
+  >
+    <a commandActions class="fin-btn fin-btn--primary" routerLink="/users/create">{{ 'Create User' | translate }}</a>
 
-  <div class="card user-list-card">
-    <div class="card-body">
-      <div class="app-filters-toolbar">
-        <div class="app-filter-field app-filter-field--search">
-          <label class="app-filter-label">{{ 'Search' | translate }}</label>
-          <div class="app-search-control">
-            <input
-              type="text"
-              class="form-control"
-              [placeholder]="'Search...' | translate"
-              [ngModel]="search()"
-              (ngModelChange)="search.set($event)"
-              (keyup.enter)="onSearch()"
-            />
-            <button class="btn app-search-btn" type="button" (click)="onSearch()">{{ 'Search' | translate }}</button>
-          </div>
-        </div>
+    <ng-container commandToolbar>
+      <app-list-search-field
+        [placeholder]="'Search...'"
+        [value]="search()"
+        (valueChange)="search.set($event)"
+        (search)="onSearch()"
+      />
+    </ng-container>
+  </app-list-command-bar>
+
+  <app-list-content-shell shellClass="user-list-shell">
+    @if (loading() || loadFailed()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>{{ 'Username' | translate }}</th>
+              <th>{{ 'Email' | translate }}</th>
+              @if (isSuperAdmin()) {
+                <th>{{ 'Fleet' | translate }}</th>
+              }
+              <th>{{ 'Active' | translate }}</th>
+              <th>{{ 'Roles' | translate }}</th>
+              <th>{{ 'Actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of users(); track user.id) {
+              <tr>
+                <td>{{ user.userName }}</td>
+                <td>{{ user.email }}</td>
+                @if (isSuperAdmin()) {
+                  <td><code>{{ fleetDisplay(user) }}</code></td>
+                }
+                <td>
+                  @if (user.isActive) {
+                    <span class="badge bg-success">{{ 'Yes' | translate }}</span>
+                  } @else {
+                    <span class="badge bg-secondary">{{ 'No' | translate }}</span>
+                  }
+                </td>
+                <td>{{ rolesDisplay(user) }}</td>
+                <td>
+                  <div class="table-actions">
+                    <a
+                      [routerLink]="['/users/edit', user.id]"
+                      class="table-action-icon table-action-icon--primary"
+                      [attr.aria-label]="'Edit' | translate"
+                      [title]="'Edit' | translate"
+                    >
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <a
+                      [routerLink]="['/users', user.id, 'privileges']"
+                      class="table-action-icon table-action-icon--info"
+                      [attr.aria-label]="'Privileges' | translate"
+                      [title]="'Privileges' | translate"
+                    >
+                      <i class="fa-solid fa-user-shield"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td [attr.colspan]="isSuperAdmin() ? 6 : 5" class="text-center">{{ 'No users found' | translate }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
 
-      @if (loading() || loadFailed()) {
-        <div class="text-center py-5">
-          <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
-        </div>
-      } @else {
-        <div class="table-responsive">
-          <table class="table table-striped align-middle">
-            <thead>
-              <tr>
-                <th>{{ 'Username' | translate }}</th>
-                <th>{{ 'Email' | translate }}</th>
-                @if (isSuperAdmin()) {
-                  <th>{{ 'Fleet' | translate }}</th>
-                }
-                <th>{{ 'Active' | translate }}</th>
-                <th>{{ 'Roles' | translate }}</th>
-                <th>{{ 'Actions' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (user of users(); track user.id) {
-                <tr>
-                  <td>{{ user.userName }}</td>
-                  <td>{{ user.email }}</td>
-                  @if (isSuperAdmin()) {
-                    <td><code>{{ fleetDisplay(user) }}</code></td>
-                  }
-                  <td>
-                    @if (user.isActive) {
-                      <span class="badge bg-success">{{ 'Yes' | translate }}</span>
-                    } @else {
-                      <span class="badge bg-secondary">{{ 'No' | translate }}</span>
-                    }
-                  </td>
-                  <td>{{ rolesDisplay(user) }}</td>
-                  <td>
-                    <div class="table-actions">
-                      <a
-                        [routerLink]="['/users/edit', user.id]"
-                        class="table-action-icon table-action-icon--primary"
-                        [attr.aria-label]="'Edit' | translate"
-                        [title]="'Edit' | translate"
-                      >
-                        <i class="fa-solid fa-pen-to-square"></i>
-                      </a>
-                      <a
-                        [routerLink]="['/users', user.id, 'privileges']"
-                        class="table-action-icon table-action-icon--info"
-                        [attr.aria-label]="'Privileges' | translate"
-                        [title]="'Privileges' | translate"
-                      >
-                        <i class="fa-solid fa-user-shield"></i>
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td [attr.colspan]="isSuperAdmin() ? 6 : 5" class="text-center">{{ 'No users found' | translate }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-
-        <app-pagination-bar
-          [pageNumber]="pageNumber()"
-          [totalPages]="totalPages()"
-          [totalCount]="totalCount()"
-          [pageSize]="pageSize()"
-          [pageSizeOptions]="[5, 10, 25, 50]"
-          (pageChange)="goToPage($event)"
-          (pageSizeChange)="changePageSize($event)"
-        />
-      }
-    </div>
-  </div>
+      <app-pagination-bar
+        [pageNumber]="pageNumber()"
+        [totalPages]="totalPages()"
+        [totalCount]="totalCount()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="changePageSize($event)"
+      />
+    }
+  </app-list-content-shell>
 </div>

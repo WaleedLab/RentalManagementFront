@@ -1,104 +1,93 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="'Customer Subscriptions' | translate"
-    [subtitle]="'Manage customer subscription offers and discount tiers used in rentals.' | translate"
+<div class="container-fluid customer-subscription-list-page">
+  <app-list-command-bar
+    [title]="'Customer Subscriptions'"
+    iconSrc="assets/images/rent_icon/subscription_customer.png"
+    toolbarClass="customer-subscription-command__toolbar"
   >
-    <div class="list-header-actions">
+    <ng-container commandActions>
       @if (canManage()) {
-        <a class="btn btn-primary" routerLink="/customer-subscriptions/create">
+        <a class="fin-btn fin-btn--primary" routerLink="/customer-subscriptions/create">
           {{ 'Create Subscription Offer' | translate }}
         </a>
       }
-    </div>
-  </app-page-header>
+    </ng-container>
 
-  <div class="card">
-    <div class="card-body">
-      <div class="app-filters-toolbar">
-        <div class="app-filter-field app-filter-field--search">
-          <label class="app-filter-label">{{ 'Search' | translate }}</label>
-          <div class="app-search-control">
-            <input
-              type="text"
-              class="form-control"
-              [placeholder]="'Search subscription offers...' | translate"
-              [ngModel]="search()"
-              (ngModelChange)="search.set($event)"
-              (keyup.enter)="onSearchSubmit()"
-            />
-            <button class="btn app-search-btn" type="button" (click)="onSearchSubmit()">
-              {{ 'Search' | translate }}
-            </button>
-          </div>
-        </div>
+    <ng-container commandToolbar>
+      <app-list-search-field
+        [placeholder]="'Search subscription offers...'"
+        [value]="search()"
+        (valueChange)="search.set($event)"
+        (search)="onSearchSubmit()"
+      />
+    </ng-container>
+  </app-list-command-bar>
+
+  <app-list-content-shell>
+    @if (loading() || loadFailed()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
       </div>
-
-      @if (loading() || loadFailed()) {
-        <div class="text-center py-5">
-          <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
-        </div>
-      } @else if (!subscriptions().length) {
-        <app-empty-state
-          [title]="'No subscription offers found' | translate"
-          [description]="'Create subscription offers for customer discounts and loyalty tiers.' | translate"
-        />
-      } @else {
-        <div class="table-responsive">
-          <table class="table table-striped align-middle">
-            <thead>
+    } @else if (!subscriptions().length) {
+      <app-empty-state
+        [title]="'No subscription offers found' | translate"
+        [description]="'Create subscription offers for customer discounts and loyalty tiers.' | translate"
+      />
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>{{ 'Name' | translate }}</th>
+              <th>{{ 'Description' | translate }}</th>
+              <th>{{ 'Discount (%)' | translate }}</th>
+              <th>{{ 'Approved After Bookings' | translate }}</th>
+              <th>{{ 'Status' | translate }}</th>
+              <th class="text-end">{{ 'Actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (subscription of subscriptions(); track subscription.id) {
               <tr>
-                <th>{{ 'Name' | translate }}</th>
-                <th>{{ 'Description' | translate }}</th>
-                <th>{{ 'Discount (%)' | translate }}</th>
-                <th>{{ 'Approved After Bookings' | translate }}</th>
-                <th>{{ 'Status' | translate }}</th>
-                <th class="text-end">{{ 'Actions' | translate }}</th>
+                <td>{{ getSubscriptionName(subscription) }}</td>
+                <td>{{ subscription.description || '-' }}</td>
+                <td>{{ subscription.discount }}</td>
+                <td>{{ subscription.subscriptionApprovedAfter }}</td>
+                <td>
+                  @if (subscription.isOld) {
+                    <span class="badge text-bg-secondary">{{ 'Old Plan' | translate }}</span>
+                  } @else {
+                    <span class="badge text-bg-success">{{ 'Active' | translate }}</span>
+                  }
+                </td>
+                <td class="text-end">
+                  <div class="table-actions">
+                    <a
+                      class="table-action-icon table-action-icon--primary"
+                      [routerLink]="['/customer-subscriptions/edit', subscription.id]"
+                      [attr.aria-label]="'Edit' | translate"
+                      [title]="'Edit' | translate"
+                    >
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              @for (subscription of subscriptions(); track subscription.id) {
-                <tr>
-                  <td>{{ getSubscriptionName(subscription) }}</td>
-                  <td>{{ subscription.description || '-' }}</td>
-                  <td>{{ subscription.discount }}</td>
-                  <td>{{ subscription.subscriptionApprovedAfter }}</td>
-                  <td>
-                    @if (subscription.isOld) {
-                      <span class="badge text-bg-secondary">{{ 'Old Plan' | translate }}</span>
-                    } @else {
-                      <span class="badge text-bg-success">{{ 'Active' | translate }}</span>
-                    }
-                  </td>
-                  <td class="text-end">
-                    <div class="table-actions">
-                      <a
-                        class="table-action-icon table-action-icon--primary"
-                        [routerLink]="['/customer-subscriptions/edit', subscription.id]"
-                        [attr.aria-label]="'Edit' | translate"
-                        [title]="'Edit' | translate"
-                      >
-                        <i class="fa-solid fa-pen-to-square"></i>
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
 
-      @if (!loading() && !loadFailed() && totalCount() > 0) {
-        <app-pagination-bar
-          [pageNumber]="currentPage()"
-          [totalPages]="totalPages()"
-          [totalCount]="totalCount()"
-          [pageSize]="pageSize()"
-          [pageSizeOptions]="[10, 20, 50]"
-          (pageChange)="goToPage($event)"
-          (pageSizeChange)="changePageSize($event)"
-        />
-      }
-    </div>
-  </div>
+    @if (!loading() && !loadFailed() && totalCount() > 0) {
+      <app-pagination-bar
+        [pageNumber]="currentPage()"
+        [totalPages]="totalPages()"
+        [totalCount]="totalCount()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[10, 20, 50]"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="changePageSize($event)"
+      />
+    }
+  </app-list-content-shell>
 </div>

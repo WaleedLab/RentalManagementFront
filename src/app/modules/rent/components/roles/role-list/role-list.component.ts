@@ -8,14 +8,27 @@ import { RoleLookup } from '../../../models';
 import { RoleService } from '../../../services/roles/role.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { ListCommandBarComponent } from '../../../../../shared/ui/list-command-bar/list-command-bar.component';
+import { ListContentShellComponent } from '../../../../../shared/ui/list-content-shell/list-content-shell.component';
+import { ListSearchFieldComponent } from '../../../../../shared/ui/list-search-field/list-search-field.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 
 @Component({
   selector: 'app-role-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, TranslateModule, EmptyStateComponent, PageHeaderComponent, PaginationBarComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    FormsModule,
+    TranslateModule,
+    EmptyStateComponent,
+    ListCommandBarComponent,
+    ListSearchFieldComponent,
+    ListContentShellComponent,
+    PaginationBarComponent,
+  ],
   templateUrl: './role-list.component.html',
+  styleUrl: './role-list.component.scss',
 })
 export class RoleListComponent implements OnInit {
   private roleService = inject(RoleService);

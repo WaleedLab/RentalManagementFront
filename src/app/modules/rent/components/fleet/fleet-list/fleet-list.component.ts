@@ -8,7 +8,9 @@ import { Fleet } from '../../../models';
 import { FleetService } from '../../../services/fleet/fleet.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { ListCommandBarComponent } from '../../../../../shared/ui/list-command-bar/list-command-bar.component';
+import { ListContentShellComponent } from '../../../../../shared/ui/list-content-shell/list-content-shell.component';
+import { ListSearchFieldComponent } from '../../../../../shared/ui/list-search-field/list-search-field.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
@@ -16,7 +18,18 @@ import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 @Component({
   selector: 'app-fleet-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, TranslateModule, PageHeaderComponent, EmptyStateComponent, PaginationBarComponent, StatusBadgeComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    FormsModule,
+    TranslateModule,
+    ListCommandBarComponent,
+    ListSearchFieldComponent,
+    ListContentShellComponent,
+    EmptyStateComponent,
+    PaginationBarComponent,
+    StatusBadgeComponent,
+  ],
   templateUrl: './fleet-list.component.html',
   styleUrl: './fleet-list.component.scss',
 })

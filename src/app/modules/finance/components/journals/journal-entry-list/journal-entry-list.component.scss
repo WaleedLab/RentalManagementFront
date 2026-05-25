@@ -2,86 +2,51 @@
   display: block;
 }
 
-/* Row 1: search(2) + sort + direction + date range(2) = 6 cols
-   Row 2: four filters in a full-width inner grid */
-:host ::ng-deep .finance-list-shell__card .app-filters-toolbar {
-  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
-  align-items: end !important;
+:host ::ng-deep .finance-command__toolbar {
+  grid-template-columns: minmax(200px, 272px) repeat(2, minmax(118px, 1fr)) minmax(200px, 1fr) !important;
+}
+
+:host ::ng-deep .finance-command__toolbar app-list-search-field {
+  max-width: 272px;
 }
 
 :host ::ng-deep .journal-filters-row2 {
   grid-column: 1 / -1;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.55rem;
+  gap: 10px;
   align-items: end;
   min-width: 0;
 }
 
-:host ::ng-deep .journal-filters-row2 > .journal-extra-filter {
-  grid-column: auto !important;
-  min-width: 0;
+:host ::ng-deep .fin-field--search {
+  grid-column: span 1;
 }
 
-:host ::ng-deep .finance-list-shell__card .app-filter-field--search {
-  grid-column: span 2 !important;
-}
-
-:host ::ng-deep .finance-list-shell__card .app-filter-field--narrow,
-:host ::ng-deep .journal-extra-filter {
-  grid-column: span 1 !important;
-}
-
-:host ::ng-deep .finance-list-shell__card .finance-filter-range {
-  grid-column: span 2 !important;
+:host ::ng-deep .fin-field--range {
+  grid-column: span 1;
   min-width: 0;
   overflow: visible;
 }
 
-:host ::ng-deep .journal-extra-filter .app-filter-label {
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
-
 @media (max-width: 1199.98px) {
-  :host ::ng-deep .finance-list-shell__card .app-filters-toolbar {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  :host ::ng-deep .finance-command__toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
-  :host ::ng-deep .finance-list-shell__card .app-filter-field--search {
-    grid-column: span 3 !important;
-  }
-
-  :host ::ng-deep .finance-list-shell__card .finance-filter-range {
-    grid-column: span 3 !important;
+  :host ::ng-deep .fin-field--search,
+  :host ::ng-deep .fin-field--range {
+    grid-column: 1 / -1 !important;
   }
 
   :host ::ng-deep .journal-filters-row2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  :host ::ng-deep .finance-list-shell__card .app-filter-field--narrow,
-  :host ::ng-deep .journal-extra-filter {
-    grid-column: span 1 !important;
-  }
 }
 
 @media (max-width: 767.98px) {
-  :host ::ng-deep .finance-list-shell__card .app-filters-toolbar {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  :host ::ng-deep .finance-list-shell__card .app-filter-field--search,
-  :host ::ng-deep .finance-list-shell__card .finance-filter-range {
-    grid-column: span 2 !important;
-  }
-
+  :host ::ng-deep .finance-command__toolbar,
   :host ::ng-deep .journal-filters-row2 {
-    grid-template-columns: 1fr;
-  }
-
-  :host ::ng-deep .finance-list-shell__card .app-filter-field--narrow,
-  :host ::ng-deep .journal-extra-filter {
-    grid-column: span 1 !important;
+    grid-template-columns: 1fr !important;
   }
 }

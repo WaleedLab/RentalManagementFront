@@ -1,0 +1,76 @@
+@use '../../styles/list-command-tokens';
+@use '../../../modules/rent/styles/rent-command-bar';
+
+:host {
+  display: block;
+  @include list-command-tokens.list-command-tokens;
+}
+
+:host-context(body.dark-only) {
+  @include list-command-tokens.list-command-tokens-dark;
+}
+
+:host-context(body.dark-only) ::ng-deep .fin-command,
+:host-context(body.dark-only) ::ng-deep .list-content-shell {
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.list-command {
+  margin-bottom: 16px;
+}
+
+.list-command__toolbar {
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+}
+
+:host ::ng-deep .list-command__toolbar > .fin-field,
+:host ::ng-deep .list-command__toolbar > app-list-search-field {
+  min-width: 0;
+}
+
+:host ::ng-deep .list-command .app-soft-select__trigger {
+  min-height: 38px;
+  border-radius: 10px;
+  border-color: var(--fin-border);
+  background: var(--fin-input-bg);
+  color: var(--fin-text);
+}
+
+:host ::ng-deep .list-command .app-soft-select__label {
+  color: var(--fin-text);
+  font-size: 0.84rem;
+}
+
+:host ::ng-deep .list-command .fin-field:has(app-smooth-select.app-smooth-select-host--open) {
+  position: relative;
+  z-index: 110;
+  overflow: visible;
+}
+
+.list-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.fin-field--search {
+  grid-column: span 1;
+}
+
+@media (max-width: 1199.98px) {
+  .list-command__toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fin-field--search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .list-command__toolbar {
+    grid-template-columns: 1fr;
+  }
+}

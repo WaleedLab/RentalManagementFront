@@ -1,0 +1,25 @@
+<label class="fin-field fin-field--search">
+  <span>{{ label() | translate }}</span>
+  <div class="fin-search-group">
+    <span class="fin-search-group__lead" aria-hidden="true">
+      <i class="fa-solid fa-magnifying-glass"></i>
+    </span>
+    <input
+      type="search"
+      class="fin-input"
+      [placeholder]="placeholder() | translate"
+      [ngModel]="value()"
+      (ngModelChange)="onInput($event)"
+      (keyup.enter)="onSubmit()"
+    />
+    <button
+      class="fin-btn fin-btn--primary fin-btn--compact fin-search-group__btn"
+      type="button"
+      [attr.aria-label]="label() | translate"
+      (click)="onSubmit()"
+    >
+      <i class="fa-solid fa-magnifying-glass fin-search-group__btn-icon" aria-hidden="true"></i>
+      <span class="fin-search-group__label">{{ label() | translate }}</span>
+    </button>
+  </div>
+</label>

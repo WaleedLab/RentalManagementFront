@@ -1,5 +1,6 @@
 <app-finance-list-shell
   [title]="'Journals'"
+  [iconSrc]="financeIcons.journals"
   [subtitle]="'Journals list subtitle'"
   [columns]="columns"
   [rows]="rows()"
@@ -32,8 +33,8 @@
   (rowAction)="onRowAction($event)"
 >
   <div finance-extra-filters class="journal-filters-row2">
-  <div class="app-filter-field app-filter-field--narrow journal-extra-filter">
-    <label class="app-filter-label">{{ 'Status' | translate }}</label>
+  <label class="fin-field journal-extra-filter">
+    <span>{{ 'Status' | translate }}</span>
     <app-smooth-select
       [ariaLabel]="'Status' | translate"
       [placeholder]="'All statuses' | translate"
@@ -41,10 +42,10 @@
       [value]="statusFilter()"
       (valueChange)="onStatusFilterChange($any($event))"
     />
-  </div>
+  </label>
 
-  <div class="app-filter-field app-filter-field--narrow journal-extra-filter">
-    <label class="app-filter-label">{{ 'Journal Type' | translate }}</label>
+  <label class="fin-field journal-extra-filter">
+    <span>{{ 'Journal Type' | translate }}</span>
     <app-smooth-select
       [ariaLabel]="'Journal Type' | translate"
       [placeholder]="'All journal types' | translate"
@@ -52,10 +53,10 @@
       [value]="journalTypeFilter()"
       (valueChange)="onJournalTypeFilterChange($any($event))"
     />
-  </div>
+  </label>
 
-  <div class="app-filter-field app-filter-field--narrow journal-extra-filter">
-    <label class="app-filter-label">{{ 'Operation Type' | translate }}</label>
+  <label class="fin-field journal-extra-filter">
+    <span>{{ 'Operation Type' | translate }}</span>
     <app-smooth-select
       [ariaLabel]="'Operation Type' | translate"
       [placeholder]="'All operation types' | translate"
@@ -63,10 +64,10 @@
       [value]="operationTypeFilter()"
       (valueChange)="onOperationTypeFilterChange($any($event))"
     />
-  </div>
+  </label>
 
-  <div class="app-filter-field app-filter-field--narrow journal-extra-filter">
-    <label class="app-filter-label">{{ 'Branch' | translate }}</label>
+  <label class="fin-field journal-extra-filter">
+    <span>{{ 'Branch' | translate }}</span>
     <app-smooth-select
       [ariaLabel]="'Branch' | translate"
       [placeholder]="'All branches' | translate"
@@ -74,6 +75,6 @@
       [value]="branchFilter()"
       (valueChange)="onBranchFilterChange($any($event))"
     />
-  </div>
+  </label>
   </div>
 </app-finance-list-shell>

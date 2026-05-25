@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { ListCommandBarComponent } from '../../../../../shared/ui/list-command-bar/list-command-bar.component';
+import { ListContentShellComponent } from '../../../../../shared/ui/list-content-shell/list-content-shell.component';
+import { ListSearchFieldComponent } from '../../../../../shared/ui/list-search-field/list-search-field.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 import { UserService } from '../../../services/users/user.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
@@ -14,7 +16,15 @@ import { User } from '../../../models';
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [RouterLink, FormsModule, TranslateModule, PageHeaderComponent, PaginationBarComponent],
+  imports: [
+    RouterLink,
+    FormsModule,
+    TranslateModule,
+    ListCommandBarComponent,
+    ListSearchFieldComponent,
+    ListContentShellComponent,
+    PaginationBarComponent,
+  ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss',
 })

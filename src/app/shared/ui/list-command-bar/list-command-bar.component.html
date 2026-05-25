@@ -1,0 +1,27 @@
+<section class="fin-command list-command" [class]="commandClass()">
+  <div class="fin-command__row">
+    <ng-content select="[commandLeading]" />
+    <div class="fin-command__brand">
+      <div class="fin-command__title-row">
+        @if (iconSrc()) {
+          <img class="fin-command__icon" [src]="iconSrc()" alt="" />
+        }
+        <h2 class="fin-command__title">{{ title() | translate }}</h2>
+      </div>
+      @if (subtitle()) {
+        <p class="fin-command__subtitle">{{ subtitle() }}</p>
+      }
+    </div>
+    <div class="fin-command__actions">
+      <ng-content select="[commandActions]" />
+    </div>
+  </div>
+
+  <div class="fin-command__toolbar list-command__toolbar" [class]="toolbarClass()">
+    <ng-content select="[commandToolbar]" />
+  </div>
+
+  <div class="fin-command__presets">
+    <ng-content select="[commandPresets]" />
+  </div>
+</section>

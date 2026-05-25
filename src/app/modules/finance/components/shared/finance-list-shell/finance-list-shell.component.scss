@@ -1,84 +1,44 @@
-.finance-list-shell__card {
-  border-radius: 18px;
+.finance-list-page {
+  padding-bottom: 1rem;
 }
 
-.finance-list-shell__meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+.finance-command__toolbar {
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
 }
 
-.finance-list-shell__header-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+:host ::ng-deep .finance-command__toolbar app-list-search-field {
+  max-width: 272px;
 }
 
-.finance-list-shell__card .table thead th {
-  white-space: nowrap;
-}
-
-.finance-list-shell__card .table td,
-.finance-list-shell__card .table th {
-  padding-block: 0.95rem;
-}
-
-.finance-search-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 120px;
-  justify-content: center;
-}
-
-.finance-list-shell__card .app-filters-toolbar {
-  align-items: end;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.finance-list-shell__card .app-filter-field--search {
-  grid-column: span 1;
-}
-
-.finance-list-shell__card .app-filter-field--narrow {
-  grid-column: span 1;
-}
-
-.finance-list-shell__card .finance-filter-range {
+:host ::ng-deep .finance-list-shell__card .fin-field--range {
   grid-column: span 2;
   min-width: 0;
-  overflow: visible;
 }
 
-.finance-list-shell__card .finance-filter-range .app-date-range-filter {
+:host ::ng-deep .finance-list-shell__card .fin-field--range .app-date-range-filter {
   width: 100%;
 }
 
+.finance-list-table thead th {
+  white-space: nowrap;
+}
+
+.finance-list-table td,
+.finance-list-table th {
+  padding-block: 0.95rem;
+}
+
 @media (max-width: 767.98px) {
-  .finance-list-shell__card .app-filters-toolbar {
+  .finance-command__toolbar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .finance-list-shell__card .table td,
-  .finance-list-shell__card .table th {
+  :host ::ng-deep .finance-list-shell__card .fin-field--range {
+    grid-column: 1 / -1;
+  }
+
+  .finance-list-table td,
+  .finance-list-table th {
     padding-block: 0.75rem;
-  }
-
-  .finance-list-shell__header-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .finance-search-btn {
-    width: 100%;
-  }
-
-  .finance-list-shell__card .app-filter-field--narrow {
-    grid-column: span 1;
-  }
-
-  .finance-list-shell__card .finance-filter-range {
-    grid-column: span 2;
   }
 }

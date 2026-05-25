@@ -2,30 +2,27 @@
   display: block;
 }
 
-:host ::ng-deep .finance-list-shell__card .app-filters-toolbar {
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  align-items: end !important;
+:host ::ng-deep .finance-command__toolbar {
+  grid-template-columns: minmax(200px, 272px) repeat(2, minmax(118px, 1fr)) repeat(3, minmax(108px, 1fr)) !important;
 }
 
-:host ::ng-deep .finance-list-shell__card .app-filter-field,
-:host ::ng-deep .finance-list-shell__card .app-filter-field--search,
-:host ::ng-deep .finance-list-shell__card .app-filter-field--narrow {
-  grid-column: span 1 !important;
+:host ::ng-deep .finance-command__toolbar app-list-search-field {
+  max-width: 272px;
 }
 
-:host ::ng-deep .finance-list-shell__card .finance-filter-range {
-  grid-column: span 2 !important;
+@media (max-width: 1199.98px) {
+  :host ::ng-deep .finance-command__toolbar {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  :host ::ng-deep .finance-command__toolbar app-list-search-field {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
 }
 
 @media (max-width: 767.98px) {
-  :host ::ng-deep .finance-list-shell__card .app-filters-toolbar {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  :host ::ng-deep .finance-list-shell__card .app-filter-field,
-  :host ::ng-deep .finance-list-shell__card .app-filter-field--search,
-  :host ::ng-deep .finance-list-shell__card .app-filter-field--narrow,
-  :host ::ng-deep .finance-list-shell__card .finance-filter-range {
-    grid-column: span 1 !important;
+  :host ::ng-deep .finance-command__toolbar {
+    grid-template-columns: 1fr !important;
   }
 }

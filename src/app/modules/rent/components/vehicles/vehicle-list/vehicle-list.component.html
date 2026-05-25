@@ -1,212 +1,203 @@
-<div class="container-fluid">
-  <app-page-header [title]="'Vehicles' | translate" [subtitle]="'Operational fleet vehicles with status, pricing, assignment, and media support.' | translate">
-    <div class="list-header-actions">
-      <a class="btn btn-primary" routerLink="/vehicles/create">{{ 'Create Vehicle' | translate }}</a>
-    </div>
-  </app-page-header>
+<div class="container-fluid vehicle-list-page">
+  <app-list-command-bar
+    [title]="'Vehicles'"
+    iconSrc="assets/images/rent_icon/Vehicles.png"
+    toolbarClass="vehicle-command__toolbar"
+  >
+    <a commandActions class="fin-btn fin-btn--primary" routerLink="/vehicles/create">{{ 'Create Vehicle' | translate }}</a>
 
-  <div class="card">
-    <div class="card-body">
-      <div class="app-filters-toolbar app-filters-toolbar--vehicles">
-        <div class="app-filter-field app-filter-field--search">
-          <label class="app-filter-label">{{ 'Search' | translate }}</label>
-          <div class="app-search-control">
-            <input
-              class="form-control"
-              [placeholder]="'Search by plate number, year, or serial number' | translate"
-              [ngModel]="search()"
-              (ngModelChange)="search.set($event)"
-            />
-            <button class="btn app-search-btn" type="button" (click)="onSearchSubmit()">
-              {{ 'Search' | translate }}
-            </button>
-          </div>
-        </div>
+    <ng-container commandToolbar>
+      <app-list-search-field
+        [placeholder]="'Search by plate number, year, or serial number'"
+        [value]="search()"
+        (valueChange)="search.set($event)"
+        (search)="onSearchSubmit()"
+      />
 
-        <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Status' | translate }}</label>
-          <app-smooth-select
-            [ariaLabel]="'Status' | translate"
-            [placeholder]="'All statuses' | translate"
-            [options]="statusFilterOptions()"
-            [value]="status()"
-            (valueChange)="onStatusFilterChange($any($event))"
-          />
-        </div>
+      <label class="fin-field">
+        <span>{{ 'Status' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Status' | translate"
+          [placeholder]="'All statuses' | translate"
+          [options]="statusFilterOptions()"
+          [value]="status()"
+          (valueChange)="onStatusFilterChange($any($event))"
+        />
+      </label>
 
-        <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Branch' | translate }}</label>
-          <app-smooth-select
-            [ariaLabel]="'Branch' | translate"
-            [placeholder]="'All branches' | translate"
-            [options]="branchFilterOptions()"
-            [value]="branchId()"
-            (valueChange)="onBranchFilterChange($any($event))"
-          />
-        </div>
+      <label class="fin-field">
+        <span>{{ 'Branch' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Branch' | translate"
+          [placeholder]="'All branches' | translate"
+          [options]="branchFilterOptions()"
+          [value]="branchId()"
+          (valueChange)="onBranchFilterChange($any($event))"
+        />
+      </label>
 
-        <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Vehicle Category' | translate }}</label>
-          <app-smooth-select
-            [ariaLabel]="'Vehicle Category' | translate"
-            [placeholder]="'All categories' | translate"
-            [options]="categoryFilterOptions()"
-            [value]="categoryId()"
-            (valueChange)="onCategoryFilterChange($any($event))"
-          />
-        </div>
+      <label class="fin-field">
+        <span>{{ 'Vehicle Category' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Vehicle Category' | translate"
+          [placeholder]="'All categories' | translate"
+          [options]="categoryFilterOptions()"
+          [value]="categoryId()"
+          (valueChange)="onCategoryFilterChange($any($event))"
+        />
+      </label>
 
-        <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Sort by' | translate }}</label>
-          <app-smooth-select
-            [ariaLabel]="'Sort by' | translate"
-            [options]="orderByFilterOptions()"
-            [value]="orderBy()"
-            (valueChange)="onOrderByChange($any($event))"
-          />
-        </div>
+      <label class="fin-field">
+        <span>{{ 'Sort by' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Sort by' | translate"
+          [options]="orderByFilterOptions()"
+          [value]="orderBy()"
+          (valueChange)="onOrderByChange($any($event))"
+        />
+      </label>
 
-        <div class="app-filter-field app-filter-field--narrow">
-          <label class="app-filter-label">{{ 'Order direction' | translate }}</label>
-          <app-smooth-select
-            [ariaLabel]="'Order direction' | translate"
-            [options]="orderDirectionFilterOptions()"
-            [value]="orderByDirection()"
-            (valueChange)="onOrderDirectionChange($any($event))"
-          />
-        </div>
-      </div>
+      <label class="fin-field">
+        <span>{{ 'Order direction' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Order direction' | translate"
+          [options]="orderDirectionFilterOptions()"
+          [value]="orderByDirection()"
+          (valueChange)="onOrderDirectionChange($any($event))"
+        />
+      </label>
+    </ng-container>
+  </app-list-command-bar>
 
-      @if (loading() || loadFailed()) {
-        <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
-      } @else if (!vehicles().length) {
-        <app-empty-state [title]="'No vehicles found' | translate" [description]="'Add vehicles to start managing bookings and fleet availability.' | translate" />
-      } @else {
-        <div class="vehicle-cards-grid">
-          @for (vehicle of vehicles(); track vehicle.id; let cardIndex = $index) {
-            <article class="vehicle-card" [ngClass]="getVehicleCardStatusClass(vehicle.status)">
-              <div class="vehicle-card__media">
-                <div class="vehicle-card__media-overlay"></div>
-                <img
-                  [src]="getVehicleImage(vehicle)"
-                  [alt]="vehicle.plateNumber || ('Vehicle' | translate)"
-                  [attr.loading]="cardIndex < 6 ? 'eager' : 'lazy'"
-                  [attr.fetchpriority]="cardIndex < 3 ? 'high' : 'auto'"
-                  decoding="async"
-                  (error)="onVehicleImageError($event)"
-                />
-                <div class="vehicle-card__status">
-                  <app-status-badge [label]="getStatusLabel(vehicle.status)" [tone]="getStatusTone(vehicle.status)" />
+  <app-list-content-shell>
+    @if (loading() || loadFailed()) {
+      <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
+    } @else if (!vehicles().length) {
+      <app-empty-state [title]="'No vehicles found' | translate" [description]="'Add vehicles to start managing bookings and fleet availability.' | translate" />
+    } @else {
+      <div class="vehicle-cards-grid">
+        @for (vehicle of vehicles(); track vehicle.id; let cardIndex = $index) {
+          <article class="vehicle-card" [ngClass]="getVehicleCardStatusClass(vehicle.status)">
+            <div class="vehicle-card__media">
+              <div class="vehicle-card__media-overlay"></div>
+              <img
+                [src]="getVehicleImage(vehicle)"
+                [alt]="vehicle.plateNumber || ('Vehicle' | translate)"
+                [attr.loading]="cardIndex < 6 ? 'eager' : 'lazy'"
+                [attr.fetchpriority]="cardIndex < 3 ? 'high' : 'auto'"
+                decoding="async"
+                (error)="onVehicleImageError($event)"
+              />
+              <div class="vehicle-card__status">
+                <app-status-badge [label]="getStatusLabel(vehicle.status)" [tone]="getStatusTone(vehicle.status)" />
+              </div>
+              <div class="vehicle-card__quick-meta">
+                <span class="vehicle-chip">{{ vehicle.year || vehicle.yearMake || '-' }}</span>
+                <span class="vehicle-chip vehicle-chip--ghost">{{ vehicle.engine || '-' }}</span>
+              </div>
+            </div>
+
+            <div class="vehicle-card__body">
+              <div class="vehicle-card__head">
+                <h6 class="vehicle-card__title">{{ getVehicleTitle(vehicle) }}</h6>
+                <span class="vehicle-card__plate">{{ vehicle.plateNumber || '-' }}</span>
+              </div>
+
+              <div class="vehicle-card__meta">
+                <div class="vehicle-meta">
+                  <span class="vehicle-meta__label">{{ 'Vehicle Category' | translate }}</span>
+                  <span class="vehicle-meta__value">{{ getCategoryName(vehicle) }}</span>
                 </div>
-                <div class="vehicle-card__quick-meta">
-                  <span class="vehicle-chip">{{ vehicle.year || vehicle.yearMake || '-' }}</span>
-                  <span class="vehicle-chip vehicle-chip--ghost">{{ vehicle.engine || '-' }}</span>
+                <div class="vehicle-meta">
+                  <span class="vehicle-meta__label">{{ 'Branch' | translate }}</span>
+                  <span class="vehicle-meta__value">{{ getBranchName(vehicle) }}</span>
+                </div>
+                <div class="vehicle-meta">
+                  <span class="vehicle-meta__label">{{ 'Daily Rate' | translate }}</span>
+                  <span class="vehicle-meta__value">{{ getDailyRateText(vehicle) }}</span>
                 </div>
               </div>
 
-              <div class="vehicle-card__body">
-                <div class="vehicle-card__head">
-                  <h6 class="vehicle-card__title">{{ getVehicleTitle(vehicle) }}</h6>
-                  <span class="vehicle-card__plate">{{ vehicle.plateNumber || '-' }}</span>
-                </div>
-
-                <div class="vehicle-card__meta">
-                  <div class="vehicle-meta">
-                    <span class="vehicle-meta__label">{{ 'Vehicle Category' | translate }}</span>
-                    <span class="vehicle-meta__value">{{ getCategoryName(vehicle) }}</span>
-                  </div>
-                  <div class="vehicle-meta">
-                    <span class="vehicle-meta__label">{{ 'Branch' | translate }}</span>
-                    <span class="vehicle-meta__value">{{ getBranchName(vehicle) }}</span>
-                  </div>
-                  <div class="vehicle-meta">
-                    <span class="vehicle-meta__label">{{ 'Daily Rate' | translate }}</span>
-                    <span class="vehicle-meta__value">{{ getDailyRateText(vehicle) }}</span>
-                  </div>
-                </div>
-
-                <div class="table-actions vehicle-card__actions">
-                  <button
-                    class="table-action-icon table-action-icon--warning vehicle-card__action"
-                    type="button"
-                    [disabled]="isChangingStatus(vehicle.id)"
-                    (click)="openChangeStatusDialog(vehicle)"
-                    [attr.aria-label]="'Change status for {{vehicle}}' | translate:{ vehicle: getVehicleTitle(vehicle) }"
-                    [title]="'Change status for {{vehicle}}' | translate:{ vehicle: getVehicleTitle(vehicle) }"
-                  >
-                    @if (isChangingStatus(vehicle.id)) {
-                      <span class="spinner-border spinner-border-sm" role="status"></span>
-                    } @else {
-                      <i class="fa-solid fa-rotate"></i>
-                    }
-                  </button>
-                  <button
-                    class="table-action-icon table-action-icon--danger vehicle-card__action"
-                    type="button"
-                    [disabled]="isDeleting(vehicle.id)"
-                    (click)="deleteVehicle(vehicle)"
-                    [attr.aria-label]="'Delete' | translate"
-                    [title]="'Delete' | translate"
-                  >
-                    @if (isDeleting(vehicle.id)) {
-                      <span class="spinner-border spinner-border-sm" role="status"></span>
-                    } @else {
-                      <i class="fa-solid fa-trash-can"></i>
-                    }
-                  </button>
-                  <a
-                    class="table-action-icon table-action-icon--info vehicle-card__action"
-                    [routerLink]="['/vehicles', vehicle.id, 'details']"
-                    [attr.aria-label]="'Details' | translate"
-                    [title]="'Details' | translate"
-                  >
-                    <i class="fa-solid fa-eye"></i>
-                  </a>
-                  <a
-                    class="table-action-icon table-action-icon--secondary vehicle-card__action"
-                    [routerLink]="['/vehicles', vehicle.id, 'track']"
-                    [attr.aria-label]="'Vehicle card track' | translate"
-                    [title]="'Vehicle card track' | translate"
-                  >
-                    <i class="fa-solid fa-location-dot"></i>
-                  </a>
-                  <a
-                    class="table-action-icon table-action-icon--primary vehicle-card__action"
-                    [routerLink]="['/vehicles', vehicle.id, 'edit']"
-                    [attr.aria-label]="'Edit' | translate"
-                    [title]="'Edit' | translate"
-                  >
-                    <i class="fa-solid fa-pen-to-square"></i>
-                  </a>
-                </div>
+              <div class="table-actions vehicle-card__actions">
+                <button
+                  class="table-action-icon table-action-icon--warning vehicle-card__action"
+                  type="button"
+                  [disabled]="isChangingStatus(vehicle.id)"
+                  (click)="openChangeStatusDialog(vehicle)"
+                  [attr.aria-label]="'Change status for {{vehicle}}' | translate:{ vehicle: getVehicleTitle(vehicle) }"
+                  [title]="'Change status for {{vehicle}}' | translate:{ vehicle: getVehicleTitle(vehicle) }"
+                >
+                  @if (isChangingStatus(vehicle.id)) {
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                  } @else {
+                    <i class="fa-solid fa-rotate"></i>
+                  }
+                </button>
+                <button
+                  class="table-action-icon table-action-icon--danger vehicle-card__action"
+                  type="button"
+                  [disabled]="isDeleting(vehicle.id)"
+                  (click)="deleteVehicle(vehicle)"
+                  [attr.aria-label]="'Delete' | translate"
+                  [title]="'Delete' | translate"
+                >
+                  @if (isDeleting(vehicle.id)) {
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                  } @else {
+                    <i class="fa-solid fa-trash-can"></i>
+                  }
+                </button>
+                <a
+                  class="table-action-icon table-action-icon--info vehicle-card__action"
+                  [routerLink]="['/vehicles', vehicle.id, 'details']"
+                  [attr.aria-label]="'Details' | translate"
+                  [title]="'Details' | translate"
+                >
+                  <i class="fa-solid fa-eye"></i>
+                </a>
+                <a
+                  class="table-action-icon table-action-icon--secondary vehicle-card__action"
+                  [routerLink]="['/vehicles', vehicle.id, 'track']"
+                  [attr.aria-label]="'Vehicle card track' | translate"
+                  [title]="'Vehicle card track' | translate"
+                >
+                  <i class="fa-solid fa-location-dot"></i>
+                </a>
+                <a
+                  class="table-action-icon table-action-icon--primary vehicle-card__action"
+                  [routerLink]="['/vehicles', vehicle.id, 'edit']"
+                  [attr.aria-label]="'Edit' | translate"
+                  [title]="'Edit' | translate"
+                >
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </a>
               </div>
-            </article>
-          }
-        </div>
-      }
-
-      <div class="vehicle-legend" role="list" aria-label="Vehicle status counts">
-        @for (item of vehicleLegendItems(); track item.key) {
-          <div class="vehicle-legend-item" role="listitem">
-            <span class="vehicle-legend-code">{{ item.count }}</span>
-            <i [class]="item.iconClass" [style.color]="item.iconColor"></i>
-            <span class="vehicle-legend-label">{{ item.label }}</span>
-          </div>
+            </div>
+          </article>
         }
       </div>
+    }
 
-      @if (!loading() && !loadFailed() && totalCount() > 0) {
-        <app-pagination-bar
-          [pageNumber]="pageNumber()"
-          [totalPages]="totalPages()"
-          [totalCount]="totalCount()"
-          [pageSize]="pageSize()"
-          [pageSizeOptions]="[10, 20, 50, 100]"
-          (pageChange)="goToPage($event)"
-          (pageSizeChange)="changePageSize($event)"
-        />
+    <div class="vehicle-legend" role="list" aria-label="Vehicle status counts">
+      @for (item of vehicleLegendItems(); track item.key) {
+        <div class="vehicle-legend-item" role="listitem">
+          <span class="vehicle-legend-code">{{ item.count }}</span>
+          <i [class]="item.iconClass" [style.color]="item.iconColor"></i>
+          <span class="vehicle-legend-label">{{ item.label }}</span>
+        </div>
       }
     </div>
-  </div>
-</div>
 
+    @if (!loading() && !loadFailed() && totalCount() > 0) {
+      <app-pagination-bar
+        [pageNumber]="pageNumber()"
+        [totalPages]="totalPages()"
+        [totalCount]="totalCount()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[10, 20, 50, 100]"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="changePageSize($event)"
+      />
+    }
+  </app-list-content-shell>
+</div>

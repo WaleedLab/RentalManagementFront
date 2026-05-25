@@ -1,44 +1,32 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="'Fleets' | translate"
-    [subtitle]="'Master fleet records used across branches, vehicles, and bookings.' | translate"
+<div class="container-fluid fleet-list-page">
+  <app-list-command-bar
+    [title]="'Fleets'"
+    iconSrc="assets/images/rent_icon/Fleet.png"
+    toolbarClass="fleet-command__toolbar"
   >
-    <div class="list-header-actions">
-      <a class="btn btn-primary" routerLink="/fleet/create">{{ 'Create Fleet' | translate }}</a>
-    </div>
-  </app-page-header>
+    <a commandActions class="fin-btn fin-btn--primary" routerLink="/fleet/create">{{ 'Create Fleet' | translate }}</a>
 
-  <div class="app-filters-toolbar">
-    <div class="app-filter-field app-filter-field--search">
-      <label class="app-filter-label">{{ 'Search' | translate }}</label>
-      <div class="app-search-control">
-        <input
-          type="text"
-          class="form-control"
-          [placeholder]="'Search fleets...' | translate"
-          [ngModel]="search()"
-          (ngModelChange)="search.set($event)"
-          (keyup.enter)="onSearch()"
-        />
-        <button class="btn app-search-btn" type="button" (click)="onSearch()">
-          {{ 'Search' | translate }}
-        </button>
+    <ng-container commandToolbar>
+      <app-list-search-field
+        [placeholder]="'Search fleets...'"
+        [value]="search()"
+        (valueChange)="search.set($event)"
+        (search)="onSearch()"
+      />
+    </ng-container>
+  </app-list-command-bar>
+
+  <app-list-content-shell>
+    @if (loading() || loadFailed()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
       </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-12">
-      @if (loading() || loadFailed()) {
-        <div class="text-center py-5">
-          <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
-        </div>
-      } @else if (!fleets().length) {
-        <app-empty-state
-          [title]="'No fleets found' | translate"
-          [description]="'Create a fleet to start organizing branches and vehicles.' | translate"
-        />
-      } @else {
+    } @else if (!fleets().length) {
+      <app-empty-state
+        [title]="'No fleets found' | translate"
+        [description]="'Create a fleet to start organizing branches and vehicles.' | translate"
+      />
+    } @else {
       <div class="table-responsive">
         <table class="table table-striped">
           <thead>
@@ -103,8 +91,6 @@
         (pageChange)="goToPage($event)"
         (pageSizeChange)="changePageSize($event)"
       />
-      }
-    </div>
-  </div>
+    }
+  </app-list-content-shell>
 </div>
-

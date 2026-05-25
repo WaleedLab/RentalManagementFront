@@ -6,11 +6,12 @@ import { TranslateModule } from '@ngx-translate/core';
 import { filter } from 'rxjs/operators';
 
 import { AppShellLoadingService } from '../../services/app-shell-loading.service';
+import { AppVersionBadgeComponent } from '../../ui/app-version-badge/app-version-badge.component';
 
 @Component({
   selector: 'app-loader',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, AppVersionBadgeComponent],
   templateUrl: './loader.html',
   styleUrls: ['./loader.scss'],
 })
