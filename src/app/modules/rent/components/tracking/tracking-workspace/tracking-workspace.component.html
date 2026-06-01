@@ -82,14 +82,38 @@
           [class.tw-map-frame--hidden]="mapLoading()"
           [title]="'Live map' | translate"
           loading="lazy"
+          allow="fullscreen"
           referrerpolicy="no-referrer-when-downgrade"
           (load)="onIframeLoad()"
         ></iframe>
       } @else if (!loading()) {
         <div class="tw-map-empty">
           <i class="fa-solid fa-satellite-dish"></i>
-          <h4>{{ 'Tracking map unavailable' | translate }}</h4>
-          <p>{{ 'Tracking map unavailable hint' | translate }}</p>
+          @if (session(); as activeSession) {
+            <h4>
+              @if (activeSession.statusMessage) {
+                {{ activeSession.statusMessage | translate }}
+              } @else {
+                {{ 'Tracking map unavailable' | translate }}
+              }
+            </h4>
+            <p>
+              @if (activeSession.statusMessage) {
+                {{ 'Tracking no data hint' | translate }}
+                @if (activeSession.vehicleInfo.serialNumber) {
+                  <br />
+                  <span class="tw-map-empty__meta">
+                    {{ 'Serial Number' | translate }}: {{ activeSession.vehicleInfo.serialNumber }}
+                  </span>
+                }
+              } @else {
+                {{ 'Tracking map unavailable hint' | translate }}
+              }
+            </p>
+          } @else {
+            <h4>{{ 'Tracking map unavailable' | translate }}</h4>
+            <p>{{ 'Tracking map unavailable hint' | translate }}</p>
+          }
         </div>
       }
     </div>

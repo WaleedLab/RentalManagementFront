@@ -23,6 +23,7 @@ export class BookingTrackingService {
       plateNumber: params.plate?.trim() || '—',
       vehicleLabel: params.vehicleLabel?.trim() || '—',
       branchName: params.branchName,
+      serialNumber: params.vehicleSerialNumber?.trim() || undefined,
       extraLines: [
         { labelKey: 'Customer', value: params.customerName?.trim() || '—' },
         { labelKey: 'Contract Number', value: params.contractNumber?.trim() || '—' },

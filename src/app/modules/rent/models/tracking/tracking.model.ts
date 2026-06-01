@@ -63,6 +63,7 @@ export interface TrackingVehicleInfo {
   plateNumber: string;
   vehicleLabel: string;
   branchName?: string;
+  serialNumber?: string;
   statusLabelKey?: string;
   extraLines?: Array<{ labelKey: string; value: string }>;
 }
@@ -76,7 +77,7 @@ export interface TrackingWorkspaceContext {
   backLink: string[];
   detailsLink?: string[];
   vehicleInfo: TrackingVehicleInfo;
-  /** Booking mode: vehicle id sent to `Tracking/GetApi` as `IdVehicle`. */
+  /** Booking mode: vehicle DB id for `Vehicle/GetById`. */
   trackingVehicleId?: string;
   /** Pre-filled date range (checkout → expected return). */
   initialFilters?: TrackingFilterForm;
@@ -88,6 +89,8 @@ export interface TrackingWorkspaceSession {
   iframeSrcdoc?: string | null;
   liveStatus: TrackingAvailability;
   lastUpdated?: string;
+  /** Shown in the empty map state (e.g. no GPS data for range). */
+  statusMessage?: string;
   stats: TrackingStatItem[];
   timeline: TrackingTimelineEvent[];
   vehicleInfo: TrackingVehicleInfo;
@@ -97,7 +100,10 @@ export interface TrackingWorkspaceSession {
 
 export interface TrackingWorkspaceRequest {
   fleetId: string;
+  /** Vehicle DB id (`Vehicle/GetById`). */
   vehicleId: string;
+  /** GPS serial for display only; `IdVehicle` uses `vehicleId` (DB id). */
+  trackingSerialNumber?: string;
   bookingId?: string;
   filters: TrackingFilterForm;
   /** When set, skips `Vehicle/GetById` and uses this snapshot for UI only. */

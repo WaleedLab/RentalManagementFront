@@ -203,6 +203,19 @@ body.dark-only {
   background: transparent !important;
 }
 
+/* Tracking: keep app footer visible (do not stretch content to full viewport). */
+.page-body:has(app-vehicle-tracking),
+.page-body:has(app-booking-tracking) {
+  z-index: auto !important;
+  min-height: 0;
+  padding-bottom: 0.5rem;
+
+  > app-vehicle-tracking,
+  > app-booking-tracking {
+    display: block;
+  }
+}
+
 /* Keep floating menus/selects above footer in compact layout (desktop / tablet only). */
 @media (min-width: 992px) {
   .page-wrapper.compact-wrapper .page-body-wrapper .page-body {

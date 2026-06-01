@@ -570,27 +570,16 @@ export class VehicleListComponent implements OnInit {
   private loadReferenceData(): void {
     const fleetId = this.authState.fleetId() || undefined;
 
-    this.branchService
-      .getPaginated({
-        fleetId,
-        pageNumber: 1,
-        pageSize: 1000,
-      })
-      .subscribe({
-        next: response => this.branches.set(response.items ?? []),
-        error: () => this.branches.set([]),
-      });
+    // Use List (not Paginated) for filter dropdowns — Paginated may 500 with large PageSize.
+    this.branchService.getList(fleetId).subscribe({
+      next: branches => this.branches.set(branches),
+      error: () => this.branches.set([]),
+    });
 
-    this.categoryVehicleService
-      .getPaginated({
-        fleetId,
-        pageNumber: 1,
-        pageSize: 1000,
-      })
-      .subscribe({
-        next: response => this.categories.set(response.items ?? []),
-        error: () => this.categories.set([]),
-      });
+    this.categoryVehicleService.getList(fleetId).subscribe({
+      next: categories => this.categories.set(categories),
+      error: () => this.categories.set([]),
+    });
   }
 
   private isArabicUi(): boolean {

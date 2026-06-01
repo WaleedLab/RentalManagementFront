@@ -14,6 +14,7 @@ export * from './roles/role.model';
 export * from './subscriptions/customer-subscription.model';
 export * from './settings/setting.model';
 export * from './traffic-violations/traffic-violation.model';
+export * from './maintenance/maintenance.model';
 export * from './users/user.model';
 export * from './vehicles/vehicle.model';
 

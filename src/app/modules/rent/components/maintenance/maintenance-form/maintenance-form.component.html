@@ -1,0 +1,126 @@
+<div class="container-fluid maintenance-form-page">
+  <app-page-header
+    [title]="(isEdit() ? 'maintenance.editTitle' : 'maintenance.createTitle') | translate"
+    [subtitle]="'maintenance.formSubtitle' | translate"
+  />
+
+  @if (initializing()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>
+  } @else {
+    <form class="card fin-card" [formGroup]="form" (ngSubmit)="save()">
+      <div class="card-body">
+        <div class="row g-3 maintenance-form-layout">
+          <div class="col-lg-8">
+            <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">{{ 'maintenance.fieldBranch' | translate }}</label>
+            <app-smooth-select
+              [options]="branchOptions()"
+              [value]="form.controls.idBranch.value ?? ''"
+              (valueChange)="onBranchChange($event)"
+              [ariaLabel]="'maintenance.fieldBranch' | translate"
+              [placeholder]="'maintenance.branchPlaceholder' | translate"
+            />
+            @if (form.controls.idBranch.touched && form.controls.idBranch.invalid) {
+              <div class="text-danger small mt-1">{{ 'maintenance.invalidBranch' | translate }}</div>
+            }
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'maintenance.fieldVehicle' | translate }}</label>
+            <app-smooth-select
+              [options]="vehicleOptions()"
+              [value]="form.controls.idVehicle.value ?? ''"
+              (valueChange)="onVehicleChange($event)"
+              [ariaLabel]="'maintenance.fieldVehicle' | translate"
+              [placeholder]="'maintenance.vehiclePlaceholder' | translate"
+              [searchPlaceholder]="'maintenance.searchVehicle'"
+            />
+            @if (loadingVehicle()) {
+              <div class="form-text">{{ 'maintenance.loadingVehicles' | translate }}</div>
+            }
+            @if (form.controls.idVehicle.touched && form.controls.idVehicle.invalid) {
+              <div class="text-danger small mt-1">{{ 'maintenance.invalidVehicle' | translate }}</div>
+            }
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'maintenance.fieldBooking' | translate }}</label>
+            <input class="form-control" type="number" min="0" formControlName="idBooking" />
+            <div class="form-text">{{ 'maintenance.bookingHint' | translate }}</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'maintenance.fieldInsurance' | translate }}</label>
+            <input class="form-control" type="number" min="0" formControlName="idInsurancecompanies" />
+          </div>
+
+          <div class="col-md-6">
+            <app-date-picker mode="datetime" formControlName="startDate" label="maintenance.fieldStartDate" />
+          </div>
+
+          <div class="col-md-6">
+            <app-date-picker mode="datetime" formControlName="endDate" label="maintenance.fieldEndDate" />
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'maintenance.fieldOdometerIn' | translate }}</label>
+            <input class="form-control" formControlName="odometerIn" />
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'maintenance.fieldOdometerOut' | translate }}</label>
+            <input class="form-control" formControlName="odometerOut" />
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'maintenance.fieldDuration' | translate }}</label>
+            <input class="form-control" formControlName="durationMaintenance" />
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'maintenance.fieldCompensationType' | translate }}</label>
+            <input class="form-control" formControlName="typeCompensation" />
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'maintenance.fieldCompensation' | translate }}</label>
+            <input class="form-control" type="number" min="0" step="0.01" formControlName="valueCompensation" />
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'maintenance.fieldTotal' | translate }}</label>
+            <input class="form-control" type="number" min="0" step="0.01" formControlName="total" />
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">{{ 'maintenance.fieldNote' | translate }}</label>
+            <textarea class="form-control" rows="3" formControlName="note"></textarea>
+          </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <app-file-upload
+              [label]="'maintenance.fieldImage' | translate"
+              [previewUrl]="previewUrl()"
+              [fallbackPreviewUrl]="imageFallback"
+              (fileSelected)="onImageSelected($event)"
+            />
+            <div class="form-text mt-2">{{ 'maintenance.imageHint' | translate }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer d-flex flex-wrap gap-2 justify-content-end">
+        <a class="btn btn-light" routerLink="/maintenance">{{ 'Cancel' | translate }}</a>
+        <button class="btn btn-primary" type="submit" [disabled]="saving()">
+          @if (saving()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+          }
+          {{ 'Save' | translate }}
+        </button>
+      </div>
+    </form>
+  }
+</div>
