@@ -185,8 +185,8 @@ export class Sidebar implements OnInit {
     if (!path) {
       return false;
     }
-    const current = this.router.url.split('?')[0];
-    return current === path || current.startsWith(`${path}/`);
+    const activeItem = this.findMenuItemByUrl(this.menuItems, this.router.url);
+    return activeItem?.path === path;
   }
 
   private collapseExpandableMenus(items: Menu[] = this.menuItems): void {

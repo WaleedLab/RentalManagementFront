@@ -278,41 +278,6 @@ const routes: Routes = [
     ],
   },
   {
-    path: 'maintenance',
-    data: {
-      title: 'maintenance.listTitle',
-      breadcrumb: 'maintenance.listTitle',
-      privileges: [APP_PRIVILEGES.vehicle],
-    },
-    canActivate: [authGuard, privilegeGuard],
-    children: [
-      {
-        path: '',
-        data: { title: 'maintenance.listTitle', breadcrumb: 'maintenance.listTitle' },
-        loadComponent: () =>
-          import('./components/maintenance/maintenance-list/maintenance-list.component').then(
-            m => m.MaintenanceListComponent,
-          ),
-      },
-      {
-        path: 'create',
-        data: { title: 'maintenance.createTitle', breadcrumb: 'maintenance.createTitle' },
-        loadComponent: () =>
-          import('./components/maintenance/maintenance-form/maintenance-form.component').then(
-            m => m.MaintenanceFormComponent,
-          ),
-      },
-      {
-        path: ':id/edit',
-        data: { title: 'maintenance.editTitle', breadcrumb: 'maintenance.editTitle' },
-        loadComponent: () =>
-          import('./components/maintenance/maintenance-form/maintenance-form.component').then(
-            m => m.MaintenanceFormComponent,
-          ),
-      },
-    ],
-  },
-  {
     path: 'traffic-violations',
     data: {
       title: 'trafficViolations.title',

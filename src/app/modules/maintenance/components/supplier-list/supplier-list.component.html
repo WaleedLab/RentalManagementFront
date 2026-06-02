@@ -1,31 +1,16 @@
-<div class="container-fluid maintenance-list-page">
+<div class="container-fluid supplier-list-page">
   <app-list-command-bar
-    [title]="'maintenance.listTitle'"
-    iconSrc="assets/images/rent_icon/Maintenace.png"
-    toolbarClass="maintenance-command__toolbar"
+    [title]="'maintenance.supplier.listTitle'"
+    iconSrc="assets/images/rent_icon/Supplier.png"
+    toolbarClass="supplier-command__toolbar"
   >
-    <a commandActions class="fin-btn fin-btn--primary" routerLink="/maintenance/create">
-      {{ 'maintenance.create' | translate }}
+    <a commandActions class="fin-btn fin-btn--primary" routerLink="/maintenance/suppliers/create">
+      {{ 'maintenance.supplier.create' | translate }}
     </a>
 
     <ng-container commandToolbar>
-      <div class="maintenance-command__filters">
-        <label class="maintenance-command__filter-label" for="maintenance-branch-filter">
-          {{ 'maintenance.fieldBranch' | translate }}
-        </label>
-        <select
-          id="maintenance-branch-filter"
-          class="form-select form-select-sm maintenance-command__branch"
-          (change)="onBranchChange($any($event.target).value)"
-        >
-          <option value="">{{ 'maintenance.allBranches' | translate }}</option>
-          @for (branch of branches(); track branch.id) {
-            <option [value]="branch.id">{{ branchLabel(branch) }}</option>
-          }
-        </select>
-      </div>
       <app-list-search-field
-        [placeholder]="'maintenance.searchPlaceholder'"
+        [placeholder]="'maintenance.supplier.searchPlaceholder'"
         [value]="search()"
         (valueChange)="search.set($event)"
         (search)="onSearch()"
@@ -38,39 +23,33 @@
       <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
     } @else if (!rows().length) {
       <app-empty-state
-        [title]="'maintenance.emptyTitle' | translate"
-        [description]="'maintenance.emptyDescription' | translate"
+        [title]="'maintenance.supplier.emptyTitle' | translate"
+        [description]="'maintenance.supplier.emptyDescription' | translate"
       />
     } @else {
       <div class="table-responsive">
-        <table class="table table-striped align-middle maintenance-table">
+        <table class="table table-striped align-middle supplier-table">
           <thead>
             <tr>
-              <th>{{ 'maintenance.colPlate' | translate }}</th>
-              <th>{{ 'maintenance.colBranch' | translate }}</th>
-              <th class="text-nowrap">{{ 'maintenance.colStart' | translate }}</th>
-              <th class="text-nowrap">{{ 'maintenance.colEnd' | translate }}</th>
-              <th>{{ 'maintenance.colStatus' | translate }}</th>
-              <th class="text-end text-nowrap">{{ 'maintenance.colCompensation' | translate }}</th>
-              <th class="text-end text-nowrap">{{ 'maintenance.colTotal' | translate }}</th>
+              <th>{{ 'maintenance.supplier.colName' | translate }}</th>
+              <th>{{ 'maintenance.supplier.colPhone' | translate }}</th>
+              <th>{{ 'maintenance.supplier.colEmail' | translate }}</th>
+              <th>{{ 'maintenance.supplier.colAddress' | translate }}</th>
               <th class="text-end">{{ 'Actions' | translate }}</th>
             </tr>
           </thead>
           <tbody>
             @for (row of rows(); track row.id) {
               <tr>
-                <td>{{ row.plateNumber || row.idVehicle || '-' }}</td>
-                <td>{{ row.branchName || row.idBranch || '-' }}</td>
-                <td>{{ formatDate(row.startDate) }}</td>
-                <td>{{ formatDate(row.endDate) }}</td>
-                <td>{{ statusLabel(row.status) }}</td>
-                <td class="text-end">{{ formatMoney(row.valueCompensation) }}</td>
-                <td class="text-end">{{ formatMoney(row.total) }}</td>
+                <td>{{ row.supplierName || '-' }}</td>
+                <td>{{ row.phone || '-' }}</td>
+                <td>{{ row.email || '-' }}</td>
+                <td>{{ row.address || '-' }}</td>
                 <td class="text-end">
                   <div class="table-actions">
                     <a
                       class="table-action-icon table-action-icon--primary"
-                      [routerLink]="['/maintenance', row.id, 'edit']"
+                      [routerLink]="['/maintenance/suppliers', row.id, 'edit']"
                       [attr.aria-label]="'Edit' | translate"
                       [title]="'Edit' | translate"
                     >

@@ -1,6 +1,12 @@
 /** Mirrors backend `MaintenanceOrderingEnum` (int). */
 export type MaintenanceOrderBy = number;
 
+export interface MaintenanceSparePartLine {
+  idSparePartName: number;
+  quantity: number;
+  sparePartName?: string;
+}
+
 export interface Maintenance {
   id: string;
   idBranch: number;
@@ -10,6 +16,8 @@ export interface Maintenance {
   idBooking: number | null;
   idInsurancecompanies: number | null;
   insuranceCompanyName?: string;
+  idSupplier?: number | null;
+  supplierName?: string;
   startDate: string;
   endDate?: string;
   odometerIn?: string;
@@ -24,6 +32,7 @@ export interface Maintenance {
   url?: string;
   total?: number | null;
   createdBy?: string;
+  spareParts?: MaintenanceSparePartLine[];
 }
 
 export interface MaintenanceFilters {
@@ -42,6 +51,7 @@ export interface MaintenanceUpsertRequest {
   idVehicle: number;
   idBooking?: number | null;
   idInsurancecompanies?: number | null;
+  idSupplier?: number | null;
   fleetId: string;
   startDate: string;
   endDate?: string | null;
@@ -58,4 +68,5 @@ export interface MaintenanceUpsertRequest {
   image?: File | null;
   /** Kept on update when no new file is chosen. */
   existingUrl?: string | null;
+  spareParts?: MaintenanceSparePartLine[];
 }

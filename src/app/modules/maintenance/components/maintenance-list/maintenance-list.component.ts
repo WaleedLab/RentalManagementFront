@@ -1,22 +1,27 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { AuthStateService } from '../../../../../core/auth/auth-state.service';
-import { ConfirmService } from '../../../../../shared/services/confirm.service';
-import { ToastService } from '../../../../../shared/services/toast.service';
-import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
-import { ListCommandBarComponent } from '../../../../../shared/ui/list-command-bar/list-command-bar.component';
-import { ListContentShellComponent } from '../../../../../shared/ui/list-content-shell/list-content-shell.component';
-import { ListSearchFieldComponent } from '../../../../../shared/ui/list-search-field/list-search-field.component';
-import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
-import { Branch } from '../../../models';
-import { Maintenance } from '../../../models/maintenance/maintenance.model';
-import { BranchService } from '../../../services/branches/branch.service';
-import { MaintenanceService } from '../../../services/maintenance/maintenance.service';
+import { AuthStateService } from '../../../../core/auth/auth-state.service';
+import { ConfirmService } from '../../../../shared/services/confirm.service';
+import { ToastService } from '../../../../shared/services/toast.service';
+import { EmptyStateComponent } from '../../../../shared/ui/empty-state/empty-state.component';
+import { ListCommandBarComponent } from '../../../../shared/ui/list-command-bar/list-command-bar.component';
+import { ListContentShellComponent } from '../../../../shared/ui/list-content-shell/list-content-shell.component';
+import { ListSearchFieldComponent } from '../../../../shared/ui/list-search-field/list-search-field.component';
+import { PaginationBarComponent } from '../../../../shared/ui/pagination-bar/pagination-bar.component';
+import {
+  SmoothSelectComponent,
+  SmoothSelectOption,
+  SmoothSelectValue,
+} from '../../../../shared/ui/smooth-select/smooth-select.component';
+import { MaintenanceBranchOption } from '../../models/branch-reference.model';
+import { Maintenance } from '../../models/maintenance.model';
+import { MaintenanceBranchService } from '../../services/maintenance-branch.service';
+import { MaintenanceService } from '../../services/maintenance.service';
 
 @Component({
   selector: 'app-maintenance-list',
@@ -31,6 +36,7 @@ import { MaintenanceService } from '../../../services/maintenance/maintenance.se
     ListSearchFieldComponent,
     ListContentShellComponent,
     PaginationBarComponent,
+    SmoothSelectComponent,
   ],
   templateUrl: './maintenance-list.component.html',
   styleUrl: './maintenance-list.component.scss',
@@ -38,13 +44,13 @@ import { MaintenanceService } from '../../../services/maintenance/maintenance.se
 export class MaintenanceListComponent implements OnInit {
   private authState = inject(AuthStateService);
   private api = inject(MaintenanceService);
-  private branchService = inject(BranchService);
+  private branchService = inject(MaintenanceBranchService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
   private confirm = inject(ConfirmService);
 
   rows = signal<Maintenance[]>([]);
-  branches = signal<Branch[]>([]);
+  branches = signal<MaintenanceBranchOption[]>([]);
   loading = signal(false);
   loadFailed = signal(false);
   totalCount = signal(0);
@@ -52,10 +58,26 @@ export class MaintenanceListComponent implements OnInit {
   pageNumber = signal(1);
   pageSize = signal(10);
   search = signal('');
-  branchId = signal<number | null>(null);
+  branchId = signal<number | ''>('');
   deletingIds = signal<string[]>([]);
+  private readonly languageTick = signal(0);
+
+  branchFilterOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('maintenance.allBranches'), value: '' },
+      ...this.branches().map(branch => ({
+        label: this.branchLabel(branch),
+        value: Number(branch.id),
+      })),
+    ];
+  });
 
   ngOnInit(): void {
+    this.translate.onLangChange.subscribe(() => {
+      this.languageTick.update(v => v + 1);
+    });
     this.loadBranches();
     this.load();
   }
@@ -71,10 +93,11 @@ export class MaintenanceListComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.loadFailed.set(false);
+    const rawBranchId = this.branchId();
     this.api
       .getPaginated({
         fleetId: this.authState.fleetId() ?? undefined,
-        branchId: this.branchId(),
+        branchId: rawBranchId === '' ? null : Number(rawBranchId),
         search: this.search() || undefined,
         pageNumber: this.pageNumber(),
         pageSize: this.pageSize(),
@@ -99,9 +122,13 @@ export class MaintenanceListComponent implements OnInit {
     this.load();
   }
 
-  onBranchChange(value: string): void {
-    const parsed = value === '' ? null : Number(value);
-    this.branchId.set(parsed !== null && Number.isFinite(parsed) && parsed > 0 ? parsed : null);
+  onBranchChange(value: SmoothSelectValue): void {
+    if (value === '' || value === null) {
+      this.branchId.set('');
+    } else {
+      const parsed = Number(value);
+      this.branchId.set(Number.isFinite(parsed) && parsed > 0 ? parsed : '');
+    }
     this.pageNumber.set(1);
     this.load();
   }
@@ -174,7 +201,7 @@ export class MaintenanceListComponent implements OnInit {
     return d.toLocaleString(this.getLocale(), { dateStyle: 'short', timeStyle: 'short' });
   }
 
-  branchLabel(branch: Branch): string {
+  branchLabel(branch: MaintenanceBranchOption): string {
     return this.isArabicUi()
       ? branch.nameAr || branch.nameEn || String(branch.id)
       : branch.nameEn || branch.nameAr || String(branch.id);

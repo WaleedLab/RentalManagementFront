@@ -28,6 +28,10 @@ export const routes: Routes = [
         path: '',
         loadChildren: () => import('./modules/rent/rent.module').then(m => m.RentModule),
       },
+      {
+        path: '',
+        loadChildren: () => import('./modules/maintenance/maintenance.module').then(m => m.MaintenanceModule),
+      },
     ],
   },
   { path: '**', redirectTo: 'auth/404' },

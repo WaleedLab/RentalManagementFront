@@ -1,18 +1,18 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, from, map, switchMap, throwError } from 'rxjs';
 
-import { buildImageUploadPayload } from '../../../../shared/utils/image-upload.utils';
+import { buildImageUploadPayload } from '../../../shared/utils/image-upload.utils';
 
-import { PaginatedAggregatorResponse } from '../../../../core/interfaces';
-import { BaseService } from '../../../../shared/services/base/base.service';
-import { buildFleetQueryParams, normalizeFleetId } from '../../../../shared/utils/fleet-query.utils';
-import { normalizePaginatedResponse } from '../../../../shared/utils/paginated-response.normalizer';
+import { PaginatedAggregatorResponse } from '../../../core/interfaces';
+import { BaseService } from '../../../shared/services/base/base.service';
+import { buildFleetQueryParams, normalizeFleetId } from '../../../shared/utils/fleet-query.utils';
+import { normalizePaginatedResponse } from '../../../shared/utils/paginated-response.normalizer';
 import {
   Maintenance,
   MaintenanceFilters,
   MaintenanceUpsertRequest,
-} from '../../models/maintenance/maintenance.model';
-import { normalizeMaintenance } from '../../models/maintenance/maintenance.normalizer';
+} from '../models/maintenance.model';
+import { normalizeMaintenance } from '../models/maintenance.normalizer';
 
 /**
  * Matches `MaintenanceRouting`:
@@ -125,6 +125,10 @@ export class MaintenanceService {
       idBooking: this.normalizeOptionalLong(body.idBooking),
       IdInsurancecompanies: this.normalizeOptionalLong(body.idInsurancecompanies),
       idInsurancecompanies: this.normalizeOptionalLong(body.idInsurancecompanies),
+      IdSupplier: this.normalizeOptionalLong(body.idSupplier),
+      idSupplier: this.normalizeOptionalLong(body.idSupplier),
+      IdSupplieres: this.normalizeOptionalLong(body.idSupplier),
+      idSupplieres: this.normalizeOptionalLong(body.idSupplier),
       FleetId: body.fleetId,
       fleetId: body.fleetId,
       StartDate: body.startDate,
@@ -151,6 +155,18 @@ export class MaintenanceService {
       total: body.total ?? null,
       Url: url,
       url,
+      SpareParts: (body.spareParts ?? []).map(x => ({
+        IdSparePartName: x.idSparePartName,
+        idSparePartName: x.idSparePartName,
+        Quantity: x.quantity,
+        quantity: x.quantity,
+      })),
+      spareParts: (body.spareParts ?? []).map(x => ({
+        IdSparePartName: x.idSparePartName,
+        idSparePartName: x.idSparePartName,
+        Quantity: x.quantity,
+        quantity: x.quantity,
+      })),
     };
   }
 

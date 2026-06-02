@@ -1,0 +1,45 @@
+<div class="container-fluid spare-part-form-page">
+  <app-page-header
+    [title]="(isEdit() ? 'maintenance.sparePart.editTitle' : 'maintenance.sparePart.createTitle') | translate"
+    [subtitle]="'maintenance.sparePart.formSubtitle' | translate"
+  />
+
+  @if (initializing()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>
+  } @else {
+    <form class="card spare-part-form__card" [formGroup]="form" (ngSubmit)="save()">
+      <div class="card-body row g-3">
+        <div class="col-md-6">
+          <label class="form-label">{{ 'maintenance.sparePart.fieldName' | translate }}</label>
+          <input class="form-control" formControlName="name" appFieldValueState />
+          @if (form.controls.name.touched && form.controls.name.invalid) {
+            <div class="text-danger small mt-1">{{ 'maintenance.sparePart.invalidName' | translate }}</div>
+          }
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">{{ 'maintenance.sparePart.fieldNumber' | translate }}</label>
+          <input class="form-control" type="number" min="0" formControlName="number" appFieldValueState />
+          @if (form.controls.number.touched && form.controls.number.invalid) {
+            <div class="text-danger small mt-1">{{ 'maintenance.sparePart.invalidNumber' | translate }}</div>
+          }
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">{{ 'maintenance.sparePart.fieldDescription' | translate }}</label>
+          <textarea class="form-control" rows="3" formControlName="description" appFieldValueState></textarea>
+        </div>
+      </div>
+
+      <div class="card-footer d-flex flex-wrap gap-2 justify-content-end">
+        <a class="btn btn-light" routerLink="/maintenance/spare-parts">{{ 'Cancel' | translate }}</a>
+        <button class="btn btn-primary" type="submit" [disabled]="saving()">
+          @if (saving()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+          }
+          {{ 'Save' | translate }}
+        </button>
+      </div>
+    </form>
+  }
+</div>
