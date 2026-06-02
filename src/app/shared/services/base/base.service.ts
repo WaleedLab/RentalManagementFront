@@ -52,6 +52,20 @@ export class BaseService {
     });
   }
 
+  /** GET when the API returns `text/plain` (e.g. Tracking/GetApi map URL). */
+  getText(
+    endpoint: string,
+    params?: Record<string, string | number | boolean | undefined>,
+    options?: BaseRequestOptions,
+  ): Observable<string> {
+    const httpParams = this.buildHttpParams(params);
+    return this.http.get(`${this.baseUrl}/${endpoint}`, {
+      params: httpParams,
+      responseType: 'text',
+      context: this.buildHttpContext(options),
+    });
+  }
+
   post<T>(endpoint: string, body: unknown, options?: BaseRequestOptions): Observable<ApiResponse<T>> {
     return this.http.post<ApiResponse<T> | T>(`${this.baseUrl}/${endpoint}`, body, {
       context: this.buildHttpContext(options),

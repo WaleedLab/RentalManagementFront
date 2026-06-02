@@ -1,0 +1,114 @@
+<div class="container-fluid maintenance-list-page">
+  <app-list-command-bar
+    [title]="'maintenance.listTitle'"
+    iconSrc="assets/images/rent_icon/Maintenace.png"
+    toolbarClass="maintenance-command__toolbar"
+  >
+    <a commandActions class="fin-btn fin-btn--primary" routerLink="/maintenance/create">
+      {{ 'maintenance.create' | translate }}
+    </a>
+
+    <ng-container commandToolbar>
+      <div class="maintenance-command__filters">
+        <label class="maintenance-command__filter-label" for="maintenance-branch-filter">
+          {{ 'maintenance.fieldBranch' | translate }}
+        </label>
+        <select
+          id="maintenance-branch-filter"
+          class="form-select form-select-sm maintenance-command__branch"
+          (change)="onBranchChange($any($event.target).value)"
+        >
+          <option value="">{{ 'maintenance.allBranches' | translate }}</option>
+          @for (branch of branches(); track branch.id) {
+            <option [value]="branch.id">{{ branchLabel(branch) }}</option>
+          }
+        </select>
+      </div>
+      <app-list-search-field
+        [placeholder]="'maintenance.searchPlaceholder'"
+        [value]="search()"
+        (valueChange)="search.set($event)"
+        (search)="onSearch()"
+      />
+    </ng-container>
+  </app-list-command-bar>
+
+  <app-list-content-shell>
+    @if (loading() || loadFailed()) {
+      <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
+    } @else if (!rows().length) {
+      <app-empty-state
+        [title]="'maintenance.emptyTitle' | translate"
+        [description]="'maintenance.emptyDescription' | translate"
+      />
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-striped align-middle maintenance-table">
+          <thead>
+            <tr>
+              <th>{{ 'maintenance.colPlate' | translate }}</th>
+              <th>{{ 'maintenance.colBranch' | translate }}</th>
+              <th class="text-nowrap">{{ 'maintenance.colStart' | translate }}</th>
+              <th class="text-nowrap">{{ 'maintenance.colEnd' | translate }}</th>
+              <th>{{ 'maintenance.colStatus' | translate }}</th>
+              <th class="text-end text-nowrap">{{ 'maintenance.colCompensation' | translate }}</th>
+              <th class="text-end text-nowrap">{{ 'maintenance.colTotal' | translate }}</th>
+              <th class="text-end">{{ 'Actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.id) {
+              <tr>
+                <td>{{ row.plateNumber || row.idVehicle || '-' }}</td>
+                <td>{{ row.branchName || row.idBranch || '-' }}</td>
+                <td>{{ formatDate(row.startDate) }}</td>
+                <td>{{ formatDate(row.endDate) }}</td>
+                <td>{{ statusLabel(row.status) }}</td>
+                <td class="text-end">{{ formatMoney(row.valueCompensation) }}</td>
+                <td class="text-end">{{ formatMoney(row.total) }}</td>
+                <td class="text-end">
+                  <div class="table-actions">
+                    <a
+                      class="table-action-icon table-action-icon--primary"
+                      [routerLink]="['/maintenance', row.id, 'edit']"
+                      [attr.aria-label]="'Edit' | translate"
+                      [title]="'Edit' | translate"
+                    >
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <button
+                      type="button"
+                      class="table-action-icon table-action-icon--danger"
+                      [disabled]="isDeleting(row.id)"
+                      (click)="deleteRow(row)"
+                      [attr.aria-label]="'Delete' | translate"
+                      [title]="'Delete' | translate"
+                    >
+                      @if (isDeleting(row.id)) {
+                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                      } @else {
+                        <i class="fa-solid fa-trash"></i>
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (!loading() && !loadFailed() && totalCount() > 0) {
+      <app-pagination-bar
+        [pageNumber]="pageNumber()"
+        [totalPages]="totalPages()"
+        [totalCount]="totalCount()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[5, 10, 25]"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="changePageSize($event)"
+      />
+    }
+  </app-list-content-shell>
+</div>

@@ -7,6 +7,8 @@ import { toTrackingDateOnlyInput } from './tracking-date.utils';
 /** Route/query payload for booking tracking (no Booking GET). */
 export interface BookingTrackingRouteParams {
   vehicleId: string;
+  /** GPS serial (`IdVehicle` int64 on Tracking/GetApi). */
+  vehicleSerialNumber?: string;
   dateFrom: string;
   dateTo: string;
   plate?: string;
@@ -36,6 +38,11 @@ export function buildBookingTrackingQueryParams(booking: Booking): Record<string
     dateFrom,
     dateTo,
   };
+
+  const vehicleSerialNumber = String(booking.vehicleSerialNumber ?? '').trim();
+  if (vehicleSerialNumber) {
+    params['vehicleSerialNumber'] = vehicleSerialNumber;
+  }
 
   const plate = String(booking.vehiclePlateNumber ?? '').trim();
   if (plate) {
@@ -96,8 +103,12 @@ export function parseBookingTrackingRouteParams(
     return null;
   }
 
+  const vehicleSerialNumber =
+    pickQueryOrState(query, fromState, 'vehicleSerialNumber') || undefined;
+
   return {
     vehicleId,
+    vehicleSerialNumber,
     dateFrom,
     dateTo,
     plate: pickQueryOrState(query, fromState, 'plate') || undefined,

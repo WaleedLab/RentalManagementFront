@@ -151,6 +151,7 @@ function buildVehicleInfo(vehicle: Vehicle, extra?: Record<string, unknown>): Tr
     plateNumber,
     vehicleLabel,
     branchName: vehicle.branchName,
+    serialNumber: vehicle.serialNumber?.trim() || undefined,
     statusLabelKey: pickString(extra ?? {}, 'vehicleStatus', 'VehicleStatus', 'statusLabel'),
   };
 }
@@ -344,6 +345,7 @@ export function buildEmptyWorkspaceSession(
   vehicle: Vehicle,
   filters: TrackingFilterForm,
   pastedUrl?: string,
+  options?: { statusMessage?: string },
 ): TrackingWorkspaceSession {
   if (pastedUrl && isValidTrackingUrl(pastedUrl)) {
     return {
@@ -363,10 +365,11 @@ export function buildEmptyWorkspaceSession(
     iframeUrl: fallback.mapsEmbedUrl ?? null,
     iframeSrcdoc: null,
     liveStatus: 'offline',
+    statusMessage: options?.statusMessage,
     stats: buildStats({}, fallback),
     timeline: [],
     vehicleInfo: buildVehicleInfo(vehicle),
     source: 'fallback',
-    exportPayload: { filters, vehicleId: vehicle.id, fallback },
+    exportPayload: { filters, vehicleId: vehicle.id, fallback, statusMessage: options?.statusMessage },
   };
 }

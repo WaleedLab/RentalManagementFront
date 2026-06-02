@@ -84,13 +84,16 @@ function buildFriendlyHttpMessage(
   err: HttpErrorResponse,
   translate: TranslateService,
 ): string {
+  if (err.status === 0) {
+    return translate.instant('Unexpected error. Please try again later.');
+  }
+  if (err.status >= 500) {
+    return translate.instant('Unexpected error. Please try again later.');
+  }
+
   const validation = formatHttpValidationMessage(err.error);
   if (validation) {
     return validation;
-  }
-
-  if (err.status === 0) {
-    return translate.instant('Unexpected error. Please try again later.');
   }
   if (err.status === 400) {
     const lowerUrl = (reqUrl || '').toLowerCase();
@@ -113,9 +116,6 @@ function buildFriendlyHttpMessage(
   }
   if (err.status === 404) {
     return translate.instant('No records found');
-  }
-  if (err.status >= 500) {
-    return translate.instant('Unexpected error. Please try again later.');
   }
 
   const topMessage =

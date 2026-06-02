@@ -109,6 +109,25 @@ export class NavMenuService {
     },
     {
       level: 1,
+      title: 'maintenance.menuTitle',
+      icon: 'sample-page',
+      imageIcon: 'assets/images/rent_icon/Maintenace.png',
+      type: 'sub',
+      privileges: [APP_PRIVILEGES.vehicle],
+      children: [
+        {
+          level: 2,
+          path: '/maintenance',
+          title: 'maintenance.listTitle',
+          icon: 'sample-page',
+          imageIcon: 'assets/images/rent_icon/Maintenace.png',
+          type: 'link',
+          privileges: [APP_PRIVILEGES.vehicle],
+        },
+      ],
+    },
+    {
+      level: 1,
       title: 'Finance',
       icon: 'sample-page',
       imageIcon: FINANCE_MENU_ICONS.banks,

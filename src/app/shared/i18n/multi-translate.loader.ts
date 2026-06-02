@@ -39,6 +39,7 @@ export class MultiTranslateLoader implements TranslateLoader {
       'subscriptions',
       'booking',
       'traffic-violations',
+      'maintenance',
       'security',
       'settings',
     ];

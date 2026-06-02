@@ -1,8 +1,9 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, map, of, switchMap, throwError } from 'rxjs';
 
 import { BaseService } from '../../../../shared/services/base/base.service';
-import { buildFleetQueryParams } from '../../../../shared/utils/fleet-query.utils';
+import { environment } from '../../../../../environments/environment';
 import {
   TrackingFilterForm,
   TrackingWorkspaceContext,
@@ -13,8 +14,11 @@ import {
   buildEmptyWorkspaceSession,
   buildTrackingWorkspaceSessionFromApi,
 } from '../../models/tracking/tracking.normalizer';
+import { isTrackingNoDataError, parseTrackingApiBody } from '../../utils/tracking-api.utils';
+import { resolveTrackingIdVehicle } from '../../utils/tracking-id.utils';
 import { isValidTrackingUrl } from '../../utils/tracking-url.utils';
 import {
+  normalizeTrackingFilterRange,
   toTrackingBeginDateTime,
   toTrackingDateOnlyInput,
   toTrackingEndDateTime,
@@ -26,6 +30,7 @@ function vehicleFromStub(
   vehicleId: string,
   fleetId: string,
   stub: NonNullable<TrackingWorkspaceRequest['vehicleStub']>,
+  serialNumber?: string,
 ): Vehicle {
   const label = stub.vehicleLabel?.trim() || stub.plateNumber?.trim() || '—';
   return {
@@ -36,46 +41,58 @@ function vehicleFromStub(
     model: label,
     year: 0,
     branchName: stub.branchName,
+    serialNumber: serialNumber?.trim() || undefined,
     status: 'Available' as VehicleStatus,
     isActive: true,
   };
 }
 
 function buildTrackingQueryParams(
-  vehicleId: string,
-  fleetId: string,
+  vehicleDbId: string,
   filters: TrackingFilterForm,
 ): Record<string, string | number | boolean | undefined> {
-  const idVehicle = Number(vehicleId);
-  const begin = toTrackingBeginDateTime(filters.dateFrom);
-  const end = toTrackingEndDateTime(filters.dateTo);
+  const idVehicle = resolveTrackingIdVehicle(vehicleDbId);
+  const normalizedRange = normalizeTrackingFilterRange(filters.dateFrom, filters.dateTo);
 
-  return {
-    ...buildFleetQueryParams(fleetId, 'both'),
-    IdVehicle: Number.isFinite(idVehicle) ? idVehicle : vehicleId,
+  if (!normalizedRange) {
+    throw new Error('Tracking date range is required');
+  }
+
+  const begin = toTrackingBeginDateTime(normalizedRange.dateFrom);
+  const end = toTrackingEndDateTime(normalizedRange.dateTo);
+
+  const params = {
+    IdVehicle: idVehicle,
     begindate: begin,
     lastdate: end,
-    DateFrom: filters.dateFrom || undefined,
-    DateTo: filters.dateTo || undefined,
-    dateFrom: filters.dateFrom || undefined,
-    dateTo: filters.dateTo || undefined,
   };
+
+  if (!environment.production) {
+    // eslint-disable-next-line no-console
+    console.info('[Tracking/GetApi] query params', params);
+  }
+
+  return params;
 }
 
 @Injectable({ providedIn: 'root' })
 export class VehicleTrackingService {
   private readonly api = inject(BaseService);
   private readonly vehicleService = inject(VehicleService);
-  /** Router.TrackingRouting.GetApi → Api/V1/CarRentalManagament/Tracking/GetApi */
+  /**
+   * Router.TrackingRouting.GetApi → Api/V1/CarRentalManagament/Tracking/GetApi
+   * Query: IdVehicle (int64 vehicle DB id), begindate, lastdate (`yyyy-MM-dd HH:mm:ss`).
+   * Response may be `text/plain` map URL or `Result<string>`.
+   */
   private readonly trackingEndpoint = 'Tracking/GetApi';
 
   createDefaultFilters(): TrackingFilterForm {
     const end = new Date();
     const start = new Date(end);
-    start.setDate(end.getDate() - 6);
+    start.setDate(end.getDate() - 29);
     return {
-      dateFrom: toTrackingDateOnlyInput(start.toISOString()),
-      dateTo: toTrackingDateOnlyInput(end.toISOString()),
+      dateFrom: toTrackingDateOnlyInput(start),
+      dateTo: toTrackingDateOnlyInput(end),
       trackingUrl: '',
     };
   }
@@ -97,7 +114,9 @@ export class VehicleTrackingService {
             plateNumber: vehicle.plateNumber || '—',
             vehicleLabel,
             branchName: vehicle.branchName,
+            serialNumber: vehicle.serialNumber?.trim() || undefined,
           },
+          initialFilters: this.createDefaultFilters(),
         };
       }),
     );
@@ -107,11 +126,18 @@ export class VehicleTrackingService {
     const fleetId = request.fleetId.trim();
     const pastedUrl = request.filters.trackingUrl.trim();
 
-    const vehicle$ = request.vehicleStub
-      ? of(vehicleFromStub(request.vehicleId, fleetId, request.vehicleStub))
-      : this.vehicleService.getById(request.vehicleId, fleetId);
+    const serialHint = (request.trackingSerialNumber ?? '').trim();
+    const vehicle$ =
+      request.vehicleStub && serialHint
+        ? of(vehicleFromStub(request.vehicleId, fleetId, request.vehicleStub, serialHint))
+        : this.vehicleService.getById(request.vehicleId, fleetId);
 
     return vehicle$.pipe(
+      catchError(err =>
+        throwError(() =>
+          err instanceof Error ? err : new Error('Failed to load vehicle for tracking'),
+        ),
+      ),
       switchMap(vehicle => {
         const vehicleCtx = { ...vehicle, fleetId };
 
@@ -119,18 +145,37 @@ export class VehicleTrackingService {
           return of(buildEmptyWorkspaceSession(vehicleCtx, request.filters, pastedUrl));
         }
 
-        return this.api
-          .getData<string>(
-            this.trackingEndpoint,
-            buildTrackingQueryParams(request.vehicleId, fleetId, request.filters),
-            { suppressErrorToast: true },
-          )
-          .pipe(
-            map(raw => buildTrackingWorkspaceSessionFromApi(raw, vehicleCtx, fleetId, request.filters)),
-            catchError(err =>
-              throwError(() => (err instanceof Error ? err : new Error('Tracking load failed'))),
-            ),
+        let params: Record<string, string | number | boolean | undefined>;
+        try {
+          params = buildTrackingQueryParams(String(vehicle.id), request.filters);
+        } catch (validationError) {
+          return throwError(() =>
+            validationError instanceof Error ? validationError : new Error('Tracking date range is required'),
           );
+        }
+
+        return this.api.getText(this.trackingEndpoint, params, { suppressErrorToast: true }).pipe(
+          map(body => parseTrackingApiBody(body)),
+          map(raw => buildTrackingWorkspaceSessionFromApi(raw, vehicleCtx, fleetId, request.filters)),
+          catchError(err => {
+            if (isTrackingNoDataError(err)) {
+              return of(
+                buildEmptyWorkspaceSession(vehicleCtx, request.filters, undefined, {
+                  statusMessage: 'No data found',
+                }),
+              );
+            }
+            if (err instanceof HttpErrorResponse && !environment.production) {
+              // eslint-disable-next-line no-console
+              console.error(
+                '[Tracking/GetApi] HTTP error',
+                err.status,
+                typeof err.error === 'string' ? err.error : err.error,
+              );
+            }
+            return throwError(() => err);
+          }),
+        );
       }),
     );
   }

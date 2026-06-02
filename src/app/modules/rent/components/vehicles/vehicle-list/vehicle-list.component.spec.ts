@@ -71,8 +71,8 @@ describe('VehicleListComponent', () => {
       'changeStatus',
       'softDelete',
     ]);
-    const branchServiceMock = jasmine.createSpyObj('BranchService', ['getPaginated']);
-    const categoryVehicleServiceMock = jasmine.createSpyObj('CategoryVehicleService', ['getPaginated']);
+    const branchServiceMock = jasmine.createSpyObj('BranchService', ['getList']);
+    const categoryVehicleServiceMock = jasmine.createSpyObj('CategoryVehicleService', ['getList']);
     const authStateMock = jasmine.createSpyObj('AuthStateService', [], {
       fleetId: signal('fleet-1'),
     });
@@ -126,8 +126,8 @@ describe('VehicleListComponent', () => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
       vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
-      branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
-      categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
+      branchServiceSpy.getList.and.returnValue(of([]));
+      categoryVehicleServiceSpy.getList.and.returnValue(of([]));
 
       fixture.detectChanges();
 
@@ -135,8 +135,8 @@ describe('VehicleListComponent', () => {
         expect(vehicleServiceSpy.getPaginated).toHaveBeenCalled();
         expect(vehicleServiceSpy.getStatusCounts).toHaveBeenCalled();
         expect(vehicleServiceSpy.getExpirationCounts).toHaveBeenCalled();
-        expect(branchServiceSpy.getPaginated).toHaveBeenCalled();
-        expect(categoryVehicleServiceSpy.getPaginated).toHaveBeenCalled();
+        expect(branchServiceSpy.getList).toHaveBeenCalled();
+        expect(categoryVehicleServiceSpy.getList).toHaveBeenCalled();
         done();
       }, 100);
     });
@@ -147,8 +147,8 @@ describe('VehicleListComponent', () => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
       vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
-      branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
-      categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
+      branchServiceSpy.getList.and.returnValue(of([]));
+      categoryVehicleServiceSpy.getList.and.returnValue(of([]));
 
       component.load();
 
@@ -164,8 +164,8 @@ describe('VehicleListComponent', () => {
       vehicleServiceSpy.getPaginated.and.returnValue(throwError(() => new Error('Load failed')));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
       vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
-      branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
-      categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
+      branchServiceSpy.getList.and.returnValue(of([]));
+      categoryVehicleServiceSpy.getList.and.returnValue(of([]));
       translateServiceSpy.instant.and.returnValue('Failed to load vehicles');
 
       component.load();
@@ -181,8 +181,8 @@ describe('VehicleListComponent', () => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
       vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
-      branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
-      categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
+      branchServiceSpy.getList.and.returnValue(of([]));
+      categoryVehicleServiceSpy.getList.and.returnValue(of([]));
       component.totalPages.set(3);
 
       component.goToPage(2);
@@ -197,8 +197,8 @@ describe('VehicleListComponent', () => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
       vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
-      branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
-      categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
+      branchServiceSpy.getList.and.returnValue(of([]));
+      categoryVehicleServiceSpy.getList.and.returnValue(of([]));
 
       component.changePageSize(20);
 
@@ -215,8 +215,8 @@ describe('VehicleListComponent', () => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
       vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
-      branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
-      categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
+      branchServiceSpy.getList.and.returnValue(of([]));
+      categoryVehicleServiceSpy.getList.and.returnValue(of([]));
 
       component.search.set('ABC-1234');
       component.onSearchSubmit();
@@ -234,8 +234,8 @@ describe('VehicleListComponent', () => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
       vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
-      branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
-      categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
+      branchServiceSpy.getList.and.returnValue(of([]));
+      categoryVehicleServiceSpy.getList.and.returnValue(of([]));
 
       component.onStatusFilterChange('Available');
 
@@ -250,8 +250,8 @@ describe('VehicleListComponent', () => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
       vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
-      branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
-      categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
+      branchServiceSpy.getList.and.returnValue(of([]));
+      categoryVehicleServiceSpy.getList.and.returnValue(of([]));
 
       component.onOrderByChange('Year');
 
@@ -265,8 +265,8 @@ describe('VehicleListComponent', () => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
       vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
-      branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
-      categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
+      branchServiceSpy.getList.and.returnValue(of([]));
+      categoryVehicleServiceSpy.getList.and.returnValue(of([]));
 
       component.onOrderDirectionChange('ASC');
 
@@ -396,8 +396,8 @@ describe('VehicleListComponent', () => {
     it('should load status counts', (done) => {
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
       vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
-      branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
-      categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
+      branchServiceSpy.getList.and.returnValue(of([]));
+      categoryVehicleServiceSpy.getList.and.returnValue(of([]));
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
 
       component.ngOnInit();
@@ -415,8 +415,8 @@ describe('VehicleListComponent', () => {
       vehicleServiceSpy.getPaginated.and.returnValue(of(mockPaginatedResponse));
       vehicleServiceSpy.getStatusCounts.and.returnValue(of(mockStatusCountsResponse));
       vehicleServiceSpy.getExpirationCounts.and.returnValue(of(mockExpirationCountsResponse));
-      branchServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
-      categoryVehicleServiceSpy.getPaginated.and.returnValue(of({ items: [] }));
+      branchServiceSpy.getList.and.returnValue(of([]));
+      categoryVehicleServiceSpy.getList.and.returnValue(of([]));
 
       component.ngOnInit();
 
