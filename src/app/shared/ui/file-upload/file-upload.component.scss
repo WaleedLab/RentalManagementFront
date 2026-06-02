@@ -3,7 +3,7 @@
   --media-box-height: 220px;
 
   .upload-validation {
-    color: #f97316;
+    color: var(--c-f97316);
     font-size: 0.8rem;
     font-weight: 600;
   }
@@ -11,8 +11,8 @@
   .upload-preview {
     border-radius: 10px;
     overflow: hidden;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    background: #f8fafc;
+    border: 1px solid rgba(var(--c-000000-rgb), 0.08);
+    background: var(--c-f8fafc);
     width: min(100%, var(--media-box-width));
     height: var(--media-box-height);
     display: flex;

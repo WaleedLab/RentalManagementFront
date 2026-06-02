@@ -19,13 +19,13 @@
   font-weight: 700;
 }
 
-.accounting-card[data-tone='good'] { border-inline-start: 4px solid #22c55e; }
-.accounting-card[data-tone='warning'] { border-inline-start: 4px solid #f59e0b; }
-.accounting-card[data-tone='risk'] { border-inline-start: 4px solid #ef4444; }
+.accounting-card[data-tone='good'] { border-inline-start: 4px solid var(--c-22c55e); }
+.accounting-card[data-tone='warning'] { border-inline-start: 4px solid var(--c-f59e0b); }
+.accounting-card[data-tone='risk'] { border-inline-start: 4px solid var(--c-ef4444); }
 
 .skeleton {
   border-radius: 8px;
-  background: linear-gradient(90deg, rgba(148, 163, 184, 0.16), rgba(148, 163, 184, 0.32), rgba(148, 163, 184, 0.16));
+  background: linear-gradient(90deg, rgba(var(--c-94a3b8-rgb), 0.16), rgba(var(--c-94a3b8-rgb), 0.32), rgba(var(--c-94a3b8-rgb), 0.16));
   background-size: 200% 100%;
   animation: shimmer 1.1s infinite;
 }

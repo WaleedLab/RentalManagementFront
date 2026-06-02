@@ -9,23 +9,7 @@
   } @else {
     <form class="card fin-card" [formGroup]="form" (ngSubmit)="save()">
       <div class="card-body">
-        <div class="row g-3 maintenance-form-layout">
-          <div class="col-lg-8">
-            <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label">{{ 'maintenance.fieldBranch' | translate }}</label>
-            <app-smooth-select
-              [options]="branchOptions()"
-              [value]="form.controls.idBranch.value ?? ''"
-              (valueChange)="onBranchChange($event)"
-              [ariaLabel]="'maintenance.fieldBranch' | translate"
-              [placeholder]="'maintenance.branchPlaceholder' | translate"
-            />
-            @if (form.controls.idBranch.touched && form.controls.idBranch.invalid) {
-              <div class="text-danger small mt-1">{{ 'maintenance.invalidBranch' | translate }}</div>
-            }
-          </div>
-
+        <div class="row g-3">
           <div class="col-md-6">
             <label class="form-label">{{ 'maintenance.fieldVehicle' | translate }}</label>
             <app-smooth-select
@@ -64,122 +48,9 @@
             }
           </div>
 
-          <div class="col-md-6">
-            <label class="form-label">{{ 'maintenance.fieldSupplier' | translate }}</label>
-            <app-smooth-select
-              [options]="supplierOptions()"
-              [value]="form.controls.idSupplier.value ?? ''"
-              (valueChange)="onSupplierChange($event)"
-              [ariaLabel]="'maintenance.fieldSupplier' | translate"
-              [placeholder]="'maintenance.supplierPlaceholder' | translate"
-            />
-            @if (loadingSupplier()) {
-              <div class="form-text">{{ 'maintenance.loadingSupplier' | translate }}</div>
-            }
-          </div>
-
-          <div class="col-md-6">
-            <app-date-picker mode="datetime" formControlName="startDate" label="maintenance.fieldStartDate" />
-          </div>
-
-          <div class="col-md-6">
-            <app-date-picker mode="datetime" formControlName="endDate" label="maintenance.fieldEndDate" />
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">{{ 'maintenance.fieldOdometerIn' | translate }}</label>
-            <input class="form-control" formControlName="odometerIn" />
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">{{ 'maintenance.fieldOdometerOut' | translate }}</label>
-            <input class="form-control" formControlName="odometerOut" />
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">{{ 'maintenance.fieldDuration' | translate }}</label>
-            <input class="form-control" formControlName="durationMaintenance" />
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">{{ 'maintenance.fieldCompensationType' | translate }}</label>
-            <input class="form-control" formControlName="typeCompensation" />
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">{{ 'maintenance.fieldCompensation' | translate }}</label>
-            <input class="form-control" type="number" min="0" step="0.01" formControlName="valueCompensation" />
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">{{ 'maintenance.fieldTotal' | translate }}</label>
-            <input class="form-control" type="number" min="0" step="0.01" formControlName="total" />
-          </div>
-
-          <div class="col-12" id="maintenance-spare-parts">
+          <div class="col-12">
             <label class="form-label">{{ 'maintenance.fieldNote' | translate }}</label>
             <textarea class="form-control" rows="3" formControlName="note"></textarea>
-          </div>
-
-          <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <label class="form-label mb-0">{{ 'maintenance.sparePart.inlineTitle' | translate }}</label>
-              <button type="button" class="btn btn-sm btn-outline-primary" (click)="addSparePartRow()">
-                {{ 'maintenance.sparePart.addLine' | translate }}
-              </button>
-            </div>
-
-            @if (loadingSpareParts()) {
-              <div class="form-text mb-2">{{ 'maintenance.sparePart.loadingOptions' | translate }}</div>
-            }
-
-            @if (!sparePartRows().length) {
-              <div class="text-muted small">{{ 'maintenance.sparePart.inlineHint' | translate }}</div>
-            } @else {
-              <div class="vstack gap-2">
-                @for (line of sparePartRows(); track $index) {
-                  <div class="row g-2 align-items-end">
-                    <div class="col-md-7">
-                      <label class="form-label">{{ 'maintenance.sparePart.fieldName' | translate }}</label>
-                      <app-smooth-select
-                        [options]="sparePartOptions()"
-                        [value]="line.idSparePartName ?? ''"
-                        (valueChange)="onSparePartChange($index, $event)"
-                        [ariaLabel]="'maintenance.sparePart.fieldName' | translate"
-                        [placeholder]="'maintenance.sparePart.selectPart' | translate"
-                      />
-                    </div>
-                    <div class="col-md-3">
-                      <label class="form-label">{{ 'maintenance.sparePart.fieldNumber' | translate }}</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        min="1"
-                        [value]="line.quantity"
-                        (input)="onSparePartQtyChange($index, $any($event.target).value)"
-                      />
-                    </div>
-                    <div class="col-md-2 d-grid">
-                      <button type="button" class="btn btn-outline-danger" (click)="removeSparePartRow($index)">
-                        {{ 'Delete' | translate }}
-                      </button>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-            </div>
-          </div>
-
-          <div class="col-lg-4">
-            <app-file-upload
-              [label]="'maintenance.fieldImage' | translate"
-              [previewUrl]="previewUrl()"
-              [fallbackPreviewUrl]="imageFallback"
-              (fileSelected)="onImageSelected($event)"
-            />
-            <div class="form-text mt-2">{{ 'maintenance.imageHint' | translate }}</div>
           </div>
         </div>
       </div>

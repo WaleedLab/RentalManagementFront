@@ -1,10 +1,10 @@
 :host {
-  --ops-bg: #f1f5f9;
-  --ops-surface: #ffffff;
-  --ops-border: rgba(71, 85, 105, 0.14);
-  --ops-shadow: 0 12px 32px rgba(15, 23, 42, 0.07);
-  --ops-muted: #64748b;
-  --ops-heading: #0f172a;
+  --ops-bg: var(--c-f1f5f9);
+  --ops-surface: var(--c-ffffff);
+  --ops-border: rgba(var(--c-475569-rgb), 0.14);
+  --ops-shadow: 0 12px 32px rgba(var(--rt-shadow-rgb), 0.07);
+  --ops-muted: var(--c-64748b);
+  --ops-heading: var(--c-0f172a);
 }
 
 .ops-dashboard {
@@ -30,11 +30,11 @@
 }
 
 .ops-banner--warn {
-  border-inline-start: 4px solid #f59e0b;
+  border-inline-start: 4px solid var(--c-f59e0b);
 }
 
 .ops-banner--error {
-  border-inline-start: 4px solid #ef4444;
+  border-inline-start: 4px solid var(--c-ef4444);
 }
 
 .ops-grid {
@@ -118,8 +118,8 @@
   gap: 0.5rem;
   padding: 0.35rem 0.65rem;
   border-radius: 10px;
-  background: rgba(20, 83, 45, 0.18);
-  border: 1px solid rgba(34, 197, 94, 0.12);
+  background: rgba(var(--c-14532d-rgb), 0.18);
+  border: 1px solid rgba(var(--c-22c55e-rgb), 0.12);
 }
 
 .ops-kpi__label {
@@ -155,7 +155,7 @@
   --ops-bg: transparent;
   --ops-surface: color-mix(in srgb, var(--app-dark-card) 72%, transparent);
   --ops-border: color-mix(in srgb, var(--app-dark-accent-cyan) 10%, transparent);
-  --ops-shadow: 0 24px 60px rgba(0, 0, 0, 0.48);
+  --ops-shadow: 0 24px 60px rgba(var(--rt-shadow-rgb), 0.48);
   --ops-muted: var(--app-dark-text-secondary);
   --ops-heading: var(--app-dark-text);
 }

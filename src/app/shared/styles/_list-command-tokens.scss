@@ -2,17 +2,17 @@
 
 @mixin list-command-tokens() {
   --fin-bg: transparent;
-  --fin-glass: #ffffff;
-  --fin-border: rgba(71, 85, 105, 0.14);
-  --fin-glow: rgba(5, 150, 105, 0.14);
-  --fin-text: #0f172a;
-  --fin-muted: #64748b;
-  --fin-accent: #059669;
-  --fin-accent-secondary: #2563eb;
-  --fin-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
-  --fin-input-bg: #ffffff;
-  --fin-pill-bg: rgba(5, 150, 105, 0.08);
-  --fin-pill-bg-hover: rgba(5, 150, 105, 0.14);
+  --fin-glass: var(--c-ffffff);
+  --fin-border: rgba(var(--c-475569-rgb), 0.14);
+  --fin-glow: rgba(var(--c-059669-rgb), 0.14);
+  --fin-text: var(--c-0f172a);
+  --fin-muted: var(--c-64748b);
+  --fin-accent: var(--c-059669);
+  --fin-accent-secondary: var(--c-2563eb);
+  --fin-shadow: 0 12px 32px rgba(var(--rt-shadow-rgb), 0.08);
+  --fin-input-bg: var(--c-ffffff);
+  --fin-pill-bg: rgba(var(--c-059669-rgb), 0.08);
+  --fin-pill-bg-hover: rgba(var(--c-059669-rgb), 0.14);
   @include fin-command-button-tokens.fin-command-btn-primary-light;
   @include fin-command-button-tokens.fin-command-btn-search-light;
   @include fin-command-button-tokens.fin-command-btn-action-light;
@@ -26,7 +26,7 @@
   --fin-muted: var(--app-dark-text-secondary);
   --fin-accent: var(--app-dark-accent-emerald);
   --fin-accent-secondary: var(--app-dark-accent-cyan);
-  --fin-shadow: 0 24px 60px rgba(0, 0, 0, 0.48);
+  --fin-shadow: 0 24px 60px rgba(var(--rt-shadow-rgb), 0.48);
   --fin-input-bg: color-mix(in srgb, var(--app-dark-card) 88%, transparent);
   --fin-pill-bg: color-mix(in srgb, var(--app-dark-accent-emerald) 14%, transparent);
   --fin-pill-bg-hover: color-mix(in srgb, var(--app-dark-accent-emerald) 22%, transparent);

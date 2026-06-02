@@ -4,24 +4,24 @@
   min-width: 0;
 }
 
-/* Matches dashboard dark theme: #071b22 / cyan glass — not forest green */
+/* Matches dashboard dark theme: var(--c-071b22) / cyan glass — not forest green */
 .modern-date-widget.header-datetime-panel {
-  --dt-surface: rgba(16, 36, 54, 0.58);
-  --dt-surface-2: rgba(10, 25, 41, 0.72);
-  --dt-border: rgba(6, 182, 212, 0.22);
-  --dt-glow: rgba(6, 182, 212, 0.14);
-  --dt-time-bg: rgba(6, 182, 212, 0.1);
-  --dt-time-border: rgba(103, 232, 249, 0.32);
-  --dt-time-color: #67e8f9;
-  --dt-text: #ecfeff;
-  --dt-text-muted: #94a3b8;
-  --dt-badge-text: #cffafe;
-  --dt-badge-bg: rgba(6, 182, 212, 0.14);
-  --dt-badge-border: rgba(6, 182, 212, 0.28);
-  --dt-badge-hijri-text: #99f6e4;
-  --dt-badge-hijri-bg: rgba(20, 184, 166, 0.14);
-  --dt-badge-hijri-border: rgba(45, 212, 191, 0.22);
-  --dt-numeric: #a5f3fc;
+  --dt-surface: rgba(var(--c-102436-rgb), 0.58);
+  --dt-surface-2: rgba(var(--c-0a1929-rgb), 0.72);
+  --dt-border: rgba(var(--c-06b6d4-rgb), 0.22);
+  --dt-glow: rgba(var(--c-06b6d4-rgb), 0.14);
+  --dt-time-bg: rgba(var(--c-06b6d4-rgb), 0.1);
+  --dt-time-border: rgba(var(--c-67e8f9-rgb), 0.32);
+  --dt-time-color: var(--c-67e8f9);
+  --dt-text: var(--c-ecfeff);
+  --dt-text-muted: var(--c-94a3b8);
+  --dt-badge-text: var(--c-cffafe);
+  --dt-badge-bg: rgba(var(--c-06b6d4-rgb), 0.14);
+  --dt-badge-border: rgba(var(--c-06b6d4-rgb), 0.28);
+  --dt-badge-hijri-text: var(--c-99f6e4);
+  --dt-badge-hijri-bg: rgba(var(--c-14b8a6-rgb), 0.14);
+  --dt-badge-hijri-border: rgba(var(--c-2dd4bf-rgb), 0.22);
+  --dt-numeric: var(--c-a5f3fc);
 
   position: static;
   pointer-events: none;
@@ -37,8 +37,8 @@
     radial-gradient(120% 80% at 100% 0%, var(--dt-glow), transparent 55%);
   border: 1px solid var(--dt-border);
   box-shadow:
-    0 14px 32px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    0 14px 32px rgba(var(--rt-shadow-rgb), 0.28),
+    inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.07);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
@@ -49,9 +49,9 @@
   padding: 7px 11px;
   border-radius: 12px;
   text-align: center;
-  background: linear-gradient(160deg, var(--dt-time-bg), rgba(6, 182, 212, 0.04));
+  background: linear-gradient(160deg, var(--dt-time-bg), rgba(var(--c-06b6d4-rgb), 0.04));
   border: 1px solid var(--dt-time-border);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.06);
 }
 
 .time {
@@ -60,7 +60,7 @@
   font-weight: 800;
   letter-spacing: 0.02em;
   line-height: 1.1;
-  text-shadow: 0 0 20px rgba(6, 182, 212, 0.35);
+  text-shadow: 0 0 20px rgba(var(--c-06b6d4-rgb), 0.35);
 }
 
 .date-box {
@@ -104,7 +104,7 @@
 }
 
 .date-row.muted .date-row-text--numeric {
-  color: #64748b;
+  color: var(--c-64748b);
   opacity: 1;
 }
 
@@ -129,26 +129,26 @@
 }
 
 :host-context(body.light-only) .modern-date-widget.header-datetime-panel {
-  --dt-surface: rgba(255, 255, 255, 0.88);
-  --dt-surface-2: rgba(241, 245, 249, 0.92);
-  --dt-border: rgba(14, 165, 233, 0.22);
-  --dt-glow: rgba(59, 130, 246, 0.1);
-  --dt-time-bg: rgba(14, 165, 233, 0.08);
-  --dt-time-border: rgba(37, 99, 235, 0.22);
-  --dt-time-color: #0369a1;
-  --dt-text: #0f172a;
-  --dt-text-muted: #64748b;
-  --dt-badge-text: #0c4a6e;
-  --dt-badge-bg: rgba(14, 165, 233, 0.1);
-  --dt-badge-border: rgba(14, 165, 233, 0.24);
-  --dt-badge-hijri-text: #115e59;
-  --dt-badge-hijri-bg: rgba(20, 184, 166, 0.1);
-  --dt-badge-hijri-border: rgba(20, 184, 166, 0.22);
-  --dt-numeric: #475569;
+  --dt-surface: rgba(var(--c-ffffff-rgb), 0.88);
+  --dt-surface-2: rgba(var(--c-f1f5f9-rgb), 0.92);
+  --dt-border: rgba(var(--c-0ea5e9-rgb), 0.22);
+  --dt-glow: rgba(var(--c-3b82f6-rgb), 0.1);
+  --dt-time-bg: rgba(var(--c-0ea5e9-rgb), 0.08);
+  --dt-time-border: rgba(var(--c-2563eb-rgb), 0.22);
+  --dt-time-color: var(--c-0369a1);
+  --dt-text: var(--c-0f172a);
+  --dt-text-muted: var(--c-64748b);
+  --dt-badge-text: var(--c-0c4a6e);
+  --dt-badge-bg: rgba(var(--c-0ea5e9-rgb), 0.1);
+  --dt-badge-border: rgba(var(--c-0ea5e9-rgb), 0.24);
+  --dt-badge-hijri-text: var(--c-115e59);
+  --dt-badge-hijri-bg: rgba(var(--c-14b8a6-rgb), 0.1);
+  --dt-badge-hijri-border: rgba(var(--c-14b8a6-rgb), 0.22);
+  --dt-numeric: var(--c-475569);
 
   box-shadow:
-    0 12px 28px rgba(15, 23, 42, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 12px 28px rgba(var(--rt-shadow-rgb), 0.1),
+    inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.9);
 }
 
 :host-context(body.light-only) .time {

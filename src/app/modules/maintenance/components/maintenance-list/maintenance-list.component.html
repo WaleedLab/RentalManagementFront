@@ -63,6 +63,22 @@
                 <td class="text-end">{{ formatMoney(row.total) }}</td>
                 <td class="text-end">
                   <div class="table-actions">
+                    @if (canAccept(row)) {
+                      <button
+                        type="button"
+                        class="table-action-icon table-action-icon--info"
+                        [disabled]="isAccepting(row.id)"
+                        (click)="openAcceptDialog(row)"
+                        [attr.aria-label]="'maintenance.accept.action' | translate"
+                        [title]="'maintenance.accept.action' | translate"
+                      >
+                        @if (isAccepting(row.id)) {
+                          <span class="spinner-border spinner-border-sm" role="status"></span>
+                        } @else {
+                          <i class="fa-solid fa-circle-check"></i>
+                        }
+                      </button>
+                    }
                     <a
                       class="table-action-icon table-action-icon--primary"
                       [routerLink]="['/maintenance', row.id, 'edit']"
@@ -70,15 +86,6 @@
                       [title]="'Edit' | translate"
                     >
                       <i class="fa-solid fa-pen-to-square"></i>
-                    </a>
-                    <a
-                      class="table-action-icon table-action-icon--primary"
-                      [routerLink]="['/maintenance', row.id, 'edit']"
-                      [queryParams]="{ section: 'spare-parts' }"
-                      [attr.aria-label]="'maintenance.sparePart.inlineTitle' | translate"
-                      [title]="'maintenance.sparePart.inlineTitle' | translate"
-                    >
-                      <i class="fa-solid fa-screwdriver-wrench"></i>
                     </a>
                     <button
                       type="button"

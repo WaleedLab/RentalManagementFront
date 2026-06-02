@@ -14,7 +14,7 @@
 }
 
 :host ::ng-deep .security-overview__list .list-group-item {
-  background: color-mix(in srgb, var(--fin-input-bg, #fff) 88%, transparent);
-  border-color: var(--fin-border, rgba(71, 85, 105, 0.14));
+  background: color-mix(in srgb, var(--fin-input-bg, var(--c-ffffff)) 88%, transparent);
+  border-color: var(--fin-border, rgba(var(--c-475569-rgb), 0.14));
   color: var(--fin-text, inherit);
 }

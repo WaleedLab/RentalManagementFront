@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { AuthStateService } from '../../../../core/auth/auth-state.service';
 import { ConfirmService } from '../../../../shared/services/confirm.service';
@@ -20,6 +21,10 @@ import {
 } from '../../../../shared/ui/smooth-select/smooth-select.component';
 import { MaintenanceBranchOption } from '../../models/branch-reference.model';
 import { Maintenance } from '../../models/maintenance.model';
+import {
+  MaintenanceAcceptDialogComponent,
+  MaintenanceAcceptDialogResult,
+} from '../maintenance-accept-dialog/maintenance-accept-dialog.component';
 import { MaintenanceBranchService } from '../../services/maintenance-branch.service';
 import { MaintenanceService } from '../../services/maintenance.service';
 
@@ -48,6 +53,7 @@ export class MaintenanceListComponent implements OnInit {
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
   private confirm = inject(ConfirmService);
+  private modal = inject(NgbModal);
 
   rows = signal<Maintenance[]>([]);
   branches = signal<MaintenanceBranchOption[]>([]);
@@ -60,6 +66,7 @@ export class MaintenanceListComponent implements OnInit {
   search = signal('');
   branchId = signal<number | ''>('');
   deletingIds = signal<string[]>([]);
+  acceptingIds = signal<string[]>([]);
   private readonly languageTick = signal(0);
 
   branchFilterOptions = computed<SmoothSelectOption[]>(() => {
@@ -150,6 +157,55 @@ export class MaintenanceListComponent implements OnInit {
     this.load();
   }
 
+  canAccept(row: Maintenance): boolean {
+    return !row.isAcceptable;
+  }
+
+  isAccepting(id: string): boolean {
+    return this.acceptingIds().includes(id);
+  }
+
+  openAcceptDialog(row: Maintenance): void {
+    const fleetId = this.authState.fleetId()?.trim();
+    if (!fleetId) {
+      this.toast.error(this.translate.instant('FleetId is required'));
+      return;
+    }
+
+    const modalRef = this.modal.open(MaintenanceAcceptDialogComponent, {
+      centered: true,
+      windowClass: 'maintenance-accept-modal',
+    });
+
+    const label = row.plateNumber || `#${row.id}`;
+    modalRef.componentInstance.title = this.translate.instant('maintenance.accept.title');
+    modalRef.componentInstance.message = this.translate.instant('maintenance.accept.message', {
+      vehicle: label,
+    });
+    modalRef.componentInstance.plateNumber = label;
+    modalRef.componentInstance.maintenanceId = row.id;
+    modalRef.componentInstance.fleetId = fleetId;
+
+    const dialog = modalRef.componentInstance as MaintenanceAcceptDialogComponent;
+    dialog.result.subscribe((payload: MaintenanceAcceptDialogResult) => {
+      if (!payload) {
+        return;
+      }
+
+      this.acceptingIds.update(ids => [...ids, row.id]);
+      this.api.acceptable(payload).subscribe({
+        next: () => {
+          this.toast.success(this.translate.instant('maintenance.accept.success'));
+          this.load();
+        },
+        error: err =>
+          this.toast.error(err?.message ?? this.translate.instant('maintenance.accept.failed')),
+        complete: () =>
+          this.acceptingIds.update(ids => ids.filter(id => id !== row.id)),
+      });
+    });
+  }
+
   deleteRow(row: Maintenance): void {
     const fleetId = this.authState.fleetId()?.trim();
     if (!fleetId) {
@@ -207,10 +263,25 @@ export class MaintenanceListComponent implements OnInit {
       : branch.nameEn || branch.nameAr || String(branch.id);
   }
 
-  statusLabel(status: number): string {
-    const key = `maintenance.status.${status}`;
-    const translated = this.translate.instant(key);
-    return translated !== key ? translated : String(status);
+  statusLabel(status: number | string | unknown): string {
+    if (typeof status === 'string' && status.trim()) {
+      const nameKey = `maintenance.statusName.${status}`;
+      const named = this.translate.instant(nameKey);
+      if (named !== nameKey) {
+        return named;
+      }
+    }
+
+    const numeric = typeof status === 'number' ? status : Number(status);
+    if (Number.isFinite(numeric)) {
+      const key = `maintenance.status.${numeric}`;
+      const translated = this.translate.instant(key);
+      if (translated !== key) {
+        return translated;
+      }
+    }
+
+    return String(status ?? '-');
   }
 
   isDeleting(id: string): boolean {

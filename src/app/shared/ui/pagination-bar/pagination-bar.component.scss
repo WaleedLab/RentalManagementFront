@@ -11,12 +11,12 @@
 
 /* Default = dark “Midnight” strip (matches body.dark-only reference bar) */
 .app-pagination-bar {
-  --pb-bg: linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(2, 6, 23, 0.94));
-  --pb-border: rgba(51, 65, 85, 0.55);
-  --pb-surface: rgba(30, 41, 59, 0.75);
-  --pb-surface-2: rgba(15, 23, 42, 0.65);
-  --pb-text: #f8fafc;
-  --pb-muted: #94a3b8;
+  --pb-bg: linear-gradient(180deg, rgba(var(--c-111827-rgb), 0.98), rgba(var(--c-020617-rgb), 0.94));
+  --pb-border: rgba(var(--c-334155-rgb), 0.55);
+  --pb-surface: rgba(var(--c-1e293b-rgb), 0.75);
+  --pb-surface-2: rgba(var(--c-0f172a-rgb), 0.65);
+  --pb-text: var(--c-f8fafc);
+  --pb-muted: var(--c-94a3b8);
 
   margin-top: 1rem;
   padding: 0.75rem 1rem;
@@ -30,8 +30,8 @@
   flex-wrap: wrap;
   color: var(--pb-text);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 12px 36px -20px rgba(0, 0, 0, 0.5);
+    inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.04),
+    0 12px 36px -20px rgba(var(--rt-shadow-rgb), 0.5);
 }
 
 .app-pagination-bar__meta {
@@ -61,29 +61,29 @@
 .app-pagination-bar__btn {
   min-width: 90px;
   border-radius: 10px;
-  border: 1px solid rgba(71, 85, 105, 0.45);
+  border: 1px solid rgba(var(--c-475569-rgb), 0.45);
   background: linear-gradient(180deg, var(--pb-surface), var(--pb-surface-2));
   color: var(--pb-text);
   font-weight: 700;
   font-size: 0.82rem;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.05);
 }
 
 .app-pagination-bar__btn:hover:not(:disabled) {
-  border-color: rgba(100, 116, 139, 0.55);
-  background: linear-gradient(180deg, rgba(51, 65, 85, 0.85), rgba(30, 41, 59, 0.8));
+  border-color: rgba(var(--c-64748b-rgb), 0.55);
+  background: linear-gradient(180deg, rgba(var(--c-334155-rgb), 0.85), rgba(var(--c-1e293b-rgb), 0.8));
 }
 
 .app-pagination-bar__btn--next:not(:disabled) {
-  border-color: rgba(34, 211, 238, 0.35);
-  background: linear-gradient(180deg, rgba(8, 51, 68, 0.9), rgba(15, 23, 42, 0.85));
+  border-color: rgba(var(--c-22d3ee-rgb), 0.35);
+  background: linear-gradient(180deg, rgba(var(--c-083344-rgb), 0.9), rgba(var(--c-0f172a-rgb), 0.85));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 0 20px rgba(34, 211, 238, 0.12);
+    inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.06),
+    0 0 20px rgba(var(--c-22d3ee-rgb), 0.12);
 }
 
 .app-pagination-bar__btn--next:hover:not(:disabled) {
-  border-color: rgba(34, 211, 238, 0.5);
+  border-color: rgba(var(--c-22d3ee-rgb), 0.5);
   filter: brightness(1.06);
 }
 
@@ -91,8 +91,8 @@
   opacity: 0.45;
   cursor: not-allowed;
   color: var(--pb-muted);
-  border-color: rgba(51, 65, 85, 0.35);
-  background: rgba(15, 23, 42, 0.45);
+  border-color: rgba(var(--c-334155-rgb), 0.35);
+  background: rgba(var(--c-0f172a-rgb), 0.45);
   box-shadow: none;
 }
 
@@ -101,8 +101,8 @@
   text-align: center;
   padding: 0.42rem 0.7rem;
   border-radius: 10px;
-  border: 1px solid rgba(71, 85, 105, 0.45);
-  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(var(--c-475569-rgb), 0.45);
+  background: rgba(var(--c-0f172a-rgb), 0.55);
   font-size: 0.82rem;
   font-weight: 800;
   color: var(--pb-text);
@@ -146,43 +146,43 @@
 :host-context(body.light-only),
 :host-context([data-bs-theme='light']) {
   .app-pagination-bar {
-    --pb-bg: linear-gradient(165deg, rgba(248, 250, 252, 0.96), rgba(241, 245, 249, 0.9));
-    --pb-border: rgba(148, 163, 184, 0.22);
-    --pb-surface: rgba(255, 255, 255, 0.92);
-    --pb-surface-2: rgba(243, 246, 250, 0.88);
-    --pb-text: #0f172a;
-    --pb-muted: #64748b;
+    --pb-bg: linear-gradient(165deg, rgba(var(--c-f8fafc-rgb), 0.96), rgba(var(--c-f1f5f9-rgb), 0.9));
+    --pb-border: rgba(var(--c-94a3b8-rgb), 0.22);
+    --pb-surface: rgba(var(--c-ffffff-rgb), 0.92);
+    --pb-surface-2: rgba(var(--c-f3f6fa-rgb), 0.88);
+    --pb-text: var(--c-0f172a);
+    --pb-muted: var(--c-64748b);
 
-    box-shadow: 0 10px 26px -20px rgba(15, 23, 42, 0.12);
+    box-shadow: 0 10px 26px -20px rgba(var(--rt-shadow-rgb), 0.12);
   }
 
   .app-pagination-bar__btn {
-    border-color: rgba(148, 163, 184, 0.28);
+    border-color: rgba(var(--c-94a3b8-rgb), 0.28);
     background: linear-gradient(180deg, var(--pb-surface), var(--pb-surface-2));
     color: var(--pb-text);
   }
 
   .app-pagination-bar__btn:hover:not(:disabled) {
-    border-color: rgba(100, 116, 139, 0.38);
-    background: linear-gradient(180deg, #ffffff, rgba(248, 250, 252, 0.96));
+    border-color: rgba(var(--c-64748b-rgb), 0.38);
+    background: linear-gradient(180deg, var(--c-ffffff), rgba(var(--c-f8fafc-rgb), 0.96));
   }
 
   .app-pagination-bar__btn--next:not(:disabled) {
-    border-color: rgba(59, 130, 246, 0.35);
-    background: linear-gradient(180deg, rgba(239, 246, 255, 0.95), rgba(248, 250, 252, 0.92));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    border-color: rgba(var(--c-3b82f6-rgb), 0.35);
+    background: linear-gradient(180deg, rgba(var(--c-eff6ff-rgb), 0.95), rgba(var(--c-f8fafc-rgb), 0.92));
+    box-shadow: inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.65);
   }
 
   .app-pagination-bar__btn:disabled {
-    color: rgba(100, 116, 139, 0.75);
-    border-color: rgba(203, 213, 225, 0.55);
-    background: rgba(248, 250, 252, 0.65);
+    color: rgba(var(--c-64748b-rgb), 0.75);
+    border-color: rgba(var(--c-cbd5e1-rgb), 0.55);
+    background: rgba(var(--c-f8fafc-rgb), 0.65);
     opacity: 1;
   }
 
   .app-pagination-bar__current {
-    border-color: rgba(148, 163, 184, 0.28);
-    background: rgba(255, 255, 255, 0.75);
+    border-color: rgba(var(--c-94a3b8-rgb), 0.28);
+    background: rgba(var(--c-ffffff-rgb), 0.75);
     color: var(--pb-text);
   }
 }

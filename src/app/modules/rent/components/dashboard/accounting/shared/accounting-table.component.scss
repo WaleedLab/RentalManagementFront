@@ -14,7 +14,7 @@
   margin-top: 12px;
   height: 220px;
   border-radius: 12px;
-  background: linear-gradient(90deg, rgba(148, 163, 184, 0.16), rgba(148, 163, 184, 0.32), rgba(148, 163, 184, 0.16));
+  background: linear-gradient(90deg, rgba(var(--c-94a3b8-rgb), 0.16), rgba(var(--c-94a3b8-rgb), 0.32), rgba(var(--c-94a3b8-rgb), 0.16));
   background-size: 200% 100%;
   animation: shimmer 1.1s infinite;
 }

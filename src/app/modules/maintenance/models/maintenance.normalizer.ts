@@ -35,6 +35,13 @@ function toOptionalLong(value: unknown): number | null {
   return n !== undefined && n > 0 ? n : null;
 }
 
+function normalizeMaintenanceStatus(value: unknown): number | string {
+  if (typeof value === 'string' && value.trim()) {
+    return value.trim();
+  }
+  return toNumber(value) ?? 0;
+}
+
 function toBool(value: unknown): boolean {
   if (typeof value === 'boolean') return value;
   if (typeof value === 'number') return value !== 0;
@@ -111,7 +118,7 @@ export function normalizeMaintenance(raw: unknown): Maintenance {
     typeCompensation: String(pickLoose(r, 'typeCompensation', 'TypeCompensation') ?? '').trim() || undefined,
     note: String(pickLoose(r, 'note', 'Note') ?? '').trim() || undefined,
     valueCompensation: toNumber(pickLoose(r, 'valueCompensation', 'ValueCompensation')) ?? 0,
-    status: toNumber(pickLoose(r, 'status', 'Status')) ?? 0,
+    status: normalizeMaintenanceStatus(pickLoose(r, 'status', 'Status')),
     isAcceptable: toBool(pickLoose(r, 'isAcceptable', 'IsAcceptable')),
     fleetId: String(pickLoose(r, 'fleetId', 'FleetId') ?? '').trim() || undefined,
     url: String(pickLoose(r, 'url', 'Url') ?? '').trim() || undefined,

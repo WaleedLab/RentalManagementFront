@@ -30,61 +30,61 @@ body.dark-only .fin-command {
 /* Light theme — force readable text (beats global button/input resets). */
 body.light-only .fin-command .app-soft-select__trigger,
 body.light-only .fin-command .app-soft-select__trigger .app-soft-select__label {
-  color: #0f172a !important;
-  -webkit-text-fill-color: #0f172a !important;
+  color: var(--c-0f172a) !important;
+  -webkit-text-fill-color: var(--c-0f172a) !important;
 }
 
 body.light-only .fin-command .app-soft-select__menu {
-  color: #0f172a !important;
+  color: var(--c-0f172a) !important;
 }
 
 body.light-only .fin-command .app-soft-select__option:not(.is-selected) {
-  color: #0f172a !important;
-  -webkit-text-fill-color: #0f172a !important;
+  color: var(--c-0f172a) !important;
+  -webkit-text-fill-color: var(--c-0f172a) !important;
 }
 
 body.light-only .fin-command .app-soft-select__option.is-selected {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  background-color: #0f766e !important;
+  color: var(--c-ffffff) !important;
+  -webkit-text-fill-color: var(--c-ffffff) !important;
+  background-color: var(--c-0f766e) !important;
   background-image: linear-gradient(
     to inline-end,
-    #1e293b 0%,
-    #134e4a 40%,
-    #0f766e 70%,
-    #14b8a6 100%
+    var(--c-1e293b) 0%,
+    var(--c-134e4a) 40%,
+    var(--c-0f766e) 70%,
+    var(--c-14b8a6) 100%
   ) !important;
 }
 
 body.light-only .fin-command .app-soft-select__search {
-  color: #0f172a !important;
-  -webkit-text-fill-color: #0f172a !important;
-  background: #ffffff !important;
+  color: var(--c-0f172a) !important;
+  -webkit-text-fill-color: var(--c-0f172a) !important;
+  background: var(--c-ffffff) !important;
 }
 
 body.light-only .fin-command .app-soft-select__search::placeholder {
-  color: #64748b !important;
+  color: var(--c-64748b) !important;
   opacity: 1 !important;
 }
 
 body.light-only .app-soft-select__trigger,
 body.light-only .app-soft-select__trigger .app-soft-select__label {
-  color: #0f172a !important;
-  -webkit-text-fill-color: #0f172a !important;
+  color: var(--c-0f172a) !important;
+  -webkit-text-fill-color: var(--c-0f172a) !important;
 }
 
 body.light-only .app-soft-select__option:not(.is-selected) {
-  color: #0f172a !important;
+  color: var(--c-0f172a) !important;
 }
 
 body.light-only .app-soft-select__option.is-selected {
-  color: #ffffff !important;
-  background-color: #0f766e !important;
+  color: var(--c-ffffff) !important;
+  background-color: var(--c-0f766e) !important;
 }
 
 body.light-only .app-soft-select__search {
-  color: #0f172a !important;
-  -webkit-text-fill-color: #0f172a !important;
+  color: var(--c-0f172a) !important;
+  -webkit-text-fill-color: var(--c-0f172a) !important;
 }
 
 .fin-command:has(app-smooth-select.app-smooth-select-host--open),
@@ -122,17 +122,17 @@ body.light-only .app-soft-select__search {
   border-radius: 999px;
   padding-inline: 16px;
   text-decoration: none;
-  background: var(--fin-btn-action-bg, #ffffff) !important;
-  color: var(--fin-btn-action-fg, #0d9488) !important;
-  border: 1px solid var(--fin-btn-action-border, rgba(45, 212, 191, 0.55)) !important;
+  background: var(--fin-btn-action-bg, var(--c-ffffff)) !important;
+  color: var(--fin-btn-action-fg, var(--c-0d9488)) !important;
+  border: 1px solid var(--fin-btn-action-border, rgba(var(--c-2dd4bf-rgb), 0.55)) !important;
   box-shadow: var(--fin-btn-action-shadow) !important;
   filter: none !important;
 }
 
 .fin-command .fin-command__actions .fin-btn--primary:hover:not(:disabled),
 .fin-command .fin-command__actions a.fin-btn--primary:hover {
-  background: var(--fin-btn-action-bg-hover, var(--fin-btn-action-bg, #f0fdfa)) !important;
-  color: var(--fin-btn-action-fg-hover, var(--fin-btn-action-fg, #0f766e)) !important;
+  background: var(--fin-btn-action-bg-hover, var(--fin-btn-action-bg, var(--c-f0fdfa))) !important;
+  color: var(--fin-btn-action-fg-hover, var(--fin-btn-action-fg, var(--c-0f766e))) !important;
   border-color: var(--fin-btn-action-border-hover, var(--fin-btn-action-border)) !important;
   box-shadow: var(--fin-btn-action-shadow-hover, var(--fin-btn-action-shadow)) !important;
   filter: none !important;
@@ -146,8 +146,8 @@ body.light-only .app-soft-select__search {
   align-items: stretch;
   min-height: 40px;
   border-radius: 12px;
-  border: 1px solid var(--fin-border, rgba(71, 85, 105, 0.14));
-  background: var(--fin-input-bg, #fff);
+  border: 1px solid var(--fin-border, rgba(var(--c-475569-rgb), 0.14));
+  background: var(--fin-input-bg, var(--c-ffffff));
   overflow: hidden;
   transition:
     border-color 0.2s ease,
@@ -157,8 +157,8 @@ body.light-only .app-soft-select__search {
 .fin-command .fin-search-group:focus-within,
 .fin-command .list-search:focus-within,
 .fin-command .booking-search:focus-within {
-  border-color: color-mix(in srgb, var(--fin-accent, #059669) 45%, transparent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--fin-accent, #059669) 18%, transparent);
+  border-color: color-mix(in srgb, var(--fin-accent, var(--c-059669)) 45%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--fin-accent, var(--c-059669)) 18%, transparent);
 }
 
 .fin-command .fin-search-group__lead {
@@ -167,7 +167,7 @@ body.light-only .app-soft-select__search {
   justify-content: center;
   flex: 0 0 auto;
   padding-inline: 12px 6px;
-  color: var(--fin-muted, #64748b);
+  color: var(--fin-muted, var(--c-64748b));
   font-size: 0.9rem;
   pointer-events: none;
 }
@@ -184,13 +184,13 @@ body.light-only .app-soft-select__search {
   box-shadow: none;
   padding-block: 8px;
   padding-inline: 4px 8px;
-  color: var(--fin-text, #0f172a);
+  color: var(--fin-text, var(--c-0f172a));
 }
 
 .fin-command .fin-search-group .fin-input::placeholder,
 .fin-command .list-search .fin-input::placeholder,
 .fin-command .booking-search .fin-input::placeholder {
-  color: color-mix(in srgb, var(--fin-muted, #64748b) 82%, transparent);
+  color: color-mix(in srgb, var(--fin-muted, var(--c-64748b)) 82%, transparent);
 }
 
 .fin-command .fin-search-group .fin-input:focus,
@@ -220,13 +220,13 @@ body.light-only .app-soft-select__search {
 .fin-command .fin-search-group__btn.fin-btn--primary,
 .fin-command .list-search .fin-btn.fin-btn--primary,
 .fin-command .booking-search .fin-btn.fin-btn--primary {
-  background-color: #0f766e !important;
+  background-color: var(--c-0f766e) !important;
   background-image: var(--fin-btn-search-bg, var(--fin-btn-primary-bg)) !important;
   background-size: 100% 100% !important;
   background-repeat: no-repeat !important;
-  color: var(--fin-btn-search-fg, var(--fin-btn-primary-fg, #fff)) !important;
+  color: var(--fin-btn-search-fg, var(--fin-btn-primary-fg, var(--c-ffffff))) !important;
   border: 0;
-  border-inline-start: 1px solid var(--fin-btn-search-border, var(--fin-btn-primary-border, rgba(45, 212, 191, 0.45))) !important;
+  border-inline-start: 1px solid var(--fin-btn-search-border, var(--fin-btn-primary-border, rgba(var(--c-2dd4bf-rgb), 0.45))) !important;
   box-shadow: var(--fin-btn-search-shadow, none);
 }
 
@@ -234,7 +234,7 @@ body.light-only .app-soft-select__search {
 .fin-command .list-search .fin-btn.fin-btn--primary:hover:not(:disabled),
 .fin-command .booking-search .fin-btn.fin-btn--primary:hover:not(:disabled) {
   filter: brightness(1.08);
-  box-shadow: var(--fin-btn-search-shadow, 0 2px 10px rgba(13, 148, 136, 0.28));
+  box-shadow: var(--fin-btn-search-shadow, 0 2px 10px rgba(var(--c-0d9488-rgb), 0.28));
 }
 
 .fin-command .fin-search-group__btn.fin-btn--primary .fin-search-group__label,
@@ -245,17 +245,17 @@ body.light-only .app-soft-select__search {
 body.light-only .fin-command .fin-search-group__btn.fin-btn--primary,
 body.light-only .fin-command .list-search .fin-btn.fin-btn--primary,
 body.light-only .fin-command .booking-search .fin-btn.fin-btn--primary {
-  background-color: #0f766e !important;
+  background-color: var(--c-0f766e) !important;
   background-image: linear-gradient(
     to inline-end,
-    #1e293b 0%,
-    #134e4a 38%,
-    #0f766e 68%,
-    #14b8a6 100%
+    var(--c-1e293b) 0%,
+    var(--c-134e4a) 38%,
+    var(--c-0f766e) 68%,
+    var(--c-14b8a6) 100%
   ) !important;
-  color: #ffffff !important;
-  border-inline-start-color: rgba(45, 212, 191, 0.55) !important;
-  box-shadow: 0 2px 10px rgba(13, 148, 136, 0.28) !important;
+  color: var(--c-ffffff) !important;
+  border-inline-start-color: rgba(var(--c-2dd4bf-rgb), 0.55) !important;
+  box-shadow: 0 2px 10px rgba(var(--c-0d9488-rgb), 0.28) !important;
 }
 
 .fin-command .fin-search-group__lead {

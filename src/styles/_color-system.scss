@@ -1,0 +1,1092 @@
+// =============================================================================
+//  RENTAL MANAGEMENT — SINGLE SOURCE OF TRUTH COLOR SYSTEM
+// -----------------------------------------------------------------------------
+//  Premium automotive SaaS palette (Light + Dark), inspired by Stripe / Linear /
+//  Salesforce / modern fleet platforms. Brand: Fleet Blue + Emerald + Graphite.
+//
+//  ⚠️  EDIT COLORS ONLY HERE.
+//  Every global surface, button, table, form, status and chart color in the app
+//  resolves from the tokens below. Change a value once and it cascades app-wide.
+//
+//  How it works:
+//   1. "RAW PALETTE" tokens (--rt-*) are the human-friendly knobs you edit.
+//   2. "APP MAPPING" tokens (--app-*) are what the existing global CSS already
+//      consumes; they simply point back at the raw palette via var().
+//   Selectors use slightly higher specificity (html:root / html body.dark-only)
+//   so this file always wins over legacy declarations without editing them.
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+//  LIGHT THEME — "Graphite Steel" enterprise palette
+//  Philosophy: a cool graphite-tinted off-white canvas (never pure #fff) with
+//  layered surfaces builds hierarchy through elevation, not borders. Steel-blue
+//  is the trust/brand anchor; emerald = positive/available; soft cyan = tech
+//  accent. Hues are desaturated enough for all-day reading (no neon).
+// -----------------------------------------------------------------------------
+html:root,
+html body.light-only {
+  color-scheme: light;
+
+  /* ============================ RAW PALETTE ============================= */
+
+  /* Brand */
+  --rt-brand-midnight: #0e1a2b; /* deepest brand graphite-navy */
+  --rt-brand-primary: #2563a8; /* Steel Blue — primary action */
+  --rt-brand-primary-strong: #1c4e86; /* pressed / borders           */
+  --rt-brand-primary-soft: #2f74c0; /* gradient top                */
+  --rt-brand-secondary: #33485f; /* Graphite Steel — secondary  */
+  --rt-brand-accent: #0f9d74; /* Emerald                     */
+  --rt-brand-cyan: #3fa9c9; /* Soft Cyan accent            */
+
+  /* Surfaces — no pure black/white; elevation via subtle steps */
+  --rt-bg: #f3f6fb; /* App background          */
+  --rt-bg-secondary: #e9eff6; /* Surface background      */
+  --rt-surface: #fbfcfe; /* Generic surface         */
+  --rt-sidebar-bg: #0e1a2b; /* Sidebar (premium dark)  */
+  --rt-header-bg: #fbfcfe; /* Header                  */
+  --rt-card-bg: #fbfdff; /* Cards                   */
+  --rt-card-elevated-bg: #fdfeff; /* Elevated cards          */
+  --rt-table-bg: #fcfdff; /* Tables                  */
+  --rt-table-header-bg: #ecf1f8; /* Table / sticky header   */
+  --rt-input-bg: #fcfdff; /* Inputs                  */
+  --rt-dropdown-bg: #fcfdff; /* Dropdowns               */
+  --rt-modal-bg: #fcfdff; /* Modals                  */
+  --rt-tooltip-bg: #16263f; /* Tooltip (inverse)       */
+  --rt-tooltip-text: #edf2f8;
+  --rt-hover-bg: #eef3f9; /* Hover surface           */
+  --rt-border: #dce4ee; /* Borders                 */
+  --rt-divider: #e7edf5; /* Dividers                */
+
+  /* Text — graphite-navy, not pure black */
+  --rt-text: #16243a; /* Primary   */
+  --rt-text-secondary: #45566e; /* Secondary */
+  --rt-text-muted: #5c6a80; /* Muted (AA: 5.06:1)  */
+  --rt-text-disabled: #748196; /* Disabled (3.0:1+)   */
+  --rt-link: #2563a8; /* Link      */
+  --rt-link-hover: #1c4e86;
+
+  /* Status — WCAG-aware, colorblind-differentiated (hue + lightness) */
+  --rt-success: #0f9d74;
+  --rt-warning: #a86a08; /* darkened amber for AA on light */
+  --rt-error: #d23b3b;
+  --rt-info: #2f74c0;
+
+  /* Vehicle status */
+  --rt-vehicle-available: #0f9d74; /* Emerald */
+  --rt-vehicle-reserved: #a86a08; /* Amber   */
+  --rt-vehicle-rented: #2563a8; /* Steel   */
+  --rt-vehicle-maintenance: #7a5af8; /* Violet  */
+  --rt-vehicle-out: #64748b; /* Slate   */
+
+  /* Booking status */
+  --rt-booking-draft: #8090a4; /* Slate    */
+  --rt-booking-pending: #a86a08; /* Amber    */
+  --rt-booking-confirmed: #2563a8; /* Steel    */
+  --rt-booking-active: #0f9d74; /* Emerald  */
+  --rt-booking-completed: #137a6b; /* Teal     */
+  --rt-booking-cancelled: #d23b3b; /* Red      */
+
+  /* Accounting */
+  --rt-acc-income: #0f9d74; /* Emerald */
+  --rt-acc-expense: #d23b3b; /* Red     */
+  --rt-acc-refund: #7a5af8; /* Violet  */
+  --rt-acc-outstanding: #a86a08; /* Amber   */
+
+  /* Charts — 12 harmonious, evenly-spaced, theme-shared hues */
+  --rt-chart-1: #2563a8;
+  --rt-chart-2: #0f9d74;
+  --rt-chart-3: #d08a0a;
+  --rt-chart-4: #7a5af8;
+  --rt-chart-5: #3fa9c9;
+  --rt-chart-6: #0f766e;
+  --rt-chart-7: #e0608a;
+  --rt-chart-8: #4f5bd5;
+  --rt-chart-9: #5fa83c;
+  --rt-chart-10: #64748b;
+  --rt-chart-11: #2f8fd0;
+  --rt-chart-12: #9d5bc0;
+
+  /* RGB helpers for alpha tints */
+  --rt-brand-primary-rgb: 37, 99, 168;
+  --rt-accent-rgb: 15, 157, 116;
+  --rt-cyan-rgb: 63, 169, 201;
+  --rt-text-rgb: 22, 36, 58;
+  --rt-success-rgb: 15, 157, 116;
+  --rt-warning-rgb: 168, 106, 8;
+  --rt-error-rgb: 210, 59, 59;
+  --rt-info-rgb: 47, 116, 192;
+
+  /* Unified shadow color — light uses graphite ink for soft depth */
+  --rt-shadow-rgb: 22, 36, 58;
+
+  /* Table state system */
+  --rt-table-row: var(--rt-table-bg);
+  --rt-table-row-alt: #f4f8fc;
+  --rt-table-row-hover: rgba(var(--rt-brand-primary-rgb), 0.06);
+  --rt-table-row-selected: rgba(var(--rt-accent-rgb), 0.12);
+  --rt-table-row-active: rgba(var(--rt-brand-primary-rgb), 0.12);
+  --rt-table-sticky-header: var(--rt-table-header-bg);
+  --rt-table-sort-indicator: var(--rt-brand-primary);
+
+  /* Form state system */
+  --rt-input-border: var(--rt-border);
+  --rt-input-hover-border: rgba(var(--rt-brand-primary-rgb), 0.45);
+  --rt-input-focus-border: var(--rt-brand-primary);
+  --rt-input-focus-ring: rgba(var(--rt-brand-primary-rgb), 0.18);
+  --rt-input-error-border: var(--rt-error);
+  --rt-input-success-border: var(--rt-success);
+  --rt-input-disabled-bg: #eef2f7;
+
+  /* ===================== APP MAPPING (consumed globally) ================= */
+  --app-table-border-color: rgba(var(--rt-text-rgb), 0.1);
+  --app-table-surface: linear-gradient(180deg, var(--rt-card-elevated-bg) 0%, var(--rt-bg) 100%);
+  --app-table-head-bg: var(--rt-table-header-bg);
+  --app-table-head-color: var(--rt-text-secondary);
+  --app-table-text-color: var(--rt-text);
+  --app-table-muted-color: var(--rt-text-muted);
+  --app-table-row-alt: var(--rt-table-row-alt);
+  --app-table-row-hover: var(--rt-table-row-hover);
+  --app-table-shadow: 0 18px 40px -32px rgba(var(--rt-shadow-rgb), 0.26);
+  --app-table-action-surface: var(--rt-card-elevated-bg);
+
+  --app-form-hint-color: var(--rt-text-muted);
+  --app-form-label-color: var(--rt-text);
+  --app-form-placeholder-color: var(--rt-text-muted);
+  --app-form-empty-bg: rgba(var(--rt-text-rgb), 0.015);
+  --app-form-empty-border: rgba(var(--rt-text-rgb), 0.22);
+  --app-form-empty-text: var(--rt-text-muted);
+  --app-form-filled-bg: rgba(var(--rt-brand-primary-rgb), 0.065);
+  --app-form-filled-border: rgba(var(--rt-brand-primary-rgb), 0.35);
+  --app-form-filled-text: var(--rt-text);
+  --app-form-readonly-bg: rgba(var(--rt-text-rgb), 0.04);
+
+  --app-btn-primary-bg: linear-gradient(135deg, var(--rt-brand-primary-soft) 0%, var(--rt-brand-primary) 52%, var(--rt-brand-primary-strong) 100%);
+  --app-btn-primary-bg-hover: linear-gradient(135deg, #3784cf 0%, #2868ad 52%, #214f87 100%);
+  --app-btn-primary-border: var(--rt-brand-primary);
+  --app-btn-primary-shadow: 0 10px 18px -14px rgba(var(--rt-brand-primary-rgb), 0.48);
+  --app-btn-primary-shadow-hover: 0 14px 24px -12px rgba(var(--rt-brand-primary-rgb), 0.58);
+  --app-btn-outline-bg: linear-gradient(135deg, rgba(var(--rt-text-rgb), 0.02), rgba(var(--rt-brand-primary-rgb), 0.04));
+  --app-btn-outline-bg-hover: linear-gradient(135deg, rgba(var(--rt-brand-primary-rgb), 0.08), rgba(var(--rt-brand-primary-rgb), 0.12));
+  --app-btn-outline-border: rgba(var(--rt-brand-primary-rgb), 0.5);
+  --app-btn-outline-border-hover: rgba(var(--rt-brand-primary-rgb), 0.78);
+  --app-btn-outline-text: var(--rt-brand-primary);
+  --app-btn-outline-text-hover: var(--rt-brand-primary-strong);
+  --app-btn-outline-shadow: 0 8px 16px -14px rgba(var(--rt-brand-primary-rgb), 0.22);
+  --app-btn-outline-shadow-hover: 0 12px 20px -12px rgba(var(--rt-brand-primary-rgb), 0.32);
+  --app-btn-focus-ring: 0 0 0 0.18rem rgba(var(--rt-brand-primary-rgb), 0.24);
+  --app-btn-focus-shadow: 0 10px 18px -14px rgba(var(--rt-brand-primary-rgb), 0.42);
+}
+
+// -----------------------------------------------------------------------------
+//  DARK THEME — "Midnight Graphite" (belongs to the same brand)
+//  Philosophy: deep graphite-navy surfaces (never pure black) with clearly
+//  stepped card elevation so data tables/forms separate from the background.
+//  Text is soft off-white (#E7EEF6) to cut halation; brand hues are lightened
+//  for AA contrast. Same identity as light, tuned for low-glare night work.
+// -----------------------------------------------------------------------------
+html body.dark-only,
+html[data-bs-theme='dark'] {
+  color-scheme: dark;
+
+  /* ============================ RAW PALETTE ============================= */
+
+  /* Brand (lightened for contrast on dark surfaces) */
+  --rt-brand-midnight: #0a1420;
+  --rt-brand-primary: #3e86cb; /* Steel Blue (light) */
+  --rt-brand-primary-strong: #2f6fb0;
+  --rt-brand-primary-soft: #4e97dc;
+  --rt-brand-secondary: #2c415a; /* Graphite Steel */
+  --rt-brand-accent: #18b889; /* Emerald        */
+  --rt-brand-cyan: #5ac4e0; /* Soft Cyan      */
+
+  /* Surfaces — stepped elevation, no washed-out grey, no pure black */
+  --rt-bg: #0d1722; /* App background   */
+  --rt-bg-secondary: #111e2c; /* Surface          */
+  --rt-surface: #111e2c;
+  --rt-sidebar-bg: #0a1420; /* Sidebar          */
+  --rt-header-bg: #111e2c; /* Header           */
+  --rt-card-bg: #15263a; /* Cards            */
+  --rt-card-elevated-bg: #1a2e45; /* Elevated cards   */
+  --rt-table-bg: #15263a; /* Tables           */
+  --rt-table-header-bg: #182a3f; /* Sticky header    */
+  --rt-input-bg: #16283c; /* Inputs           */
+  --rt-dropdown-bg: #16283c; /* Dropdowns        */
+  --rt-modal-bg: #16283c; /* Modals           */
+  --rt-tooltip-bg: #20344c; /* Tooltip          */
+  --rt-tooltip-text: #eaf1f8;
+  --rt-hover-bg: #1c3047; /* Hover surface    */
+  --rt-border: #25394f; /* Borders          */
+  --rt-divider: #1e3145; /* Dividers         */
+
+  /* Text — soft off-white, not pure white */
+  --rt-text: #e7eef6; /* Primary   */
+  --rt-text-secondary: #afc0d2; /* Secondary */
+  --rt-text-muted: #8093a6; /* Muted     */
+  --rt-text-disabled: #6a8094; /* Disabled (3.0:1+) */
+  --rt-link: #5ab0e0; /* Link      */
+  --rt-link-hover: #7dc3ec;
+
+  /* Status (brightened so they read on dark) */
+  --rt-success: #18b889;
+  --rt-warning: #e0a23a;
+  --rt-error: #f0625f;
+  --rt-info: #4e97dc;
+
+  /* Vehicle status */
+  --rt-vehicle-available: #18b889;
+  --rt-vehicle-reserved: #e0a23a;
+  --rt-vehicle-rented: #4e97dc;
+  --rt-vehicle-maintenance: #9b87fb;
+  --rt-vehicle-out: #8295a6;
+
+  /* Booking status */
+  --rt-booking-draft: #8295a6;
+  --rt-booking-pending: #e0a23a;
+  --rt-booking-confirmed: #4e97dc;
+  --rt-booking-active: #18b889;
+  --rt-booking-completed: #2bb3a8;
+  --rt-booking-cancelled: #f0625f;
+
+  /* Accounting */
+  --rt-acc-income: #18b889;
+  --rt-acc-expense: #f0625f;
+  --rt-acc-refund: #9b87fb;
+  --rt-acc-outstanding: #e0a23a;
+
+  /* Charts (dark-optimized variants of the same 12 hues) */
+  --rt-chart-1: #4e97dc;
+  --rt-chart-2: #18b889;
+  --rt-chart-3: #e0a23a;
+  --rt-chart-4: #9b87fb;
+  --rt-chart-5: #5ac4e0;
+  --rt-chart-6: #2bb3a8;
+  --rt-chart-7: #ef7fa6;
+  --rt-chart-8: #6e79e6;
+  --rt-chart-9: #84c95b;
+  --rt-chart-10: #8295a6;
+  --rt-chart-11: #56a9e8;
+  --rt-chart-12: #b57bd6;
+
+  /* RGB helpers */
+  --rt-brand-primary-rgb: 62, 134, 203;
+  --rt-accent-rgb: 24, 184, 137;
+  --rt-cyan-rgb: 90, 196, 224;
+  --rt-text-rgb: 231, 238, 246;
+  --rt-success-rgb: 24, 184, 137;
+  --rt-warning-rgb: 224, 162, 58;
+  --rt-error-rgb: 240, 98, 95;
+  --rt-info-rgb: 78, 151, 220;
+
+  /* Unified shadow color — dark uses true black for deep premium elevation */
+  --rt-shadow-rgb: 0, 0, 0;
+
+  /* Table state system */
+  --rt-table-row: var(--rt-table-bg);
+  --rt-table-row-alt: rgba(var(--rt-text-rgb), 0.04);
+  --rt-table-row-hover: rgba(var(--rt-brand-primary-rgb), 0.12);
+  --rt-table-row-selected: rgba(var(--rt-accent-rgb), 0.16);
+  --rt-table-row-active: rgba(var(--rt-brand-primary-rgb), 0.18);
+  --rt-table-sticky-header: var(--rt-table-header-bg);
+  --rt-table-sort-indicator: var(--rt-brand-cyan);
+
+  /* Form state system */
+  --rt-input-border: var(--rt-border);
+  --rt-input-hover-border: rgba(var(--rt-brand-primary-rgb), 0.5);
+  --rt-input-focus-border: var(--rt-brand-primary);
+  --rt-input-focus-ring: rgba(var(--rt-brand-primary-rgb), 0.28);
+  --rt-input-error-border: var(--rt-error);
+  --rt-input-success-border: var(--rt-success);
+  --rt-input-disabled-bg: rgba(var(--rt-text-rgb), 0.04);
+
+  /* ===================== APP MAPPING (consumed globally) ================= */
+  --app-dark-base: var(--rt-bg);
+  --app-dark-base-rgb: 13, 23, 34;
+  --app-dark-surface: var(--rt-bg-secondary);
+  --app-dark-card: var(--rt-card-bg);
+  --app-dark-accent-emerald: var(--rt-brand-accent);
+  --app-dark-accent-cyan: var(--rt-brand-cyan);
+  --app-dark-text: var(--rt-text);
+  --app-dark-text-secondary: var(--rt-text-secondary);
+  --app-dark-text-muted: var(--rt-text-muted);
+  color: var(--rt-text);
+
+  --app-table-border-color: rgba(var(--rt-accent-rgb), 0.12);
+  --app-table-surface: linear-gradient(180deg, var(--rt-card-bg) 0%, var(--rt-bg) 100%);
+  --app-table-head-bg: var(--rt-table-header-bg);
+  --app-table-head-color: var(--rt-text-secondary);
+  --app-table-text-color: var(--rt-text);
+  --app-table-muted-color: var(--rt-text-muted);
+  --app-table-row-alt: var(--rt-table-row-alt);
+  --app-table-row-hover: var(--rt-table-row-hover);
+  --app-table-shadow: 0 22px 48px -28px rgba(var(--rt-shadow-rgb), 0.55);
+  --app-table-action-surface: var(--rt-input-bg);
+
+  --app-form-hint-color: var(--rt-text-muted);
+  --app-form-label-color: var(--rt-text);
+  --app-form-placeholder-color: var(--rt-text-muted);
+  --app-form-empty-bg: rgba(var(--rt-text-rgb), 0.04);
+  --app-form-empty-border: var(--rt-border);
+  --app-form-empty-text: var(--rt-text-secondary);
+  --app-form-filled-bg: rgba(var(--rt-brand-primary-rgb), 0.16);
+  --app-form-filled-border: rgba(var(--rt-brand-primary-rgb), 0.4);
+  --app-form-filled-text: var(--rt-text);
+  --app-form-readonly-bg: rgba(var(--rt-text-rgb), 0.05);
+
+  /* Steel-only gradient (no emerald stop) so white labels clear AA (≥5:1). */
+  --app-btn-primary-bg: linear-gradient(135deg, #2f72b4 0%, #2a689f 55%, #245a90 110%);
+  --app-btn-primary-bg-hover: linear-gradient(135deg, #2f72b4 0%, #2a689f 50%, #225788 110%);
+  --app-btn-primary-border: rgba(var(--rt-brand-primary-rgb), 0.55);
+  --app-btn-primary-shadow: 0 12px 28px -14px rgba(var(--rt-shadow-rgb), 0.5);
+  --app-btn-primary-shadow-hover: 0 16px 32px -12px rgba(var(--rt-accent-rgb), 0.3);
+  --app-btn-outline-bg: linear-gradient(135deg, rgba(var(--rt-text-rgb), 0.04), rgba(var(--rt-brand-primary-rgb), 0.06));
+  --app-btn-outline-bg-hover: linear-gradient(135deg, rgba(var(--rt-accent-rgb), 0.12), rgba(var(--rt-brand-primary-rgb), 0.1));
+  --app-btn-outline-border: rgba(var(--rt-brand-primary-rgb), 0.4);
+  --app-btn-outline-border-hover: rgba(var(--rt-accent-rgb), 0.5);
+  --app-btn-outline-text: var(--rt-text);
+  --app-btn-outline-text-hover: var(--rt-tooltip-text);
+  --app-btn-outline-shadow: 0 10px 22px -14px rgba(var(--rt-shadow-rgb), 0.45);
+  --app-btn-outline-shadow-hover: 0 14px 28px -12px rgba(var(--rt-accent-rgb), 0.2);
+  --app-btn-focus-ring: 0 0 0 4px rgba(var(--rt-accent-rgb), 0.18);
+  --app-btn-focus-shadow: 0 12px 24px -14px rgba(var(--rt-accent-rgb), 0.2);
+}
+
+// -----------------------------------------------------------------------------
+//  RENTAL VEHICLE STATUS UTILITIES (theme-aware via tokens above)
+//  Use on badges/dots: <span class="rt-badge rt-badge--available">Available</span>
+// -----------------------------------------------------------------------------
+// =============================================================================
+//  LEGACY LITERAL TOKENS (auto-generated by scripts/color-codemod.mjs)
+//  Every previously-hardcoded color in the app now resolves to one of these.
+//  Edit a value here to recolor that hue everywhere it appears.
+//  `--c-<hex>`     = solid color    | `--c-<hex>-rgb` = channels (for rgba()).
+//  Re-running the codemod refreshes everything between the BEGIN/END markers.
+// =============================================================================
+// >>> RT-LEGACY-TOKENS:BEGIN
+:root {
+  --c-000000: #000000;
+  --c-000000-rgb: 0, 0, 0;
+  --c-020617: #020617;
+  --c-020617-rgb: 2, 6, 23;
+  --c-0284c7: #0284c7;
+  --c-0284c7-rgb: 2, 132, 199;
+  --c-030712: #030712;
+  --c-030712-rgb: 3, 7, 18;
+  --c-031018: #031018;
+  --c-031018-rgb: 3, 16, 24;
+  --c-0369a1: #0369a1;
+  --c-0369a1-rgb: 3, 105, 161;
+  --c-040c16: #040c16;
+  --c-040c16-rgb: 4, 12, 22;
+  --c-041338: #041338;
+  --c-041338-rgb: 4, 19, 56;
+  --c-047857: #047857;
+  --c-047857-rgb: 4, 120, 87;
+  --c-050816: #050816;
+  --c-050816-rgb: 5, 8, 22;
+  --c-051a28: #051a28;
+  --c-051a28-rgb: 5, 26, 40;
+  --c-059669: #059669;
+  --c-059669-rgb: 5, 150, 105;
+  --c-064e3b: #064e3b;
+  --c-064e3b-rgb: 6, 78, 59;
+  --c-065f46: #065f46;
+  --c-065f46-rgb: 6, 95, 70;
+  --c-06b6d4: #06b6d4;
+  --c-06b6d4-rgb: 6, 182, 212;
+  --c-07121d: #07121d;
+  --c-07121d-rgb: 7, 18, 29;
+  --c-071b22: #071b22;
+  --c-071b22-rgb: 7, 27, 34;
+  --c-071e51: #071e51;
+  --c-071e51-rgb: 7, 30, 81;
+  --c-080f20: #080f20;
+  --c-080f20-rgb: 8, 15, 32;
+  --c-082838: #082838;
+  --c-082838-rgb: 8, 40, 56;
+  --c-083344: #083344;
+  --c-083344-rgb: 8, 51, 68;
+  --c-0891b2: #0891b2;
+  --c-0891b2-rgb: 8, 145, 178;
+  --c-0a0e18: #0a0e18;
+  --c-0a0e18-rgb: 10, 14, 24;
+  --c-0a1628: #0a1628;
+  --c-0a1628-rgb: 10, 22, 40;
+  --c-0a1929: #0a1929;
+  --c-0a1929-rgb: 10, 25, 41;
+  --c-0b1923: #0b1923;
+  --c-0b1923-rgb: 11, 25, 35;
+  --c-0b1c28: #0b1c28;
+  --c-0b1c28-rgb: 11, 28, 40;
+  --c-0b4aa8: #0b4aa8;
+  --c-0b4aa8-rgb: 11, 74, 168;
+  --c-0c2d70: #0c2d70;
+  --c-0c2d70-rgb: 12, 45, 112;
+  --c-0c4a6e: #0c4a6e;
+  --c-0c4a6e-rgb: 12, 74, 110;
+  --c-0d9488: #0d9488;
+  --c-0d9488-rgb: 13, 148, 136;
+  --c-0dcaf0: #0dcaf0;
+  --c-0dcaf0-rgb: 13, 202, 240;
+  --c-0e7490: #0e7490;
+  --c-0e7490-rgb: 14, 116, 144;
+  --c-0ea5e9: #0ea5e9;
+  --c-0ea5e9-rgb: 14, 165, 233;
+  --c-0f172a: #0f172a;
+  --c-0f172a-rgb: 15, 23, 42;
+  --c-0f1e2a: #0f1e2a;
+  --c-0f1e2a-rgb: 15, 30, 42;
+  --c-0f2233: #0f2233;
+  --c-0f2233-rgb: 15, 34, 51;
+  --c-0f2332: #0f2332;
+  --c-0f2332-rgb: 15, 35, 50;
+  --c-0f766e: #0f766e;
+  --c-0f766e-rgb: 15, 118, 110;
+  --c-102436: #102436;
+  --c-102436-rgb: 16, 36, 54;
+  --c-102a43: #102a43;
+  --c-102a43-rgb: 16, 42, 67;
+  --c-10b981: #10b981;
+  --c-10b981-rgb: 16, 185, 129;
+  --c-111827: #111827;
+  --c-111827-rgb: 17, 24, 39;
+  --c-115e59: #115e59;
+  --c-115e59-rgb: 17, 94, 89;
+  --c-121824: #121824;
+  --c-121824-rgb: 18, 24, 36;
+  --c-134e4a: #134e4a;
+  --c-134e4a-rgb: 19, 78, 74;
+  --c-14283a: #14283a;
+  --c-14283a-rgb: 20, 40, 58;
+  --c-14532d: #14532d;
+  --c-14532d-rgb: 20, 83, 45;
+  --c-14b8a6: #14b8a6;
+  --c-14b8a6-rgb: 20, 184, 166;
+  --c-15803d: #15803d;
+  --c-15803d-rgb: 21, 128, 61;
+  --c-166534: #166534;
+  --c-166534-rgb: 22, 101, 52;
+  --c-16a34a: #16a34a;
+  --c-16a34a-rgb: 22, 163, 74;
+  --c-1976d2: #1976d2;
+  --c-1976d2-rgb: 25, 118, 210;
+  --c-1b56ba: #1b56ba;
+  --c-1b56ba-rgb: 27, 86, 186;
+  --c-1c181e: #1c181e;
+  --c-1c181e-rgb: 28, 24, 30;
+  --c-1c2434: #1c2434;
+  --c-1c2434-rgb: 28, 36, 52;
+  --c-1d4ed8: #1d4ed8;
+  --c-1d4ed8-rgb: 29, 78, 216;
+  --c-1d4fb8: #1d4fb8;
+  --c-1d4fb8-rgb: 29, 79, 184;
+  --c-1d5fcb: #1d5fcb;
+  --c-1d5fcb-rgb: 29, 95, 203;
+  --c-1e2937: #1e2937;
+  --c-1e2937-rgb: 30, 41, 55;
+  --c-1e293b: #1e293b;
+  --c-1e293b-rgb: 30, 41, 59;
+  --c-1e375a: #1e375a;
+  --c-1e375a-rgb: 30, 55, 90;
+  --c-1e3a8a: #1e3a8a;
+  --c-1e3a8a-rgb: 30, 58, 138;
+  --c-1e40af: #1e40af;
+  --c-1e40af-rgb: 30, 64, 175;
+  --c-1f2937: #1f2937;
+  --c-1f2937-rgb: 31, 41, 55;
+  --c-1f64d7: #1f64d7;
+  --c-1f64d7-rgb: 31, 100, 215;
+  --c-202a3c: #202a3c;
+  --c-202a3c-rgb: 32, 42, 60;
+  --c-221e24: #221e24;
+  --c-221e24-rgb: 34, 30, 36;
+  --c-22c55e: #22c55e;
+  --c-22c55e-rgb: 34, 197, 94;
+  --c-22d3ee: #22d3ee;
+  --c-22d3ee-rgb: 34, 211, 238;
+  --c-235bc7: #235bc7;
+  --c-235bc7-rgb: 35, 91, 199;
+  --c-243044: #243044;
+  --c-243044-rgb: 36, 48, 68;
+  --c-243447: #243447;
+  --c-243447-rgb: 36, 52, 71;
+  --c-2563eb: #2563eb;
+  --c-2563eb-rgb: 37, 99, 235;
+  --c-2666d0: #2666d0;
+  --c-2666d0-rgb: 38, 102, 208;
+  --c-2764d8: #2764d8;
+  --c-2764d8-rgb: 39, 100, 216;
+  --c-282228: #282228;
+  --c-282228-rgb: 40, 34, 40;
+  --c-2a384e: #2a384e;
+  --c-2a384e-rgb: 42, 56, 78;
+  --c-2a3d52: #2a3d52;
+  --c-2a3d52-rgb: 42, 61, 82;
+  --c-2b70e0: #2b70e0;
+  --c-2b70e0-rgb: 43, 112, 224;
+  --c-2c262e: #2c262e;
+  --c-2c262e-rgb: 44, 38, 46;
+  --c-2c3a55: #2c3a55;
+  --c-2c3a55-rgb: 44, 58, 85;
+  --c-2d1c1e: #2d1c1e;
+  --c-2d1c1e-rgb: 45, 28, 30;
+  --c-2d3a52: #2d3a52;
+  --c-2d3a52-rgb: 45, 58, 82;
+  --c-2dd4bf: #2dd4bf;
+  --c-2dd4bf-rgb: 45, 212, 191;
+  --c-2f6ddf: #2f6ddf;
+  --c-2f6ddf-rgb: 47, 109, 223;
+  --c-2f6fe3: #2f6fe3;
+  --c-2f6fe3-rgb: 47, 111, 227;
+  --c-2f7cf2: #2f7cf2;
+  --c-2f7cf2-rgb: 47, 124, 242;
+  --c-30282e: #30282e;
+  --c-30282e-rgb: 48, 40, 46;
+  --c-307ef3: #307ef3;
+  --c-307ef3-rgb: 48, 126, 243;
+  --c-334155: #334155;
+  --c-334155-rgb: 51, 65, 85;
+  --c-341418: #341418;
+  --c-341418-rgb: 52, 20, 24;
+  --c-342c34: #342c34;
+  --c-342c34-rgb: 52, 44, 52;
+  --c-34425c: #34425c;
+  --c-34425c-rgb: 52, 66, 92;
+  --c-3448c5: #3448c5;
+  --c-3448c5-rgb: 52, 72, 197;
+  --c-34d399: #34d399;
+  --c-34d399-rgb: 52, 211, 153;
+  --c-363636: #363636;
+  --c-363636-rgb: 54, 54, 54;
+  --c-3657d8: #3657d8;
+  --c-3657d8-rgb: 54, 87, 216;
+  --c-374151: #374151;
+  --c-374151-rgb: 55, 65, 81;
+  --c-38bdf8: #38bdf8;
+  --c-38bdf8-rgb: 56, 189, 248;
+  --c-3a3038: #3a3038;
+  --c-3a3038-rgb: 58, 48, 56;
+  --c-3a4c6c: #3a4c6c;
+  --c-3a4c6c-rgb: 58, 76, 108;
+  --c-3b82f6: #3b82f6;
+  --c-3b82f6-rgb: 59, 130, 246;
+  --c-3c84f6: #3c84f6;
+  --c-3c84f6-rgb: 60, 132, 246;
+  --c-3d4f6e: #3d4f6e;
+  --c-3d4f6e-rgb: 61, 79, 110;
+  --c-3e181c: #3e181c;
+  --c-3e181c-rgb: 62, 24, 28;
+  --c-4338ca: #4338ca;
+  --c-4338ca-rgb: 67, 56, 202;
+  --c-4361ee: #4361ee;
+  --c-4361ee-rgb: 67, 97, 238;
+  --c-445262: #445262;
+  --c-445262-rgb: 68, 82, 98;
+  --c-445878: #445878;
+  --c-445878-rgb: 68, 88, 120;
+  --c-450a0a: #450a0a;
+  --c-450a0a-rgb: 69, 10, 10;
+  --c-463a42: #463a42;
+  --c-463a42-rgb: 70, 58, 66;
+  --c-475569: #475569;
+  --c-475569-rgb: 71, 85, 105;
+  --c-481c20: #481c20;
+  --c-481c20-rgb: 72, 28, 32;
+  --c-4a3e44: #4a3e44;
+  --c-4a3e44-rgb: 74, 62, 68;
+  --c-4a6fa5: #4a6fa5;
+  --c-4a6fa5-rgb: 74, 111, 165;
+  --c-4a90ff: #4a90ff;
+  --c-4a90ff-rgb: 74, 144, 255;
+  --c-4ade80: #4ade80;
+  --c-4ade80-rgb: 74, 222, 128;
+  --c-504678: #504678;
+  --c-504678-rgb: 80, 70, 120;
+  --c-526684: #526684;
+  --c-526684-rgb: 82, 102, 132;
+  --c-587c6c: #587c6c;
+  --c-587c6c-rgb: 88, 124, 108;
+  --c-5895ff: #5895ff;
+  --c-5895ff-rgb: 88, 149, 255;
+  --c-5a2026: #5a2026;
+  --c-5a2026-rgb: 90, 32, 38;
+  --c-5a3438: #5a3438;
+  --c-5a3438-rgb: 90, 52, 56;
+  --c-5a4a50: #5a4a50;
+  --c-5a4a50-rgb: 90, 74, 80;
+  --c-5b7a9e: #5b7a9e;
+  --c-5b7a9e-rgb: 91, 122, 158;
+  --c-5eead4: #5eead4;
+  --c-5eead4-rgb: 94, 234, 212;
+  --c-5f7694: #5f7694;
+  --c-5f7694-rgb: 95, 118, 148;
+  --c-60a5fa: #60a5fa;
+  --c-60a5fa-rgb: 96, 165, 250;
+  --c-62565e: #62565e;
+  --c-62565e-rgb: 98, 86, 94;
+  --c-6366f1: #6366f1;
+  --c-6366f1-rgb: 99, 102, 241;
+  --c-64748b: #64748b;
+  --c-64748b-rgb: 100, 116, 139;
+  --c-647da0: #647da0;
+  --c-647da0-rgb: 100, 125, 160;
+  --c-6482af: #6482af;
+  --c-6482af-rgb: 100, 130, 175;
+  --c-67e8f9: #67e8f9;
+  --c-67e8f9-rgb: 103, 232, 249;
+  --c-6b7280: #6b7280;
+  --c-6b7280-rgb: 107, 114, 128;
+  --c-6d28d9: #6d28d9;
+  --c-6d28d9-rgb: 109, 40, 217;
+  --c-6ee7b7: #6ee7b7;
+  --c-6ee7b7-rgb: 110, 231, 183;
+  --c-766670: #766670;
+  --c-766670-rgb: 118, 102, 112;
+  --c-768292: #768292;
+  --c-768292-rgb: 118, 130, 146;
+  --c-78350f: #78350f;
+  --c-78350f-rgb: 120, 53, 15;
+  --c-7891b9: #7891b9;
+  --c-7891b9-rgb: 120, 145, 185;
+  --c-7891be: #7891be;
+  --c-7891be-rgb: 120, 145, 190;
+  --c-78948a: #78948a;
+  --c-78948a-rgb: 120, 148, 138;
+  --c-789e8a: #789e8a;
+  --c-789e8a-rgb: 120, 158, 138;
+  --c-78a0d2: #78a0d2;
+  --c-78a0d2-rgb: 120, 160, 210;
+  --c-7c2d12: #7c2d12;
+  --c-7c2d12-rgb: 124, 45, 18;
+  --c-7c3aed: #7c3aed;
+  --c-7c3aed-rgb: 124, 58, 237;
+  --c-7d6c76: #7d6c76;
+  --c-7d6c76-rgb: 125, 108, 118;
+  --c-7dd3fc: #7dd3fc;
+  --c-7dd3fc-rgb: 125, 211, 252;
+  --c-7f1d1d: #7f1d1d;
+  --c-7f1d1d-rgb: 127, 29, 29;
+  --c-7f91a3: #7f91a3;
+  --c-7f91a3-rgb: 127, 145, 163;
+  --c-826e78: #826e78;
+  --c-826e78-rgb: 130, 110, 120;
+  --c-84cc16: #84cc16;
+  --c-84cc16-rgb: 132, 204, 22;
+  --c-86efac: #86efac;
+  --c-86efac-rgb: 134, 239, 172;
+  --c-8b5cf6: #8b5cf6;
+  --c-8b5cf6-rgb: 139, 92, 246;
+  --c-8ca0c8: #8ca0c8;
+  --c-8ca0c8-rgb: 140, 160, 200;
+  --c-917d87: #917d87;
+  --c-917d87-rgb: 145, 125, 135;
+  --c-92400e: #92400e;
+  --c-92400e-rgb: 146, 64, 14;
+  --c-93c5fd: #93c5fd;
+  --c-93c5fd-rgb: 147, 197, 253;
+  --c-94a3b8: #94a3b8;
+  --c-94a3b8-rgb: 148, 163, 184;
+  --c-9682d2: #9682d2;
+  --c-9682d2-rgb: 150, 130, 210;
+  --c-991b1b: #991b1b;
+  --c-991b1b-rgb: 153, 27, 27;
+  --c-99f6e4: #99f6e4;
+  --c-99f6e4-rgb: 153, 246, 228;
+  --c-9a3412: #9a3412;
+  --c-9a3412-rgb: 154, 52, 18;
+  --c-9d174d: #9d174d;
+  --c-9d174d-rgb: 157, 23, 77;
+  --c-9fb4c7: #9fb4c7;
+  --c-9fb4c7-rgb: 159, 180, 199;
+  --c-a3b4d2: #a3b4d2;
+  --c-a3b4d2-rgb: 163, 180, 210;
+  --c-a5f3fc: #a5f3fc;
+  --c-a5f3fc-rgb: 165, 243, 252;
+  --c-a78bfa: #a78bfa;
+  --c-a78bfa-rgb: 167, 139, 250;
+  --c-a7f3d0: #a7f3d0;
+  --c-a7f3d0-rgb: 167, 243, 208;
+  --c-a855f7: #a855f7;
+  --c-a855f7-rgb: 168, 85, 247;
+  --c-a86266: #a86266;
+  --c-a86266-rgb: 168, 98, 102;
+  --c-b08e5c: #b08e5c;
+  --c-b08e5c-rgb: 176, 142, 92;
+  --c-b27074: #b27074;
+  --c-b27074-rgb: 178, 112, 116;
+  --c-b27076: #b27076;
+  --c-b27076-rgb: 178, 112, 118;
+  --c-b4232c: #b4232c;
+  --c-b4232c-rgb: 180, 35, 44;
+  --c-b45309: #b45309;
+  --c-b45309-rgb: 180, 83, 9;
+  --c-b8c7d6: #b8c7d6;
+  --c-b8c7d6-rgb: 184, 199, 214;
+  --c-b91c1c: #b91c1c;
+  --c-b91c1c-rgb: 185, 28, 28;
+  --c-b93c41: #b93c41;
+  --c-b93c41-rgb: 185, 60, 65;
+  --c-b9a5ac: #b9a5ac;
+  --c-b9a5ac-rgb: 185, 165, 172;
+  --c-bacde8: #bacde8;
+  --c-bacde8-rgb: 186, 205, 232;
+  --c-bae6fd: #bae6fd;
+  --c-bae6fd-rgb: 186, 230, 253;
+  --c-bc986c: #bc986c;
+  --c-bc986c-rgb: 188, 152, 108;
+  --c-bc9a6c: #bc9a6c;
+  --c-bc9a6c-rgb: 188, 154, 108;
+  --c-be185d: #be185d;
+  --c-be185d-rgb: 190, 24, 93;
+  --c-bfdbfe: #bfdbfe;
+  --c-bfdbfe-rgb: 191, 219, 254;
+  --c-c48488: #c48488;
+  --c-c48488-rgb: 196, 132, 136;
+  --c-c4b5fd: #c4b5fd;
+  --c-c4b5fd-rgb: 196, 181, 253;
+  --c-c8b6bc: #c8b6bc;
+  --c-c8b6bc-rgb: 200, 182, 188;
+  --c-cbd5e1: #cbd5e1;
+  --c-cbd5e1-rgb: 203, 213, 225;
+  --c-ccfbf1: #ccfbf1;
+  --c-ccfbf1-rgb: 204, 251, 241;
+  --c-cfe2f3: #cfe2f3;
+  --c-cfe2f3-rgb: 207, 226, 243;
+  --c-cffafe: #cffafe;
+  --c-cffafe-rgb: 207, 250, 254;
+  --c-d1fae5: #d1fae5;
+  --c-d1fae5-rgb: 209, 250, 229;
+  --c-d2c8ce: #d2c8ce;
+  --c-d2c8ce-rgb: 210, 200, 206;
+  --c-d4dee8: #d4dee8;
+  --c-d4dee8-rgb: 212, 222, 232;
+  --c-d8e0ea: #d8e0ea;
+  --c-d8e0ea-rgb: 216, 224, 234;
+  --c-d97706: #d97706;
+  --c-d97706-rgb: 217, 119, 6;
+  --c-db2777: #db2777;
+  --c-db2777-rgb: 219, 39, 119;
+  --c-dbeafe: #dbeafe;
+  --c-dbeafe-rgb: 219, 234, 254;
+  --c-dc2626: #dc2626;
+  --c-dc2626-rgb: 220, 38, 38;
+  --c-dc3545: #dc3545;
+  --c-dc3545-rgb: 220, 53, 69;
+  --c-dc5a5a: #dc5a5a;
+  --c-dc5a5a-rgb: 220, 90, 90;
+  --c-dc6464: #dc6464;
+  --c-dc6464-rgb: 220, 100, 100;
+  --c-dce8f8: #dce8f8;
+  --c-dce8f8-rgb: 220, 232, 248;
+  --c-dcfce7: #dcfce7;
+  --c-dcfce7-rgb: 220, 252, 231;
+  --c-dde3ea: #dde3ea;
+  --c-dde3ea-rgb: 221, 227, 234;
+  --c-dee2e6: #dee2e6;
+  --c-dee2e6-rgb: 222, 226, 230;
+  --c-deedff: #deedff;
+  --c-deedff-rgb: 222, 237, 255;
+  --c-dfe5ec: #dfe5ec;
+  --c-dfe5ec-rgb: 223, 229, 236;
+  --c-e08587: #e08587;
+  --c-e08587-rgb: 224, 133, 135;
+  --c-e0e7ff: #e0e7ff;
+  --c-e0e7ff-rgb: 224, 231, 255;
+  --c-e0f2fe: #e0f2fe;
+  --c-e0f2fe-rgb: 224, 242, 254;
+  --c-e2e8f0: #e2e8f0;
+  --c-e2e8f0-rgb: 226, 232, 240;
+  --c-e2ebf8: #e2ebf8;
+  --c-e2ebf8-rgb: 226, 235, 248;
+  --c-e4dade: #e4dade;
+  --c-e4dade-rgb: 228, 218, 222;
+  --c-e4eaf8: #e4eaf8;
+  --c-e4eaf8-rgb: 228, 234, 248;
+  --c-e5e7eb: #e5e7eb;
+  --c-e5e7eb-rgb: 229, 231, 235;
+  --c-e5e9ef: #e5e9ef;
+  --c-e5e9ef-rgb: 229, 233, 239;
+  --c-e66e6e: #e66e6e;
+  --c-e66e6e-rgb: 230, 110, 110;
+  --c-e8eef4: #e8eef4;
+  --c-e8eef4-rgb: 232, 238, 244;
+  --c-e8eefc: #e8eefc;
+  --c-e8eefc-rgb: 232, 238, 252;
+  --c-e8f1fe: #e8f1fe;
+  --c-e8f1fe-rgb: 232, 241, 254;
+  --c-e9ecef: #e9ecef;
+  --c-e9ecef-rgb: 233, 236, 239;
+  --c-ea580c: #ea580c;
+  --c-ea580c-rgb: 234, 88, 12;
+  --c-eaf4ff: #eaf4ff;
+  --c-eaf4ff-rgb: 234, 244, 255;
+  --c-eaf6ff: #eaf6ff;
+  --c-eaf6ff-rgb: 234, 246, 255;
+  --c-ec4899: #ec4899;
+  --c-ec4899-rgb: 236, 72, 153;
+  --c-ecfdf5: #ecfdf5;
+  --c-ecfdf5-rgb: 236, 253, 245;
+  --c-ecfeff: #ecfeff;
+  --c-ecfeff-rgb: 236, 254, 255;
+  --c-edf2f7: #edf2f7;
+  --c-edf2f7-rgb: 237, 242, 247;
+  --c-eef0f3: #eef0f3;
+  --c-eef0f3-rgb: 238, 240, 243;
+  --c-eef0f4: #eef0f4;
+  --c-eef0f4-rgb: 238, 240, 244;
+  --c-eef1f5: #eef1f5;
+  --c-eef1f5-rgb: 238, 241, 245;
+  --c-eef2f0: #eef2f0;
+  --c-eef2f0-rgb: 238, 242, 240;
+  --c-eef2f6: #eef2f6;
+  --c-eef2f6-rgb: 238, 242, 246;
+  --c-eef2fc: #eef2fc;
+  --c-eef2fc-rgb: 238, 242, 252;
+  --c-eef2ff: #eef2ff;
+  --c-eef2ff-rgb: 238, 242, 255;
+  --c-eef5fd: #eef5fd;
+  --c-eef5fd-rgb: 238, 245, 253;
+  --c-ef4444: #ef4444;
+  --c-ef4444-rgb: 239, 68, 68;
+  --c-eff4ff: #eff4ff;
+  --c-eff4ff-rgb: 239, 244, 255;
+  --c-eff6ff: #eff6ff;
+  --c-eff6ff-rgb: 239, 246, 255;
+  --c-f0a0a2: #f0a0a2;
+  --c-f0a0a2-rgb: 240, 160, 162;
+  --c-f0f2f5: #f0f2f5;
+  --c-f0f2f5-rgb: 240, 242, 245;
+  --c-f0f9ff: #f0f9ff;
+  --c-f0f9ff-rgb: 240, 249, 255;
+  --c-f0fdf9: #f0fdf9;
+  --c-f0fdf9-rgb: 240, 253, 249;
+  --c-f0fdfa: #f0fdfa;
+  --c-f0fdfa-rgb: 240, 253, 250;
+  --c-f1f3f6: #f1f3f6;
+  --c-f1f3f6-rgb: 241, 243, 246;
+  --c-f1f4f2: #f1f4f2;
+  --c-f1f4f2-rgb: 241, 244, 242;
+  --c-f1f5f9: #f1f5f9;
+  --c-f1f5f9-rgb: 241, 245, 249;
+  --c-f1f5ff: #f1f5ff;
+  --c-f1f5ff-rgb: 241, 245, 255;
+  --c-f1f7ff: #f1f7ff;
+  --c-f1f7ff-rgb: 241, 247, 255;
+  --c-f1f8ff: #f1f8ff;
+  --c-f1f8ff-rgb: 241, 248, 255;
+  --c-f2f6fa: #f2f6fa;
+  --c-f2f6fa-rgb: 242, 246, 250;
+  --c-f3f0ea: #f3f0ea;
+  --c-f3f0ea-rgb: 243, 240, 234;
+  --c-f3f6fa: #f3f6fa;
+  --c-f3f6fa-rgb: 243, 246, 250;
+  --c-f3f8ff: #f3f8ff;
+  --c-f3f8ff-rgb: 243, 248, 255;
+  --c-f43f5e: #f43f5e;
+  --c-f43f5e-rgb: 244, 63, 94;
+  --c-f472b6: #f472b6;
+  --c-f472b6-rgb: 244, 114, 182;
+  --c-f4eeef: #f4eeef;
+  --c-f4eeef-rgb: 244, 238, 239;
+  --c-f4f6fb: #f4f6fb;
+  --c-f4f6fb-rgb: 244, 246, 251;
+  --c-f4f6ff: #f4f6ff;
+  --c-f4f6ff-rgb: 244, 246, 255;
+  --c-f4f7f5: #f4f7f5;
+  --c-f4f7f5-rgb: 244, 247, 245;
+  --c-f4f7ff: #f4f7ff;
+  --c-f4f7ff-rgb: 244, 247, 255;
+  --c-f4f8fe: #f4f8fe;
+  --c-f4f8fe-rgb: 244, 248, 254;
+  --c-f4f8ff: #f4f8ff;
+  --c-f4f8ff-rgb: 244, 248, 255;
+  --c-f4f9ff: #f4f9ff;
+  --c-f4f9ff-rgb: 244, 249, 255;
+  --c-f59e0b: #f59e0b;
+  --c-f59e0b-rgb: 245, 158, 11;
+  --c-f5ecee: #f5ecee;
+  --c-f5ecee-rgb: 245, 236, 238;
+  --c-f5efff: #f5efff;
+  --c-f5efff-rgb: 245, 239, 255;
+  --c-f5f0f1: #f5f0f1;
+  --c-f5f0f1-rgb: 245, 240, 241;
+  --c-f5f0f2: #f5f0f2;
+  --c-f5f0f2-rgb: 245, 240, 242;
+  --c-f5f2eb: #f5f2eb;
+  --c-f5f2eb-rgb: 245, 242, 235;
+  --c-f6efff: #f6efff;
+  --c-f6efff-rgb: 246, 239, 255;
+  --c-f7f8fa: #f7f8fa;
+  --c-f7f8fa-rgb: 247, 248, 250;
+  --c-f7faff: #f7faff;
+  --c-f7faff-rgb: 247, 250, 255;
+  --c-f87171: #f87171;
+  --c-f87171-rgb: 248, 113, 113;
+  --c-f8f0f2: #f8f0f2;
+  --c-f8f0f2-rgb: 248, 240, 242;
+  --c-f8f9fa: #f8f9fa;
+  --c-f8f9fa-rgb: 248, 249, 250;
+  --c-f8fafb: #f8fafb;
+  --c-f8fafb-rgb: 248, 250, 251;
+  --c-f8fafc: #f8fafc;
+  --c-f8fafc-rgb: 248, 250, 252;
+  --c-f8faff: #f8faff;
+  --c-f8faff-rgb: 248, 250, 255;
+  --c-f8fbff: #f8fbff;
+  --c-f8fbff-rgb: 248, 251, 255;
+  --c-f97316: #f97316;
+  --c-f97316-rgb: 249, 115, 22;
+  --c-f9a8d4: #f9a8d4;
+  --c-f9a8d4-rgb: 249, 168, 212;
+  --c-f9fafb: #f9fafb;
+  --c-f9fafb-rgb: 249, 250, 251;
+  --c-f9fbff: #f9fbff;
+  --c-f9fbff-rgb: 249, 251, 255;
+  --c-facc15: #facc15;
+  --c-facc15-rgb: 250, 204, 21;
+  --c-faf6f6: #faf6f6;
+  --c-faf6f6-rgb: 250, 246, 246;
+  --c-faf8f4: #faf8f4;
+  --c-faf8f4-rgb: 250, 248, 244;
+  --c-fafbfc: #fafbfc;
+  --c-fafbfc-rgb: 250, 251, 252;
+  --c-fb923c: #fb923c;
+  --c-fb923c-rgb: 251, 146, 60;
+  --c-fbbf24: #fbbf24;
+  --c-fbbf24-rgb: 251, 191, 36;
+  --c-fbcfe8: #fbcfe8;
+  --c-fbcfe8-rgb: 251, 207, 232;
+  --c-fbfcfd: #fbfcfd;
+  --c-fbfcfd-rgb: 251, 252, 253;
+  --c-fbfcff: #fbfcff;
+  --c-fbfcff-rgb: 251, 252, 255;
+  --c-fca5a5: #fca5a5;
+  --c-fca5a5-rgb: 252, 165, 165;
+  --c-fcd34d: #fcd34d;
+  --c-fcd34d-rgb: 252, 211, 77;
+  --c-fcf8f9: #fcf8f9;
+  --c-fcf8f9-rgb: 252, 248, 249;
+  --c-fdba74: #fdba74;
+  --c-fdba74-rgb: 253, 186, 116;
+  --c-fde68a: #fde68a;
+  --c-fde68a-rgb: 253, 230, 138;
+  --c-fecaca: #fecaca;
+  --c-fecaca-rgb: 254, 202, 202;
+  --c-fed7aa: #fed7aa;
+  --c-fed7aa-rgb: 254, 215, 170;
+  --c-fee2e2: #fee2e2;
+  --c-fee2e2-rgb: 254, 226, 226;
+  --c-fef3c7: #fef3c7;
+  --c-fef3c7-rgb: 254, 243, 199;
+  --c-ff5a5a: #ff5a5a;
+  --c-ff5a5a-rgb: 255, 90, 90;
+  --c-ffb547: #ffb547;
+  --c-ffb547-rgb: 255, 181, 71;
+  --c-ffc107: #ffc107;
+  --c-ffc107-rgb: 255, 193, 7;
+  --c-ffd6dc: #ffd6dc;
+  --c-ffd6dc-rgb: 255, 214, 220;
+  --c-ffe4e8: #ffe4e8;
+  --c-ffe4e8-rgb: 255, 228, 232;
+  --c-ffe4e9: #ffe4e9;
+  --c-ffe4e9-rgb: 255, 228, 233;
+  --c-ffecec: #ffecec;
+  --c-ffecec-rgb: 255, 236, 236;
+  --c-ffecef: #ffecef;
+  --c-ffecef-rgb: 255, 236, 239;
+  --c-fff1f2: #fff1f2;
+  --c-fff1f2-rgb: 255, 241, 242;
+  --c-fff5f5: #fff5f5;
+  --c-fff5f5-rgb: 255, 245, 245;
+  --c-fffbeb: #fffbeb;
+  --c-fffbeb-rgb: 255, 251, 235;
+  --c-ffffff: #ffffff;
+  --c-ffffff-rgb: 255, 255, 255;
+}
+// >>> RT-LEGACY-TOKENS:END
+
+// =============================================================================
+//  UNIFY OVERRIDES (manual — NOT touched by the codemod)
+//  Re-points the dominant legacy accent/surface hues onto the new palette so the
+//  whole app shares one identity. Accent/brand hues become theme-aware (via
+//  --rt-*); old dark-navy surfaces map to the new dark surfaces (fixed).
+//  Placed after the generated :root block so these win by source order.
+// =============================================================================
+:root {
+  /* Soft Cyan accent family */
+  --c-06b6d4: var(--rt-brand-cyan);
+  --c-06b6d4-rgb: var(--rt-cyan-rgb);
+  --c-22d3ee: var(--rt-brand-cyan);
+  --c-22d3ee-rgb: var(--rt-cyan-rgb);
+
+  /* Emerald accent family */
+  --c-10b981: var(--rt-brand-accent);
+  --c-10b981-rgb: var(--rt-accent-rgb);
+  --c-059669: var(--rt-brand-accent);
+  --c-059669-rgb: var(--rt-accent-rgb);
+  --c-34d399: var(--rt-brand-accent);
+  --c-34d399-rgb: var(--rt-accent-rgb);
+
+  /* Steel Blue brand family (mid / strong / soft) */
+  --c-2563eb: var(--rt-brand-primary);
+  --c-2563eb-rgb: var(--rt-brand-primary-rgb);
+  --c-3b82f6: var(--rt-brand-primary);
+  --c-3b82f6-rgb: var(--rt-brand-primary-rgb);
+  --c-1d4ed8: var(--rt-brand-primary-strong);
+  --c-1d4ed8-rgb: var(--rt-brand-primary-rgb);
+  --c-2764d8: var(--rt-brand-primary-strong);
+  --c-2764d8-rgb: var(--rt-brand-primary-rgb);
+  --c-60a5fa: var(--rt-brand-primary-soft);
+  --c-60a5fa-rgb: var(--rt-brand-primary-rgb);
+  --c-93c5fd: var(--rt-brand-primary-soft);
+  --c-93c5fd-rgb: var(--rt-brand-primary-rgb);
+
+  /* Legacy dark-navy surfaces → new dark surfaces (fixed; dark-only usage) */
+  --c-050816: #0d1722;
+  --c-050816-rgb: 13, 23, 34;
+  --c-020617: #0a1420;
+  --c-020617-rgb: 10, 20, 32;
+  --c-071b22: #0d1722;
+  --c-071b22-rgb: 13, 23, 34;
+  --c-0a1929: #111e2c;
+  --c-0a1929-rgb: 17, 30, 44;
+  --c-102436: #15263a;
+  --c-102436-rgb: 21, 38, 58;
+  --c-12212c: #15263a;
+  --c-12212c-rgb: 21, 38, 58;
+}
+
+.rt-status-dot {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.rt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.4;
+  border: 1px solid transparent;
+}
+
+@each $name, $token in (available: --rt-vehicle-available, reserved: --rt-vehicle-reserved, rented: --rt-vehicle-rented, maintenance: --rt-vehicle-maintenance, out: --rt-vehicle-out, booking-draft: --rt-booking-draft, booking-pending: --rt-booking-pending, booking-confirmed: --rt-booking-confirmed, booking-active: --rt-booking-active, booking-completed: --rt-booking-completed, booking-cancelled: --rt-booking-cancelled, income: --rt-acc-income, expense: --rt-acc-expense, refund: --rt-acc-refund, outstanding: --rt-acc-outstanding, success: --rt-success, warning: --rt-warning, error: --rt-error, info: --rt-info) {
+  .rt-badge--#{$name} {
+    color: var(#{$token});
+    background: color-mix(in srgb, var(#{$token}) 14%, transparent);
+    border-color: color-mix(in srgb, var(#{$token}) 38%, transparent);
+  }
+
+  .rt-status-dot--#{$name} {
+    background: var(#{$token});
+  }
+
+  .rt-text--#{$name} {
+    color: var(#{$token});
+  }
+}

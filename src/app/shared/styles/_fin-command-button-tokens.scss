@@ -1,107 +1,54 @@
-/// Primary action buttons in fin-command toolbars (dark → teal, inline-end glow).
+/// Command-bar buttons — unified with the central brand button system
+/// (src/styles/_color-system.scss). All variants resolve to the same
+/// --app-btn-* tokens so buttons are identical across every page and theme.
+/// Primary + Search = solid primary; Action (Add/Create) = outline (secondary).
+
 @mixin fin-command-btn-primary-light() {
-  --fin-btn-primary-bg: linear-gradient(
-    to inline-end,
-    #1e293b 0%,
-    #134e4a 42%,
-    #0f766e 72%,
-    #14b8a6 100%
-  );
-  --fin-btn-primary-fg: #ffffff;
-  --fin-btn-primary-border: rgba(45, 212, 191, 0.45);
-  --fin-btn-primary-shadow: 0 4px 20px rgba(13, 148, 136, 0.3);
-}
-
-/// Search submit button (toolbar search bar).
-@mixin fin-command-btn-search-light() {
-  --fin-btn-search-bg: linear-gradient(
-    to inline-end,
-    #1e293b 0%,
-    #134e4a 38%,
-    #0f766e 68%,
-    #14b8a6 100%
-  );
-  --fin-btn-search-fg: #ffffff;
-  --fin-btn-search-border: rgba(45, 212, 191, 0.55);
-  --fin-btn-search-shadow: 0 2px 10px rgba(13, 148, 136, 0.28);
-}
-
-@mixin fin-command-btn-search-dark() {
-  --fin-btn-search-bg: linear-gradient(
-    to inline-end,
-    #050816 0%,
-    #0a1628 28%,
-    #065f46 62%,
-    #10b981 100%
-  );
-  --fin-btn-search-fg: #ffffff;
-  --fin-btn-search-border: color-mix(in srgb, var(--app-dark-accent-cyan) 58%, #10b981 42%);
-  --fin-btn-search-shadow: 0 0 18px color-mix(in srgb, var(--app-dark-accent-emerald) 30%, transparent);
-}
-
-/// Add / Create buttons in command header (light theme — white pill + teal glow).
-@mixin fin-command-btn-action-light() {
-  --fin-btn-action-bg: #ffffff;
-  --fin-btn-action-bg-hover: #f0fdfa;
-  --fin-btn-action-fg: #0d9488;
-  --fin-btn-action-fg-hover: #0f766e;
-  --fin-btn-action-border: rgba(45, 212, 191, 0.55);
-  --fin-btn-action-border-hover: rgba(45, 212, 191, 0.72);
-  --fin-btn-action-shadow:
-    0 0 0 1px rgba(45, 212, 191, 0.14),
-    0 4px 16px rgba(13, 148, 136, 0.14),
-    0 0 22px rgba(45, 212, 191, 0.22);
-  --fin-btn-action-shadow-hover:
-    0 0 0 1px rgba(45, 212, 191, 0.22),
-    0 6px 20px rgba(13, 148, 136, 0.2),
-    0 0 28px rgba(45, 212, 191, 0.28);
-}
-
-/// Add / Create buttons in command header (dark theme — glass pill + cyan/emerald glow).
-@mixin fin-command-btn-action-dark() {
-  --fin-btn-action-bg: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--app-dark-card, #102a43) 94%, transparent),
-    color-mix(in srgb, var(--app-dark-accent-emerald, #10b981) 20%, var(--app-dark-card, #0f172a))
-  );
-  --fin-btn-action-bg-hover: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--app-dark-card, #102a43) 88%, transparent),
-    color-mix(in srgb, var(--app-dark-accent-emerald, #10b981) 34%, var(--app-dark-card, #0f172a))
-  );
-  --fin-btn-action-fg: #5eead4;
-  --fin-btn-action-fg-hover: #ccfbf1;
-  --fin-btn-action-border: color-mix(
-    in srgb,
-    var(--app-dark-accent-cyan, #06b6d4) 48%,
-    var(--app-dark-accent-emerald, #10b981) 52%
-  );
-  --fin-btn-action-border-hover: color-mix(
-    in srgb,
-    var(--app-dark-accent-cyan, #06b6d4) 62%,
-    #ecfeff 38%
-  );
-  --fin-btn-action-shadow:
-    0 0 0 1px color-mix(in srgb, var(--app-dark-accent-cyan, #06b6d4) 16%, transparent),
-    0 4px 18px rgba(0, 0, 0, 0.38),
-    0 0 22px color-mix(in srgb, var(--app-dark-accent-emerald, #10b981) 28%, transparent);
-  --fin-btn-action-shadow-hover:
-    0 0 0 1px color-mix(in srgb, var(--app-dark-accent-cyan, #06b6d4) 26%, transparent),
-    0 6px 22px rgba(0, 0, 0, 0.42),
-    0 0 30px color-mix(in srgb, var(--app-dark-accent-emerald, #10b981) 38%, transparent);
+  --fin-btn-primary-bg: var(--app-btn-primary-bg);
+  --fin-btn-primary-fg: var(--c-ffffff);
+  --fin-btn-primary-border: var(--app-btn-primary-border);
+  --fin-btn-primary-shadow: var(--app-btn-primary-shadow);
 }
 
 @mixin fin-command-btn-primary-dark() {
-  --fin-btn-primary-bg: linear-gradient(
-    to inline-end,
-    #050816 0%,
-    #0a1628 28%,
-    #065f46 62%,
-    #10b981 100%
-  );
-  --fin-btn-primary-fg: #ffffff;
-  --fin-btn-primary-border: color-mix(in srgb, var(--app-dark-accent-cyan) 58%, #10b981 42%);
-  --fin-btn-primary-shadow:
-    0 0 24px color-mix(in srgb, var(--app-dark-accent-emerald) 34%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --fin-btn-primary-bg: var(--app-btn-primary-bg);
+  --fin-btn-primary-fg: var(--c-ffffff);
+  --fin-btn-primary-border: var(--app-btn-primary-border);
+  --fin-btn-primary-shadow: var(--app-btn-primary-shadow);
+}
+
+@mixin fin-command-btn-search-light() {
+  --fin-btn-search-bg: var(--app-btn-primary-bg);
+  --fin-btn-search-fg: var(--c-ffffff);
+  --fin-btn-search-border: var(--app-btn-primary-border);
+  --fin-btn-search-shadow: var(--app-btn-primary-shadow);
+}
+
+@mixin fin-command-btn-search-dark() {
+  --fin-btn-search-bg: var(--app-btn-primary-bg);
+  --fin-btn-search-fg: var(--c-ffffff);
+  --fin-btn-search-border: var(--app-btn-primary-border);
+  --fin-btn-search-shadow: var(--app-btn-primary-shadow);
+}
+
+@mixin fin-command-btn-action-light() {
+  --fin-btn-action-bg: var(--app-btn-outline-bg);
+  --fin-btn-action-bg-hover: var(--app-btn-outline-bg-hover);
+  --fin-btn-action-fg: var(--app-btn-outline-text);
+  --fin-btn-action-fg-hover: var(--app-btn-outline-text-hover);
+  --fin-btn-action-border: var(--app-btn-outline-border);
+  --fin-btn-action-border-hover: var(--app-btn-outline-border-hover);
+  --fin-btn-action-shadow: var(--app-btn-outline-shadow);
+  --fin-btn-action-shadow-hover: var(--app-btn-outline-shadow-hover);
+}
+
+@mixin fin-command-btn-action-dark() {
+  --fin-btn-action-bg: var(--app-btn-outline-bg);
+  --fin-btn-action-bg-hover: var(--app-btn-outline-bg-hover);
+  --fin-btn-action-fg: var(--app-btn-outline-text);
+  --fin-btn-action-fg-hover: var(--app-btn-outline-text-hover);
+  --fin-btn-action-border: var(--app-btn-outline-border);
+  --fin-btn-action-border-hover: var(--app-btn-outline-border-hover);
+  --fin-btn-action-shadow: var(--app-btn-outline-shadow);
+  --fin-btn-action-shadow-hover: var(--app-btn-outline-shadow-hover);
 }
