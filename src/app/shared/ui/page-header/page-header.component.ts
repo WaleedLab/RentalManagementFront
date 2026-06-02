@@ -30,6 +30,9 @@ export class PageHeaderComponent {
 
     if (url.includes('/booking')) return 'assets/images/rent_icon/Booking.png';
     if (url.includes('/traffic-violations')) return 'assets/images/rent_icon/Traffic-violations.png';
+    if (url.includes('/maintenance/spare-parts')) return 'assets/images/rent_icon/sparepart.png';
+    if (url.includes('/maintenance/suppliers')) return 'assets/images/rent_icon/Supplier.png';
+    if (url.includes('/maintenance/insurance-companies')) return 'assets/images/rent_icon/insurance.png';
     if (url.includes('/maintenance')) return 'assets/images/rent_icon/Maintenace.png';
     if (url.includes('/customer-subscriptions')) return 'assets/images/rent_icon/subscription_customer.png';
     if (url.includes('/customers')) return 'assets/images/rent_icon/Customers.png';

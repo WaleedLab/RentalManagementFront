@@ -1,0 +1,63 @@
+<div class="maintenance-accept-dialog" [attr.dir]="dialogDir">
+  <div class="modal-header maintenance-accept-dialog__header">
+    <h5 class="modal-title">{{ title }}</h5>
+    <button
+      type="button"
+      class="btn-close maintenance-accept-dialog__close"
+      [attr.aria-label]="'Close' | translate"
+      (click)="cancel()"
+    ></button>
+  </div>
+
+  <form class="modal-body" [formGroup]="form" (ngSubmit)="confirm()">
+    <p class="maintenance-accept-dialog__message">{{ message }}</p>
+
+    <div class="maintenance-accept-dialog__meta">
+      <div class="maintenance-accept-dialog__row">
+        <span class="maintenance-accept-dialog__label">{{ 'maintenance.colPlate' | translate }}</span>
+        <span class="maintenance-accept-dialog__value">{{ plateNumber || '-' }}</span>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <app-date-picker
+        formControlName="startDate"
+        [label]="'maintenance.fieldStartDate' | translate"
+      />
+      @if (form.controls.startDate.touched && form.controls.startDate.invalid) {
+        <div class="text-danger small mt-1">{{ 'maintenance.accept.invalidStartDate' | translate }}</div>
+      }
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">{{ 'maintenance.fieldDuration' | translate }}</label>
+      <input
+        class="form-control"
+        type="number"
+        min="1"
+        step="1"
+        formControlName="durationDays"
+        [placeholder]="'maintenance.accept.durationPlaceholder' | translate"
+      />
+      <div class="form-text">{{ 'maintenance.accept.durationHint' | translate }}</div>
+      @if (form.controls.durationDays.touched && form.controls.durationDays.invalid) {
+        <div class="text-danger small mt-1">{{ 'maintenance.accept.invalidDuration' | translate }}</div>
+      }
+    </div>
+
+    <div class="maintenance-accept-dialog__end-preview">
+      <span class="maintenance-accept-dialog__label">{{ 'maintenance.fieldEndDate' | translate }}</span>
+      <span class="maintenance-accept-dialog__value">
+        {{ formatPreviewDate(computedEndDate()) }}
+      </span>
+      <div class="form-text mb-0">{{ 'maintenance.accept.endDateHint' | translate }}</div>
+    </div>
+  </form>
+
+  <div class="modal-footer maintenance-accept-dialog__footer">
+    <button type="button" class="btn btn-cancel" (click)="cancel()">{{ 'Cancel' | translate }}</button>
+    <button type="button" class="btn btn-primary" (click)="confirm()">
+      {{ 'maintenance.accept.confirm' | translate }}
+    </button>
+  </div>
+</div>

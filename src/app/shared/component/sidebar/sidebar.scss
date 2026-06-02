@@ -1,11 +1,11 @@
 .active {
-  background: linear-gradient(135deg, rgba(39, 100, 216, 0.95), rgba(25, 118, 210, 0.98));
-  color: #fff;
+  background: linear-gradient(135deg, rgba(var(--c-2764d8-rgb), 0.95), rgba(var(--c-1976d2-rgb), 0.98));
+  color: var(--c-ffffff);
   font-weight: 600;
   border-radius: 14px;
   box-shadow:
-    0 10px 22px rgba(25, 118, 210, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 10px 22px rgba(var(--c-1976d2-rgb), 0.18),
+    inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.12);
 }
 
 :host-context(body.dark-only) .active,
@@ -15,15 +15,15 @@
     color-mix(in srgb, var(--app-dark-accent-cyan) 32%, var(--app-dark-card)) 0%,
     color-mix(in srgb, var(--app-dark-card) 94%, transparent) 100%
   );
-  color: var(--app-dark-text, #ecfeff);
+  color: var(--app-dark-text, var(--c-ecfeff));
   box-shadow:
     0 10px 24px color-mix(in srgb, var(--app-dark-accent-cyan) 18%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.08);
 }
 
 .sidebar-main .badge {
   background: red;
-  color: #fff;
+  color: var(--c-ffffff);
   border-radius: 10px;
   padding: 2px 6px;
   font-size: 12px;
@@ -80,10 +80,10 @@
     position: relative;
     margin-bottom: 0;
     padding: 12px 14px var(--sidebar-footer-safe-space);
-    border-top: 1px solid rgba(148, 163, 184, 0.12);
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.08) 100%);
+    border-top: 1px solid rgba(var(--c-94a3b8-rgb), 0.12);
+    background: linear-gradient(180deg, rgba(var(--c-0f172a-rgb), 0) 0%, rgba(var(--c-0f172a-rgb), 0.08) 100%);
     border-radius: 14px 14px 0 0;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.04);
 
     &::after {
       content: '';
@@ -92,7 +92,7 @@
       bottom: 6px;
       height: 8px;
       border-radius: 999px;
-      background: rgba(148, 163, 184, 0.18);
+      background: rgba(var(--c-94a3b8-rgb), 0.18);
       filter: blur(8px);
       opacity: 0.55;
       pointer-events: none;
@@ -104,12 +104,12 @@
     position: relative;
     z-index: 1;
     margin-bottom: 2px;
-    border: 1px solid rgba(220, 100, 100, 0.32);
-    background: rgba(185, 60, 65, 0.12);
-    color: #e08587;
+    border: 1px solid rgba(var(--c-dc6464-rgb), 0.32);
+    background: rgba(var(--c-b93c41-rgb), 0.12);
+    color: var(--c-e08587);
     justify-content: flex-start;
     gap: 12px;
-    box-shadow: 0 14px 28px -24px rgba(127, 29, 29, 0.28);
+    box-shadow: 0 14px 28px -24px rgba(var(--c-7f1d1d-rgb), 0.28);
     transition:
       background-color 0.2s ease,
       border-color 0.2s ease,
@@ -139,9 +139,9 @@
     }
 
     &:hover {
-      background: rgba(185, 60, 65, 0.2);
-      border-color: rgba(230, 110, 110, 0.45);
-      color: #f0a0a2;
+      background: rgba(var(--c-b93c41-rgb), 0.2);
+      border-color: rgba(var(--c-e66e6e-rgb), 0.45);
+      color: var(--c-f0a0a2);
     }
   }
 
@@ -203,8 +203,8 @@
 
     > a.sidebar-link:hover,
     .sidebar-submenu a:hover {
-      background: rgba(255, 255, 255, 0.05);
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+      background: rgba(var(--c-ffffff-rgb), 0.05);
+      box-shadow: 0 8px 18px rgba(var(--rt-shadow-rgb), 0.06);
     }
 
     > a.sidebar-link app-svg-icon,
@@ -217,7 +217,7 @@
     > a.sidebar-link:hover app-svg-icon,
     > a.sidebar-link:hover .menu-image-icon {
       transform: translateY(-2px) scale(1.08);
-      filter: drop-shadow(0 6px 10px rgba(59, 130, 246, 0.24));
+      filter: drop-shadow(0 6px 10px rgba(var(--c-3b82f6-rgb), 0.24));
     }
 
     :host-context(body.dark-only) > a.sidebar-link:hover app-svg-icon,
@@ -259,7 +259,7 @@
         border-radius: 12px;
         min-height: var(--sidebar-menu-row-height);
         padding-inline: 16px;
-        color: rgba(255, 255, 255, 0.88);
+        color: rgba(var(--c-ffffff-rgb), 0.88);
 
         > span {
           flex: 1 1 auto;
@@ -269,18 +269,18 @@
       }
 
       a.active {
-        background: rgba(25, 118, 210, 0.14);
-        color: #fff;
+        background: rgba(var(--c-1976d2-rgb), 0.14);
+        color: var(--c-ffffff);
         font-weight: 600;
-        text-shadow: 0 1px 8px rgba(8, 15, 32, 0.18);
+        text-shadow: 0 1px 8px rgba(var(--c-080f20-rgb), 0.18);
       }
     }
 
     :host-context(body.dark-only) .sidebar-submenu a.active,
     :host-context([data-bs-theme='dark']) .sidebar-submenu a.active {
       background: color-mix(in srgb, var(--app-dark-accent-cyan) 14%, var(--app-dark-card));
-      color: var(--app-dark-text, #fff);
-      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+      color: var(--app-dark-text, var(--c-ffffff));
+      text-shadow: 0 1px 10px rgba(var(--rt-shadow-rgb), 0.35);
     }
 
     /* Nested flyout lists use different ul classes; keep same row + icon column as `.sidebar-submenu`. */
@@ -439,7 +439,7 @@
     .submenu-content.opensubmegamenu a:hover .menu-image-icon,
     .submenu-content.opensubmegamenu a:hover app-svg-icon {
       transform: translateY(-2px) scale(1.12);
-      filter: drop-shadow(0 6px 10px rgba(59, 130, 246, 0.28));
+      filter: drop-shadow(0 6px 10px rgba(var(--c-3b82f6-rgb), 0.28));
     }
 
     :host-context(body.dark-only) .sidebar-list > a.sidebar-link:hover app-svg-icon,

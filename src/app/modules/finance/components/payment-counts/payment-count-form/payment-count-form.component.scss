@@ -21,9 +21,9 @@
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 0.65rem;
   padding: 0.8rem;
-  border: 1px solid rgba(148, 163, 184, 0.28);
+  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.28);
   border-radius: 12px;
-  background: rgba(148, 163, 184, 0.06);
+  background: rgba(var(--c-94a3b8-rgb), 0.06);
 }
 
 .voucher-add-row__field {
@@ -67,9 +67,9 @@
 }
 
 .voucher-summary__item {
-  border: 1px solid rgba(148, 163, 184, 0.26);
+  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.26);
   border-radius: 12px;
-  background: rgba(148, 163, 184, 0.08);
+  background: rgba(var(--c-94a3b8-rgb), 0.08);
   padding: 0.6rem 0.75rem;
   display: flex;
   align-items: baseline;
@@ -88,15 +88,15 @@
   }
 
   &.is-balanced {
-    border-color: rgba(34, 197, 94, 0.45);
-    background: rgba(34, 197, 94, 0.12);
-    color: #15803d;
+    border-color: rgba(var(--c-22c55e-rgb), 0.45);
+    background: rgba(var(--c-22c55e-rgb), 0.12);
+    color: var(--c-15803d);
   }
 
   &.is-unbalanced {
-    border-color: rgba(239, 68, 68, 0.45);
-    background: rgba(239, 68, 68, 0.12);
-    color: #b91c1c;
+    border-color: rgba(var(--c-ef4444-rgb), 0.45);
+    background: rgba(var(--c-ef4444-rgb), 0.12);
+    color: var(--c-b91c1c);
   }
 }
 

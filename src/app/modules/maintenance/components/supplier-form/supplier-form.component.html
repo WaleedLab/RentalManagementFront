@@ -1,0 +1,68 @@
+<div class="container-fluid supplier-form-page">
+  <app-page-header
+    [title]="(isEdit() ? 'maintenance.supplier.editTitle' : 'maintenance.supplier.createTitle') | translate"
+    [subtitle]="'maintenance.supplier.formSubtitle' | translate"
+  />
+
+  @if (initializing()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>
+  } @else {
+    <form class="card supplier-form__card" [formGroup]="form" (ngSubmit)="save()">
+      <div class="card-body row g-3">
+        <div class="col-md-6">
+          <label class="form-label">{{ 'maintenance.supplier.fieldName' | translate }}</label>
+          <input class="form-control" formControlName="supplierName" appFieldValueState />
+          @if (form.controls.supplierName.touched && form.controls.supplierName.invalid) {
+            <div class="text-danger small mt-1">{{ 'maintenance.supplier.invalidName' | translate }}</div>
+          }
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">{{ 'maintenance.supplier.fieldPhone' | translate }}</label>
+          <input class="form-control" formControlName="phone" appFieldValueState />
+          @if (form.controls.phone.touched && form.controls.phone.invalid) {
+            <div class="text-danger small mt-1">{{ 'maintenance.supplier.invalidPhone' | translate }}</div>
+          }
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">{{ 'maintenance.supplier.fieldPhone2' | translate }}</label>
+          <input class="form-control" formControlName="phone2" appFieldValueState />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">{{ 'maintenance.supplier.fieldEmail' | translate }}</label>
+          <input class="form-control" type="email" formControlName="email" appFieldValueState />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <div class="text-danger small mt-1">{{ 'maintenance.supplier.invalidEmail' | translate }}</div>
+          }
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">{{ 'maintenance.supplier.fieldTaxRecord' | translate }}</label>
+          <input class="form-control" formControlName="taxRecord" appFieldValueState />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">{{ 'maintenance.supplier.fieldAccountNumber' | translate }}</label>
+          <input class="form-control" formControlName="accountNumber" appFieldValueState />
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">{{ 'maintenance.supplier.fieldAddress' | translate }}</label>
+          <textarea class="form-control" rows="3" formControlName="address" appFieldValueState></textarea>
+        </div>
+      </div>
+
+      <div class="card-footer d-flex flex-wrap gap-2 justify-content-end">
+        <a class="btn btn-light" routerLink="/maintenance/suppliers">{{ 'Cancel' | translate }}</a>
+        <button class="btn btn-primary" type="submit" [disabled]="saving()">
+          @if (saving()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+          }
+          {{ 'Save' | translate }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

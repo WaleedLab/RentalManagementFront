@@ -109,7 +109,7 @@
   background: var(--fin-btn-primary-bg);
   color: var(--fin-btn-primary-fg);
   font-weight: 700;
-  border: 1px solid var(--fin-btn-primary-border, rgba(45, 212, 191, 0.4));
+  border: 1px solid var(--fin-btn-primary-border, rgba(var(--c-2dd4bf-rgb), 0.4));
   border-radius: 999px;
   box-shadow: var(--fin-btn-primary-shadow, 0 0 24px var(--fin-glow));
 }

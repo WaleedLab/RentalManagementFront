@@ -1,4 +1,4 @@
-import { Maintenance } from './maintenance.model';
+import { Maintenance, MaintenanceSparePartLine } from './maintenance.model';
 
 function pickLoose(source: Record<string, unknown> | undefined, ...candidates: string[]): unknown {
   if (!source || typeof source !== 'object') {
@@ -35,11 +35,49 @@ function toOptionalLong(value: unknown): number | null {
   return n !== undefined && n > 0 ? n : null;
 }
 
+function normalizeMaintenanceStatus(value: unknown): number | string {
+  if (typeof value === 'string' && value.trim()) {
+    return value.trim();
+  }
+  return toNumber(value) ?? 0;
+}
+
 function toBool(value: unknown): boolean {
   if (typeof value === 'boolean') return value;
   if (typeof value === 'number') return value !== 0;
   const s = String(value ?? '').trim().toLowerCase();
   return s === 'true' || s === '1' || s === 'yes';
+}
+
+function normalizeSparePartLines(value: unknown): MaintenanceSparePartLine[] {
+  if (!Array.isArray(value)) return [];
+  const out: MaintenanceSparePartLine[] = [];
+  for (const item of value) {
+    const r = (item ?? {}) as Record<string, unknown>;
+    const idSparePartName =
+      toNumber(
+        pickLoose(
+          r,
+          'idSparePartName',
+          'IdSparePartName',
+          'sparePartId',
+          'SparePartId',
+          'id',
+          'Id',
+        ),
+      ) ?? 0;
+    const quantity =
+      toNumber(pickLoose(r, 'quantity', 'Quantity', 'number', 'Number', 'qty', 'Qty')) ?? 0;
+    if (idSparePartName <= 0 || quantity <= 0) continue;
+    out.push({
+      idSparePartName,
+      quantity,
+      sparePartName:
+        String(pickLoose(r, 'sparePartName', 'SparePartName', 'name', 'Name') ?? '').trim() ||
+        undefined,
+    });
+  }
+  return out;
 }
 
 export function normalizeMaintenance(raw: unknown): Maintenance {
@@ -56,6 +94,21 @@ export function normalizeMaintenance(raw: unknown): Maintenance {
     idInsurancecompanies: toOptionalLong(pickLoose(r, 'idInsurancecompanies', 'IdInsurancecompanies')),
     insuranceCompanyName:
       String(pickLoose(r, 'insuranceCompanyName', 'InsuranceCompanyName') ?? '').trim() || undefined,
+    idSupplier: toOptionalLong(
+      pickLoose(
+        r,
+        'idSupplier',
+        'IdSupplier',
+        'idSupplieres',
+        'IdSupplieres',
+        'idSuppliers',
+        'IdSuppliers',
+      ),
+    ),
+    supplierName:
+      String(
+        pickLoose(r, 'supplierName', 'SupplierName', 'suppliersName', 'SuppliersName') ?? '',
+      ).trim() || undefined,
     startDate: String(pickLoose(r, 'startDate', 'StartDate') ?? ''),
     endDate: String(pickLoose(r, 'endDate', 'EndDate') ?? '').trim() || undefined,
     odometerIn: String(pickLoose(r, 'odometerIn', 'OdometerIn') ?? '').trim() || undefined,
@@ -65,11 +118,24 @@ export function normalizeMaintenance(raw: unknown): Maintenance {
     typeCompensation: String(pickLoose(r, 'typeCompensation', 'TypeCompensation') ?? '').trim() || undefined,
     note: String(pickLoose(r, 'note', 'Note') ?? '').trim() || undefined,
     valueCompensation: toNumber(pickLoose(r, 'valueCompensation', 'ValueCompensation')) ?? 0,
-    status: toNumber(pickLoose(r, 'status', 'Status')) ?? 0,
+    status: normalizeMaintenanceStatus(pickLoose(r, 'status', 'Status')),
     isAcceptable: toBool(pickLoose(r, 'isAcceptable', 'IsAcceptable')),
     fleetId: String(pickLoose(r, 'fleetId', 'FleetId') ?? '').trim() || undefined,
     url: String(pickLoose(r, 'url', 'Url') ?? '').trim() || undefined,
     total: toNumber(pickLoose(r, 'total', 'Total')) ?? null,
     createdBy: String(pickLoose(r, 'createdBy', 'CreatedBy') ?? '').trim() || undefined,
+    spareParts: normalizeSparePartLines(
+      pickLoose(
+        r,
+        'spareParts',
+        'SpareParts',
+        'maintenanceSpareParts',
+        'MaintenanceSpareParts',
+        'sparePartNames',
+        'SparePartNames',
+        'details',
+        'Details',
+      ),
+    ),
   };
 }

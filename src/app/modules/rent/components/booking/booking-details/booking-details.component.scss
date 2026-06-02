@@ -1,11 +1,11 @@
 .contract-details-card {
-  --field-bg: #f8fafc;
-  --field-border: #d4dee8;
+  --field-bg: var(--c-f8fafc);
+  --field-border: var(--c-d4dee8);
 }
 
 .contract-details-card .form-label {
   margin-bottom: 0.3rem;
-  color: #334155;
+  color: var(--c-334155);
   font-size: 0.78rem;
   font-weight: 600;
 }
@@ -25,9 +25,9 @@
 }
 
 .contract-details-card .form-control[readonly] {
-  background: linear-gradient(180deg, #f2f6fa, #edf2f7);
-  color: #475569;
-  border-color: #d8e0ea;
+  background: linear-gradient(180deg, var(--c-f2f6fa), var(--c-edf2f7));
+  color: var(--c-475569);
+  border-color: var(--c-d8e0ea);
 }
 
 .contract-details-page .contract-details-card {
@@ -38,8 +38,8 @@
   margin-bottom: 1.25rem;
   padding: 1rem 1.1rem 1.05rem;
   border-radius: 16px;
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.9));
+  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.28);
+  background: linear-gradient(180deg, rgba(var(--c-f8fafc-rgb), 0.98), rgba(var(--c-f1f5f9-rgb), 0.9));
 }
 
 .contract-details__summary-row {
@@ -61,15 +61,15 @@
   height: 48px;
   object-fit: contain;
   border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: #fff;
+  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.35);
+  background: var(--c-ffffff);
 }
 
 .contract-details__contract-no {
   font-size: 1.45rem;
   font-weight: 800;
   letter-spacing: 0.06em;
-  color: #0f172a;
+  color: var(--c-0f172a);
 }
 
 .contract-details__status-pill {
@@ -86,9 +86,9 @@
 }
 
 .contract-details__meta-item {
-  border: 1px solid rgba(148, 163, 184, 0.28);
+  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.28);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.66);
+  background: rgba(var(--c-ffffff-rgb), 0.66);
   padding: 0.42rem 0.6rem;
   display: flex;
   flex-direction: column;
@@ -98,13 +98,13 @@
 
 .contract-details__meta-label {
   font-size: 0.68rem;
-  color: #64748b;
+  color: var(--c-64748b);
   font-weight: 700;
 }
 
 .contract-details__meta-value {
   font-size: 0.85rem;
-  color: #0f172a;
+  color: var(--c-0f172a);
   font-weight: 700;
 }
 
@@ -112,8 +112,8 @@
   margin-bottom: 1.35rem;
   padding: 1rem 1.05rem 1.1rem;
   border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.22);
+  background: rgba(var(--c-ffffff-rgb), 0.72);
 }
 
 .contract-panel--audit {
@@ -129,12 +129,12 @@
   max-width: none;
   margin-inline: 0;
   padding: 1rem 1.05rem 1.15rem;
-  border-color: rgba(148, 163, 184, 0.3);
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.16), rgba(15, 23, 42, 0.08));
+  border-color: rgba(var(--c-94a3b8-rgb), 0.3);
+  background: linear-gradient(180deg, rgba(var(--c-0f172a-rgb), 0.16), rgba(var(--c-0f172a-rgb), 0.08));
 }
 
 .extend-form-grid {
-  border-top: 1px solid rgba(148, 163, 184, 0.25);
+  border-top: 1px solid rgba(var(--c-94a3b8-rgb), 0.25);
   padding-top: 0.85rem;
 }
 
@@ -145,7 +145,7 @@
 }
 
 .extend-field-hint--danger {
-  color: #b91c1c;
+  color: var(--c-b91c1c);
 }
 
 .extend-payment-date-row {
@@ -177,16 +177,16 @@
   position: relative;
   padding: 0.75rem 0.85rem 0.9rem;
   border-radius: 14px;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(5, 150, 105, 0.06));
-  border: 1px solid rgba(52, 211, 153, 0.5);
+  background: linear-gradient(135deg, rgba(var(--c-10b981-rgb), 0.14), rgba(var(--c-059669-rgb), 0.06));
+  border: 1px solid rgba(var(--c-34d399-rgb), 0.5);
   box-shadow:
-    0 0 0 1px rgba(16, 185, 129, 0.12),
-    0 14px 32px -20px rgba(16, 185, 129, 0.55);
+    0 0 0 1px rgba(var(--c-10b981-rgb), 0.12),
+    0 14px 32px -20px rgba(var(--c-10b981-rgb), 0.55);
 }
 
 .extend-field-group--pay-now .extend-field-group__label {
   margin-bottom: 0.4rem;
-  color: #6ee7b7;
+  color: var(--c-6ee7b7);
   font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.03em;
@@ -198,40 +198,40 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
-  color: #ecfdf5;
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.78));
-  border-color: rgba(52, 211, 153, 0.55);
+  color: var(--c-ecfdf5);
+  background: linear-gradient(180deg, rgba(var(--c-0f172a-rgb), 0.92), rgba(var(--c-0f172a-rgb), 0.78));
+  border-color: rgba(var(--c-34d399-rgb), 0.55);
   border-radius: 12px;
 }
 
 .contract-panel--extend .extend-field-group--pay-now .extend-field-group__input--pay-now::placeholder {
-  color: rgba(236, 253, 245, 0.45);
+  color: rgba(var(--c-ecfdf5-rgb), 0.45);
 }
 
 .contract-panel--extend .extend-field-group--pay-now .extend-field-group__input--pay-now:focus {
-  border-color: rgba(110, 231, 183, 0.95);
-  box-shadow: 0 0 0 0.22rem rgba(16, 185, 129, 0.28);
+  border-color: rgba(var(--c-6ee7b7-rgb), 0.95);
+  box-shadow: 0 0 0 0.22rem rgba(var(--c-10b981-rgb), 0.28);
   outline: 0;
 }
 
 .extend-readonly-field .form-control[disabled] {
   opacity: 1;
-  background: linear-gradient(180deg, rgba(51, 65, 85, 0.45), rgba(30, 41, 59, 0.52));
-  color: #e2e8f0;
-  -webkit-text-fill-color: #e2e8f0;
-  border-color: rgba(148, 163, 184, 0.42);
+  background: linear-gradient(180deg, rgba(var(--c-334155-rgb), 0.45), rgba(var(--c-1e293b-rgb), 0.52));
+  color: var(--c-e2e8f0);
+  -webkit-text-fill-color: var(--c-e2e8f0);
+  border-color: rgba(var(--c-94a3b8-rgb), 0.42);
 }
 
 .extend-payment-card {
   margin-top: 0.15rem;
   border-radius: 14px;
-  border: 1px solid rgba(59, 130, 246, 0.42);
-  background: linear-gradient(140deg, #041338, #071e51 55%, #0c2d70);
+  border: 1px solid rgba(var(--c-3b82f6-rgb), 0.42);
+  background: linear-gradient(140deg, var(--c-041338), var(--c-071e51) 55%, var(--c-0c2d70));
   padding: 0.9rem;
 }
 
 .extend-payment-card__title {
-  color: #dbeafe;
+  color: var(--c-dbeafe);
   font-size: 0.82rem;
   font-weight: 700;
   margin-bottom: 0.55rem;
@@ -244,28 +244,28 @@
 }
 
 .extend-payment-field .form-label {
-  color: #cbd5e1;
+  color: var(--c-cbd5e1);
 }
 
 .extend-payment-select {
   min-height: 38px;
   border-radius: 10px;
-  border-color: rgba(148, 163, 184, 0.38);
-  background: rgba(15, 23, 42, 0.66);
-  color: #f1f5f9;
+  border-color: rgba(var(--c-94a3b8-rgb), 0.38);
+  background: rgba(var(--c-0f172a-rgb), 0.66);
+  color: var(--c-f1f5f9);
 }
 
 .extend-payment-amount {
   min-height: 38px;
   border-radius: 10px;
-  border-color: rgba(148, 163, 184, 0.38);
-  background: rgba(15, 23, 42, 0.66);
-  color: #f1f5f9;
+  border-color: rgba(var(--c-94a3b8-rgb), 0.38);
+  background: rgba(var(--c-0f172a-rgb), 0.66);
+  color: var(--c-f1f5f9);
 }
 
 .extend-payment-select:focus {
-  border-color: rgba(96, 165, 250, 0.75);
-  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
+  border-color: rgba(var(--c-60a5fa-rgb), 0.75);
+  box-shadow: 0 0 0 0.2rem rgba(var(--c-3b82f6-rgb), 0.2);
 }
 
 .extend-payment-field--span-2 {
@@ -275,23 +275,23 @@
 .contract-panel--extend textarea.form-control {
   border-radius: 10px;
   min-height: 92px;
-  background: rgba(15, 23, 42, 0.5);
-  color: #e2e8f0;
-  border-color: rgba(148, 163, 184, 0.42);
+  background: rgba(var(--c-0f172a-rgb), 0.5);
+  color: var(--c-e2e8f0);
+  border-color: rgba(var(--c-94a3b8-rgb), 0.42);
 }
 
 .contract-panel--extend input[type='datetime-local'].form-control,
 .contract-panel--extend input[type='number'].form-control {
-  background: rgba(15, 23, 42, 0.42);
-  color: #e2e8f0;
-  border-color: rgba(148, 163, 184, 0.42);
+  background: rgba(var(--c-0f172a-rgb), 0.42);
+  color: var(--c-e2e8f0);
+  border-color: rgba(var(--c-94a3b8-rgb), 0.42);
 }
 
 .contract-panel--extend .extend-payment-date-row__days-input.form-control[readonly] {
-  background: rgba(15, 23, 42, 0.42);
-  color: #e2e8f0;
-  -webkit-text-fill-color: #e2e8f0;
-  border-color: rgba(148, 163, 184, 0.42);
+  background: rgba(var(--c-0f172a-rgb), 0.42);
+  color: var(--c-e2e8f0);
+  -webkit-text-fill-color: var(--c-e2e8f0);
+  border-color: rgba(var(--c-94a3b8-rgb), 0.42);
 }
 
 .contract-basics-grid {
@@ -331,9 +331,9 @@
   margin: 0 0 0.85rem;
   font-size: 0.95rem;
   font-weight: 800;
-  color: #1e293b;
+  color: var(--c-1e293b);
   padding-bottom: 0.45rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.28);
+  border-bottom: 1px solid rgba(var(--c-94a3b8-rgb), 0.28);
 }
 
 .contract-panel__title--summary {
@@ -353,10 +353,10 @@
 }
 
 .contract-table-wrap {
-  border: 1px solid rgba(148, 163, 184, 0.24);
+  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.24);
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(var(--c-ffffff-rgb), 0.72);
 }
 
 .contract-settlement-table th,
@@ -364,7 +364,7 @@
 .contract-vouchers-table th,
 .contract-vouchers-table td {
   padding: 0.45rem 0.6rem;
-  border-color: rgba(148, 163, 184, 0.2);
+  border-color: rgba(var(--c-94a3b8-rgb), 0.2);
   vertical-align: middle;
   font-size: 0.8rem;
 }
@@ -372,18 +372,18 @@
 .contract-settlement-table th,
 .contract-vouchers-table th {
   font-weight: 700;
-  color: #334155;
-  background: rgba(241, 245, 249, 0.8);
+  color: var(--c-334155);
+  background: rgba(var(--c-f1f5f9-rgb), 0.8);
   white-space: nowrap;
 }
 
 .contract-settlement-table td {
-  color: #0f172a;
+  color: var(--c-0f172a);
 }
 
 .contract-settlement-table .is-emph {
   font-weight: 800;
-  color: #0b4aa8;
+  color: var(--c-0b4aa8);
 }
 
 .contract-panel--photos {
@@ -460,8 +460,8 @@
 
 .contract-photo-slot {
   border-radius: 12px;
-  border: 1px dashed rgba(148, 163, 184, 0.55);
-  background: rgba(248, 250, 252, 0.9);
+  border: 1px dashed rgba(var(--c-94a3b8-rgb), 0.55);
+  background: rgba(var(--c-f8fafc-rgb), 0.9);
   min-height: 112px;
   display: flex;
   flex-direction: column;
@@ -482,7 +482,7 @@
   align-items: center;
   justify-content: center;
   font-size: 0.78rem;
-  color: #94a3b8;
+  color: var(--c-94a3b8);
   padding: 0.5rem;
   text-align: center;
 }
@@ -492,14 +492,14 @@
   font-weight: 700;
   text-align: center;
   padding: 0.35rem 0.4rem;
-  background: rgba(226, 232, 240, 0.65);
-  color: #475569;
+  background: rgba(var(--c-e2e8f0-rgb), 0.65);
+  color: var(--c-475569);
 }
 
 .contract-details__footer {
   margin-top: 0.5rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.22);
+  border-top: 1px solid rgba(var(--c-94a3b8-rgb), 0.22);
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -528,38 +528,38 @@
 }
 
 .contract-details__extend-submit {
-  border: 1px solid rgba(100, 125, 160, 0.38);
-  background: linear-gradient(180deg, rgba(58, 76, 108, 0.52), rgba(45, 58, 82, 0.48));
-  color: rgba(226, 235, 248, 0.95);
+  border: 1px solid rgba(var(--c-647da0-rgb), 0.38);
+  background: linear-gradient(180deg, rgba(var(--c-3a4c6c-rgb), 0.52), rgba(var(--c-2d3a52-rgb), 0.48));
+  color: rgba(var(--c-e2ebf8-rgb), 0.95);
   box-shadow: none;
 }
 
 .contract-details__extend-submit:hover {
-  border-color: rgba(120, 145, 185, 0.42);
-  background: linear-gradient(180deg, rgba(68, 88, 120, 0.55), rgba(52, 66, 92, 0.52));
-  color: #f8fafc;
+  border-color: rgba(var(--c-7891b9-rgb), 0.42);
+  background: linear-gradient(180deg, rgba(var(--c-445878-rgb), 0.55), rgba(var(--c-34425c-rgb), 0.52));
+  color: var(--c-f8fafc);
 }
 
 .contract-details__extend-submit:focus-visible {
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(100, 130, 175, 0.22);
+  box-shadow: 0 0 0 0.2rem rgba(var(--c-6482af-rgb), 0.22);
 }
 
 .contract-details__extend-back {
-  border: 1px solid rgba(125, 108, 118, 0.34);
-  background: linear-gradient(180deg, rgba(58, 48, 56, 0.48), rgba(44, 38, 46, 0.46));
-  color: rgba(228, 218, 222, 0.93);
+  border: 1px solid rgba(var(--c-7d6c76-rgb), 0.34);
+  background: linear-gradient(180deg, rgba(var(--c-3a3038-rgb), 0.48), rgba(var(--c-2c262e-rgb), 0.46));
+  color: rgba(var(--c-e4dade-rgb), 0.93);
 }
 
 .contract-details__extend-back:hover {
-  border-color: rgba(145, 125, 135, 0.38);
-  background: linear-gradient(180deg, rgba(70, 58, 66, 0.52), rgba(52, 44, 52, 0.5));
-  color: #f5f0f2;
+  border-color: rgba(var(--c-917d87-rgb), 0.38);
+  background: linear-gradient(180deg, rgba(var(--c-463a42-rgb), 0.52), rgba(var(--c-342c34-rgb), 0.5));
+  color: var(--c-f5f0f2);
 }
 
 .contract-details__extend-back:focus-visible {
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(130, 110, 120, 0.2);
+  box-shadow: 0 0 0 0.2rem rgba(var(--c-826e78-rgb), 0.2);
 }
 
 .contract-details__toolbar {
@@ -579,15 +579,15 @@
   margin-top: 1rem;
   padding: 0.85rem 0.95rem 0.95rem;
   border-radius: 14px;
-  border: 1px solid rgba(59, 130, 246, 0.28);
-  background: linear-gradient(165deg, rgba(239, 246, 255, 0.92), rgba(248, 250, 252, 0.88));
+  border: 1px solid rgba(var(--c-3b82f6-rgb), 0.28);
+  background: linear-gradient(165deg, rgba(var(--c-eff6ff-rgb), 0.92), rgba(var(--c-f8fafc-rgb), 0.88));
 }
 
 .contract-voucher-summary__title {
   margin: 0 0 0.65rem;
   font-size: 0.88rem;
   font-weight: 800;
-  color: #1e40af;
+  color: var(--c-1e40af);
   letter-spacing: 0.02em;
 }
 
@@ -599,8 +599,8 @@
 
 .contract-voucher-summary__item {
   border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.35);
+  background: rgba(var(--c-ffffff-rgb), 0.85);
   padding: 0.45rem 0.55rem;
   display: flex;
   flex-direction: column;
@@ -609,21 +609,21 @@
 }
 
 .contract-voucher-summary__item--emph {
-  border-color: rgba(245, 158, 11, 0.55);
-  background: linear-gradient(180deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.35));
+  border-color: rgba(var(--c-f59e0b-rgb), 0.55);
+  background: linear-gradient(180deg, rgba(var(--c-fffbeb-rgb), 0.95), rgba(var(--c-fef3c7-rgb), 0.35));
 }
 
 .contract-voucher-summary__label {
   font-size: 0.68rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--c-64748b);
   line-height: 1.25;
 }
 
 .contract-voucher-summary__value {
   font-size: 0.88rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--c-0f172a);
 }
 
 .contract-voucher-summary__decision {
@@ -632,9 +632,9 @@
   border-radius: 10px;
   font-size: 0.8rem;
   line-height: 1.45;
-  color: #334155;
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(148, 163, 184, 0.28);
+  color: var(--c-334155);
+  background: rgba(var(--c-ffffff-rgb), 0.65);
+  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.28);
 }
 
 .contract-voucher-summary__warn {
@@ -644,349 +644,349 @@
   border-radius: 9px;
   font-size: 0.76rem;
   line-height: 1.4;
-  color: #9a3412;
-  background: rgba(254, 215, 170, 0.45);
-  border: 1px solid rgba(251, 146, 60, 0.45);
+  color: var(--c-9a3412);
+  background: rgba(var(--c-fed7aa-rgb), 0.45);
+  border: 1px solid rgba(var(--c-fb923c-rgb), 0.45);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details__summary,
 :host-context(body.dark-only) .contract-details__summary {
-  border-color: rgba(100, 116, 139, 0.45);
-  background: linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.88));
+  border-color: rgba(var(--c-64748b-rgb), 0.45);
+  background: linear-gradient(180deg, rgba(var(--c-1e293b-rgb), 0.92), rgba(var(--c-0f172a-rgb), 0.88));
 }
 
 :host-context([data-bs-theme='dark']) .contract-details__contract-no,
 :host-context(body.dark-only) .contract-details__contract-no {
-  color: #f1f5f9;
+  color: var(--c-f1f5f9);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details__summary-meta,
 :host-context(body.dark-only) .contract-details__summary-meta {
-  color: #cbd5e1;
+  color: var(--c-cbd5e1);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details__meta-item,
 :host-context(body.dark-only) .contract-details__meta-item {
-  border-color: rgba(100, 116, 139, 0.45);
-  background: rgba(15, 23, 42, 0.5);
+  border-color: rgba(var(--c-64748b-rgb), 0.45);
+  background: rgba(var(--c-0f172a-rgb), 0.5);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details__meta-label,
 :host-context(body.dark-only) .contract-details__meta-label {
-  color: #94a3b8;
+  color: var(--c-94a3b8);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details__meta-value,
 :host-context(body.dark-only) .contract-details__meta-value {
-  color: #f1f5f9;
+  color: var(--c-f1f5f9);
 }
 
 :host-context([data-bs-theme='dark']) .contract-panel,
 :host-context(body.dark-only) .contract-panel {
-  border-color: rgba(100, 116, 139, 0.4);
-  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(var(--c-64748b-rgb), 0.4);
+  background: rgba(var(--c-1e293b-rgb), 0.55);
 }
 
 :host-context([data-bs-theme='dark']) .contract-panel--extend,
 :host-context(body.dark-only) .contract-panel--extend {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.78));
+  background: linear-gradient(180deg, rgba(var(--c-0f172a-rgb), 0.9), rgba(var(--c-1e293b-rgb), 0.78));
 }
 
 :host-context([data-bs-theme='dark']) .contract-panel__title,
 :host-context(body.dark-only) .contract-panel__title {
-  color: #e2e8f0;
-  border-bottom-color: rgba(100, 116, 139, 0.45);
+  color: var(--c-e2e8f0);
+  border-bottom-color: rgba(var(--c-64748b-rgb), 0.45);
 }
 
 :host-context([data-bs-theme='dark']) .contract-photo-slot,
 :host-context(body.dark-only) .contract-photo-slot {
-  border-color: rgba(100, 116, 139, 0.45);
-  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(var(--c-64748b-rgb), 0.45);
+  background: rgba(var(--c-0f172a-rgb), 0.55);
 }
 
 :host-context([data-bs-theme='dark']) .contract-table-wrap,
 :host-context(body.dark-only) .contract-table-wrap {
-  border-color: rgba(100, 116, 139, 0.45);
-  background: rgba(15, 23, 42, 0.52);
+  border-color: rgba(var(--c-64748b-rgb), 0.45);
+  background: rgba(var(--c-0f172a-rgb), 0.52);
 }
 
 :host-context([data-bs-theme='dark']) .contract-settlement-table th,
 :host-context([data-bs-theme='dark']) .contract-vouchers-table th,
 :host-context(body.dark-only) .contract-settlement-table th,
 :host-context(body.dark-only) .contract-vouchers-table th {
-  color: #cbd5e1;
-  background: rgba(51, 65, 85, 0.72);
-  border-color: rgba(100, 116, 139, 0.45);
+  color: var(--c-cbd5e1);
+  background: rgba(var(--c-334155-rgb), 0.72);
+  border-color: rgba(var(--c-64748b-rgb), 0.45);
 }
 
 :host-context([data-bs-theme='dark']) .contract-settlement-table td,
 :host-context([data-bs-theme='dark']) .contract-vouchers-table td,
 :host-context(body.dark-only) .contract-settlement-table td,
 :host-context(body.dark-only) .contract-vouchers-table td {
-  color: #e2e8f0;
-  border-color: rgba(100, 116, 139, 0.35);
+  color: var(--c-e2e8f0);
+  border-color: rgba(var(--c-64748b-rgb), 0.35);
 }
 
 :host-context([data-bs-theme='dark']) .contract-settlement-table .is-emph,
 :host-context(body.dark-only) .contract-settlement-table .is-emph {
-  color: #93c5fd;
+  color: var(--c-93c5fd);
 }
 
 :host-context([data-bs-theme='dark']) .contract-photo-slot__cap,
 :host-context(body.dark-only) .contract-photo-slot__cap {
-  background: rgba(51, 65, 85, 0.75);
-  color: #cbd5e1;
+  background: rgba(var(--c-334155-rgb), 0.75);
+  color: var(--c-cbd5e1);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details__footer,
 :host-context(body.dark-only) .contract-details__footer {
-  border-top-color: rgba(100, 116, 139, 0.4);
+  border-top-color: rgba(var(--c-64748b-rgb), 0.4);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details__footer--extend,
 :host-context(body.dark-only) .contract-details__footer--extend {
-  border-top-color: rgba(100, 116, 139, 0.32);
+  border-top-color: rgba(var(--c-64748b-rgb), 0.32);
 }
 
 :host-context([data-bs-theme='dark']) .contract-panel--extend .extend-payment-card,
 :host-context(body.dark-only) .contract-panel--extend .extend-payment-card {
-  border-color: rgba(68, 82, 98, 0.3);
-  background: linear-gradient(165deg, rgba(18, 24, 36, 0.9), rgba(10, 14, 24, 0.86));
+  border-color: rgba(var(--c-445262-rgb), 0.3);
+  background: linear-gradient(165deg, rgba(var(--c-121824-rgb), 0.9), rgba(var(--c-0a0e18-rgb), 0.86));
 }
 
 :host-context([data-bs-theme='dark']) .contract-details__extend-submit,
 :host-context(body.dark-only) .contract-details__extend-submit {
-  border-color: rgba(82, 102, 132, 0.3);
-  background: linear-gradient(180deg, rgba(36, 48, 68, 0.64), rgba(28, 36, 52, 0.58));
-  color: rgba(220, 232, 248, 0.9);
+  border-color: rgba(var(--c-526684-rgb), 0.3);
+  background: linear-gradient(180deg, rgba(var(--c-243044-rgb), 0.64), rgba(var(--c-1c2434-rgb), 0.58));
+  color: rgba(var(--c-dce8f8-rgb), 0.9);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details__extend-submit:hover,
 :host-context(body.dark-only) .contract-details__extend-submit:hover {
-  background: linear-gradient(180deg, rgba(42, 56, 78, 0.66), rgba(32, 42, 60, 0.6));
-  border-color: rgba(95, 118, 148, 0.34);
+  background: linear-gradient(180deg, rgba(var(--c-2a384e-rgb), 0.66), rgba(var(--c-202a3c-rgb), 0.6));
+  border-color: rgba(var(--c-5f7694-rgb), 0.34);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details__extend-back,
 :host-context(body.dark-only) .contract-details__extend-back {
-  border-color: rgba(98, 86, 94, 0.28);
-  background: linear-gradient(180deg, rgba(40, 34, 40, 0.64), rgba(28, 24, 30, 0.6));
-  color: rgba(210, 200, 206, 0.88);
+  border-color: rgba(var(--c-62565e-rgb), 0.28);
+  background: linear-gradient(180deg, rgba(var(--c-282228-rgb), 0.64), rgba(var(--c-1c181e-rgb), 0.6));
+  color: rgba(var(--c-d2c8ce-rgb), 0.88);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details__extend-back:hover,
 :host-context(body.dark-only) .contract-details__extend-back:hover {
-  background: linear-gradient(180deg, rgba(48, 40, 46, 0.66), rgba(34, 30, 36, 0.62));
-  border-color: rgba(118, 102, 112, 0.32);
+  background: linear-gradient(180deg, rgba(var(--c-30282e-rgb), 0.66), rgba(var(--c-221e24-rgb), 0.62));
+  border-color: rgba(var(--c-766670-rgb), 0.32);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details-card,
 :host-context(body.dark-only) .contract-details-card {
-  --field-bg: rgba(30, 41, 59, 0.75);
-  --field-border: rgba(100, 116, 139, 0.62);
+  --field-bg: rgba(var(--c-1e293b-rgb), 0.75);
+  --field-border: rgba(var(--c-64748b-rgb), 0.62);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details-card .form-label,
 :host-context(body.dark-only) .contract-details-card .form-label {
-  color: #cbd5e1;
+  color: var(--c-cbd5e1);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details-card .form-control,
 :host-context(body.dark-only) .contract-details-card .form-control {
-  border-color: rgba(100, 116, 139, 0.6);
-  color: #e2e8f0;
-  -webkit-text-fill-color: #e2e8f0;
-  background: rgba(30, 41, 59, 0.78);
+  border-color: rgba(var(--c-64748b-rgb), 0.6);
+  color: var(--c-e2e8f0);
+  -webkit-text-fill-color: var(--c-e2e8f0);
+  background: rgba(var(--c-1e293b-rgb), 0.78);
 }
 
 :host-context([data-bs-theme='dark']) .contract-details-card .form-control[readonly],
 :host-context(body.dark-only) .contract-details-card .form-control[readonly] {
-  background: rgba(51, 65, 85, 0.76);
-  color: #cbd5e1;
-  -webkit-text-fill-color: #cbd5e1;
-  border-color: rgba(100, 116, 139, 0.65);
+  background: rgba(var(--c-334155-rgb), 0.76);
+  color: var(--c-cbd5e1);
+  -webkit-text-fill-color: var(--c-cbd5e1);
+  border-color: rgba(var(--c-64748b-rgb), 0.65);
 }
 
 :host-context([data-bs-theme='dark']) .contract-voucher-summary,
 :host-context(body.dark-only) .contract-voucher-summary {
-  border-color: rgba(96, 165, 250, 0.35);
-  background: linear-gradient(165deg, rgba(30, 58, 138, 0.35), rgba(15, 23, 42, 0.72));
+  border-color: rgba(var(--c-60a5fa-rgb), 0.35);
+  background: linear-gradient(165deg, rgba(var(--c-1e3a8a-rgb), 0.35), rgba(var(--c-0f172a-rgb), 0.72));
 }
 
 :host-context([data-bs-theme='dark']) .contract-voucher-summary__title,
 :host-context(body.dark-only) .contract-voucher-summary__title {
-  color: #93c5fd;
+  color: var(--c-93c5fd);
 }
 
 :host-context([data-bs-theme='dark']) .contract-voucher-summary__item,
 :host-context(body.dark-only) .contract-voucher-summary__item {
-  border-color: rgba(100, 116, 139, 0.5);
-  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(var(--c-64748b-rgb), 0.5);
+  background: rgba(var(--c-0f172a-rgb), 0.55);
 }
 
 :host-context([data-bs-theme='dark']) .contract-voucher-summary__item--emph,
 :host-context(body.dark-only) .contract-voucher-summary__item--emph {
-  border-color: rgba(251, 191, 36, 0.45);
-  background: linear-gradient(180deg, rgba(120, 53, 15, 0.55), rgba(30, 41, 59, 0.65));
+  border-color: rgba(var(--c-fbbf24-rgb), 0.45);
+  background: linear-gradient(180deg, rgba(var(--c-78350f-rgb), 0.55), rgba(var(--c-1e293b-rgb), 0.65));
 }
 
 :host-context([data-bs-theme='dark']) .contract-voucher-summary__label,
 :host-context(body.dark-only) .contract-voucher-summary__label {
-  color: #94a3b8;
+  color: var(--c-94a3b8);
 }
 
 :host-context([data-bs-theme='dark']) .contract-voucher-summary__value,
 :host-context(body.dark-only) .contract-voucher-summary__value {
-  color: #f1f5f9;
+  color: var(--c-f1f5f9);
 }
 
 :host-context([data-bs-theme='dark']) .contract-voucher-summary__decision,
 :host-context(body.dark-only) .contract-voucher-summary__decision {
-  color: #cbd5e1;
-  background: rgba(15, 23, 42, 0.6);
-  border-color: rgba(100, 116, 139, 0.45);
+  color: var(--c-cbd5e1);
+  background: rgba(var(--c-0f172a-rgb), 0.6);
+  border-color: rgba(var(--c-64748b-rgb), 0.45);
 }
 
 :host-context([data-bs-theme='dark']) .contract-voucher-summary__warn,
 :host-context(body.dark-only) .contract-voucher-summary__warn {
-  color: #fdba74;
-  background: rgba(124, 45, 18, 0.42);
-  border-color: rgba(234, 88, 12, 0.45);
+  color: var(--c-fdba74);
+  background: rgba(var(--c-7c2d12-rgb), 0.42);
+  border-color: rgba(var(--c-ea580c-rgb), 0.45);
 }
 
 /* ----- Light theme: extend panel (تمديد العقد) readable on pale surfaces ----- */
 :host-context(body.light-only) .contract-panel--extend {
-  border-color: rgba(148, 163, 184, 0.38);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  border-color: rgba(var(--c-94a3b8-rgb), 0.38);
+  background: linear-gradient(180deg, rgba(var(--c-ffffff-rgb), 0.98), rgba(var(--c-f8fafc-rgb), 0.94));
 }
 
 :host-context(body.light-only) .contract-panel--extend .contract-panel__title {
-  color: #0f172a;
-  border-bottom-color: rgba(148, 163, 184, 0.32);
+  color: var(--c-0f172a);
+  border-bottom-color: rgba(var(--c-94a3b8-rgb), 0.32);
 }
 
 :host-context(body.light-only) .extend-form-grid {
-  border-top-color: rgba(148, 163, 184, 0.32);
+  border-top-color: rgba(var(--c-94a3b8-rgb), 0.32);
 }
 
 :host-context(body.light-only) .contract-panel--extend .form-label {
-  color: #334155;
+  color: var(--c-334155);
 }
 
 :host-context(body.light-only) .extend-readonly-field .form-control[disabled] {
-  background: linear-gradient(180deg, #f1f5f9, #e8eef4);
-  color: #0f172a;
-  -webkit-text-fill-color: #0f172a;
-  border-color: rgba(148, 163, 184, 0.45);
+  background: linear-gradient(180deg, var(--c-f1f5f9), var(--c-e8eef4));
+  color: var(--c-0f172a);
+  -webkit-text-fill-color: var(--c-0f172a);
+  border-color: rgba(var(--c-94a3b8-rgb), 0.45);
 }
 
 :host-context(body.light-only) .contract-panel--extend input[type='datetime-local'].form-control,
 :host-context(body.light-only) .contract-panel--extend input[type='number'].form-control {
-  background: #fff;
-  color: #0f172a;
-  -webkit-text-fill-color: #0f172a;
-  border-color: rgba(148, 163, 184, 0.45);
+  background: var(--c-ffffff);
+  color: var(--c-0f172a);
+  -webkit-text-fill-color: var(--c-0f172a);
+  border-color: rgba(var(--c-94a3b8-rgb), 0.45);
 }
 
 :host-context(body.light-only) .contract-panel--extend .extend-payment-date-row__days-input.form-control[readonly] {
-  background: linear-gradient(180deg, #f8fafc, #f1f5f9);
-  color: #0f172a;
-  -webkit-text-fill-color: #0f172a;
-  border-color: rgba(148, 163, 184, 0.4);
+  background: linear-gradient(180deg, var(--c-f8fafc), var(--c-f1f5f9));
+  color: var(--c-0f172a);
+  -webkit-text-fill-color: var(--c-0f172a);
+  border-color: rgba(var(--c-94a3b8-rgb), 0.4);
 }
 
 :host-context(body.light-only) .contract-panel--extend textarea.form-control {
-  background: #fff;
-  color: #0f172a;
-  -webkit-text-fill-color: #0f172a;
-  border-color: rgba(148, 163, 184, 0.45);
+  background: var(--c-ffffff);
+  color: var(--c-0f172a);
+  -webkit-text-fill-color: var(--c-0f172a);
+  border-color: rgba(var(--c-94a3b8-rgb), 0.45);
 }
 
 :host-context(body.light-only) .contract-panel--extend .form-control[readonly] {
-  background: linear-gradient(180deg, #f8fafc, #f1f5f9);
-  color: #0f172a;
-  -webkit-text-fill-color: #0f172a;
-  border-color: rgba(148, 163, 184, 0.4);
+  background: linear-gradient(180deg, var(--c-f8fafc), var(--c-f1f5f9));
+  color: var(--c-0f172a);
+  -webkit-text-fill-color: var(--c-0f172a);
+  border-color: rgba(var(--c-94a3b8-rgb), 0.4);
 }
 
 :host-context(body.light-only) .extend-field-group--pay-now {
-  background: linear-gradient(135deg, rgba(209, 250, 229, 0.92), rgba(167, 243, 208, 0.42));
-  border-color: rgba(16, 185, 129, 0.42);
+  background: linear-gradient(135deg, rgba(var(--c-d1fae5-rgb), 0.92), rgba(var(--c-a7f3d0-rgb), 0.42));
+  border-color: rgba(var(--c-10b981-rgb), 0.42);
   box-shadow:
-    0 0 0 1px rgba(16, 185, 129, 0.08),
-    0 12px 28px -18px rgba(5, 150, 105, 0.22);
+    0 0 0 1px rgba(var(--c-10b981-rgb), 0.08),
+    0 12px 28px -18px rgba(var(--c-059669-rgb), 0.22);
 }
 
 :host-context(body.light-only) .extend-field-group--pay-now .extend-field-group__label {
-  color: #047857;
+  color: var(--c-047857);
 }
 
 :host-context(body.light-only) .contract-panel--extend .extend-field-group--pay-now .extend-field-group__input--pay-now {
-  color: #064e3b;
-  background: linear-gradient(180deg, #ffffff, #f8fafc);
-  border-color: rgba(16, 185, 129, 0.48);
+  color: var(--c-064e3b);
+  background: linear-gradient(180deg, var(--c-ffffff), var(--c-f8fafc));
+  border-color: rgba(var(--c-10b981-rgb), 0.48);
 }
 
 :host-context(body.light-only) .contract-panel--extend .extend-field-group--pay-now .extend-field-group__input--pay-now::placeholder {
-  color: rgba(6, 78, 59, 0.45);
+  color: rgba(var(--c-064e3b-rgb), 0.45);
 }
 
 :host-context(body.light-only) .contract-panel--extend .extend-field-group--pay-now .extend-field-group__input--pay-now:focus {
-  border-color: rgba(5, 150, 105, 0.72);
-  box-shadow: 0 0 0 0.22rem rgba(16, 185, 129, 0.16);
+  border-color: rgba(var(--c-059669-rgb), 0.72);
+  box-shadow: 0 0 0 0.22rem rgba(var(--c-10b981-rgb), 0.16);
 }
 
 :host-context(body.light-only) .extend-payment-card {
-  border: 1px solid rgba(59, 130, 246, 0.28);
-  background: linear-gradient(140deg, #f0f9ff, #e0f2fe 52%, #dbeafe);
+  border: 1px solid rgba(var(--c-3b82f6-rgb), 0.28);
+  background: linear-gradient(140deg, var(--c-f0f9ff), var(--c-e0f2fe) 52%, var(--c-dbeafe));
 }
 
 :host-context(body.light-only) .extend-payment-card__title {
-  color: #0c4a6e;
+  color: var(--c-0c4a6e);
 }
 
 :host-context(body.light-only) .extend-payment-field .form-label {
-  color: #334155;
+  color: var(--c-334155);
 }
 
 :host-context(body.light-only) .extend-payment-amount,
 :host-context(body.light-only) .extend-payment-select {
-  background: #fff;
-  color: #0f172a;
-  -webkit-text-fill-color: #0f172a;
-  border-color: rgba(148, 163, 184, 0.45);
+  background: var(--c-ffffff);
+  color: var(--c-0f172a);
+  -webkit-text-fill-color: var(--c-0f172a);
+  border-color: rgba(var(--c-94a3b8-rgb), 0.45);
 }
 
 :host-context(body.light-only) .extend-payment-select:focus,
 :host-context(body.light-only) .extend-payment-amount:focus {
-  border-color: rgba(59, 130, 246, 0.55);
-  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.12);
+  border-color: rgba(var(--c-3b82f6-rgb), 0.55);
+  box-shadow: 0 0 0 0.2rem rgba(var(--c-3b82f6-rgb), 0.12);
 }
 
 :host-context(body.light-only) .contract-panel--extend .form-text.text-warning {
-  color: #b45309;
+  color: var(--c-b45309);
 }
 
 :host-context(body.light-only) .contract-details__extend-submit {
-  border: 1px solid rgba(163, 180, 210, 0.55);
-  background: linear-gradient(180deg, rgba(238, 242, 252, 0.98), rgba(228, 234, 248, 0.92));
-  color: #3d4f6e;
+  border: 1px solid rgba(var(--c-a3b4d2-rgb), 0.55);
+  background: linear-gradient(180deg, rgba(var(--c-eef2fc-rgb), 0.98), rgba(var(--c-e4eaf8-rgb), 0.92));
+  color: var(--c-3d4f6e);
 }
 
 :host-context(body.light-only) .contract-details__extend-submit:hover {
-  background: linear-gradient(180deg, rgba(244, 247, 255, 1), rgba(232, 238, 252, 0.96));
-  border-color: rgba(140, 160, 200, 0.5);
-  color: #2c3a55;
+  background: linear-gradient(180deg, rgba(var(--c-f4f7ff-rgb), 1), rgba(var(--c-e8eefc-rgb), 0.96));
+  border-color: rgba(var(--c-8ca0c8-rgb), 0.5);
+  color: var(--c-2c3a55);
 }
 
 :host-context(body.light-only) .contract-details__extend-back {
-  border: 1px solid rgba(200, 182, 188, 0.45);
-  background: linear-gradient(180deg, rgba(252, 248, 249, 0.98), rgba(245, 236, 238, 0.94));
-  color: #5a4a50;
+  border: 1px solid rgba(var(--c-c8b6bc-rgb), 0.45);
+  background: linear-gradient(180deg, rgba(var(--c-fcf8f9-rgb), 0.98), rgba(var(--c-f5ecee-rgb), 0.94));
+  color: var(--c-5a4a50);
 }
 
 :host-context(body.light-only) .contract-details__extend-back:hover {
-  background: linear-gradient(180deg, #fff, rgba(248, 240, 242, 0.98));
-  border-color: rgba(185, 165, 172, 0.48);
-  color: #4a3e44;
+  background: linear-gradient(180deg, var(--c-ffffff), rgba(var(--c-f8f0f2-rgb), 0.98));
+  border-color: rgba(var(--c-b9a5ac-rgb), 0.48);
+  color: var(--c-4a3e44);
 }

@@ -9,21 +9,16 @@
     </a>
 
     <ng-container commandToolbar>
-      <div class="maintenance-command__filters">
-        <label class="maintenance-command__filter-label" for="maintenance-branch-filter">
-          {{ 'maintenance.fieldBranch' | translate }}
-        </label>
-        <select
-          id="maintenance-branch-filter"
-          class="form-select form-select-sm maintenance-command__branch"
-          (change)="onBranchChange($any($event.target).value)"
-        >
-          <option value="">{{ 'maintenance.allBranches' | translate }}</option>
-          @for (branch of branches(); track branch.id) {
-            <option [value]="branch.id">{{ branchLabel(branch) }}</option>
-          }
-        </select>
-      </div>
+      <label class="fin-field">
+        <span>{{ 'maintenance.fieldBranch' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'maintenance.fieldBranch' | translate"
+          [placeholder]="'maintenance.allBranches' | translate"
+          [options]="branchFilterOptions()"
+          [value]="branchId()"
+          (valueChange)="onBranchChange($event)"
+        />
+      </label>
       <app-list-search-field
         [placeholder]="'maintenance.searchPlaceholder'"
         [value]="search()"
@@ -68,6 +63,22 @@
                 <td class="text-end">{{ formatMoney(row.total) }}</td>
                 <td class="text-end">
                   <div class="table-actions">
+                    @if (canAccept(row)) {
+                      <button
+                        type="button"
+                        class="table-action-icon table-action-icon--info"
+                        [disabled]="isAccepting(row.id)"
+                        (click)="openAcceptDialog(row)"
+                        [attr.aria-label]="'maintenance.accept.action' | translate"
+                        [title]="'maintenance.accept.action' | translate"
+                      >
+                        @if (isAccepting(row.id)) {
+                          <span class="spinner-border spinner-border-sm" role="status"></span>
+                        } @else {
+                          <i class="fa-solid fa-circle-check"></i>
+                        }
+                      </button>
+                    }
                     <a
                       class="table-action-icon table-action-icon--primary"
                       [routerLink]="['/maintenance', row.id, 'edit']"

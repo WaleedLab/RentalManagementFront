@@ -1,9 +1,9 @@
 :root {
-  --app-form-actions-border: rgba(148, 163, 184, 0.22);
+  --app-form-actions-border: rgba(var(--c-94a3b8-rgb), 0.22);
 }
 
 body.dark-only {
-  --app-form-actions-border: rgba(6, 182, 212, 0.12);
+  --app-form-actions-border: rgba(var(--c-06b6d4-rgb), 0.12);
 }
 
 .app-form-actions {

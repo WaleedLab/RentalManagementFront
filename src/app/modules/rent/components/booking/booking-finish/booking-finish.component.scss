@@ -4,14 +4,14 @@
 
 .finish-closed-banner {
   border-radius: 12px;
-  border: 1px solid rgba(217, 119, 6, 0.35);
+  border: 1px solid rgba(var(--c-d97706-rgb), 0.35);
 }
 
 .contract-finish-card {
   border-radius: 16px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  box-shadow: 0 12px 28px -22px rgba(15, 23, 42, 0.12);
-  border-top: 3px solid rgba(59, 130, 246, 0.55);
+  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.22);
+  box-shadow: 0 12px 28px -22px rgba(var(--rt-shadow-rgb), 0.12);
+  border-top: 3px solid rgba(var(--c-3b82f6-rgb), 0.55);
 }
 
 .finish-form-grid {
@@ -41,11 +41,11 @@
 }
 
 .finish-field-hint--danger {
-  color: #b91c1c;
+  color: var(--c-b91c1c);
 }
 
 .finish-field-hint--muted {
-  color: #64748b;
+  color: var(--c-64748b);
   font-size: 0.76rem;
 }
 
@@ -62,8 +62,8 @@
   margin: 0;
   border-radius: 12px;
   padding: 0.45rem 0.55rem 0.55rem;
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.28);
+  background: rgba(var(--c-ffffff-rgb), 0.45);
 }
 
 .finish-val-cell .form-label {
@@ -87,15 +87,15 @@
   font-size: 0.78rem;
   font-weight: 600;
   margin-bottom: 0.25rem;
-  color: #334155;
+  color: var(--c-334155);
 }
 
 .finish-field--readonly .form-control[disabled],
 .finish-field--readonly .form-control[readonly] {
   opacity: 1;
-  background: #f1f5f9;
-  color: #0f172a;
-  border-color: #e2e8f0;
+  background: var(--c-f1f5f9);
+  color: var(--c-0f172a);
+  border-color: var(--c-e2e8f0);
 }
 
 /**
@@ -115,31 +115,31 @@
 
 .finish-field--readonly .finish-stat-display {
   opacity: 1;
-  background: #f1f5f9;
-  color: #0f172a;
-  border: 1px solid #e2e8f0;
+  background: var(--c-f1f5f9);
+  color: var(--c-0f172a);
+  border: 1px solid var(--c-e2e8f0);
 }
 
 .finish-payment-card .finish-field--readonly .finish-stat-display {
   cursor: default;
-  background: rgba(241, 245, 249, 0.72);
-  border: 1px dashed rgba(148, 163, 184, 0.55);
-  color: #475569;
+  background: rgba(var(--c-f1f5f9-rgb), 0.72);
+  border: 1px dashed rgba(var(--c-94a3b8-rgb), 0.55);
+  color: var(--c-475569);
 }
 
 .finish-payment-card .finish-val-cell.finish-field--readonly .finish-stat-display {
   border-style: solid;
   border-width: 2px;
-  border-color: rgba(148, 163, 184, 0.55);
-  background: #f8fafc;
-  color: #0f172a;
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+  border-color: rgba(var(--c-94a3b8-rgb), 0.55);
+  background: var(--c-f8fafc);
+  color: var(--c-0f172a);
+  box-shadow: inset 0 1px 2px rgba(var(--rt-shadow-rgb), 0.08);
 }
 
 .finish-summary-grid .finish-field--readonly .finish-stat-display {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: #0f172a;
+  background: var(--c-f1f5f9);
+  border: 1px solid var(--c-e2e8f0);
+  color: var(--c-0f172a);
 }
 
 /**
@@ -148,10 +148,10 @@
 .finish-payment-card .finish-field--readonly .form-control[disabled],
 .finish-payment-card .finish-field--readonly .form-control[readonly] {
   cursor: default;
-  background: rgba(241, 245, 249, 0.72);
+  background: rgba(var(--c-f1f5f9-rgb), 0.72);
   border-style: dashed;
-  border-color: rgba(148, 163, 184, 0.55);
-  color: #475569;
+  border-color: rgba(var(--c-94a3b8-rgb), 0.55);
+  color: var(--c-475569);
   font-variant-numeric: tabular-nums;
 }
 
@@ -161,46 +161,46 @@
   cursor: default;
   border-style: solid;
   border-width: 2px;
-  border-color: rgba(148, 163, 184, 0.55);
-  background: #f8fafc;
-  color: #0f172a;
+  border-color: rgba(var(--c-94a3b8-rgb), 0.55);
+  background: var(--c-f8fafc);
+  color: var(--c-0f172a);
   font-variant-numeric: tabular-nums;
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+  box-shadow: inset 0 1px 2px rgba(var(--rt-shadow-rgb), 0.08);
 }
 
 /** حقول الإنهاء الأساسية التي يحرّكها المستخدم */
 .finish-field--contract-input.finish-val-cell {
-  border-color: rgba(13, 148, 136, 0.45);
-  background: rgba(236, 253, 245, 0.92);
+  border-color: rgba(var(--c-0d9488-rgb), 0.45);
+  background: rgba(var(--c-ecfdf5-rgb), 0.92);
 }
 
 .finish-field--contract-input .form-label {
   font-weight: 700;
-  color: #0f766e;
+  color: var(--c-0f766e);
 }
 
 .finish-field--contract-input .form-control:not([disabled]) {
   border-width: 2px;
-  border-color: rgba(13, 148, 136, 0.55);
-  background: #fff;
+  border-color: rgba(var(--c-0d9488-rgb), 0.55);
+  background: var(--c-ffffff);
   box-shadow:
-    0 0 0 1px rgba(45, 212, 191, 0.2),
-    0 10px 26px -18px rgba(13, 148, 136, 0.45);
+    0 0 0 1px rgba(var(--c-2dd4bf-rgb), 0.2),
+    0 10px 26px -18px rgba(var(--c-0d9488-rgb), 0.45);
 }
 
 .finish-field--contract-input .form-control:focus:not([disabled]) {
-  border-color: rgba(13, 148, 136, 0.85);
+  border-color: rgba(var(--c-0d9488-rgb), 0.85);
   box-shadow:
-    0 0 0 3px rgba(45, 212, 191, 0.28),
-    0 12px 28px -16px rgba(13, 148, 136, 0.5);
+    0 0 0 3px rgba(var(--c-2dd4bf-rgb), 0.28),
+    0 12px 28px -16px rgba(var(--c-0d9488-rgb), 0.5);
 }
 
 .finish-payment-card {
   margin-top: 1rem;
   padding: 1rem;
   border-radius: 14px;
-  border: 1px solid rgba(59, 130, 246, 0.28);
-  background: linear-gradient(140deg, #f8fafc, #eff6ff 55%, #e8f1fe);
+  border: 1px solid rgba(var(--c-3b82f6-rgb), 0.28);
+  background: linear-gradient(140deg, var(--c-f8fafc), var(--c-eff6ff) 55%, var(--c-e8f1fe));
 }
 
 /** Nested main grid inside a subcard (schedule / odometer–km blocks) */
@@ -215,7 +215,7 @@
 .finish-payment-card__title {
   font-size: 0.88rem;
   font-weight: 700;
-  color: #1e3a8a;
+  color: var(--c-1e3a8a);
   margin-bottom: 0.65rem;
 }
 
@@ -240,111 +240,111 @@
 }
 
 :host-context(body.dark-only) .contract-finish-card {
-  border-color: rgba(100, 116, 139, 0.35);
-  border-top-color: rgba(96, 165, 250, 0.55);
-  background: rgba(15, 23, 42, 0.35);
+  border-color: rgba(var(--c-64748b-rgb), 0.35);
+  border-top-color: rgba(var(--c-60a5fa-rgb), 0.55);
+  background: rgba(var(--c-0f172a-rgb), 0.35);
 }
 
 :host-context(body.dark-only) .finish-field .form-label {
-  color: rgba(226, 232, 240, 0.92);
+  color: rgba(var(--c-e2e8f0-rgb), 0.92);
 }
 
 :host-context(body.dark-only) .finish-field--readonly .form-control[disabled] {
-  background: rgba(30, 41, 59, 0.72);
-  color: #e2e8f0;
-  border-color: rgba(100, 116, 139, 0.45);
+  background: rgba(var(--c-1e293b-rgb), 0.72);
+  color: var(--c-e2e8f0);
+  border-color: rgba(var(--c-64748b-rgb), 0.45);
 }
 
 :host-context(body.dark-only) .finish-field--readonly .finish-stat-display {
-  background: rgba(30, 41, 59, 0.72);
-  color: #e2e8f0;
-  border-color: rgba(100, 116, 139, 0.45);
+  background: rgba(var(--c-1e293b-rgb), 0.72);
+  color: var(--c-e2e8f0);
+  border-color: rgba(var(--c-64748b-rgb), 0.45);
 }
 
 :host-context(body.dark-only) .finish-payment-card .finish-field--readonly .form-control[disabled],
 :host-context(body.dark-only) .finish-payment-card .finish-field--readonly .form-control[readonly] {
   cursor: default;
-  background: rgba(15, 23, 42, 0.55);
+  background: rgba(var(--c-0f172a-rgb), 0.55);
   border-style: dashed;
-  border-color: rgba(100, 116, 139, 0.55);
-  color: rgba(226, 232, 240, 0.88);
+  border-color: rgba(var(--c-64748b-rgb), 0.55);
+  color: rgba(var(--c-e2e8f0-rgb), 0.88);
   font-variant-numeric: tabular-nums;
 }
 
 :host-context(body.dark-only) .finish-payment-card .finish-field--readonly .finish-stat-display {
   cursor: default;
-  background: rgba(15, 23, 42, 0.55);
-  border: 1px dashed rgba(100, 116, 139, 0.55);
-  color: rgba(226, 232, 240, 0.88);
+  background: rgba(var(--c-0f172a-rgb), 0.55);
+  border: 1px dashed rgba(var(--c-64748b-rgb), 0.55);
+  color: rgba(var(--c-e2e8f0-rgb), 0.88);
   font-variant-numeric: tabular-nums;
 }
 
 :host-context(body.dark-only) .finish-payment-card .finish-val-cell.finish-field--readonly .finish-stat-display {
   border-style: solid;
   border-width: 2px;
-  border-color: rgba(100, 116, 139, 0.6);
-  background: rgba(15, 23, 42, 0.72);
-  color: #e2e8f0;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+  border-color: rgba(var(--c-64748b-rgb), 0.6);
+  background: rgba(var(--c-0f172a-rgb), 0.72);
+  color: var(--c-e2e8f0);
+  box-shadow: inset 0 1px 3px rgba(var(--rt-shadow-rgb), 0.45);
 }
 
 :host-context(body.dark-only) .finish-summary-grid .finish-field--readonly .finish-stat-display {
-  background: rgba(30, 41, 59, 0.72);
-  border-color: rgba(100, 116, 139, 0.45);
-  color: #e2e8f0;
+  background: rgba(var(--c-1e293b-rgb), 0.72);
+  border-color: rgba(var(--c-64748b-rgb), 0.45);
+  color: var(--c-e2e8f0);
 }
 
 :host-context(body.dark-only) .finish-payment-card .finish-val-cell.finish-field--readonly .form-control[disabled],
 :host-context(body.dark-only) .finish-payment-card .finish-val-cell.finish-field--readonly .form-control[readonly] {
   border-style: solid;
   border-width: 2px;
-  border-color: rgba(100, 116, 139, 0.6);
-  background: rgba(15, 23, 42, 0.72);
-  color: #e2e8f0;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+  border-color: rgba(var(--c-64748b-rgb), 0.6);
+  background: rgba(var(--c-0f172a-rgb), 0.72);
+  color: var(--c-e2e8f0);
+  box-shadow: inset 0 1px 3px rgba(var(--rt-shadow-rgb), 0.45);
 }
 
 :host-context(body.dark-only) .finish-payment-card {
-  border-color: rgba(59, 130, 246, 0.4);
-  background: linear-gradient(140deg, rgba(15, 23, 42, 0.55), rgba(30, 58, 138, 0.35));
+  border-color: rgba(var(--c-3b82f6-rgb), 0.4);
+  background: linear-gradient(140deg, rgba(var(--c-0f172a-rgb), 0.55), rgba(var(--c-1e3a8a-rgb), 0.35));
 }
 
 :host-context(body.dark-only) .finish-payment-card__title {
-  color: #bfdbfe;
+  color: var(--c-bfdbfe);
 }
 
 :host-context(body.dark-only) .finish-field .form-control:not([disabled]) {
-  background: rgba(15, 23, 42, 0.55);
-  color: #f8fafc;
-  border-color: rgba(100, 116, 139, 0.45);
+  background: rgba(var(--c-0f172a-rgb), 0.55);
+  color: var(--c-f8fafc);
+  border-color: rgba(var(--c-64748b-rgb), 0.45);
 }
 
 :host-context(body.dark-only) .finish-field--contract-input.finish-val-cell {
-  border-color: rgba(52, 211, 153, 0.42);
-  background: rgba(6, 78, 59, 0.28);
+  border-color: rgba(var(--c-34d399-rgb), 0.42);
+  background: rgba(var(--c-064e3b-rgb), 0.28);
 }
 
 :host-context(body.dark-only) .finish-field--contract-input .form-label {
-  color: #5eead4;
+  color: var(--c-5eead4);
 }
 
 :host-context(body.dark-only) .finish-field--contract-input .form-control:not([disabled]) {
-  background: rgba(6, 78, 59, 0.42);
-  color: #ecfdf5;
-  border-color: rgba(52, 211, 153, 0.55);
+  background: rgba(var(--c-064e3b-rgb), 0.42);
+  color: var(--c-ecfdf5);
+  border-color: rgba(var(--c-34d399-rgb), 0.55);
   box-shadow:
-    0 0 0 1px rgba(16, 185, 129, 0.22),
-    0 12px 30px -18px rgba(16, 185, 129, 0.4);
+    0 0 0 1px rgba(var(--c-10b981-rgb), 0.22),
+    0 12px 30px -18px rgba(var(--c-10b981-rgb), 0.4);
 }
 
 :host-context(body.dark-only) .finish-field--contract-input .form-control:focus:not([disabled]) {
-  border-color: rgba(110, 231, 183, 0.75);
+  border-color: rgba(var(--c-6ee7b7-rgb), 0.75);
   box-shadow:
-    0 0 0 3px rgba(16, 185, 129, 0.2),
-    0 14px 32px -16px rgba(16, 185, 129, 0.45);
+    0 0 0 3px rgba(var(--c-10b981-rgb), 0.2),
+    0 14px 32px -16px rgba(var(--c-10b981-rgb), 0.45);
 }
 
 :host-context(body.dark-only) .finish-val-cell {
-  border-color: rgba(100, 116, 139, 0.38);
-  background: rgba(15, 23, 42, 0.28);
+  border-color: rgba(var(--c-64748b-rgb), 0.38);
+  background: rgba(var(--c-0f172a-rgb), 0.28);
 }

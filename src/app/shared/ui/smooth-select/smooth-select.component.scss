@@ -4,42 +4,42 @@
   position: relative;
 
   /* Light theme (default) */
-  --ss-trigger-bg: linear-gradient(150deg, #ffffff 0%, #f8fafc 100%);
-  --ss-trigger-border: rgba(71, 85, 105, 0.18);
-  --ss-trigger-fg: #0f172a;
-  --ss-trigger-shadow: 0 8px 16px -14px rgba(15, 23, 42, 0.1);
-  --ss-trigger-hover-border: rgba(13, 148, 136, 0.38);
-  --ss-trigger-focus-ring: rgba(5, 150, 105, 0.14);
+  --ss-trigger-bg: linear-gradient(150deg, var(--c-ffffff) 0%, var(--c-f8fafc) 100%);
+  --ss-trigger-border: rgba(var(--c-475569-rgb), 0.18);
+  --ss-trigger-fg: var(--c-0f172a);
+  --ss-trigger-shadow: 0 8px 16px -14px rgba(var(--rt-shadow-rgb), 0.1);
+  --ss-trigger-hover-border: rgba(var(--c-0d9488-rgb), 0.38);
+  --ss-trigger-focus-ring: rgba(var(--c-059669-rgb), 0.14);
 
-  --ss-menu-bg: #ffffff;
-  --ss-menu-border: rgba(71, 85, 105, 0.16);
-  --ss-menu-fg: #0f172a;
+  --ss-menu-bg: var(--c-ffffff);
+  --ss-menu-border: rgba(var(--c-475569-rgb), 0.16);
+  --ss-menu-fg: var(--c-0f172a);
   --ss-menu-shadow:
-    0 20px 40px -16px rgba(15, 23, 42, 0.16),
-    0 0 0 1px rgba(45, 212, 191, 0.08);
+    0 20px 40px -16px rgba(var(--rt-shadow-rgb), 0.16),
+    0 0 0 1px rgba(var(--c-2dd4bf-rgb), 0.08);
 
-  --ss-search-bg: #ffffff;
-  --ss-search-border: rgba(71, 85, 105, 0.2);
-  --ss-search-fg: #0f172a;
+  --ss-search-bg: var(--c-ffffff);
+  --ss-search-border: rgba(var(--c-475569-rgb), 0.2);
+  --ss-search-fg: var(--c-0f172a);
 
-  --ss-option-hover-bg: rgba(5, 150, 105, 0.1);
-  --ss-option-hover-border: rgba(45, 212, 191, 0.32);
+  --ss-option-hover-bg: rgba(var(--c-059669-rgb), 0.1);
+  --ss-option-hover-border: rgba(var(--c-2dd4bf-rgb), 0.32);
   --ss-option-selected-bg: linear-gradient(
     to inline-end,
-    #1e293b 0%,
-    #134e4a 40%,
-    #0f766e 70%,
-    #14b8a6 100%
+    var(--c-1e293b) 0%,
+    var(--c-134e4a) 40%,
+    var(--c-0f766e) 70%,
+    var(--c-14b8a6) 100%
   );
-  --ss-option-selected-fg: #ffffff;
-  --ss-option-selected-border: rgba(45, 212, 191, 0.45);
-  --ss-option-selected-shadow: 0 8px 18px -10px rgba(13, 148, 136, 0.35);
+  --ss-option-selected-fg: var(--c-ffffff);
+  --ss-option-selected-border: rgba(var(--c-2dd4bf-rgb), 0.45);
+  --ss-option-selected-shadow: 0 8px 18px -10px rgba(var(--c-0d9488-rgb), 0.35);
 }
 
 :host-context(body.light-only) {
-  --ss-trigger-bg: linear-gradient(150deg, #ffffff 0%, #f8fafc 100%);
-  --ss-menu-bg: #ffffff;
-  --ss-menu-fg: #0f172a;
+  --ss-trigger-bg: linear-gradient(150deg, var(--c-ffffff) 0%, var(--c-f8fafc) 100%);
+  --ss-menu-bg: var(--c-ffffff);
+  --ss-menu-fg: var(--c-0f172a);
 }
 
 /* Lift entire host above page chrome; stay under global loader (999999). */
@@ -96,7 +96,7 @@
 .app-soft-select__trigger:hover:not(:disabled) {
   border-color: var(--ss-trigger-hover-border);
   box-shadow:
-    0 12px 20px -14px rgba(15, 23, 42, 0.12),
+    0 12px 20px -14px rgba(var(--rt-shadow-rgb), 0.12),
     0 0 0 1px color-mix(in srgb, var(--ss-trigger-hover-border) 35%, transparent);
   transform: translateY(-1px);
 }
@@ -149,7 +149,7 @@
 }
 
 .app-soft-select__search::placeholder {
-  color: color-mix(in srgb, var(--ss-search-fg) 52%, #94a3b8);
+  color: color-mix(in srgb, var(--ss-search-fg) 52%, var(--c-94a3b8));
   opacity: 1;
 }
 
@@ -186,13 +186,13 @@
 .app-soft-select__option:hover {
   border-color: var(--ss-option-hover-border);
   background: var(--ss-option-hover-bg);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.35);
 }
 
 .app-soft-select__option.is-selected {
   color: var(--ss-option-selected-fg);
   border-color: var(--ss-option-selected-border);
-  background-color: #0f766e;
+  background-color: var(--c-0f766e);
   background-image: var(--ss-option-selected-bg);
   background-size: 100% 100%;
   background-repeat: no-repeat;
@@ -215,38 +215,38 @@
 
 :host-context(body.dark-only),
 :host-context([data-bs-theme='dark']) {
-  --ss-trigger-bg: linear-gradient(145deg, rgba(16, 36, 54, 0.94), rgba(7, 27, 34, 0.92));
-  --ss-trigger-border: color-mix(in srgb, var(--app-dark-accent-cyan, #06b6d4) 18%, transparent);
-  --ss-trigger-fg: rgba(236, 254, 255, 0.96);
-  --ss-trigger-shadow: 0 6px 14px -12px rgba(0, 0, 0, 0.55);
-  --ss-trigger-hover-border: color-mix(in srgb, var(--app-dark-accent-cyan, #06b6d4) 32%, transparent);
-  --ss-trigger-focus-ring: color-mix(in srgb, var(--app-dark-accent-emerald, #10b981) 22%, transparent);
+  --ss-trigger-bg: linear-gradient(145deg, rgba(var(--c-102436-rgb), 0.94), rgba(var(--c-071b22-rgb), 0.92));
+  --ss-trigger-border: color-mix(in srgb, var(--app-dark-accent-cyan, var(--c-06b6d4)) 18%, transparent);
+  --ss-trigger-fg: rgba(var(--c-ecfeff-rgb), 0.96);
+  --ss-trigger-shadow: 0 6px 14px -12px rgba(var(--rt-shadow-rgb), 0.55);
+  --ss-trigger-hover-border: color-mix(in srgb, var(--app-dark-accent-cyan, var(--c-06b6d4)) 32%, transparent);
+  --ss-trigger-focus-ring: color-mix(in srgb, var(--app-dark-accent-emerald, var(--c-10b981)) 22%, transparent);
 
-  --ss-menu-bg: linear-gradient(155deg, rgba(7, 27, 34, 0.98), rgba(16, 36, 54, 0.97));
-  --ss-menu-border: color-mix(in srgb, var(--app-dark-accent-cyan, #06b6d4) 14%, transparent);
-  --ss-menu-fg: rgba(236, 254, 255, 0.96);
+  --ss-menu-bg: linear-gradient(155deg, rgba(var(--c-071b22-rgb), 0.98), rgba(var(--c-102436-rgb), 0.97));
+  --ss-menu-border: color-mix(in srgb, var(--app-dark-accent-cyan, var(--c-06b6d4)) 14%, transparent);
+  --ss-menu-fg: rgba(var(--c-ecfeff-rgb), 0.96);
   --ss-menu-shadow:
-    0 20px 36px -14px rgba(0, 0, 0, 0.72),
-    0 0 0 1px color-mix(in srgb, var(--app-dark-accent-cyan, #06b6d4) 10%, transparent);
+    0 20px 36px -14px rgba(var(--rt-shadow-rgb), 0.72),
+    0 0 0 1px color-mix(in srgb, var(--app-dark-accent-cyan, var(--c-06b6d4)) 10%, transparent);
 
-  --ss-search-bg: rgba(16, 36, 54, 0.72);
-  --ss-search-border: color-mix(in srgb, var(--app-dark-accent-cyan, #06b6d4) 18%, transparent);
-  --ss-search-fg: rgba(236, 254, 255, 0.96);
+  --ss-search-bg: rgba(var(--c-102436-rgb), 0.72);
+  --ss-search-border: color-mix(in srgb, var(--app-dark-accent-cyan, var(--c-06b6d4)) 18%, transparent);
+  --ss-search-fg: rgba(var(--c-ecfeff-rgb), 0.96);
 
-  --ss-option-hover-bg: color-mix(in srgb, var(--app-dark-accent-cyan, #06b6d4) 12%, transparent);
-  --ss-option-hover-border: color-mix(in srgb, var(--app-dark-accent-cyan, #06b6d4) 22%, transparent);
+  --ss-option-hover-bg: color-mix(in srgb, var(--app-dark-accent-cyan, var(--c-06b6d4)) 12%, transparent);
+  --ss-option-hover-border: color-mix(in srgb, var(--app-dark-accent-cyan, var(--c-06b6d4)) 22%, transparent);
   --ss-option-selected-bg: linear-gradient(
     to inline-end,
-    #050816 0%,
-    #0a1628 30%,
-    #065f46 65%,
-    #10b981 100%
+    var(--c-050816) 0%,
+    var(--c-0a1628) 30%,
+    var(--c-065f46) 65%,
+    var(--c-10b981) 100%
   );
-  --ss-option-selected-fg: #ffffff;
-  --ss-option-selected-border: color-mix(in srgb, var(--app-dark-accent-cyan, #06b6d4) 42%, #10b981 58%);
+  --ss-option-selected-fg: var(--c-ffffff);
+  --ss-option-selected-border: color-mix(in srgb, var(--app-dark-accent-cyan, var(--c-06b6d4)) 42%, var(--c-10b981) 58%);
   --ss-option-selected-shadow:
-    0 0 18px color-mix(in srgb, var(--app-dark-accent-emerald, #10b981) 28%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 0 18px color-mix(in srgb, var(--app-dark-accent-emerald, var(--c-10b981)) 28%, transparent),
+    inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.08);
 }
 
 @keyframes soft-select-fade {

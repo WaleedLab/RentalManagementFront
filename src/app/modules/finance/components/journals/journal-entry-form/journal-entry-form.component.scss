@@ -42,9 +42,9 @@
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 0.65rem;
   padding: 0.8rem;
-  border: 1px solid rgba(148, 163, 184, 0.28);
+  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.28);
   border-radius: 12px;
-  background: rgba(148, 163, 184, 0.06);
+  background: rgba(var(--c-94a3b8-rgb), 0.06);
 }
 
 .journal-add-row__field {
@@ -82,8 +82,8 @@
 
 .journal-line-validation td {
   font-size: 0.83rem;
-  color: #dc2626;
-  background: rgba(239, 68, 68, 0.07);
+  color: var(--c-dc2626);
+  background: rgba(var(--c-ef4444-rgb), 0.07);
   border-top: 0;
 }
 
@@ -95,9 +95,9 @@
 }
 
 .journal-summary__item {
-  border: 1px solid rgba(148, 163, 184, 0.26);
+  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.26);
   border-radius: 12px;
-  background: rgba(148, 163, 184, 0.08);
+  background: rgba(var(--c-94a3b8-rgb), 0.08);
   padding: 0.6rem 0.75rem;
   display: flex;
   align-items: baseline;
@@ -116,15 +116,15 @@
   }
 
   &.is-balanced {
-    border-color: rgba(34, 197, 94, 0.45);
-    background: rgba(34, 197, 94, 0.12);
-    color: #15803d;
+    border-color: rgba(var(--c-22c55e-rgb), 0.45);
+    background: rgba(var(--c-22c55e-rgb), 0.12);
+    color: var(--c-15803d);
   }
 
   &.is-unbalanced {
-    border-color: rgba(239, 68, 68, 0.45);
-    background: rgba(239, 68, 68, 0.12);
-    color: #b91c1c;
+    border-color: rgba(var(--c-ef4444-rgb), 0.45);
+    background: rgba(var(--c-ef4444-rgb), 0.12);
+    color: var(--c-b91c1c);
   }
 }
 
@@ -132,41 +132,41 @@
   margin-top: 0.75rem;
   font-size: 0.86rem;
   font-weight: 600;
-  color: #92400e;
+  color: var(--c-92400e);
 
   &--danger {
-    color: #dc2626;
+    color: var(--c-dc2626);
   }
 }
 
 :host-context(body.dark-only) {
   .journal-line-validation td {
-    color: #fecaca;
-    background: rgba(127, 29, 29, 0.32);
+    color: var(--c-fecaca);
+    background: rgba(var(--c-7f1d1d-rgb), 0.32);
   }
 
   .journal-summary__item {
-    border-color: rgba(100, 116, 139, 0.42);
-    background: rgba(15, 23, 42, 0.45);
+    border-color: rgba(var(--c-64748b-rgb), 0.42);
+    background: rgba(var(--c-0f172a-rgb), 0.45);
 
     &.is-balanced {
-      border-color: rgba(74, 222, 128, 0.42);
-      background: rgba(21, 128, 61, 0.25);
-      color: #86efac;
+      border-color: rgba(var(--c-4ade80-rgb), 0.42);
+      background: rgba(var(--c-15803d-rgb), 0.25);
+      color: var(--c-86efac);
     }
 
     &.is-unbalanced {
-      border-color: rgba(248, 113, 113, 0.48);
-      background: rgba(153, 27, 27, 0.35);
-      color: #fecaca;
+      border-color: rgba(var(--c-f87171-rgb), 0.48);
+      background: rgba(var(--c-991b1b-rgb), 0.35);
+      color: var(--c-fecaca);
     }
   }
 
   .journal-validation-hint {
-    color: #facc15;
+    color: var(--c-facc15);
 
     &--danger {
-      color: #fca5a5;
+      color: var(--c-fca5a5);
     }
   }
 }

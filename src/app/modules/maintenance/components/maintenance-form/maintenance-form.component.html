@@ -1,0 +1,69 @@
+<div class="container-fluid maintenance-form-page">
+  <app-page-header
+    [title]="(isEdit() ? 'maintenance.editTitle' : 'maintenance.createTitle') | translate"
+    [subtitle]="'maintenance.formSubtitle' | translate"
+  />
+
+  @if (initializing()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>
+  } @else {
+    <form class="card fin-card" [formGroup]="form" (ngSubmit)="save()">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">{{ 'maintenance.fieldVehicle' | translate }}</label>
+            <app-smooth-select
+              [options]="vehicleOptions()"
+              [value]="form.controls.idVehicle.value ?? ''"
+              (valueChange)="onVehicleChange($event)"
+              [ariaLabel]="'maintenance.fieldVehicle' | translate"
+              [placeholder]="'maintenance.vehiclePlaceholder' | translate"
+              [searchPlaceholder]="'maintenance.searchVehicle'"
+            />
+            @if (loadingVehicle()) {
+              <div class="form-text">{{ 'maintenance.loadingVehicles' | translate }}</div>
+            }
+            @if (form.controls.idVehicle.touched && form.controls.idVehicle.invalid) {
+              <div class="text-danger small mt-1">{{ 'maintenance.invalidVehicle' | translate }}</div>
+            }
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'maintenance.fieldBooking' | translate }}</label>
+            <input class="form-control" type="number" min="0" formControlName="idBooking" />
+            <div class="form-text">{{ 'maintenance.bookingHint' | translate }}</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">{{ 'maintenance.fieldInsurance' | translate }}</label>
+            <app-smooth-select
+              [options]="insuranceOptions()"
+              [value]="form.controls.idInsurancecompanies.value ?? ''"
+              (valueChange)="onInsuranceChange($event)"
+              [ariaLabel]="'maintenance.fieldInsurance' | translate"
+              [placeholder]="'maintenance.insurancePlaceholder' | translate"
+            />
+            @if (loadingInsurance()) {
+              <div class="form-text">{{ 'maintenance.loadingInsurance' | translate }}</div>
+            }
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">{{ 'maintenance.fieldNote' | translate }}</label>
+            <textarea class="form-control" rows="3" formControlName="note"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer d-flex flex-wrap gap-2 justify-content-end">
+        <a class="btn btn-light" routerLink="/maintenance">{{ 'Cancel' | translate }}</a>
+        <button class="btn btn-primary" type="submit" [disabled]="saving()">
+          @if (saving()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+          }
+          {{ 'Save' | translate }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

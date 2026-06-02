@@ -1,23 +1,23 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, from, map, switchMap, throwError } from 'rxjs';
+import { Observable, map, throwError } from 'rxjs';
 
-import { buildImageUploadPayload } from '../../../../shared/utils/image-upload.utils';
-
-import { PaginatedAggregatorResponse } from '../../../../core/interfaces';
-import { BaseService } from '../../../../shared/services/base/base.service';
-import { buildFleetQueryParams, normalizeFleetId } from '../../../../shared/utils/fleet-query.utils';
-import { normalizePaginatedResponse } from '../../../../shared/utils/paginated-response.normalizer';
+import { PaginatedAggregatorResponse } from '../../../core/interfaces';
+import { BaseService } from '../../../shared/services/base/base.service';
+import { buildFleetQueryParams, normalizeFleetId } from '../../../shared/utils/fleet-query.utils';
+import { normalizePaginatedResponse } from '../../../shared/utils/paginated-response.normalizer';
 import {
   Maintenance,
+  MaintenanceAcceptRequest,
   MaintenanceFilters,
   MaintenanceUpsertRequest,
-} from '../../models/maintenance/maintenance.model';
-import { normalizeMaintenance } from '../../models/maintenance/maintenance.normalizer';
+} from '../models/maintenance.model';
+import { normalizeMaintenance } from '../models/maintenance.normalizer';
 
 /**
  * Matches `MaintenanceRouting`:
  * - List, Paginated, GetById `/{id}/{fleetid}`, Create, Update `/{id}`,
- * - SoftDelete `/SoftDelete/{id}/{fleetid}`.
+ * - SoftDelete `/SoftDelete/{id}/{fleetid}`,
+ * - Acceptable `PUT /Acceptable/{id}`.
  */
 @Injectable({
   providedIn: 'root',
@@ -80,9 +80,7 @@ export class MaintenanceService {
   }
 
   create(body: MaintenanceUpsertRequest): Observable<unknown> {
-    return from(this.toCommandPayload(body)).pipe(
-      switchMap(payload => this.api.postData(this.base, payload)),
-    );
+    return this.api.postData(this.base, this.toCommandPayload(body));
   }
 
   update(body: MaintenanceUpsertRequest): Observable<unknown> {
@@ -90,9 +88,17 @@ export class MaintenanceService {
     if (!id) {
       return throwError(() => new Error('Id is required for update'));
     }
-    return from(this.toCommandPayload(body)).pipe(
-      switchMap(payload => this.api.putData(`${this.base}/${encodeURIComponent(id)}`, payload)),
-    );
+    return this.api.putData(`${this.base}/${encodeURIComponent(id)}`, this.toCommandPayload(body));
+  }
+
+  /**
+   * `PUT Maintenance/Acceptable/{id}` — `MaintenanceRouting.Acceptable`.
+   * Sets start date, duration, and moves status to InProgress.
+   */
+  acceptable(body: MaintenanceAcceptRequest): Observable<unknown> {
+    const id = encodeURIComponent(String(body.id));
+    const payload = this.toAcceptablePayload(body);
+    return this.api.putData(`${this.base}/Acceptable/${id}`, payload);
   }
 
   /** `PATCH Maintenance/SoftDelete/{id}/{fleetid}` — `MaintenanceRouting.SoftDelete`. */
@@ -106,51 +112,50 @@ export class MaintenanceService {
     return this.api.patchData(`${this.base}/SoftDelete/${encodedId}/${encodedFleet}`, {});
   }
 
-  private async toCommandPayload(body: MaintenanceUpsertRequest): Promise<Record<string, unknown>> {
-    const imagePayload = await buildImageUploadPayload(body.image);
-    const url =
-      imagePayload?.attachment?.trim() ||
-      body.existingUrl?.trim() ||
-      null;
-
+  /**
+   * Minimal payload: fleet + vehicle (required), optional booking + insurance,
+   * and a note. No branch/dates/odometer/compensation/image/parts are sent.
+   */
+  private toCommandPayload(body: MaintenanceUpsertRequest): Record<string, unknown> {
     const idNum = body.id ? Number(body.id) : undefined;
+    const note = body.note?.trim() || null;
     return {
       Id: idNum,
       id: idNum,
-      IdBranch: body.idBranch,
-      idBranch: body.idBranch,
+      FleetId: body.fleetId,
+      fleetId: body.fleetId,
       IdVehicle: body.idVehicle,
       idVehicle: body.idVehicle,
       IdBooking: this.normalizeOptionalLong(body.idBooking),
       idBooking: this.normalizeOptionalLong(body.idBooking),
       IdInsurancecompanies: this.normalizeOptionalLong(body.idInsurancecompanies),
       idInsurancecompanies: this.normalizeOptionalLong(body.idInsurancecompanies),
-      FleetId: body.fleetId,
-      fleetId: body.fleetId,
-      StartDate: body.startDate,
-      startDate: body.startDate,
-      EndDate: body.endDate ?? null,
-      endDate: body.endDate ?? null,
-      StartTime: body.startTime ?? null,
-      startTime: body.startTime ?? null,
-      EndTime: body.endTime ?? null,
-      endTime: body.endTime ?? null,
-      OdometerIn: body.odometerIn ?? null,
-      odometerIn: body.odometerIn ?? null,
-      OdometerOut: body.odometerOut ?? null,
-      odometerOut: body.odometerOut ?? null,
-      DurationMaintenance: body.durationMaintenance ?? null,
-      durationMaintenance: body.durationMaintenance ?? null,
-      TypeCompensation: body.typeCompensation ?? null,
-      typeCompensation: body.typeCompensation ?? null,
-      Note: body.note ?? null,
-      note: body.note ?? null,
-      ValueCompensation: body.valueCompensation,
-      valueCompensation: body.valueCompensation,
-      Total: body.total ?? null,
-      total: body.total ?? null,
-      Url: url,
-      url,
+      Note: note,
+      note,
+    };
+  }
+
+  private toAcceptablePayload(body: MaintenanceAcceptRequest): Record<string, unknown> {
+    const idNum = Number(body.id);
+    const fleetId = body.fleetId;
+    const start = body.startDate?.trim();
+    const duration = body.durationMaintenance?.trim() || null;
+    const end = body.endDate?.trim() || null;
+    return {
+      Id: idNum,
+      id: idNum,
+      IdFleet: fleetId,
+      idFleet: fleetId,
+      FleetId: fleetId,
+      fleetId,
+      StartDate: start,
+      startDate: start,
+      EndDate: end,
+      endDate: end,
+      Durationmaintanance: duration,
+      durationmaintanance: duration,
+      DurationMaintenance: duration,
+      durationMaintenance: duration,
     };
   }
 

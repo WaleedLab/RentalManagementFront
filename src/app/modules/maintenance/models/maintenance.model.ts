@@ -1,6 +1,12 @@
 /** Mirrors backend `MaintenanceOrderingEnum` (int). */
 export type MaintenanceOrderBy = number;
 
+export interface MaintenanceSparePartLine {
+  idSparePartName: number;
+  quantity: number;
+  sparePartName?: string;
+}
+
 export interface Maintenance {
   id: string;
   idBranch: number;
@@ -10,6 +16,8 @@ export interface Maintenance {
   idBooking: number | null;
   idInsurancecompanies: number | null;
   insuranceCompanyName?: string;
+  idSupplier?: number | null;
+  supplierName?: string;
   startDate: string;
   endDate?: string;
   odometerIn?: string;
@@ -18,12 +26,14 @@ export interface Maintenance {
   typeCompensation?: string;
   note?: string;
   valueCompensation: number;
-  status: number;
+  /** Numeric legacy codes or backend `MaintenanceEnum` string names. */
+  status: number | string;
   isAcceptable: boolean;
   fleetId?: string;
   url?: string;
   total?: number | null;
   createdBy?: string;
+  spareParts?: MaintenanceSparePartLine[];
 }
 
 export interface MaintenanceFilters {
@@ -36,26 +46,27 @@ export interface MaintenanceFilters {
   orderByDirection?: 'ASC' | 'DESC';
 }
 
+/**
+ * Simplified create/update payload: a maintenance record is opened for a
+ * vehicle only, with an optional booking + insurance company + note.
+ * The fleet id is sent automatically.
+ */
 export interface MaintenanceUpsertRequest {
   id?: string;
-  idBranch: number;
+  fleetId: string;
   idVehicle: number;
   idBooking?: number | null;
   idInsurancecompanies?: number | null;
+  note?: string | null;
+}
+
+/** `AcceptableMaintenanceCommand` — `MaintenanceRouting.Acceptable` → PUT `Maintenance/Acceptable/{id}`. */
+export interface MaintenanceAcceptRequest {
+  id: string | number;
   fleetId: string;
   startDate: string;
-  endDate?: string | null;
-  startTime?: string | null;
-  endTime?: string | null;
-  odometerIn?: string | null;
-  odometerOut?: string | null;
-  durationMaintenance?: string | null;
-  typeCompensation?: string | null;
-  note?: string | null;
-  valueCompensation: number;
-  total?: number | null;
-  /** New image file (optional). */
-  image?: File | null;
-  /** Kept on update when no new file is chosen. */
-  existingUrl?: string | null;
+  /** Positive day count; sent to API as `Durationmaintanance`. */
+  durationMaintenance: string;
+  /** Computed: start + duration days. */
+  endDate: string;
 }

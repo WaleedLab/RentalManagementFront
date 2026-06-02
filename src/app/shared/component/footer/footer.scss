@@ -11,9 +11,9 @@
   gap: 1rem;
   padding: 0.7rem 0.9rem;
   border-radius: 16px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.04), rgba(15, 23, 42, 0.01));
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(var(--c-0f172a-rgb), 0.12);
+  background: linear-gradient(135deg, rgba(var(--c-0f172a-rgb), 0.04), rgba(var(--c-0f172a-rgb), 0.01));
+  box-shadow: 0 12px 28px rgba(var(--rt-shadow-rgb), 0.08);
 }
 
 .footer-brand {
@@ -30,9 +30,9 @@
   width: 2rem;
   height: 2rem;
   border-radius: 0.65rem;
-  border: 1px solid rgba(59, 130, 246, 0.22);
-  background: linear-gradient(145deg, rgba(59, 130, 246, 0.22), rgba(59, 130, 246, 0.08));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(var(--c-3b82f6-rgb), 0.22);
+  background: linear-gradient(145deg, rgba(var(--c-3b82f6-rgb), 0.22), rgba(var(--c-3b82f6-rgb), 0.08));
+  box-shadow: inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.28);
   overflow: hidden;
 
   img {
@@ -77,27 +77,27 @@
   width: 2.4rem;
   height: 0.35rem;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.56));
+  background: linear-gradient(90deg, rgba(var(--c-3b82f6-rgb), 0.2), rgba(var(--c-3b82f6-rgb), 0.56));
 }
 
 .footer-meta-dot {
   width: 0.56rem;
   height: 0.56rem;
   border-radius: 50%;
-  background: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.16);
+  background: var(--c-3b82f6);
+  box-shadow: 0 0 0 4px rgba(var(--c-3b82f6-rgb), 0.16);
 }
 
 :host-context(body.dark-only) {
   .footer-shell {
-    border-color: rgba(148, 163, 184, 0.22);
-    background: linear-gradient(135deg, rgba(148, 163, 184, 0.12), rgba(30, 41, 59, 0.34));
-    box-shadow: 0 14px 30px rgba(2, 6, 23, 0.35);
+    border-color: rgba(var(--c-94a3b8-rgb), 0.22);
+    background: linear-gradient(135deg, rgba(var(--c-94a3b8-rgb), 0.12), rgba(var(--c-1e293b-rgb), 0.34));
+    box-shadow: 0 14px 30px rgba(var(--rt-shadow-rgb), 0.35);
   }
 
   .footer-logo-wrap {
-    border-color: rgba(96, 165, 250, 0.34);
-    background: linear-gradient(145deg, rgba(37, 99, 235, 0.34), rgba(30, 64, 175, 0.24));
+    border-color: rgba(var(--c-60a5fa-rgb), 0.34);
+    background: linear-gradient(145deg, rgba(var(--c-2563eb-rgb), 0.34), rgba(var(--c-1e40af-rgb), 0.24));
   }
 
   .footer-copy {
