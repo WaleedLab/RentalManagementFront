@@ -9,6 +9,7 @@ import {
   Maintenance,
   MaintenanceAcceptRequest,
   MaintenanceFilters,
+  MaintenanceFinishRequest,
   MaintenanceUpsertRequest,
 } from '../models/maintenance.model';
 import { normalizeMaintenance } from '../models/maintenance.normalizer';
@@ -17,7 +18,8 @@ import { normalizeMaintenance } from '../models/maintenance.normalizer';
  * Matches `MaintenanceRouting`:
  * - List, Paginated, GetById `/{id}/{fleetid}`, Create, Update `/{id}`,
  * - SoftDelete `/SoftDelete/{id}/{fleetid}`,
- * - Acceptable `PUT /Acceptable/{id}`.
+ * - Acceptable `PUT /Acceptable/{id}`,
+ * - Finsh `PUT /Finsh/{id}`.
  */
 @Injectable({
   providedIn: 'root',
@@ -101,6 +103,15 @@ export class MaintenanceService {
     return this.api.putData(`${this.base}/Acceptable/${id}`, payload);
   }
 
+  /**
+   * `PUT Maintenance/Finsh/{id}` — sets end date, total, and status to Completed.
+   */
+  finish(body: MaintenanceFinishRequest): Observable<unknown> {
+    const id = encodeURIComponent(String(body.id));
+    const payload = this.toFinishPayload(body);
+    return this.api.putData(`${this.base}/Finsh/${id}`, payload);
+  }
+
   /** `PATCH Maintenance/SoftDelete/{id}/{fleetid}` — `MaintenanceRouting.SoftDelete`. */
   softDelete(id: string | number, fleetId: string): Observable<unknown> {
     const fid = normalizeFleetId(fleetId);
@@ -156,6 +167,25 @@ export class MaintenanceService {
       durationmaintanance: duration,
       DurationMaintenance: duration,
       durationMaintenance: duration,
+    };
+  }
+
+  private toFinishPayload(body: MaintenanceFinishRequest): Record<string, unknown> {
+    const idNum = Number(body.id);
+    const fleetId = body.fleetId;
+    const end = body.endDate?.trim();
+    const total = Number(body.total) || 0;
+    return {
+      Id: idNum,
+      id: idNum,
+      IdFleet: fleetId,
+      idFleet: fleetId,
+      FleetId: fleetId,
+      fleetId,
+      EndDate: end,
+      endDate: end,
+      Total: total,
+      total,
     };
   }
 

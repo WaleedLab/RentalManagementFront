@@ -7,7 +7,7 @@
         type="button"
         class="btn btn-outline-secondary btn-sm"
         (click)="refreshAll()"
-        [disabled]="!authState.fleetId() || vehicleLoading() || bookingLoading()"
+        [disabled]="!authState.fleetId() || vehicleLoading() || bookingLoading() || maintenanceLoading() || paymentCountLoading() || journalLoading() || trafficViolationLoading()"
       >
         {{ 'Dashboard ops refresh' | translate }}
       </button>
@@ -222,28 +222,382 @@
         />
         <dashboard-chart
           class="ops-chart"
-          title="Dashboard ops chart booking status list"
+          title="Dashboard ops chart booking month bar"
           type="bar"
-          [labels]="chartLabels(bookingByStatusList())"
-          [values]="chartValues(bookingByStatusList())"
+          [labels]="chartLabels(bookingByMonth())"
+          [values]="chartValues(bookingByMonth())"
           [loading]="bookingLoading()"
           [dataUnavailable]="!!authState.fleetId() && bookingError()"
         />
       </div>
     </article>
 
-    <article class="ops-card ops-card--placeholder">
+    <article class="ops-card">
       <header class="ops-card__header">
-        <h2 class="ops-card__title">{{ 'Dashboard ops placeholder voucher' | translate }}</h2>
+        <div>
+          <h2 class="ops-card__title">{{ 'maintenance.menuTitle' | translate }}</h2>
+        </div>
+        @if (maintenanceLoading()) {
+          <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
+        }
       </header>
-      <p class="ops-placeholder">{{ 'Dashboard ops placeholder later' | translate }}</p>
+
+      <div class="ops-card__filters">
+        <div class="ops-filter-field">
+          <label class="ops-filter-label">{{ 'Branch' | translate }}</label>
+          <app-smooth-select
+            [ariaLabel]="'Branch' | translate"
+            [placeholder]="'All branches' | translate"
+            [options]="branchOptions()"
+            [value]="maintenanceBranchId()"
+            [disabled]="!authState.fleetId()"
+            (valueChange)="onMaintenanceBranchChange($any($event))"
+          />
+        </div>
+        <div class="ops-filter-actions">
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            (click)="applyMaintenanceFilters()"
+            [disabled]="!authState.fleetId() || maintenanceLoading()"
+          >
+            {{ 'Dashboard ops apply' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="resetMaintenanceFilters()"
+            [disabled]="!authState.fleetId() || maintenanceLoading()"
+          >
+            {{ 'Dashboard ops reset' | translate }}
+          </button>
+        </div>
+      </div>
+
+      @if (authState.fleetId() && maintenanceError()) {
+        <div class="ops-banner ops-banner--error" role="alert">
+          {{ 'Dashboard summary failed to load' | translate }}
+        </div>
+      }
+
+      <div class="ops-card__kpis">
+        <div class="ops-kpi">
+          <span class="ops-kpi__label">{{ 'Dashboard ops total label' | translate }}</span>
+          <span class="ops-kpi__value">{{ maintenanceTotal() }}</span>
+        </div>
+        <div class="ops-kpi ops-kpi--accent">
+          <span class="ops-kpi__label">{{ 'Dashboard ops maintenance cost label' | translate }}</span>
+          <span class="ops-kpi__value">{{ formatMaintenanceCost(maintenanceCostTotal()) }}</span>
+        </div>
+      </div>
+
+      <div class="ops-charts">
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops maintenance chart title status bar"
+          type="bar"
+          [labels]="chartLabels(maintenanceStatusCounts())"
+          [values]="chartValues(maintenanceStatusCounts())"
+          [loading]="maintenanceLoading()"
+          [dataUnavailable]="!!authState.fleetId() && maintenanceError()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops maintenance chart title status donut"
+          type="doughnut"
+          [labels]="chartLabels(maintenanceStatusCounts())"
+          [values]="chartValues(maintenanceStatusCounts())"
+          [loading]="maintenanceLoading()"
+          [dataUnavailable]="!!authState.fleetId() && maintenanceError()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops chart maintenance branch list"
+          type="bar"
+          [labels]="chartLabels(maintenanceByBranch())"
+          [values]="chartValues(maintenanceByBranch())"
+          [loading]="maintenanceLoading()"
+          [dataUnavailable]="!!authState.fleetId() && maintenanceError()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops chart maintenance month bar"
+          type="bar"
+          [labels]="chartLabels(maintenanceByMonth())"
+          [values]="chartValues(maintenanceByMonth())"
+          [loading]="maintenanceLoading()"
+          [dataUnavailable]="!!authState.fleetId() && maintenanceError()"
+        />
+      </div>
     </article>
 
-    <article class="ops-card ops-card--placeholder">
+    <article class="ops-card">
       <header class="ops-card__header">
-        <h2 class="ops-card__title">{{ 'Dashboard ops placeholder journal' | translate }}</h2>
+        <div>
+          <h2 class="ops-card__title">{{ 'Vouchers' | translate }}</h2>
+        </div>
+        @if (paymentCountLoading()) {
+          <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
+        }
       </header>
-      <p class="ops-placeholder">{{ 'Dashboard ops placeholder later' | translate }}</p>
+
+      <div class="ops-card__filters">
+        <div class="ops-filter-field">
+          <label class="ops-filter-label">{{ 'Branch' | translate }}</label>
+          <app-smooth-select
+            [ariaLabel]="'Branch' | translate"
+            [placeholder]="'All branches' | translate"
+            [options]="branchOptions()"
+            [value]="paymentCountBranchId()"
+            [disabled]="!authState.fleetId()"
+            (valueChange)="onPaymentCountBranchChange($any($event))"
+          />
+        </div>
+        <div class="ops-filter-actions">
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            (click)="applyPaymentCountFilters()"
+            [disabled]="!authState.fleetId() || paymentCountLoading()"
+          >
+            {{ 'Dashboard ops apply' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="resetPaymentCountFilters()"
+            [disabled]="!authState.fleetId() || paymentCountLoading()"
+          >
+            {{ 'Dashboard ops reset' | translate }}
+          </button>
+        </div>
+      </div>
+
+      @if (authState.fleetId() && paymentCountError()) {
+        <div class="ops-banner ops-banner--error" role="alert">
+          {{ 'Dashboard summary failed to load' | translate }}
+        </div>
+      }
+
+      <div class="ops-card__kpis">
+        <div class="ops-kpi">
+          <span class="ops-kpi__label">{{ 'Dashboard ops total label' | translate }}</span>
+          <span class="ops-kpi__value">{{ paymentCountTotal() }}</span>
+        </div>
+        <div class="ops-kpi ops-kpi--accent">
+          <span class="ops-kpi__label">{{ 'Dashboard ops payment count paid label' | translate }}</span>
+          <span class="ops-kpi__value">{{ formatMaintenanceCost(paymentCountPaidTotal()) }}</span>
+        </div>
+      </div>
+
+      <div class="ops-charts">
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops payment count chart bond bar"
+          type="bar"
+          [labels]="chartLabels(paymentCountByBondType())"
+          [values]="chartValues(paymentCountByBondType())"
+          [loading]="paymentCountLoading()"
+          [dataUnavailable]="!!authState.fleetId() && paymentCountError()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops payment count chart bond donut"
+          type="doughnut"
+          [labels]="chartLabels(paymentCountByBondType())"
+          [values]="chartValues(paymentCountByBondType())"
+          [loading]="paymentCountLoading()"
+          [dataUnavailable]="!!authState.fleetId() && paymentCountError()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops payment count chart payment type bar"
+          type="bar"
+          [labels]="chartLabels(paymentCountByPaymentType())"
+          [values]="chartValues(paymentCountByPaymentType())"
+          [loading]="paymentCountLoading()"
+          [dataUnavailable]="!!authState.fleetId() && paymentCountError()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops payment count chart branch bar"
+          type="bar"
+          [labels]="chartLabels(paymentCountByBranch())"
+          [values]="chartValues(paymentCountByBranch())"
+          [loading]="paymentCountLoading()"
+          [dataUnavailable]="!!authState.fleetId() && paymentCountError()"
+        />
+      </div>
+    </article>
+
+    <article class="ops-card">
+      <header class="ops-card__header">
+        <div>
+          <h2 class="ops-card__title">{{ 'Journals' | translate }}</h2>
+        </div>
+        @if (journalLoading()) {
+          <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
+        }
+      </header>
+
+      <div class="ops-card__filters">
+        <div class="ops-filter-field">
+          <label class="ops-filter-label">{{ 'Branch' | translate }}</label>
+          <app-smooth-select
+            [ariaLabel]="'Branch' | translate"
+            [placeholder]="'All branches' | translate"
+            [options]="branchOptions()"
+            [value]="journalBranchId()"
+            [disabled]="!authState.fleetId()"
+            (valueChange)="onJournalBranchChange($any($event))"
+          />
+        </div>
+        <div class="ops-filter-actions">
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            (click)="applyJournalFilters()"
+            [disabled]="!authState.fleetId() || journalLoading()"
+          >
+            {{ 'Dashboard ops apply' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="resetJournalFilters()"
+            [disabled]="!authState.fleetId() || journalLoading()"
+          >
+            {{ 'Dashboard ops reset' | translate }}
+          </button>
+        </div>
+      </div>
+
+      @if (authState.fleetId() && journalError()) {
+        <div class="ops-banner ops-banner--error" role="alert">
+          {{ 'Dashboard summary failed to load' | translate }}
+        </div>
+      }
+
+      <div class="ops-card__kpis">
+        <div class="ops-kpi">
+          <span class="ops-kpi__label">{{ 'Dashboard ops total label' | translate }}</span>
+          <span class="ops-kpi__value">{{ journalTotal() }}</span>
+        </div>
+        <div class="ops-kpi ops-kpi--accent">
+          <span class="ops-kpi__label">{{ 'Total Debit' | translate }}</span>
+          <span class="ops-kpi__value">{{ formatMaintenanceCost(journalDebitTotal()) }}</span>
+        </div>
+        <div class="ops-kpi ops-kpi--accent">
+          <span class="ops-kpi__label">{{ 'Total Credit' | translate }}</span>
+          <span class="ops-kpi__value">{{ formatMaintenanceCost(journalCreditTotal()) }}</span>
+        </div>
+      </div>
+
+      <div class="ops-charts">
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops journal chart status bar"
+          type="bar"
+          [labels]="chartLabels(journalByStatus())"
+          [values]="chartValues(journalByStatus())"
+          [loading]="journalLoading()"
+          [dataUnavailable]="!!authState.fleetId() && journalError()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops journal chart status donut"
+          type="doughnut"
+          [labels]="chartLabels(journalByStatus())"
+          [values]="chartValues(journalByStatus())"
+          [loading]="journalLoading()"
+          [dataUnavailable]="!!authState.fleetId() && journalError()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops journal chart type bar"
+          type="bar"
+          [labels]="chartLabels(journalByType())"
+          [values]="chartValues(journalByType())"
+          [loading]="journalLoading()"
+          [dataUnavailable]="!!authState.fleetId() && journalError()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops journal chart operation bar"
+          type="bar"
+          [labels]="chartLabels(journalByOperationType())"
+          [values]="chartValues(journalByOperationType())"
+          [loading]="journalLoading()"
+          [dataUnavailable]="!!authState.fleetId() && journalError()"
+        />
+      </div>
+    </article>
+
+    <article class="ops-card">
+      <header class="ops-card__header">
+        <div>
+          <h2 class="ops-card__title">{{ 'trafficViolations.title' | translate }}</h2>
+        </div>
+        @if (trafficViolationLoading()) {
+          <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
+        }
+      </header>
+
+      @if (authState.fleetId() && trafficViolationError()) {
+        <div class="ops-banner ops-banner--error" role="alert">
+          {{ 'Dashboard summary failed to load' | translate }}
+        </div>
+      }
+
+      <div class="ops-card__kpis">
+        <div class="ops-kpi">
+          <span class="ops-kpi__label">{{ 'Dashboard ops total label' | translate }}</span>
+          <span class="ops-kpi__value">{{ trafficViolationTotal() }}</span>
+        </div>
+        <div class="ops-kpi ops-kpi--accent">
+          <span class="ops-kpi__label">{{ 'trafficViolations.colFine' | translate }}</span>
+          <span class="ops-kpi__value">{{ formatMaintenanceCost(trafficViolationFineTotal()) }}</span>
+        </div>
+      </div>
+
+      <div class="ops-charts">
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops traffic violation chart name bar"
+          type="bar"
+          [labels]="chartLabels(trafficViolationByName())"
+          [values]="chartValues(trafficViolationByName())"
+          [loading]="trafficViolationLoading()"
+          [dataUnavailable]="!!authState.fleetId() && trafficViolationError()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops traffic violation chart vehicle bar"
+          type="bar"
+          [labels]="chartLabels(trafficViolationByVehicle())"
+          [values]="chartValues(trafficViolationByVehicle())"
+          [loading]="trafficViolationLoading()"
+          [dataUnavailable]="!!authState.fleetId() && trafficViolationError()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops traffic violation chart booking donut"
+          type="doughnut"
+          [labels]="chartLabels(trafficViolationByBookingLink())"
+          [values]="chartValues(trafficViolationByBookingLink())"
+          [loading]="trafficViolationLoading()"
+          [dataUnavailable]="!!authState.fleetId() && trafficViolationError()"
+        />
+        <dashboard-chart
+          class="ops-chart"
+          title="Dashboard ops traffic violation chart month bar"
+          type="bar"
+          [labels]="chartLabels(trafficViolationByMonth())"
+          [values]="chartValues(trafficViolationByMonth())"
+          [loading]="trafficViolationLoading()"
+          [dataUnavailable]="!!authState.fleetId() && trafficViolationError()"
+        />
+      </div>
     </article>
   </div>
 </div>

@@ -1,0 +1,66 @@
+.maintenance-finish-dialog__header {
+  border-bottom: 1px solid var(--app-modal-border, rgba(var(--c-e2e8f0-rgb), 0.8));
+}
+
+.maintenance-finish-dialog__close {
+  margin-inline-start: auto;
+}
+
+.maintenance-finish-dialog__message {
+  margin-bottom: 1rem;
+  color: var(--app-table-muted-color);
+}
+
+.maintenance-finish-dialog__meta {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(var(--c-e2e8f0-rgb), 0.85);
+  background: color-mix(in srgb, var(--rt-success) 4%, transparent);
+}
+
+.maintenance-finish-dialog__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.maintenance-finish-dialog__label {
+  color: var(--app-table-muted-color);
+  font-size: 0.875rem;
+}
+
+.maintenance-finish-dialog__value {
+  font-weight: 600;
+  color: var(--app-table-text-color);
+}
+
+.maintenance-finish-dialog__total {
+  color: var(--rt-success);
+  font-size: 1.05rem;
+}
+
+.maintenance-finish-dialog__total-hint {
+  margin-top: 0.55rem;
+}
+
+.maintenance-finish-dialog__footer {
+  border-top: 1px solid var(--app-modal-border, rgba(var(--c-e2e8f0-rgb), 0.8));
+}
+
+.maintenance-finish-dialog__footer .btn {
+  min-width: 6.5rem;
+}
+
+.maintenance-finish-dialog[dir='rtl'] .maintenance-finish-dialog__header {
+  flex-direction: row-reverse;
+}
+
+:host-context(body.dark-only) {
+  .maintenance-finish-dialog__meta {
+    border-color: rgba(var(--c-64748b-rgb), 0.35);
+    background: color-mix(in srgb, var(--rt-success) 10%, rgba(var(--c-0f172a-rgb), 0.92) 90%);
+  }
+}

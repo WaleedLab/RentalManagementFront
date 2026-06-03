@@ -58,7 +58,9 @@
                 <td>{{ row.branchName || row.idBranch || '-' }}</td>
                 <td>{{ formatDate(row.startDate) }}</td>
                 <td>{{ formatDate(row.endDate) }}</td>
-                <td>{{ statusLabel(row.status) }}</td>
+                <td>
+                  <span [class]="statusBadgeClass(row.status)">{{ statusLabel(row.status) }}</span>
+                </td>
                 <td class="text-end">{{ formatMoney(row.valueCompensation) }}</td>
                 <td class="text-end">{{ formatMoney(row.total) }}</td>
                 <td class="text-end">
@@ -76,6 +78,33 @@
                           <span class="spinner-border spinner-border-sm" role="status"></span>
                         } @else {
                           <i class="fa-solid fa-circle-check"></i>
+                        }
+                      </button>
+                    }
+                    @if (canManageDetails(row)) {
+                      <button
+                        type="button"
+                        class="table-action-icon table-action-icon--secondary"
+                        (click)="openDetailsDialog(row)"
+                        [attr.aria-label]="'maintenance.details.action' | translate"
+                        [title]="'maintenance.details.action' | translate"
+                      >
+                        <i class="fa-solid fa-clipboard-list"></i>
+                      </button>
+                    }
+                    @if (canFinish(row)) {
+                      <button
+                        type="button"
+                        class="table-action-icon table-action-icon--primary"
+                        [disabled]="isFinishing(row.id)"
+                        (click)="openFinishDialog(row)"
+                        [attr.aria-label]="'maintenance.finish.action' | translate"
+                        [title]="'maintenance.finish.action' | translate"
+                      >
+                        @if (isFinishing(row.id)) {
+                          <span class="spinner-border spinner-border-sm" role="status"></span>
+                        } @else {
+                          <i class="fa-solid fa-clipboard-check"></i>
                         }
                       </button>
                     }

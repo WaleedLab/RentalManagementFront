@@ -1,5 +1,8 @@
 :host {
-  display: block;
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: var(--ops-chart-block-height, 21.5rem);
   --dashboard-surface: linear-gradient(165deg, rgba(var(--c-ffffff-rgb), 0.96), rgba(var(--c-f8fafc-rgb), 0.92));
   --dashboard-border: rgba(var(--c-94a3b8-rgb), 0.22);
   --dashboard-shadow: 0 12px 28px -22px rgba(var(--rt-shadow-rgb), 0.12);
@@ -16,8 +19,13 @@
 }
 
 .dashboard-widget {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-height: var(--ops-chart-block-height, 21.5rem);
   border-radius: 16px;
-  padding: 16px;
+  padding: 0.75rem 0.875rem 0.875rem;
   background: var(--dashboard-surface);
   box-shadow: var(--dashboard-shadow);
   border: 1px solid var(--dashboard-border);
@@ -25,30 +33,57 @@
   -webkit-backdrop-filter: blur(12px);
 }
 
+.dashboard-widget__header {
+  flex: 0 0 var(--ops-chart-title-height, 3.25rem);
+  min-height: var(--ops-chart-title-height, 3.25rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
 .dashboard-widget__header h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  min-height: calc(2 * 1.35 * 0.875rem);
   color: var(--dashboard-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .dashboard-widget__header p {
-  margin: 6px 0 0;
+  margin: 0.35rem 0 0;
   color: var(--dashboard-text-muted);
   font-size: 0.83rem;
 }
 
+.dashboard-widget__chart,
+.dashboard-widget__fallback,
+.skeleton--chart {
+  flex: 0 0 var(--ops-chart-plot-height, 14.5rem);
+  width: 100%;
+  height: var(--ops-chart-plot-height, 14.5rem);
+  min-height: var(--ops-chart-plot-height, 14.5rem);
+  margin-top: 0.5rem;
+}
+
 .dashboard-widget__chart {
-  margin-top: 12px;
-  height: 280px;
+  position: relative;
+}
+
+.dashboard-widget__chart canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .dashboard-widget__fallback {
-  margin-top: 12px;
-  min-height: 280px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px 16px;
+  padding: 1rem;
   border-radius: 12px;
   text-align: center;
   font-size: 0.95rem;
@@ -65,8 +100,6 @@
 }
 
 .skeleton--chart {
-  margin-top: 12px;
-  height: 280px;
   border-radius: 12px;
   background: linear-gradient(90deg, rgba(var(--c-94a3b8-rgb), 0.16), rgba(var(--c-94a3b8-rgb), 0.32), rgba(var(--c-94a3b8-rgb), 0.16));
   background-size: 200% 100%;

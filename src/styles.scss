@@ -319,13 +319,24 @@ body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .form-select {
 
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .card,
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .app-filter-field,
-body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .table-responsive,
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .modal-content,
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .dropdown-menu,
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .swal2-popup {
   background: rgba(var(--c-102436-rgb), 0.72) !important;
   border: 1px solid rgba(var(--c-06b6d4-rgb), 0.08) !important;
   box-shadow: 0 10px 40px rgba(var(--rt-shadow-rgb), 0.45) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .table-responsive {
+  background: var(--app-table-surface) !important;
+  border: 1px solid var(--app-table-border-color) !important;
+  box-shadow: var(--app-table-shadow) !important;
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   transition:
@@ -347,9 +358,16 @@ body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .app-pagination-
 
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .card:hover,
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .app-filter-field:hover,
-body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .table-responsive:hover {
+body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .modal-content:hover,
+body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .dropdown-menu:hover,
+body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .swal2-popup:hover {
   background: rgba(var(--c-06b6d4-rgb), 0.08) !important;
   border-color: rgba(var(--c-06b6d4-rgb), 0.14) !important;
+}
+
+body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .table-responsive:hover {
+  background: color-mix(in srgb, var(--app-table-surface) 88%, var(--app-table-row-hover) 12%) !important;
+  border-color: color-mix(in srgb, var(--app-table-border-color) 72%, var(--rt-brand-cyan) 28%) !important;
 }
 
 body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper .form-control,
@@ -464,15 +482,16 @@ html[dir='rtl'] .table-actions {
 
 body.dark-only {
   --app-table-border-color: rgba(var(--c-06b6d4-rgb), 0.1);
-  --app-table-surface: linear-gradient(180deg, rgba(var(--c-102436-rgb), 0.72) 0%, rgba(var(--c-0a1929-rgb), 0.88) 100%);
-  --app-table-head-bg: var(--c-0f2233);
+  --app-table-surface: linear-gradient(180deg, var(--rt-table-bg, #101e2e) 0%, var(--rt-bg, #0d1722) 100%);
+  --app-table-head-bg: var(--rt-table-header-bg, #0c1826);
   --app-table-head-color: var(--c-a5f3fc);
   --app-table-text-color: var(--c-ecfeff);
   --app-table-muted-color: rgba(var(--c-67e8f9-rgb), 0.82);
-  --app-table-row-alt: rgba(var(--c-102436-rgb), 0.35);
-  --app-table-row-hover: rgba(var(--c-06b6d4-rgb), 0.06);
+  --app-table-row-even: var(--rt-table-row-even, #0d1926);
+  --app-table-row-alt: var(--rt-table-row-alt, #182838);
+  --app-table-row-hover: rgba(var(--c-06b6d4-rgb), 0.08);
   --app-table-shadow: 0 22px 48px -28px rgba(var(--rt-shadow-rgb), 0.55);
-  --app-table-action-surface: rgba(var(--c-102436-rgb), 0.65);
+  --app-table-action-surface: color-mix(in srgb, var(--rt-table-bg, #101e2e) 82%, black 18%);
   --app-form-hint-color: rgba(var(--c-67e8f9-rgb), 0.88);
   --app-form-label-color: var(--c-ecfeff);
   --app-form-placeholder-color: rgba(var(--c-67e8f9-rgb), 0.52);
@@ -700,15 +719,15 @@ html[data-bs-theme='dark'] .app-filter-field {
 }
 
 body.dark-only .table-striped > tbody > tr:nth-of-type(odd) > * {
-  background-color: rgba(var(--c-102436-rgb), 0.42) !important;
+  background-color: var(--app-table-row-alt) !important;
 }
 
 body.dark-only .table-striped > tbody > tr:nth-of-type(even) > * {
-  background-color: rgba(var(--c-102436-rgb), 0.55) !important;
+  background-color: var(--app-table-row-even) !important;
 }
 
 body.dark-only .table-hover > tbody > tr:hover > * {
-  background-color: rgba(var(--c-06b6d4-rgb), 0.06) !important;
+  background-color: var(--app-table-row-hover) !important;
   color: var(--app-table-text-color) !important;
 }
 
@@ -1105,6 +1124,11 @@ thead th,
 
 .table-striped > tbody > tr:nth-of-type(even) > * {
   background-color: transparent;
+}
+
+body.dark-only .table-striped > tbody > tr:nth-of-type(even) > *,
+html[data-bs-theme='dark'] .table-striped > tbody > tr:nth-of-type(even) > * {
+  background-color: var(--app-table-row-even);
 }
 
 .table-hover > tbody > tr:hover > * {

@@ -1,0 +1,57 @@
+<div class="maintenance-finish-dialog" [attr.dir]="dialogDir">
+  <div class="modal-header maintenance-finish-dialog__header">
+    <h5 class="modal-title">{{ title }}</h5>
+    <button
+      type="button"
+      class="btn-close maintenance-finish-dialog__close"
+      [attr.aria-label]="'Close' | translate"
+      (click)="cancel()"
+    ></button>
+  </div>
+
+  <form class="modal-body" [formGroup]="form" (ngSubmit)="confirm()">
+    <p class="maintenance-finish-dialog__message">{{ message }}</p>
+
+    <div class="maintenance-finish-dialog__meta">
+      <div class="maintenance-finish-dialog__row">
+        <span class="maintenance-finish-dialog__label">{{ 'maintenance.colPlate' | translate }}</span>
+        <span class="maintenance-finish-dialog__value">{{ plateNumber || '-' }}</span>
+      </div>
+      <div class="maintenance-finish-dialog__row">
+        <span class="maintenance-finish-dialog__label">{{ 'maintenance.finish.linesCount' | translate }}</span>
+        <span class="maintenance-finish-dialog__value">{{ detailsCount() }}</span>
+      </div>
+      <div class="maintenance-finish-dialog__row">
+        <span class="maintenance-finish-dialog__label">{{ 'maintenance.colTotal' | translate }}</span>
+        <span class="maintenance-finish-dialog__value maintenance-finish-dialog__total">
+          @if (loading()) {
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+          } @else {
+            {{ formatMoney(computedTotal()) }}
+          }
+        </span>
+      </div>
+    </div>
+
+    <div class="form-text maintenance-finish-dialog__total-hint">
+      {{ 'maintenance.finish.totalHint' | translate }}
+    </div>
+
+    <div class="mb-0 mt-3">
+      <app-date-picker
+        formControlName="endDate"
+        [label]="'maintenance.fieldEndDate' | translate"
+      />
+      @if (form.controls.endDate.touched && form.controls.endDate.invalid) {
+        <div class="text-danger small mt-1">{{ 'maintenance.finish.invalidEndDate' | translate }}</div>
+      }
+    </div>
+  </form>
+
+  <div class="modal-footer maintenance-finish-dialog__footer">
+    <button type="button" class="btn btn-cancel" (click)="cancel()">{{ 'Cancel' | translate }}</button>
+    <button type="button" class="btn btn-primary" [disabled]="loading()" (click)="confirm()">
+      {{ 'maintenance.finish.confirm' | translate }}
+    </button>
+  </div>
+</div>
