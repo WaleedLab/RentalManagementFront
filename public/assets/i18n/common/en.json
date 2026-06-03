@@ -329,6 +329,7 @@
   "Vehicle status updated successfully": "Vehicle status updated successfully",
   "Failed to update vehicle status": "Failed to update vehicle status",
   "Save": "Save",
+  "Pagination page of": "Page {{page}} of {{total}}",
   "Close": "Close",
   "Gregorian": "Gregorian",
   "Hijri": "Hijri",

@@ -8,7 +8,12 @@
     <button class="btn btn-sm app-pagination-bar__btn app-pagination-bar__btn--prev" type="button" [disabled]="!canGoPrevious" (click)="goPrevious()">
       {{ 'Previous' | translate }}
     </button>
-    <span class="app-pagination-bar__current">{{ pageNumber }} / {{ normalizedTotalPages }}</span>
+    <span
+      class="app-pagination-bar__current"
+      [attr.title]="'Pagination page of' | translate: { page: pageNumber, total: normalizedTotalPages }"
+    >
+      {{ pageNumber }} / {{ normalizedTotalPages }}
+    </span>
     <button class="btn btn-sm app-pagination-bar__btn app-pagination-bar__btn--next" type="button" [disabled]="!canGoNext" (click)="goNext()">
       {{ 'Next' | translate }}
     </button>

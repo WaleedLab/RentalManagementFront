@@ -10,14 +10,13 @@
       </div>
     </div>
   } @else if (booking(); as item) {
-    <app-page-header
-      [title]="(isExtendMode() ? 'Contract extension page title' : 'Contract details view') | translate"
-      [subtitle]="contractSubtitle(item)"
-    />
-
-    <div class="card contract-details-card">
-      <div class="card-body">
-        @if (isExtendMode()) {
+    @if (isExtendMode()) {
+      <app-page-header
+        [title]="'Contract extension page title' | translate"
+        [subtitle]="contractSubtitle(item)"
+      />
+      <div class="card contract-details-card">
+        <div class="card-body">
           <section class="contract-panel contract-panel--extend">
             <h2 class="contract-panel__title">{{ 'Contract extension page title' | translate }}</h2>
             <div class="row g-3 extend-form-grid">
@@ -124,9 +123,6 @@
                         [readonly]="!extendPaymentTypeIsMixed()"
                         (input)="onExtendPaidCashChange($any($event.target).value)"
                       />
-                      @if (extendPaymentTypeIsBankOnly()) {
-                        <div class="form-text text-warning">مقفل لأن الدفع يتم عبر البنك.</div>
-                      }
                     </div>
                     <div class="extend-payment-field extend-payment-field--span-2">
                       <label class="form-label">{{ 'Bank Account' | translate }}</label>
@@ -138,9 +134,6 @@
                         [disabled]="extendPaymentTypeIsCash()"
                         (valueChange)="onExtendBankAccountChange('' + $any($event))"
                       />
-                      @if (extendPaymentTypeIsCash()) {
-                        <div class="form-text text-warning">مقفل لأن نوع الدفع نقدي.</div>
-                      }
                     </div>
                     <div class="extend-payment-field">
                       <label class="form-label">المبلغ البنكي</label>
@@ -154,9 +147,6 @@
                         [readonly]="!extendPaymentTypeIsMixed()"
                         (input)="onExtendPaidBankChange($any($event.target).value)"
                       />
-                      @if (extendPaymentTypeIsCash()) {
-                        <div class="form-text text-warning">مقفل لأن نوع الدفع نقدي.</div>
-                      }
                     </div>
                   </div>
                 </div>
@@ -173,467 +163,638 @@
               </div>
             </div>
           </section>
-        } @else {
-        <div class="contract-details__summary">
-          <div class="contract-details__summary-row">
-            @if (logoOnlyUrl(item); as logo) {
-              <div class="contract-details__summary-logo" aria-hidden="true">
-                <img [src]="logo" alt="" class="contract-details__summary-logo-img" />
+          <div class="contract-details__footer contract-details__footer--extend">
+            <button type="button" class="btn contract-details__extend-submit" (click)="submitExtend()">تمديد</button>
+            <a class="btn contract-details__extend-back" routerLink="/booking">{{ 'Back' | translate }}</a>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <section class="contract-dash-hero card">
+        <div class="card-body">
+          <div class="contract-dash-hero__head">
+            <div class="contract-dash-hero__brand">
+              @if (logoOnlyUrl(item); as logo) {
+                <img [src]="logo" alt="" class="contract-dash-hero__logo" />
+              }
+              <div>
+                <h1 class="contract-dash-hero__title">{{ 'Contract details view' | translate }}</h1>
+                <p class="contract-dash-hero__subtitle">{{ contractSubtitle(item) }}</p>
               </div>
-            }
-            <div class="contract-details__contract-no">{{ contractNumber(item) }}</div>
-            <div class="contract-details__status-pill">
+            </div>
+            <div class="contract-dash-hero__status">
               <app-status-badge
                 [label]="statusBadgeLabelKey(item.status) | translate"
                 [tone]="statusBadgeTone(item.status)"
               />
             </div>
           </div>
-          <div class="contract-details__summary-meta">
-            <div class="contract-details__meta-item">
-              <span class="contract-details__meta-label">{{ 'Contract summary status label' | translate }}</span>
-              <span class="contract-details__meta-value">{{ statusDisplayText(item) }}</span>
+
+          <dl class="contract-dash-hero__grid">
+            <div>
+              <dt>{{ 'Booking Number' | translate }}</dt>
+              <dd>{{ contractNumber(item) }}</dd>
             </div>
-            <div class="contract-details__meta-item">
-              <span class="contract-details__meta-label">{{ 'Count Of Days' | translate }}</span>
-              <span class="contract-details__meta-value">{{ numberOrDash(item.countOfDay) }}</span>
+            <div>
+              <dt>{{ 'Arabic Name' | translate }}</dt>
+              <dd>{{ valueOrDash(item.customerName) }}</dd>
             </div>
-            <div class="contract-details__meta-item">
-              <span class="contract-details__meta-label">{{ 'Vehicle Return Date' | translate }}</span>
-              <span class="contract-details__meta-value">{{ dateOrDash(item.returnDate, 'date') }}</span>
+            <div>
+              <dt>{{ 'Vehicle' | translate }}</dt>
+              <dd>{{ vehicleHeadline(item) }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'Plate Number' | translate }}</dt>
+              <dd>{{ valueOrDash(item.vehiclePlateNumber) }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'Contract summary status label' | translate }}</dt>
+              <dd>{{ statusDisplayText(item) }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'Count Of Days' | translate }}</dt>
+              <dd>{{ numberOrDash(item.countOfDay) }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'Vehicle Return Date' | translate }}</dt>
+              <dd>{{ dateOrDash(item.returnDate, 'date') }}</dd>
             </div>
             @if (item.paymentNumber) {
-              <div class="contract-details__meta-item">
-                <span class="contract-details__meta-label">{{ 'Contract main payment reference' | translate }}</span>
-                <span class="contract-details__meta-value">{{ valueOrDash(item.paymentNumber) }}</span>
+              <div>
+                <dt>{{ 'Contract main payment reference' | translate }}</dt>
+                <dd>{{ valueOrDash(item.paymentNumber) }}</dd>
               </div>
+            }
+          </dl>
+
+          <div class="contract-dash-hero__actions">
+            @if (canPrintAction(item)) {
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-info"
+                (click)="onDetailsToolbarAction('print', item)"
+              >
+                <i class="fa-solid fa-print me-1" aria-hidden="true"></i>
+                {{ 'Booking card menu print' | translate }}
+              </button>
+            }
+            @if (canExtendAction(item)) {
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-warning"
+                (click)="onDetailsToolbarAction('extend', item)"
+              >
+                <i class="fa-solid fa-up-right-and-down-left-from-center me-1" aria-hidden="true"></i>
+                {{ 'Booking card menu extend' | translate }}
+              </button>
+            }
+            @if (canSuspendAction(item)) {
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                (click)="onDetailsToolbarAction('suspend', item)"
+              >
+                <i class="fa-solid fa-comment-slash me-1" aria-hidden="true"></i>
+                {{ 'Booking card menu suspend' | translate }}
+              </button>
+            }
+            @if (canFinishAction(item)) {
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-success"
+                (click)="onDetailsToolbarAction('finish', item)"
+              >
+                <i class="fa-solid fa-flag-checkered me-1" aria-hidden="true"></i>
+                {{ 'Booking card finish' | translate }}
+              </button>
+            }
+            @if (canCloseAction(item)) {
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                (click)="onDetailsToolbarAction('closeContract', item)"
+              >
+                <i class="fa-solid fa-lock me-1" aria-hidden="true"></i>
+                {{ 'Booking card close contract' | translate }}
+              </button>
+            }
+            @if (canEditAction(item)) {
+              <a class="btn btn-sm btn-outline-primary" [routerLink]="['/booking', item.id, 'edit']">
+                <i class="fa-solid fa-pen-to-square me-1" aria-hidden="true"></i>
+                {{ 'Booking card menu edit' | translate }}
+              </a>
             }
           </div>
         </div>
+      </section>
 
-        <section class="contract-panel">
-          <h2 class="contract-panel__title">{{ 'Contract section customer' | translate }}</h2>
-          <div class="row g-3">
-            <div class="col-md-4">
-              <label class="form-label">{{ 'Arabic Name' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.customerName || item.customerId)" />
-            </div>
-            @if (item.customerNameEn) {
-              <div class="col-md-4">
-                <label class="form-label">{{ 'English Name' | translate }}</label>
-                <input class="form-control" readonly [value]="valueOrDash(item.customerNameEn)" />
-              </div>
-            }
-            <div class="col-md-4">
-              <label class="form-label">{{ 'Identity Number' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.customerIqama)" />
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ 'Nationality' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.customerNationality)" />
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ 'Primary Mobile Number' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.customerMobile)" />
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ 'Address' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.customerAddress)" />
-            </div>
-          </div>
-        </section>
-
-        <section class="contract-panel">
-          <h2 class="contract-panel__title">{{ 'Contract section vehicle' | translate }}</h2>
-          <div class="row g-3">
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Plate Number' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.vehiclePlateNumber)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Vehicle Type' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.vehicleCategoryLabel)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Vehicle' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.vehicleName)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Year' | translate }}</label>
-              <input class="form-control" readonly [value]="numberOrDash(item.vehicleYear)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Color' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.vehicleColor)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Daily Price' | translate }}</label>
-              <input class="form-control" readonly [value]="moneyOrDash(item.priceInDay)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Extra KM Price' | translate }}</label>
-              <input class="form-control" readonly [value]="moneyOrDash(item.priceKmExtra)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Hourly Extra Price' | translate }}</label>
-              <input class="form-control" readonly [value]="moneyOrDash(item.priceHoureExtra)" />
-            </div>
-          </div>
-        </section>
-
-        <section class="contract-panel contract-panel--photos">
-          <div class="contract-photos-group">
-            <h2 class="contract-panel__title contract-photos-group__title">
-              {{ 'Contract section photos checkout' | translate }}
-            </h2>
-            <div class="contract-photo-grid">
-            @for (angle of ['front', 'right', 'left', 'back', 'interior']; track angle) {
-              <div class="contract-photo-slot">
-                @if (contractPhotoSlotUrl(item, 'checkout', angle); as imgUrl) {
-                  <img class="contract-photo-slot__img" [src]="imgUrl" alt="" />
-                } @else {
-                  <div class="contract-photo-slot__ph">{{ 'Contract photo placeholder' | translate }}</div>
-                }
-                <div class="contract-photo-slot__cap">{{ vehiclePhotoLabel(angle) }}</div>
-              </div>
-            }
-            </div>
-          </div>
-
-          <div class="contract-photos-group">
-            <h2 class="contract-panel__title contract-photos-group__title">
-              {{ 'Contract section photos return' | translate }}
-            </h2>
-            <div class="contract-photo-grid">
-              @for (angle of ['front', 'right', 'left', 'back', 'interior']; track angle) {
-                <div class="contract-photo-slot">
-                  @if (contractPhotoSlotUrl(item, 'return', angle); as imgUrl) {
-                    <img class="contract-photo-slot__img" [src]="imgUrl" alt="" />
-                  } @else {
-                    <div class="contract-photo-slot__ph">{{ 'Contract photo placeholder' | translate }}</div>
-                  }
-                  <div class="contract-photo-slot__cap">{{ vehiclePhotoLabel(angle) }}</div>
-                </div>
-              }
-            </div>
-          </div>
-        </section>
-
-        <section class="contract-panel contract-panel--basics">
-          <h2 class="contract-panel__title">{{ 'Contract section basics' | translate }}</h2>
-          <div class="contract-basics-grid">
-            <div class="contract-basics-field">
-              <label class="form-label">{{ 'Start Date' | translate }}</label>
-              <input class="form-control" readonly [value]="dateOrDash(item.startDate)" />
-            </div>
-            <div class="contract-basics-field">
-              <label class="form-label">{{ 'End Date' | translate }}</label>
-              <input class="form-control" readonly [value]="dateOrDash(item.endDate)" />
-            </div>
-            <div class="contract-basics-field">
-              <label class="form-label">{{ 'Vehicle Return Date' | translate }}</label>
-              <input class="form-control" readonly [value]="dateOrDash(item.returnDate)" />
-            </div>
-            <div class="contract-basics-field">
-              <label class="form-label">{{ 'Checkout Counter' | translate }}</label>
-              <input class="form-control" readonly [value]="numberOrDash(item.checkoutCounter)" />
-            </div>
-            <div class="contract-basics-field">
-              <label class="form-label">{{ 'Checkin Counter' | translate }}</label>
-              <input class="form-control" readonly [value]="numberOrDash(item.checkinCounter)" />
-            </div>
-            <div class="contract-basics-field">
-              <label class="form-label">{{ 'Usage Place' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.placeUSE)" />
-            </div>
-            <div class="contract-basics-field">
-              <label class="form-label">{{ 'Travelled Distance GPS' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.distancetraveledgps)" />
-            </div>
-            <div class="contract-basics-field">
-              <label class="form-label">{{ 'Paid total' | translate }}</label>
-              <input class="form-control" readonly [value]="moneyOrDash(displayedPaidTotal(item))" />
-            </div>
-            <div class="contract-basics-field">
-              <label class="form-label">{{ 'Excess Hours Count' | translate }}</label>
-              <input class="form-control" readonly [value]="numberOrDash(item.numberOfHoursExcess)" />
-            </div>
-            <div class="contract-basics-field">
-              <label class="form-label">{{ 'Excess KM Count' | translate }}</label>
-              <input class="form-control" readonly [value]="numberOrDash(item.numberKmExcess)" />
-            </div>
-            <div class="contract-basics-field">
-              <label class="form-label">{{ 'Excess Days Count' | translate }}</label>
-              <input class="form-control" readonly [value]="numberOrDash(item.dayExcess)" />
-            </div>
-            <div class="contract-basics-field contract-basics-field--notes contract-basics-field--notes-inline">
-              <label class="form-label">{{ 'Notes' | translate }}</label>
-              <textarea class="form-control" rows="2" readonly [value]="valueOrDash(item.notes)"></textarea>
-            </div>
-          </div>
-        </section>
-
-        <section class="contract-panel">
-          <h2 class="contract-panel__title">{{ 'Contract section settlement' | translate }}</h2>
-          <div class="table-responsive contract-table-wrap">
-            <table class="table table-sm contract-settlement-table mb-0">
-              <tbody>
-                <tr>
-                  <th>{{ 'Daily Price' | translate }}</th>
-                  <td>{{ moneyOrDash(item.priceInDay) }}</td>
-                  <th>{{ 'Monthly Price' | translate }}</th>
-                  <td>{{ moneyOrDash(item.priceInMonth) }}</td>
-                </tr>
-                <tr>
-                  <th>{{ 'Allowed Distance' | translate }}</th>
-                  <td>{{ numberOrDash(item.allowTo) }}</td>
-                  <th>{{ 'Fleet Name' | translate }}</th>
-                  <td>{{ fleetDisplay(item) }}</td>
-                </tr>
-                <tr>
-                  <th>{{ 'Discount' | translate }}</th>
-                  <td>{{ moneyOrDash(item.discount) }}</td>
-                  <th>{{ 'Total Tax' | translate }}</th>
-                  <td>{{ moneyOrDash(item.totaltax) }}</td>
-                </tr>
-                <tr>
-                  <th>{{ 'TOTAL' | translate }}</th>
-                  <td class="is-emph">{{ moneyOrDash(item.totalAmount) }}</td>
-                  <th>{{ 'Paid total' | translate }}</th>
-                  <td class="is-emph">{{ moneyOrDash(displayedPaidTotal(item)) }}</td>
-                </tr>
-                <tr>
-                  <th>{{ 'Other Expenses' | translate }}</th>
-                  <td>{{ moneyOrDash(item.otherExpenses) }}</td>
-                  <th>{{ 'Transportation Fees' | translate }}</th>
-                  <td>{{ moneyOrDash(item.transportationFees) }}</td>
-                </tr>
-                <tr>
-                  <th>{{ 'Traffic Total' | translate }}</th>
-                  <td>{{ moneyOrDash(item.totalTrafic) }}</td>
-                  <th>{{ 'Maintenance Total' | translate }}</th>
-                  <td>{{ moneyOrDash(item.totalMaintance) }}</td>
-                </tr>
-                <tr>
-                  <th>{{ 'Received Vehicle Total' | translate }}</th>
-                  <td>{{ moneyOrDash(item.totalReceivedVehicle) }}</td>
-                  <th>{{ 'Extra KM Count' | translate }}</th>
-                  <td>{{ numberOrDash(item.countKMExtra) }}</td>
-                </tr>
-                <tr>
-                  <th>{{ 'Customer Vehicle Counting' | translate }}</th>
-                  <td colspan="3">{{ countingCustVehicleDisplay(item) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="table-responsive contract-table-wrap mt-3">
-            <table class="table table-sm contract-vouchers-table mb-0">
-              <thead>
-                <tr>
-                  <th>{{ 'Payment Number' | translate }}</th>
-                  <th>{{ 'Bond Type' | translate }}</th>
-                  <th>{{ 'Payment Type' | translate }}</th>
-                  <th>{{ 'Paid Amount' | translate }}</th>
-                  <th>{{ 'Paid Cash' | translate }}</th>
-                  <th>{{ 'Paid Bank' | translate }}</th>
-                  <th>{{ 'Created At' | translate }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @if (paymentRows().length === 0) {
-                  <tr>
-                    <td colspan="7" class="text-center text-muted py-3">
-                      {{ 'No linked voucher payments for this booking' | translate }}
-                    </td>
-                  </tr>
-                } @else {
-                  @for (row of paymentRows(); track row.id) {
-                    <tr>
-                      <td>{{ valueOrDash(row.paymentNumber) }}</td>
-                      <td>{{ bondTypeLabel(row.bondType) }}</td>
-                      <td>{{ paymentTypeLabel(row.paymentType) }}</td>
-                      <td>{{ moneyOrDash(row.paid) }}</td>
-                      <td>{{ moneyOrDash(row.paidCash) }}</td>
-                      <td>{{ moneyOrDash(row.paidBank) }}</td>
-                      <td>{{ dateOrDash(row.createdAt) }}</td>
-                    </tr>
-                  }
-                }
-              </tbody>
-            </table>
-          </div>
-
-          <div class="contract-voucher-summary">
-            <h3 class="contract-voucher-summary__title">{{ 'Voucher financial summary' | translate }}</h3>
-            <div class="contract-voucher-summary__grid">
-              <div class="contract-voucher-summary__item">
-                <span class="contract-voucher-summary__label">{{ 'Vouchers table paid sum' | translate }}</span>
-                <span class="contract-voucher-summary__value">{{ moneyOrDash(vouchersTablePaidSum()) }}</span>
-              </div>
-              <div class="contract-voucher-summary__item">
-                <span class="contract-voucher-summary__label">{{ 'Contract total with tax' | translate }}</span>
-                <span class="contract-voucher-summary__value">{{ moneyOrDash(item.totalAmount) }}</span>
-              </div>
-              <div class="contract-voucher-summary__item">
-                <span class="contract-voucher-summary__label">{{ 'Summary discount amount' | translate }}</span>
-                <span class="contract-voucher-summary__value">{{ moneyOrDash(discountAmount(item)) }}</span>
-              </div>
-              <div class="contract-voucher-summary__item">
-                <span class="contract-voucher-summary__label">{{ 'Summary total after discount' | translate }}</span>
-                <span class="contract-voucher-summary__value">{{ moneyOrDash(totalAfterDiscount(item)) }}</span>
-              </div>
-              <div class="contract-voucher-summary__item">
-                <span class="contract-voucher-summary__label">{{ 'Contract total without tax' | translate }}</span>
-                <span class="contract-voucher-summary__value">{{ moneyOrDash(contractTotalWithoutTax(item)) }}</span>
-              </div>
-              <div class="contract-voucher-summary__item contract-voucher-summary__item--emph">
-                <span class="contract-voucher-summary__label">{{ 'Remaining on contract' | translate }}</span>
-                <span class="contract-voucher-summary__value">{{ moneyOrDash(contractRemaining(item)) }}</span>
-              </div>
-              <div class="contract-voucher-summary__item">
-                <span class="contract-voucher-summary__label">{{ 'Collection progress percent' | translate }}</span>
-                <span class="contract-voucher-summary__value">{{ percentOrDash(item) }}</span>
-              </div>
-              @if (paymentRows().length > 0) {
-                <div class="contract-voucher-summary__item">
-                  <span class="contract-voucher-summary__label">{{ 'Voucher count label' | translate }}</span>
-                  <span class="contract-voucher-summary__value">{{ paymentRows().length }}</span>
-                </div>
-              }
-            </div>
-            <p class="contract-voucher-summary__decision">{{ decisionHintText(item) }}</p>
-            @if (voucherPaidSumMismatch(item)) {
-              <p class="contract-voucher-summary__warn">{{ 'Voucher paid sum mismatch hint' | translate }}</p>
-            }
-          </div>
-        </section>
-
-        <details class="contract-panel contract-panel--audit">
-          <summary class="contract-panel__title contract-panel__title--summary">
-            {{ 'Contract section audit' | translate }}
-          </summary>
-          <div class="row g-3 mt-1">
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Booking Number' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.bookingNumber || item.id)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Created At' | translate }}</label>
-              <input class="form-control" readonly [value]="dateOrDash(item.createdAt)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Created By' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.createdBy)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Updated At' | translate }}</label>
-              <input class="form-control" readonly [value]="dateOrDash(item.updatedAt)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Updated By' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.updatedBy)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Deleted At' | translate }}</label>
-              <input class="form-control" readonly [value]="dateOrDash(item.deletedAt)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Deleted By' | translate }}</label>
-              <input class="form-control" readonly [value]="valueOrDash(item.deletedBy)" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Is Preview' | translate }}</label>
-              <input
-                class="form-control"
-                readonly
-                [value]="item.isprview ? ('Yes' | translate) : ('No' | translate)"
-              />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Is Deleted' | translate }}</label>
-              <input
-                class="form-control"
-                readonly
-                [value]="item.isDeleted ? ('Yes' | translate) : ('No' | translate)"
-              />
-            </div>
-          </div>
-        </details>
+      <nav class="contract-dash-tabs" [attr.aria-label]="'Contract details tabs' | translate">
+        @for (tab of detailsTabs; track tab.id) {
+          <button
+            type="button"
+            class="contract-dash-tabs__btn"
+            [class.contract-dash-tabs__btn--active]="isActiveTab(tab.id)"
+            (click)="setActiveTab(tab.id)"
+          >
+            {{ tab.labelKey | translate }}
+          </button>
         }
+      </nav>
 
-        <div class="contract-details__footer" [class.contract-details__footer--extend]="isExtendMode()">
-          @if (isExtendMode()) {
-            <button type="button" class="btn contract-details__extend-submit" (click)="submitExtend()">تمديد</button>
-            <a class="btn contract-details__extend-back" routerLink="/booking">{{ 'Back' | translate }}</a>
-          } @else {
-            <div class="contract-details__toolbar">
-              @if (canSuspendAction(item)) {
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-secondary contract-details__toolbar-btn"
-                  (click)="onDetailsToolbarAction('suspend', item)"
-                >
-                  <i class="fa-solid fa-comment-slash me-1" aria-hidden="true"></i>
-                  {{ 'Booking card menu suspend' | translate }}
-                </button>
+      <div class="contract-dash-panel card">
+        <div class="card-body">
+          @switch (activeTab()) {
+            @case ('overview') {
+              <div class="contract-dash-split">
+                <article class="contract-dash-card">
+                  <h2 class="contract-dash-card__title">{{ 'Contract details card contract' | translate }}</h2>
+                  <dl class="contract-dash-kv contract-dash-kv--2">
+                    <div>
+                      <dt>{{ 'Booking Number' | translate }}</dt>
+                      <dd>{{ contractNumber(item) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Contract summary status label' | translate }}</dt>
+                      <dd>{{ statusDisplayText(item) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Start Date' | translate }}</dt>
+                      <dd>{{ dateOrDash(item.startDate) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'End Date' | translate }}</dt>
+                      <dd>{{ dateOrDash(item.endDate) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Vehicle Return Date' | translate }}</dt>
+                      <dd>{{ dateOrDash(item.returnDate) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Usage Place' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.placeUSE) }}</dd>
+                    </div>
+                  </dl>
+                </article>
+                <article class="contract-dash-card">
+                  <h2 class="contract-dash-card__title">{{ 'Contract details card financial' | translate }}</h2>
+                  <div class="contract-dash-kpi-row">
+                    <div class="contract-dash-kpi">
+                      <span class="contract-dash-kpi__value">{{ moneyOrDash(item.totalAmount) }}</span>
+                      <span class="contract-dash-kpi__label">{{ 'TOTAL' | translate }}</span>
+                    </div>
+                    <div class="contract-dash-kpi">
+                      <span class="contract-dash-kpi__value">{{ moneyOrDash(displayedPaidTotal(item)) }}</span>
+                      <span class="contract-dash-kpi__label">{{ 'Paid total' | translate }}</span>
+                    </div>
+                    <div class="contract-dash-kpi contract-dash-kpi--warn">
+                      <span class="contract-dash-kpi__value">{{ moneyOrDash(contractRemaining(item)) }}</span>
+                      <span class="contract-dash-kpi__label">{{ 'Remaining on contract' | translate }}</span>
+                    </div>
+                  </div>
+                  <dl class="contract-dash-kv contract-dash-kv--2 mt-3">
+                    <div>
+                      <dt>{{ 'Discount' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.discount) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Total Tax' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.totaltax) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Collection progress percent' | translate }}</dt>
+                      <dd>{{ percentOrDash(item) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Notes' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.notes) }}</dd>
+                    </div>
+                  </dl>
+                  <p class="contract-dash-hint mb-0 mt-2">{{ decisionHintText(item) }}</p>
+                </article>
+              </div>
+            }
+            @case ('customer') {
+              <div class="contract-dash-split">
+                <article class="contract-dash-card">
+                  <h2 class="contract-dash-card__title">{{ 'Contract details customer personal' | translate }}</h2>
+                  <dl class="contract-dash-kv contract-dash-kv--2">
+                    <div>
+                      <dt>{{ 'Arabic Name' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.customerName || item.customerId) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'English Name' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.customerNameEn) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Identity Number' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.customerIqama) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Nationality' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.customerNationality) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Date of Birth' | translate }}</dt>
+                      <dd>{{ dateOrDash(item.customerBirthDay, 'date') }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Driving License Number' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.customerDrivingLicenseNumber) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Driving License Expiry Date' | translate }}</dt>
+                      <dd>{{ dateOrDash(item.customerDrivingLicenseExpiry, 'date') }}</dd>
+                    </div>
+                  </dl>
+                </article>
+                <article class="contract-dash-card">
+                  <h2 class="contract-dash-card__title">{{ 'Contract details customer contact' | translate }}</h2>
+                  <dl class="contract-dash-kv contract-dash-kv--2">
+                    <div>
+                      <dt>{{ 'Primary Mobile Number' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.customerMobile) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Address' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.customerAddress) }}</dd>
+                    </div>
+                  </dl>
+                </article>
+              </div>
+            }
+            @case ('vehicle') {
+              <div class="contract-dash-stack">
+                <article class="contract-dash-card">
+                  <h2 class="contract-dash-card__title">{{ 'Contract section vehicle' | translate }}</h2>
+                  <dl class="contract-dash-kv contract-dash-kv--3">
+                    <div>
+                      <dt>{{ 'Plate Number' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.vehiclePlateNumber) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Vehicle Type' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.vehicleCategoryLabel) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Vehicle' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.vehicleName) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Color' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.vehicleColor) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Year' | translate }}</dt>
+                      <dd>{{ numberOrDash(item.vehicleYear) }}</dd>
+                    </div>
+                  </dl>
+                </article>
+                <article class="contract-dash-card">
+                  <h2 class="contract-dash-card__title">{{ 'Contract details vehicle pricing' | translate }}</h2>
+                  <dl class="contract-dash-kv contract-dash-kv--3">
+                    <div>
+                      <dt>{{ 'Daily Price' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.priceInDay) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Hourly Extra Price' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.priceHoureExtra) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Extra KM Price' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.priceKmExtra) }}</dd>
+                    </div>
+                  </dl>
+                </article>
+                <article class="contract-dash-card">
+                  <h2 class="contract-dash-card__title">{{ 'Contract details vehicle usage' | translate }}</h2>
+                  <dl class="contract-dash-kv contract-dash-kv--3">
+                    <div>
+                      <dt>{{ 'Checkout Counter' | translate }}</dt>
+                      <dd>{{ numberOrDash(item.checkoutCounter) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Checkin Counter' | translate }}</dt>
+                      <dd>{{ numberOrDash(item.checkinCounter) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Excess KM Count' | translate }}</dt>
+                      <dd>{{ numberOrDash(item.numberKmExcess) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Excess Hours Count' | translate }}</dt>
+                      <dd>{{ numberOrDash(item.numberOfHoursExcess) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Excess Days Count' | translate }}</dt>
+                      <dd>{{ numberOrDash(item.dayExcess) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Travelled Distance GPS' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.distancetraveledgps) }}</dd>
+                    </div>
+                  </dl>
+                </article>
+              </div>
+            }
+            @case ('photos') {
+              <div class="contract-dash-stack">
+                <article class="contract-dash-card">
+                  <h2 class="contract-dash-card__title">{{ 'Contract section photos checkout' | translate }}</h2>
+                  <div class="contract-dash-gallery">
+                    @for (angle of photoAngles; track angle) {
+                      <button
+                        type="button"
+                        class="contract-dash-gallery__item"
+                        [disabled]="!contractPhotoSlotUrl(item, 'checkout', angle)"
+                        (click)="openPhotoLightbox(contractPhotoSlotUrl(item, 'checkout', angle)!, vehiclePhotoLabel(angle), $event)"
+                      >
+                        @if (contractPhotoSlotUrl(item, 'checkout', angle); as imgUrl) {
+                          <img [src]="imgUrl" alt="" />
+                        } @else {
+                          <span class="contract-dash-gallery__ph">{{ 'Contract photo placeholder' | translate }}</span>
+                        }
+                        <span class="contract-dash-gallery__cap">{{ vehiclePhotoLabel(angle) }}</span>
+                      </button>
+                    }
+                  </div>
+                </article>
+                <article class="contract-dash-card">
+                  <h2 class="contract-dash-card__title">{{ 'Contract section photos return' | translate }}</h2>
+                  <div class="contract-dash-gallery">
+                    @for (angle of photoAngles; track angle) {
+                      <button
+                        type="button"
+                        class="contract-dash-gallery__item"
+                        [disabled]="!contractPhotoSlotUrl(item, 'return', angle)"
+                        (click)="openPhotoLightbox(contractPhotoSlotUrl(item, 'return', angle)!, vehiclePhotoLabel(angle), $event)"
+                      >
+                        @if (contractPhotoSlotUrl(item, 'return', angle); as imgUrl) {
+                          <img [src]="imgUrl" alt="" />
+                        } @else {
+                          <span class="contract-dash-gallery__ph">{{ 'Contract photo placeholder' | translate }}</span>
+                        }
+                        <span class="contract-dash-gallery__cap">{{ vehiclePhotoLabel(angle) }}</span>
+                      </button>
+                    }
+                  </div>
+                </article>
+              </div>
+            }
+            @case ('settlement') {
+              <div class="contract-dash-stack">
+                <article class="contract-dash-card">
+                  <h2 class="contract-dash-card__title">{{ 'Contract details cost summary' | translate }}</h2>
+                  <dl class="contract-dash-breakdown">
+                    <div>
+                      <dt>{{ 'Daily Price' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.priceInDay) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Monthly Price' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.priceInMonth) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Allowed Distance' | translate }}</dt>
+                      <dd>{{ numberOrDash(item.allowTo) }}</dd>
+                    </div>
+                  </dl>
+                </article>
+                <article class="contract-dash-card">
+                  <h2 class="contract-dash-card__title">{{ 'Contract details cost fees' | translate }}</h2>
+                  <dl class="contract-dash-breakdown">
+                    <div>
+                      <dt>{{ 'Discount' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.discount) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Total Tax' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.totaltax) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Maintenance Total' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.totalMaintance) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Traffic Total' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.totalTrafic) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Transportation Fees' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.transportationFees) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Other Expenses' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.otherExpenses) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Received Vehicle Total' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.totalReceivedVehicle) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Customer Vehicle Counting' | translate }}</dt>
+                      <dd>{{ countingCustVehicleDisplay(item) }}</dd>
+                    </div>
+                  </dl>
+                </article>
+                <article class="contract-dash-card contract-dash-card--totals">
+                  <h2 class="contract-dash-card__title">{{ 'Contract details cost totals' | translate }}</h2>
+                  <dl class="contract-dash-breakdown contract-dash-breakdown--totals">
+                    <div>
+                      <dt>{{ 'TOTAL' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.totalAmount) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Paid total' | translate }}</dt>
+                      <dd>{{ moneyOrDash(displayedPaidTotal(item)) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Remaining on contract' | translate }}</dt>
+                      <dd>{{ moneyOrDash(contractRemaining(item)) }}</dd>
+                    </div>
+                  </dl>
+                </article>
+              </div>
+            }
+            @case ('vouchers') {
+              @if (voucherPaidSumMismatch(item)) {
+                <div class="alert alert-warning contract-dash-alert" role="alert">
+                  {{ 'Voucher paid sum mismatch hint' | translate }}
+                </div>
               }
-              @if (canEditAction(item)) {
-                <a
-                  class="btn btn-sm btn-outline-primary contract-details__toolbar-btn"
-                  [routerLink]="['/booking', item.id, 'edit']"
-                >
-                  <i class="fa-solid fa-pen-to-square me-1" aria-hidden="true"></i>
-                  {{ 'Booking card menu edit' | translate }}
-                </a>
-              }
-              @if (canExtendAction(item)) {
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-warning contract-details__toolbar-btn"
-                  (click)="onDetailsToolbarAction('extend', item)"
-                >
-                  <i class="fa-solid fa-up-right-and-down-left-from-center me-1" aria-hidden="true"></i>
-                  {{ 'Booking card menu extend' | translate }}
-                </button>
-              }
-              @if (canPrintAction(item)) {
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-info contract-details__toolbar-btn"
-                  (click)="onDetailsToolbarAction('print', item)"
-                >
-                  <i class="fa-solid fa-print me-1" aria-hidden="true"></i>
-                  {{ 'Booking card menu print' | translate }}
-                </button>
-              }
-              @if (canCloseAction(item)) {
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-danger contract-details__toolbar-btn"
-                  (click)="onDetailsToolbarAction('closeContract', item)"
-                >
-                  <i class="fa-solid fa-lock me-1" aria-hidden="true"></i>
-                  {{ 'Booking card close contract' | translate }}
-                </button>
-              }
-              @if (canFinishAction(item)) {
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-success contract-details__toolbar-btn"
-                  (click)="onDetailsToolbarAction('finish', item)"
-                >
-                  <i class="fa-solid fa-flag-checkered me-1" aria-hidden="true"></i>
-                  {{ 'Booking card finish' | translate }}
-                </button>
-              }
-            </div>
-            <a class="btn btn-cancel" routerLink="/booking">{{ 'Back' | translate }}</a>
+              <div class="contract-dash-kpi-row contract-dash-kpi-row--4 mb-3">
+                <div class="contract-dash-kpi">
+                  <span class="contract-dash-kpi__value">{{ paymentRows().length }}</span>
+                  <span class="contract-dash-kpi__label">{{ 'Voucher count label' | translate }}</span>
+                </div>
+                <div class="contract-dash-kpi">
+                  <span class="contract-dash-kpi__value">{{ moneyOrDash(vouchersTablePaidSum()) }}</span>
+                  <span class="contract-dash-kpi__label">{{ 'Vouchers table paid sum' | translate }}</span>
+                </div>
+                <div class="contract-dash-kpi">
+                  <span class="contract-dash-kpi__value">{{ percentOrDash(item) }}</span>
+                  <span class="contract-dash-kpi__label">{{ 'Collection progress percent' | translate }}</span>
+                </div>
+                <div class="contract-dash-kpi contract-dash-kpi--warn">
+                  <span class="contract-dash-kpi__value">{{ moneyOrDash(contractRemaining(item)) }}</span>
+                  <span class="contract-dash-kpi__label">{{ 'Remaining on contract' | translate }}</span>
+                </div>
+              </div>
+              <div class="table-responsive contract-dash-table-wrap">
+                <table class="table table-sm contract-dash-table mb-0">
+                  <thead>
+                    <tr>
+                      <th>{{ 'Payment Number' | translate }}</th>
+                      <th>{{ 'Bond Type' | translate }}</th>
+                      <th>{{ 'Payment Type' | translate }}</th>
+                      <th>{{ 'Paid Amount' | translate }}</th>
+                      <th>{{ 'Created At' | translate }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @if (paymentRows().length === 0) {
+                      <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                          {{ 'No linked voucher payments for this booking' | translate }}
+                        </td>
+                      </tr>
+                    } @else {
+                      @for (row of paymentRows(); track row.id) {
+                        <tr>
+                          <td>{{ valueOrDash(row.paymentNumber) }}</td>
+                          <td>{{ bondTypeLabel(row.bondType) }}</td>
+                          <td>{{ paymentTypeLabel(row.paymentType) }}</td>
+                          <td>{{ moneyOrDash(row.paid) }}</td>
+                          <td>{{ dateOrDash(row.createdAt) }}</td>
+                        </tr>
+                      }
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <p class="contract-dash-hint mt-3 mb-0">{{ decisionHintText(item) }}</p>
+            }
+            @case ('audit') {
+              <details class="contract-dash-audit">
+                <summary>{{ 'Contract section audit' | translate }}</summary>
+                <dl class="contract-dash-kv contract-dash-kv--2 mt-3">
+                  <div>
+                    <dt>{{ 'Created At' | translate }}</dt>
+                    <dd>{{ dateOrDash(item.createdAt) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Created By' | translate }}</dt>
+                    <dd>{{ valueOrDash(item.createdBy) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Updated At' | translate }}</dt>
+                    <dd>{{ dateOrDash(item.updatedAt) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Updated By' | translate }}</dt>
+                    <dd>{{ valueOrDash(item.updatedBy) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Deleted At' | translate }}</dt>
+                    <dd>{{ dateOrDash(item.deletedAt) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Deleted By' | translate }}</dt>
+                    <dd>{{ valueOrDash(item.deletedBy) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Is Preview' | translate }}</dt>
+                    <dd>{{ item.isprview ? ('Yes' | translate) : ('No' | translate) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Is Deleted' | translate }}</dt>
+                    <dd>{{ item.isDeleted ? ('Yes' | translate) : ('No' | translate) }}</dd>
+                  </div>
+                </dl>
+              </details>
+            }
+            @case ('extra') {
+              <div class="contract-dash-stack">
+                <article class="contract-dash-card">
+                  <h2 class="contract-dash-card__title">{{ 'Contract details tab extra' | translate }}</h2>
+                  <dl class="contract-dash-kv contract-dash-kv--2">
+                    <div>
+                      <dt>{{ 'Basame Booking Number' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.numberBookingINBasame) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Tax Number' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.taxNumber) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Serial Number' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.vehicleSerialNumber) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Engine' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.vehicleEngine) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Deposit Amount' | translate }}</dt>
+                      <dd>{{ moneyOrDash(item.depositAmount) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Pickup Date' | translate }}</dt>
+                      <dd>{{ dateOrDash(item.pickupDate) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Fleet Name' | translate }}</dt>
+                      <dd>{{ fleetDisplay(item) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Branch' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.branchName) }}</dd>
+                    </div>
+                    <div class="contract-dash-kv__span-2">
+                      <dt>{{ 'Contract details branch address' | translate }}</dt>
+                      <dd>{{ branchAddressLine(item) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Booking Number' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.bookingNumber || item.id) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Customer ID' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.customerId) }}</dd>
+                    </div>
+                  </dl>
+                  <p class="contract-dash-hint mb-0 mt-2">{{ 'Contract details agent not linked' | translate }}</p>
+                </article>
+              </div>
+            }
           }
         </div>
       </div>
-    </div>
+
+      @if (photoLightbox(); as lb) {
+        <div
+          class="contract-photo-lightbox"
+          role="dialog"
+          aria-modal="true"
+          tabindex="-1"
+          (click)="closePhotoLightbox()"
+          (keydown)="onLightboxKeydown($event)"
+        >
+          <div class="contract-photo-lightbox__dialog" (click)="$event.stopPropagation()">
+            <button type="button" class="contract-photo-lightbox__close" (click)="closePhotoLightbox()">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <img class="contract-photo-lightbox__img" [src]="lb.url" [alt]="lb.caption" />
+            <p class="contract-photo-lightbox__cap">{{ lb.caption }}</p>
+          </div>
+        </div>
+      }
+
+      <div class="contract-dash-footer">
+        <a class="btn btn-cancel" routerLink="/booking">{{ 'Back' | translate }}</a>
+      </div>
+    }
   } @else {
     <app-page-header
       [title]="'Contract details view' | translate"

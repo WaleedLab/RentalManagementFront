@@ -308,7 +308,7 @@ export class DatePickerComponent implements ControlValueAccessor, OnInit, OnChan
 
   formatHijriSlash(date: Date): string {
     const { day, month, year } = this.getHijriNumericParts(date);
-    return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+    return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${String(year).padStart(4, '0')}`;
   }
 
   prevMonth(): void {
@@ -670,9 +670,12 @@ export class DatePickerComponent implements ControlValueAccessor, OnInit, OnChan
 
     const targetDay = Number(match[1]);
     const targetMonth = Number(match[2]);
-    const targetYear = Number(match[3]);
+    let targetYear = Number(match[3]);
     if (!Number.isFinite(targetDay) || !Number.isFinite(targetMonth) || !Number.isFinite(targetYear)) {
       return null;
+    }
+    if (targetYear >= 400 && targetYear <= 999) {
+      targetYear += 600;
     }
 
     return this.gregorianFromHijri(targetDay, targetMonth, targetYear);

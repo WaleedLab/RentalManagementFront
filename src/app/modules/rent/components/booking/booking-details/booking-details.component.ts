@@ -45,6 +45,16 @@ import {
 
 type BookingDetailsToolbarAction = 'suspend' | 'extend' | 'print' | 'finish' | 'closeContract';
 
+export type ContractDetailsTabId =
+  | 'overview'
+  | 'customer'
+  | 'vehicle'
+  | 'photos'
+  | 'settlement'
+  | 'vouchers'
+  | 'audit'
+  | 'extra';
+
 @Component({
   selector: 'app-booking-details',
   standalone: true,
@@ -120,6 +130,22 @@ export class BookingDetailsComponent implements OnInit {
     })),
   ]);
 
+  readonly photoAngles = ['front', 'right', 'left', 'back', 'interior'] as const;
+
+  readonly detailsTabs: { id: ContractDetailsTabId; labelKey: string }[] = [
+    { id: 'overview', labelKey: 'Contract details tab overview' },
+    { id: 'customer', labelKey: 'Contract details tab customer' },
+    { id: 'vehicle', labelKey: 'Contract details tab vehicle' },
+    { id: 'photos', labelKey: 'Contract details tab photos' },
+    { id: 'settlement', labelKey: 'Contract details tab settlement' },
+    { id: 'vouchers', labelKey: 'Contract details tab vouchers' },
+    { id: 'audit', labelKey: 'Contract details tab audit' },
+    { id: 'extra', labelKey: 'Contract details tab extra' },
+  ];
+
+  activeTab = signal<ContractDetailsTabId>('overview');
+  photoLightbox = signal<{ url: string; caption: string } | null>(null);
+
   statusBadgeTone(status: BookingStatus): 'success' | 'warning' | 'danger' | 'secondary' | 'info' {
     return bookingStatusTone(status);
   }
@@ -176,6 +202,51 @@ export class BookingDetailsComponent implements OnInit {
     };
     const key = map[angle];
     return key ? this.translate.instant(key) : angle;
+  }
+
+  setActiveTab(tabId: ContractDetailsTabId): void {
+    this.activeTab.set(tabId);
+  }
+
+  isActiveTab(tabId: ContractDetailsTabId): boolean {
+    return this.activeTab() === tabId;
+  }
+
+  vehicleHeadline(item: Booking): string {
+    const name = String(item.vehicleName ?? '').trim();
+    const year = item.vehicleYear;
+    if (name && year) {
+      return `${name} ${year}`;
+    }
+    if (name) {
+      return name;
+    }
+    return this.numberOrDash(year);
+  }
+
+  branchAddressLine(item: Booking): string {
+    return this.resolveBookingBranchAddress(item);
+  }
+
+  bookingPaidTotalField(item: Booking): number | null {
+    const parsed = Number(item.paidtotal ?? item.paidAmount);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  openPhotoLightbox(url: string, caption: string, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.photoLightbox.set({ url, caption });
+  }
+
+  closePhotoLightbox(): void {
+    this.photoLightbox.set(null);
+  }
+
+  onLightboxKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      this.closePhotoLightbox();
+    }
   }
 
   logoOnlyUrl(item: Booking): string | null {

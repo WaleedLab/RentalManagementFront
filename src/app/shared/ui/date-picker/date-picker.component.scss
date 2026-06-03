@@ -35,11 +35,11 @@
 
 .date-picker--compact .date-value {
   flex: 1;
-  min-width: 0;
+  min-width: 6.75rem;
   font-size: 0.8125rem;
   font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
   white-space: nowrap;
 }
 

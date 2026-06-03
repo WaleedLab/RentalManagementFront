@@ -1,47 +1,167 @@
-<div class="container-fluid customer-form-page">
-  <app-page-header
-    [title]="(isEdit() ? 'Edit Customer' : 'Create Customer') | translate"
-    [subtitle]="'Clean customer forms with image upload, identity, and license details.' | translate"
-  >
-    <div class="d-flex gap-2">
-      @if (canManageSubscriptions()) {
-        <a class="btn btn-outline-primary" routerLink="/customer-subscriptions">
-          {{ 'Subscription Offers' | translate }}
+<div class="container-fluid contract-flow-page contract-flow-edit customer-form-page">
+  <header class="contract-flow-header customer-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          {{ (isEdit() ? 'Edit Customer' : 'Create Customer') | translate }}
+        </h1>
+        <p class="contract-flow-header__meta mb-0">
+          {{ 'Customer form page subtitle' | translate }}
+        </p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        @if (canManageSubscriptions()) {
+          <a class="btn btn-outline-primary btn-sm" routerLink="/customer-subscriptions">
+            {{ 'Subscription Offers' | translate }}
+          </a>
+        }
+        <a class="btn btn-outline-secondary btn-sm" [routerLink]="returnTo()">
+          {{ 'Back to Customers' | translate }}
         </a>
-      }
-      <a class="btn btn-outline-secondary" [routerLink]="returnTo()">{{ 'Back to Customers' | translate }}</a>
+      </div>
     </div>
-  </app-page-header>
+  </header>
 
-  <div class="row g-4 customer-form-layout">
-    <div class="col-xl-8">
-      <div class="card customer-form-card customer-form-card--main">
-        <div class="card-body">
-          <form class="app-form-value-state" [formGroup]="form" (ngSubmit)="save()">
-            <div class="customer-form-section light-card-gradient-soft-purple">
-              <div class="customer-form-section__header">
-                <h6 class="mb-1">{{ 'Customer Section Identity Title' | translate }}</h6>
-                <p class="mb-0">{{ 'Customer Section Identity Subtitle' | translate }}</p>
-              </div>
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label">{{ 'Full Name' | translate }}</label>
-                  <input class="form-control" formControlName="nameAr" maxlength="200" [placeholder]="'Example Customer Arabic Name' | translate" />
-                  <div class="form-text">{{ 'Hint Customer Arabic Name' | translate }}</div>
+  <div class="contract-flow-layout customer-form-layout">
+    <div class="contract-flow-main">
+      <form class="app-form-value-state customer-form" [formGroup]="form" (ngSubmit)="save()">
+        <ol class="customer-form-workflow" [attr.aria-label]="'Customer form workflow steps' | translate">
+          <li>
+            <button
+              type="button"
+              class="customer-form-workflow__step"
+              [class.customer-form-workflow__step--done]="identitySectionComplete()"
+              [class.customer-form-workflow__step--current]="currentWorkflowStep() === 1"
+              [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+              [attr.aria-controls]="'customer-form-section-identity'"
+              (click)="focusWorkflowSection(1)"
+            >
+              <span class="customer-form-workflow__num">1</span>
+              <span>{{ 'Customer flow step identity' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="customer-form-workflow__step"
+              [class.customer-form-workflow__step--done]="licenseSectionComplete()"
+              [class.customer-form-workflow__step--current]="currentWorkflowStep() === 2"
+              [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+              [attr.aria-controls]="'customer-form-section-license'"
+              (click)="focusWorkflowSection(2)"
+            >
+              <span class="customer-form-workflow__num">2</span>
+              <span>{{ 'Customer flow step license' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="customer-form-workflow__step"
+              [class.customer-form-workflow__step--done]="contactSectionComplete()"
+              [class.customer-form-workflow__step--current]="currentWorkflowStep() === 3"
+              [attr.aria-current]="currentWorkflowStep() === 3 ? 'step' : null"
+              [attr.aria-controls]="'customer-form-section-contact'"
+              (click)="focusWorkflowSection(3)"
+            >
+              <span class="customer-form-workflow__num">3</span>
+              <span>{{ 'Customer flow step contact' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="customer-form-workflow__step"
+              [class.customer-form-workflow__step--done]="imageSectionComplete()"
+              [class.customer-form-workflow__step--current]="currentWorkflowStep() === 4"
+              [attr.aria-current]="currentWorkflowStep() === 4 ? 'step' : null"
+              [attr.aria-controls]="'customer-form-section-photo'"
+              (click)="focusWorkflowSection(4)"
+            >
+              <span class="customer-form-workflow__num">4</span>
+              <span>{{ 'Customer flow step photo' | translate }}</span>
+            </button>
+          </li>
+        </ol>
+
+        <div class="customer-form-fields-shell">
+          <!-- 1) الهوية -->
+          <details id="customer-form-section-identity" class="customer-form-section customer-form-fold" open>
+            <summary class="customer-form-section__summary">
+              <span class="customer-form-section__step">1</span>
+              {{ 'Customer Section Identity Title' | translate }}
+            </summary>
+            <div class="customer-form-fold__body">
+              <header class="customer-form-section-head">
+                <span class="customer-form-section-head__step">1</span>
+                <div>
+                  <h2 class="customer-form-section-head__title">
+                    {{ 'Customer Section Identity Title' | translate }}
+                  </h2>
+                  <p class="customer-form-section-head__hint">
+                    {{ 'Customer Section Identity Subtitle' | translate }}
+                  </p>
+                </div>
+              </header>
+              <div class="customer-form-grid customer-form-grid--2">
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'Full Name' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="nameAr"
+                    maxlength="200"
+                    autocomplete="name"
+                    [placeholder]="'Example Customer Arabic Name' | translate"
+                  />
                   @if (form.controls.nameAr.invalid && form.controls.nameAr.touched) {
-                    <div class="text-danger small mt-1">{{ 'Customer Arabic name is required and must contain Arabic characters only.' | translate }}</div>
+                    <div class="customer-form-hint customer-form-hint--danger">
+                      {{ 'Customer Arabic name is required and must contain Arabic characters only.' | translate }}
+                    </div>
                   }
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">{{ 'Name (En)' | translate }}</label>
-                  <input class="form-control" formControlName="nameEn" maxlength="200" [placeholder]="'Example Customer English Name' | translate" />
-                  <div class="form-text">{{ 'Hint Customer English Name' | translate }}</div>
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'Name (En)' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="nameEn"
+                    maxlength="200"
+                    [placeholder]="'Example Customer English Name' | translate"
+                  />
                   @if (form.controls.nameEn.invalid && form.controls.nameEn.touched) {
-                    <div class="text-danger small mt-1">{{ 'English name must contain English letters only.' | translate }}</div>
+                    <div class="customer-form-hint customer-form-hint--danger">
+                      {{ 'English name must contain English letters only.' | translate }}
+                    </div>
                   }
                 </div>
-                <div class="col-md-4">
-                  <label class="form-label">{{ 'Nationality' | translate }}</label>
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'Identity Number' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="idNationality"
+                    maxlength="50"
+                    inputmode="numeric"
+                    [placeholder]="'Example Identity Number' | translate"
+                  />
+                  @if (form.controls.idNationality.invalid && form.controls.idNationality.touched) {
+                    <div class="customer-form-hint customer-form-hint--danger">
+                      {{ 'Identity number is required and must be valid.' | translate }}
+                    </div>
+                  }
+                </div>
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'Nationality' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
                   <input
                     class="form-control"
                     formControlName="nationality"
@@ -49,230 +169,433 @@
                     list="customer-nationalities-list"
                     [placeholder]="'Example Nationality' | translate"
                   />
-                  <div class="form-text">{{ 'Hint Nationality' | translate }}</div>
                   @if (form.controls.nationality.invalid && form.controls.nationality.touched) {
-                    <div class="text-danger small mt-1">{{ 'Nationality is required.' | translate }}</div>
+                    <div class="customer-form-hint customer-form-hint--danger">
+                      {{ 'Nationality is required.' | translate }}
+                    </div>
                   }
                 </div>
-                <div class="col-md-4">
-                  <app-date-picker formControlName="birthDay" label="Date of Birth" />
-                  <div class="form-text">{{ 'Hint Date of Birth' | translate }}</div>
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'Date of Birth' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <app-date-picker
+                    formControlName="birthDay"
+                    label=""
+                    placeholder="Example Date of Birth"
+                    [compact]="true"
+                  />
                 </div>
-                <div class="col-md-4">
-                  <label class="form-label">{{ 'Identity Number' | translate }}</label>
-                  <input class="form-control" formControlName="idNationality" maxlength="50" inputmode="text" [placeholder]="'Example Identity Number' | translate" />
-                  <div class="form-text">{{ 'Hint Identity Number' | translate }}</div>
-                  @if (form.controls.idNationality.invalid && form.controls.idNationality.touched) {
-                    <div class="text-danger small mt-1">{{ 'Identity number is required and must be valid.' | translate }}</div>
-                  }
-                </div>
-                <div class="col-md-6">
-                  <app-date-picker formControlName="dateIdNationality" label="Identity Issue Date" />
-                  <div class="form-text">{{ 'Hint Identity Issue Date' | translate }}</div>
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'Identity Issue Date' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <app-date-picker
+                    formControlName="dateIdNationality"
+                    label=""
+                    placeholder="Example Identity Issue Date"
+                    [compact]="true"
+                  />
                   @if (form.controls.dateIdNationality.invalid && form.controls.dateIdNationality.touched) {
-                    <div class="text-danger small mt-1">{{ 'Identity issue date is required.' | translate }}</div>
+                    <div class="customer-form-hint customer-form-hint--danger">
+                      {{ 'Identity issue date is required.' | translate }}
+                    </div>
                   }
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">{{ 'Identity Issue Place' | translate }}</label>
+              </div>
+            </div>
+          </details>
+
+          <!-- 2) الرخصة -->
+          <details id="customer-form-section-license" class="customer-form-section customer-form-fold" open>
+            <summary class="customer-form-section__summary">
+              <span class="customer-form-section__step">2</span>
+              {{ 'Customer Section License Title' | translate }}
+            </summary>
+            <div class="customer-form-fold__body">
+              <header class="customer-form-section-head">
+                <span class="customer-form-section-head__step">2</span>
+                <div>
+                  <h2 class="customer-form-section-head__title">
+                    {{ 'Customer Section License Title' | translate }}
+                  </h2>
+                  <p class="customer-form-section-head__hint">
+                    {{ 'Customer Section License Subtitle' | translate }}
+                  </p>
+                </div>
+              </header>
+              <div class="customer-form-grid customer-form-grid--2">
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'Driving License Number' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
                   <input
                     class="form-control"
-                    formControlName="plaseIdNationality"
-                    maxlength="150"
-                    list="customer-issue-places-list"
-                    [placeholder]="'Example Identity Issue Place' | translate"
+                    formControlName="licenceNo"
+                    maxlength="50"
+                    inputmode="numeric"
+                    [placeholder]="'Example Driving License Number' | translate"
                   />
-                  <div class="form-text">{{ 'Hint Identity Issue Place' | translate }}</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="customer-form-section light-card-gradient-sky">
-              <div class="customer-form-section__header">
-                <h6 class="mb-1">{{ 'Customer Section Contact Title' | translate }}</h6>
-                <p class="mb-0">{{ 'Customer Section Contact Subtitle' | translate }}</p>
-              </div>
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label">{{ 'Primary Mobile Number' | translate }}</label>
-                  <input class="form-control" formControlName="firstMobileNumber" maxlength="20" inputmode="tel" [placeholder]="'Example Primary Mobile Number' | translate" />
-                  <div class="form-text">{{ 'Hint Primary Mobile Number' | translate }}</div>
-                  @if (form.controls.firstMobileNumber.invalid && form.controls.firstMobileNumber.touched) {
-                    <div class="text-danger small mt-1">{{ 'Primary mobile number is required and must be valid.' | translate }}</div>
-                  }
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">{{ 'Email' | translate }}</label>
-                  <input class="form-control" type="email" formControlName="email" maxlength="150" [placeholder]="'Example Customer Email' | translate" />
-                  <div class="form-text">{{ 'Hint Customer Email' | translate }}</div>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">{{ 'Secondary Mobile Number' | translate }}</label>
-                  <input class="form-control" formControlName="secondMobileNumber" maxlength="20" inputmode="tel" [placeholder]="'Example Secondary Mobile Number' | translate" />
-                  <div class="form-text">{{ 'Hint Secondary Mobile Number' | translate }}</div>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">{{ 'Third Mobile Number' | translate }}</label>
-                  <input class="form-control" formControlName="thirdMobileNumber" maxlength="20" inputmode="tel" [placeholder]="'Example Third Mobile Number' | translate" />
-                  <div class="form-text">{{ 'Hint Third Mobile Number' | translate }}</div>
-                </div>
-                <div class="col-12">
-                  <label class="form-label">{{ 'Address' | translate }}</label>
-                  <textarea class="form-control" rows="3" formControlName="address" [placeholder]="'Example Address' | translate"></textarea>
-                  <div class="form-text">{{ 'Hint Address' | translate }}</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="customer-form-section light-card-gradient-soft-purple">
-              <div class="customer-form-section__header">
-                <h6 class="mb-1">{{ 'Customer Section License Title' | translate }}</h6>
-                <p class="mb-0">{{ 'Customer Section License Subtitle' | translate }}</p>
-              </div>
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label">{{ 'Driving License Number' | translate }}</label>
-                  <input class="form-control" formControlName="licenceNo" maxlength="50" inputmode="text" [placeholder]="'Example Driving License Number' | translate" />
-                  <div class="form-text">{{ 'Hint Driving License Number' | translate }}</div>
                   @if (form.controls.licenceNo.invalid && form.controls.licenceNo.touched) {
-                    <div class="text-danger small mt-1">{{ 'Driving license number is required and must be valid.' | translate }}</div>
+                    <div class="customer-form-hint customer-form-hint--danger">
+                      {{ 'Driving license number is required and must be valid.' | translate }}
+                    </div>
                   }
                 </div>
-                <div class="col-md-6">
-                  <app-date-picker formControlName="dateDrivinglicense" label="License Expiry Date" />
-                  <div class="form-text">{{ 'Hint License Expiry Date' | translate }}</div>
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'License Expiry Date' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <app-date-picker
+                    formControlName="dateDrivinglicense"
+                    label=""
+                    placeholder="Example License Expiry Date"
+                    [compact]="true"
+                  />
                   @if (form.controls.dateDrivinglicense.invalid && form.controls.dateDrivinglicense.touched) {
-                    <div class="text-danger small mt-1">{{ 'License expiry date is required.' | translate }}</div>
+                    <div class="customer-form-hint customer-form-hint--danger">
+                      {{ 'License expiry date is required.' | translate }}
+                    </div>
                   }
                 </div>
-                <div class="col-md-6">
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'License Hijri Date' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
                   <app-date-picker
                     formControlName="dateDrivinglicenseHajri"
-                    label="License Hijri Date"
+                    label=""
                     placeholder="Example License Hijri Date"
                     valueFormat="hijri-slash"
+                    [compact]="true"
                   />
-                  <div class="form-text">{{ 'Hint License Hijri Date' | translate }}</div>
                   @if (form.controls.dateDrivinglicenseHajri.invalid && form.controls.dateDrivinglicenseHajri.touched) {
-                    <div class="text-danger small mt-1">{{ 'Hijri license date is required.' | translate }}</div>
+                    <div class="customer-form-hint customer-form-hint--danger">
+                      {{ 'Hijri license date is required.' | translate }}
+                    </div>
                   }
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">{{ 'License Issue Place' | translate }}</label>
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'License Issue Place' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
                   <input
                     class="form-control"
                     formControlName="plaseDrivinglicense"
                     maxlength="150"
                     list="customer-issue-places-list"
+                    tabindex="-1"
                     [placeholder]="'Example License Issue Place' | translate"
                   />
-                  <div class="form-text">{{ 'Hint License Issue Place' | translate }}</div>
                 </div>
               </div>
             </div>
+          </details>
 
-            <div class="customer-form-section light-card-gradient">
-              <div class="customer-form-section__header">
-                <h6 class="mb-1">{{ 'Customer Section Extra Title' | translate }}</h6>
-                <p class="mb-0">{{ 'Customer Section Extra Subtitle' | translate }}</p>
-              </div>
-              <div class="row g-3">
-                @if (canManageSubscriptions() && isEdit()) {
-                  <div class="col-12">
-                    <div class="subscription-offer-box">
-                      <div class="subscription-offer-box__header">
-                        <h6 class="mb-1">{{ 'Subscription Offer Strategy' | translate }}</h6>
-                        <p class="mb-0">{{ 'Set customer offer by automatic rental-count rule or by manual admin assignment.' | translate }}</p>
-                      </div>
-
-                      <div class="row g-3">
-                        <div class="col-md-4">
-                          <label class="form-label">{{ 'Rental Count' | translate }}</label>
-                          <input class="form-control" type="text" [value]="rentalCount()" readonly />
-                          <div class="form-text">{{ 'Calculated from customer booking history.' | translate }}</div>
-                        </div>
-
-                        <div class="col-md-8">
-                          <label class="form-label">{{ 'Auto Suggested Category' | translate }}</label>
-                          <input class="form-control" type="text" [value]="getAutoAssignedSubscriptionName()" readonly />
-                          <div class="form-text">{{ 'Highest eligible offer based on approved-after bookings.' | translate }}</div>
-                        </div>
-
-                        <div class="col-12">
-                          <label class="form-label">{{ 'Offer Assignment Mode' | translate }}</label>
-                          <div class="subscription-mode-toggle">
-                            <label class="form-check">
-                              <input class="form-check-input" type="radio" formControlName="subscriptionAssignmentMode" value="auto" />
-                              <span class="form-check-label">{{ 'Automatic by rental count' | translate }}</span>
-                            </label>
-                            <label class="form-check">
-                              <input class="form-check-input" type="radio" formControlName="subscriptionAssignmentMode" value="manual" />
-                              <span class="form-check-label">{{ 'Manual admin assignment' | translate }}</span>
-                            </label>
-                          </div>
-                        </div>
-
-                        @if (form.controls.subscriptionAssignmentMode.value === 'manual') {
-                          <div class="col-12">
-                            <label class="form-label">{{ 'Manual Subscription Category' | translate }}</label>
-                            <app-smooth-select
-                              formControlName="idSubscriptionsOfCustomer"
-                              [ariaLabel]="'Manual Subscription Category' | translate"
-                              [options]="getManualSubscriptionOptions()"
-                              [placeholder]="'Select category'"
-                            />
-                            <div class="form-text">{{ 'Admin can force a specific offer category for this customer.' | translate }}</div>
-                          </div>
-                        }
-                      </div>
+          <!-- 3) التواصل -->
+          <details id="customer-form-section-contact" class="customer-form-section customer-form-fold" open>
+            <summary class="customer-form-section__summary">
+              <span class="customer-form-section__step">3</span>
+              {{ 'Customer Section Contact Title' | translate }}
+            </summary>
+            <div class="customer-form-fold__body">
+              <header class="customer-form-section-head">
+                <span class="customer-form-section-head__step">3</span>
+                <div>
+                  <h2 class="customer-form-section-head__title">
+                    {{ 'Customer Section Contact Title' | translate }}
+                  </h2>
+                  <p class="customer-form-section-head__hint">
+                    {{ 'Customer Section Contact Subtitle' | translate }}
+                  </p>
+                </div>
+              </header>
+              <div class="customer-form-grid customer-form-grid--2">
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'Primary Mobile Number' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="firstMobileNumber"
+                    maxlength="10"
+                    inputmode="numeric"
+                    autocomplete="tel"
+                    [placeholder]="'Example Primary Mobile Number' | translate"
+                  />
+                  @if (form.controls.firstMobileNumber.invalid && form.controls.firstMobileNumber.touched) {
+                    <div class="customer-form-hint customer-form-hint--danger">
+                      {{ 'Primary mobile number is required and must be valid.' | translate }}
                     </div>
-                  </div>
-                }
-
-                <div class="col-md-6">
-                  <label class="form-label">{{ 'Tax Record' | translate }}</label>
-                  <input class="form-control" type="number" min="0" formControlName="taxRecord" [placeholder]="'Example Tax Record' | translate" />
-                  <div class="form-text">{{ 'Hint Tax Record' | translate }}</div>
+                  }
                 </div>
-                <div class="col-12">
-                  <label class="form-label">{{ 'Notes' | translate }}</label>
-                  <textarea class="form-control" rows="3" formControlName="notes" [placeholder]="'Example Customer Notes' | translate"></textarea>
-                  <div class="form-text">{{ 'Hint Customer Notes' | translate }}</div>
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'Email' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    type="email"
+                    formControlName="email"
+                    maxlength="150"
+                    autocomplete="email"
+                    [placeholder]="'Example Customer Email' | translate"
+                  />
+                </div>
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'Secondary Mobile Number' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="secondMobileNumber"
+                    maxlength="10"
+                    inputmode="numeric"
+                    tabindex="-1"
+                    [placeholder]="'Example Secondary Mobile Number' | translate"
+                  />
+                </div>
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'Third Mobile Number' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="thirdMobileNumber"
+                    maxlength="10"
+                    inputmode="numeric"
+                    tabindex="-1"
+                    [placeholder]="'Example Third Mobile Number' | translate"
+                  />
+                </div>
+                <div class="customer-form-field customer-form-field--wide">
+                  <label class="customer-form-label">
+                    <span>{{ 'Address' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <textarea
+                    class="form-control"
+                    rows="2"
+                    formControlName="address"
+                    [placeholder]="'Example Address' | translate"
+                  ></textarea>
                 </div>
               </div>
             </div>
+          </details>
 
-            <div class="app-form-actions">
-              <button class="btn btn-primary" type="submit" [disabled]="loading()">
-                {{ (isEdit() ? 'Update Customer' : 'Create Customer') | translate }}
-              </button>
-              <a class="btn btn-cancel" [routerLink]="returnTo()">{{ 'Cancel' | translate }}</a>
+          <!-- 4) الصورة -->
+          <details id="customer-form-section-photo" class="customer-form-section customer-form-fold" open>
+            <summary class="customer-form-section__summary">
+              <span class="customer-form-section__step">4</span>
+              {{ 'Customer Image' | translate }}
+            </summary>
+            <div class="customer-form-fold__body">
+              <header class="customer-form-section-head">
+                <span class="customer-form-section-head__step">4</span>
+                <div>
+                  <h2 class="customer-form-section-head__title">{{ 'Customer Image' | translate }}</h2>
+                  <p class="customer-form-section-head__hint">{{ 'Hint Customer Image' | translate }}</p>
+                </div>
+              </header>
+              <div class="customer-form-upload">
+                <app-file-upload
+                  [label]="''"
+                  [previewUrl]="previewUrl()"
+                  (fileSelected)="onImageSelected($event)"
+                />
+              </div>
             </div>
+          </details>
 
-            <datalist id="customer-nationalities-list">
-              @for (nationality of nationalitySuggestions(); track nationality) {
-                <option [value]="nationality"></option>
-              }
-            </datalist>
-
-            <datalist id="customer-issue-places-list">
-              @for (city of issuePlaceSuggestions(); track city) {
-                <option [value]="city"></option>
-              }
-            </datalist>
-          </form>
+          <!-- 5) إضافي -->
+          <details class="customer-form-section customer-form-fold customer-form-fold--extra">
+            <summary class="customer-form-section__summary">
+              {{ 'Customer Section Extra Title' | translate }}
+            </summary>
+            <div class="customer-form-fold__body">
+              <header class="customer-form-section-head">
+                <div>
+                  <h2 class="customer-form-section-head__title">
+                    {{ 'Customer Section Extra Title' | translate }}
+                  </h2>
+                  <p class="customer-form-section-head__hint">
+                    {{ 'Customer Section Extra Subtitle' | translate }}
+                  </p>
+                </div>
+              </header>
+              <div class="customer-form-grid customer-form-grid--2">
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'Tax Record' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    formControlName="taxRecord"
+                    tabindex="-1"
+                    [placeholder]="'Example Tax Record' | translate"
+                  />
+                </div>
+                <div class="customer-form-field">
+                  <label class="customer-form-label">
+                    <span>{{ 'Identity Issue Place' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="plaseIdNationality"
+                    maxlength="150"
+                    list="customer-issue-places-list"
+                    tabindex="-1"
+                    [placeholder]="'Example Identity Issue Place' | translate"
+                  />
+                </div>
+                <div class="customer-form-field customer-form-field--wide">
+                  <label class="customer-form-label">
+                    <span>{{ 'Notes' | translate }}</span>
+                    <span class="customer-form-badge customer-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <textarea
+                    class="form-control"
+                    rows="3"
+                    formControlName="notes"
+                    tabindex="-1"
+                    [placeholder]="'Example Customer Notes' | translate"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </details>
         </div>
-      </div>
+
+        @if (canManageSubscriptions() && isEdit()) {
+          <section class="customer-form-section">
+            <header class="customer-form-section-head">
+              <div>
+                <h2 class="customer-form-section-head__title">
+                  {{ 'Customer flow subscriptions title' | translate }}
+                </h2>
+              </div>
+            </header>
+            <div class="customer-form-grid customer-form-grid--2">
+              <div class="customer-form-field customer-form-field--readonly">
+                <label class="customer-form-label">{{ 'Rental Count' | translate }}</label>
+                <input class="form-control" type="text" [value]="rentalCount()" readonly />
+              </div>
+              <div class="customer-form-field customer-form-field--readonly">
+                <label class="customer-form-label">{{ 'Auto Suggested Category' | translate }}</label>
+                <input class="form-control" type="text" [value]="getAutoAssignedSubscriptionName()" readonly />
+              </div>
+              <div class="customer-form-field customer-form-field--wide">
+                <label class="customer-form-label">{{ 'Offer Assignment Mode' | translate }}</label>
+                <div class="subscription-mode-toggle">
+                  <label class="form-check">
+                    <input class="form-check-input" type="radio" formControlName="subscriptionAssignmentMode" value="auto" />
+                    <span class="form-check-label">{{ 'Automatic by rental count' | translate }}</span>
+                  </label>
+                  <label class="form-check">
+                    <input class="form-check-input" type="radio" formControlName="subscriptionAssignmentMode" value="manual" />
+                    <span class="form-check-label">{{ 'Manual admin assignment' | translate }}</span>
+                  </label>
+                </div>
+              </div>
+              @if (form.controls.subscriptionAssignmentMode.value === 'manual') {
+                <div class="customer-form-field customer-form-field--wide">
+                  <label class="customer-form-label">{{ 'Manual Subscription Category' | translate }}</label>
+                  <app-smooth-select
+                    formControlName="idSubscriptionsOfCustomer"
+                    [ariaLabel]="'Manual Subscription Category' | translate"
+                    [options]="getManualSubscriptionOptions()"
+                    [placeholder]="'Select category'"
+                  />
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <datalist id="customer-nationalities-list">
+          @for (nationality of nationalitySuggestions(); track nationality) {
+            <option [value]="nationality"></option>
+          }
+        </datalist>
+        <datalist id="customer-issue-places-list">
+          @for (city of issuePlaceSuggestions(); track city) {
+            <option [value]="city"></option>
+          }
+        </datalist>
+
+        <div class="app-form-actions customer-form-actions">
+          <button class="btn btn-primary" type="submit" [disabled]="loading()">
+            {{ (isEdit() ? 'Update Customer' : 'Create Customer') | translate }}
+          </button>
+          <a class="btn btn-cancel" [routerLink]="returnTo()">{{ 'Cancel' | translate }}</a>
+        </div>
+      </form>
     </div>
 
-    <div class="col-xl-4">
-      <div class="card customer-form-card customer-form-card--side light-card-gradient">
-        <div class="card-body">
-          <app-file-upload [label]="'Customer Image' | translate" [previewUrl]="previewUrl()" (fileSelected)="onImageSelected($event)" />
-          <div class="form-text mt-2">{{ 'Hint Customer Image' | translate }}</div>
+    <aside class="contract-flow-aside customer-form-aside" aria-label="Customer form summary">
+      <div class="customer-form-aside-card">
+        <div class="customer-form-progress">
+          <div class="customer-form-progress__head">
+            <span>{{ 'Customer flow profile completion' | translate }}</span>
+            <strong>{{ profileCompletionPercent() }}%</strong>
+          </div>
+          <div
+            class="customer-form-progress__track"
+            role="progressbar"
+            [attr.aria-valuenow]="profileCompletionPercent()"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <span class="customer-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+          </div>
+        </div>
+
+        <ul class="customer-form-status-list">
+          <li [class.customer-form-status-list__item--done]="identitySectionComplete()">
+            <span class="customer-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Customer flow summary identity' | translate }}</span>
+          </li>
+          <li [class.customer-form-status-list__item--done]="licenseSectionComplete()">
+            <span class="customer-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Customer flow summary license' | translate }}</span>
+          </li>
+          <li [class.customer-form-status-list__item--done]="contactSectionComplete()">
+            <span class="customer-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Customer flow summary contact' | translate }}</span>
+          </li>
+          <li [class.customer-form-status-list__item--done]="imageSectionComplete()">
+            <span class="customer-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Customer flow summary image' | translate }}</span>
+          </li>
+        </ul>
+
+        <div class="customer-form-aside-photo">
+          <span class="customer-form-aside-photo__label">{{ 'Customer Image' | translate }}</span>
+          @if (previewUrl()) {
+            <img [src]="previewUrl()" alt="" class="customer-form-aside-photo__img" />
+          } @else {
+            <div class="customer-form-aside-photo__empty">
+              <i class="fa-regular fa-user" aria-hidden="true"></i>
+              <span>{{ 'Customer photo placeholder' | translate }}</span>
+            </div>
+          }
         </div>
       </div>
-    </div>
+    </aside>
   </div>
 </div>
-

@@ -21,7 +21,11 @@
       <i class="fa-regular fa-calendar"></i>
     </span>
 
-    <span class="date-value" [class.placeholder]="!selectedDate()">
+    <span
+      class="date-value"
+      [class.placeholder]="!selectedDate()"
+      [attr.dir]="valueFormat === 'hijri-slash' ? 'ltr' : null"
+    >
       {{ selectedDate() ? displayValue() : placeholderText() }}
     </span>
 
