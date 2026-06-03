@@ -1,687 +1,925 @@
 <div class="container-fluid">
   <app-page-header
     [title]="(editMode() ? 'Edit Booking' : 'Create Booking') | translate"
-    [subtitle]="'Quick booking entry with essential fields only.' | translate"
+    [subtitle]="editMode() ? editPageSubtitle() : ('Booking wizard subtitle' | translate)"
   />
 
   <div class="card">
     <div class="card-body">
-      <form [formGroup]="form" (ngSubmit)="save()">
-        <div class="row g-3 booking-form-grid">
-          <div class="col-12">
-            <h6 class="mb-2 booking-section-title">{{ 'Customer Information' | translate }}</h6>
-          </div>
-          @if (editMode()) {
-            <div class="col-md-6">
-              <label class="form-label">{{ 'Identity Number' | translate }}</label>
-              <input class="form-control" [value]="form.controls.customerIqama.value" readonly />
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">{{ 'Arabic Name' | translate }}</label>
-              <input
-                class="form-control"
-                [value]="selectedCustomer() ? customerBasicFieldValue('Arabic Name') : form.controls.customerNameAr.value"
-                readonly
-              />
-            </div>
-          } @else {
-            <div class="col-md-4 booking-identity-field">
-              <label class="form-label">{{ 'Identity Number' | translate }} <span class="text-danger">*</span></label>
-              <div class="customer-iqama-search">
-                <input
-                  class="form-control customer-iqama-input"
-                  formControlName="customerIqama"
-                  maxlength="10"
-                  inputmode="numeric"
-                  [placeholder]="'Identity Number' | translate"
-                  (paste)="onCustomerIqamaPaste($event)"
-                  (blur)="customerLookupByIqama()"
-                  aria-autocomplete="list"
-                  [attr.aria-expanded]="false"
-                />
-              </div>
-            </div>
-            @if (selectedCustomer()) {
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Arabic Name' | translate }}</label>
-                <input class="form-control" [value]="customerBasicFieldValue('Arabic Name')" readonly />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Primary Mobile Number' | translate }}</label>
-                <input class="form-control" [value]="customerBasicFieldValue('Primary Mobile Number')" readonly />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Nationality' | translate }}</label>
-                <input class="form-control" [value]="customerBasicFieldValue('Nationality')" readonly />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Driving License Expiry Date' | translate }}</label>
-                <input class="form-control" [value]="customerBasicFieldValue('Driving License Expiry Date')" readonly />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Driving License Number' | translate }}</label>
-                <input class="form-control" [value]="customerBasicFieldValue('Driving License Number')" readonly />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Date of Birth' | translate }}</label>
-                <input class="form-control" [value]="customerBasicFieldValue('Date of Birth')" readonly />
-              </div>
-              <div class="col-md-4 booking-key-field">
-                <label class="form-label">{{ 'Rental Contract Number' | translate }} <span class="text-danger">*</span></label>
-                <input
-                  class="form-control"
-                  formControlName="numberBookingINBasame"
-                  maxlength="10"
-                  [placeholder]="'Example Basame Booking Number' | translate"
-                />
-              </div>
-              <div class="col-md-12">
-                <label class="form-label">{{ 'Address' | translate }}</label>
-                <input class="form-control" [value]="customerBasicFieldValue('Address')" readonly />
-              </div>
-            } @else {
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Arabic Name' | translate }} <span class="text-danger">*</span></label>
-                <input class="form-control" formControlName="customerNameAr" />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Primary Mobile Number' | translate }} <span class="text-danger">*</span></label>
-                <input class="form-control" formControlName="customerFirstMobileNumber" />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Nationality' | translate }} <span class="text-danger">*</span></label>
-                <div class="nationality-field position-relative">
-                  <input
-                    class="form-control"
-                    formControlName="customerNationality"
-                    maxlength="200"
-                    autocomplete="off"
-                    [attr.aria-label]="'Nationality' | translate"
-                    [attr.aria-expanded]="nationalitySuggestionsOpen() && nationalitySuggestions().length > 0"
-                    [attr.aria-controls]="'nationality-suggest-list'"
-                    (focus)="onNationalityFocus()"
-                    (input)="onNationalityInput()"
-                    (blur)="onNationalityBlur()"
-                  />
-                  @if (nationalitySuggestionsOpen() && nationalitySuggestions().length > 0) {
-                    <ul
-                      id="nationality-suggest-list"
-                      class="nationality-suggestions list-group position-absolute w-100 shadow-sm"
-                      role="listbox"
-                    >
-                      @for (s of nationalitySuggestions(); track s.canonicalValue) {
-                        <li class="list-group-item p-0 nationality-suggestions__item" role="option">
-                          <button
-                            type="button"
-                            class="btn btn-link nationality-suggestions__btn text-start w-100 py-2 px-3 text-decoration-none"
-                            (mousedown)="pickNationalitySuggestion($event, s)"
-                          >
-                            {{ s.label }}
-                          </button>
-                        </li>
-                      }
-                    </ul>
-                  }
-                </div>
-                <div class="form-text nationality-field-hint">{{ 'Nationality type or pick suggestion' | translate }}</div>
-              </div>
-              <div class="col-md-4">
-                <app-date-picker formControlName="customerDateDrivinglicense" label="Driving License Expiry Date" />
-              </div>
-              <div class="col-md-4">
-                <app-date-picker formControlName="customerBirthDay" label="Date of Birth" />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Address' | translate }}</label>
-                <input class="form-control" formControlName="customerAddress" />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Driving License Number' | translate }}</label>
-                <input class="form-control" formControlName="customerDrivingLicenseNumber" />
-              </div>
-              <div class="col-md-4 booking-key-field">
-                <label class="form-label">{{ 'Rental Contract Number' | translate }} <span class="text-danger">*</span></label>
-                <input
-                  class="form-control"
-                  formControlName="numberBookingINBasame"
-                  maxlength="10"
-                  [placeholder]="'Example Basame Booking Number' | translate"
-                />
-              </div>
-            }
-          }
-
-          <div class="col-12 mt-2">
-            <h6 class="mb-2 booking-section-title">{{ 'Vehicle Information' | translate }}</h6>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Plate Number' | translate }} <span class="text-danger">*</span></label>
-            @if (editMode()) {
-              <input
-                class="form-control mb-2"
-                [value]="vehiclePlateLookup()"
-                (input)="onVehiclePlateLookupChange($any($event.target).value)"
-                (blur)="applyVehicleByPlateLookup()"
-                [placeholder]="'Plate Number' | translate"
-              />
-            }
-            <app-smooth-select
-              formControlName="vehicleId"
-              [ariaLabel]="'Plate Number' | translate"
-              [placeholder]="'Select vehicle'"
-              [options]="vehicleSelectOptions()"
-            />
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Vehicle Type' | translate }}</label>
-            <input class="form-control" [value]="vehicleInfoValue('type')" readonly />
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Year' | translate }}</label>
-            <input class="form-control" [value]="vehicleInfoValue('year')" readonly />
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Color' | translate }}</label>
-            <input class="form-control" [value]="vehicleInfoValue('color')" readonly />
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Insurance Expiry Date' | translate }}</label>
-            <input class="form-control" [value]="vehicleInfoValue('insuranceExpires')" readonly />
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Driving License Expiry Date' | translate }}</label>
-            <input class="form-control" [value]="vehicleInfoValue('licenseExpirationDate')" readonly />
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Insurance Policy Number' | translate }}</label>
-            <input class="form-control" [value]="vehicleInfoValue('insurancePolicyNumber')" readonly />
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Registration Expiry Date' | translate }}</label>
-            <input class="form-control" [value]="vehicleInfoValue('validityCarRegistration')" readonly />
-          </div>
-          <div class="col-md-3 booking-key-field">
-            <label class="form-label">{{ 'Checkout Counter' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="checkoutCounter" />
-          </div>
-
-          <div class="col-12 mt-2">
-            <div class="booking-subsection-title">{{ 'Booking category pricing bands' | translate }}</div>
-            <div class="form-text mb-2">{{ 'Booking band smart hint' | translate }}</div>
-          </div>
-
-            <div class="col-12">
-              <div class="booking-band-block">
-                <div class="booking-band-block__title">{{ 'Booking band daily block title' | translate }}</div>
-                <div class="row g-2 align-items-end">
-                  <div class="col-6 col-md-2">
-                    <label class="form-label">{{ 'Booking band daily min' | translate }}</label>
-                    <input
-                      class="form-control booking-band-boundary"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputmode="decimal"
-                      autocomplete="off"
-                      readonly
-                      tabindex="-1"
-                      formControlName="priceDayBandLow"
-                    />
-                  </div>
-                  <div class="col-6 col-md-2">
-                    <label class="form-label">{{ 'Booking band daily max' | translate }}</label>
-                    <input
-                      class="form-control booking-band-boundary"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputmode="decimal"
-                      autocomplete="off"
-                      readonly
-                      tabindex="-1"
-                      formControlName="priceDayBandHigh"
-                    />
-                  </div>
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">{{ 'Booking band contract value daily' | translate }}</label>
-                    <input
-                      class="form-control"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputmode="decimal"
-                      autocomplete="off"
-                      formControlName="priceInDay"
-                    />
-                    @let dailyBandHint = contractPriceBandHintDaily();
-                    @if (dailyBandHint) {
-                      <div class="form-text text-warning booking-band-contract-hint">{{ dailyBandHint }}</div>
-                    }
-                  </div>
-                  <div class="col-12 col-md-4">
-                    <div class="booking-band-block__preset-label">{{ 'Booking band preset label' | translate }}</div>
-                    <div class="d-flex flex-wrap gap-1">
-                      <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('day', 'min')">
-                        {{ 'Booking band use min' | translate }}
-                      </button>
-                      <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('day', 'mid')">
-                        {{ 'Booking band use mid' | translate }}
-                      </button>
-                      <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('day', 'max')">
-                        {{ 'Booking band use max' | translate }}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12">
-              <div class="booking-band-block">
-                <div class="booking-band-block__title">{{ 'Booking band hour block title' | translate }}</div>
-                <div class="row g-2 align-items-end">
-                  <div class="col-6 col-md-2">
-                    <label class="form-label">{{ 'Booking band hour extra min' | translate }}</label>
-                    <input
-                      class="form-control booking-band-boundary"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputmode="decimal"
-                      autocomplete="off"
-                      readonly
-                      tabindex="-1"
-                      formControlName="priceHourExtraBandLow"
-                    />
-                  </div>
-                  <div class="col-6 col-md-2">
-                    <label class="form-label">{{ 'Booking band hour extra max' | translate }}</label>
-                    <input
-                      class="form-control booking-band-boundary"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputmode="decimal"
-                      autocomplete="off"
-                      readonly
-                      tabindex="-1"
-                      formControlName="priceHourExtraBandHigh"
-                    />
-                  </div>
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">{{ 'Booking band contract value hour' | translate }}</label>
-                    <input
-                      class="form-control"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputmode="decimal"
-                      autocomplete="off"
-                      formControlName="priceHoureExtra"
-                    />
-                    @let hourBandHint = contractPriceBandHintHour();
-                    @if (hourBandHint) {
-                      <div class="form-text text-warning booking-band-contract-hint">{{ hourBandHint }}</div>
-                    }
-                  </div>
-                  <div class="col-12 col-md-4">
-                    <div class="booking-band-block__preset-label">{{ 'Booking band preset label' | translate }}</div>
-                    <div class="d-flex flex-wrap gap-1">
-                      <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('hour', 'min')">
-                        {{ 'Booking band use min' | translate }}
-                      </button>
-                      <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('hour', 'mid')">
-                        {{ 'Booking band use mid' | translate }}
-                      </button>
-                      <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('hour', 'max')">
-                        {{ 'Booking band use max' | translate }}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          <div class="col-12">
-            <div class="booking-band-block">
-              <div class="booking-band-block__title">{{ 'Booking band km block title' | translate }}</div>
-              <div class="row g-2 align-items-end">
-                  <div class="col-6 col-md-2">
-                    <label class="form-label">{{ 'Booking band km extra min' | translate }}</label>
-                    <input
-                      class="form-control booking-band-boundary"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputmode="decimal"
-                      autocomplete="off"
-                      readonly
-                      tabindex="-1"
-                      formControlName="priceKmExtraBandLow"
-                    />
-                  </div>
-                  <div class="col-6 col-md-2">
-                    <label class="form-label">{{ 'Booking band km extra max' | translate }}</label>
-                    <input
-                      class="form-control booking-band-boundary"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputmode="decimal"
-                      autocomplete="off"
-                      readonly
-                      tabindex="-1"
-                      formControlName="priceKmExtraBandHigh"
-                    />
-                  </div>
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">{{ 'Booking band contract value km' | translate }}</label>
-                    <input
-                      class="form-control"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputmode="decimal"
-                      autocomplete="off"
-                      formControlName="priceKmExtra"
-                    />
-                    @let kmBandHint = contractPriceBandHintKm();
-                    @if (kmBandHint) {
-                      <div class="form-text text-warning booking-band-contract-hint">{{ kmBandHint }}</div>
-                    }
-                  </div>
-                  <div class="col-12 col-md-4">
-                    <div class="booking-band-block__preset-label">{{ 'Booking band preset label' | translate }}</div>
-                    <div class="d-flex flex-wrap gap-1">
-                      <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('km', 'min')">
-                        {{ 'Booking band use min' | translate }}
-                      </button>
-                      <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('km', 'mid')">
-                        {{ 'Booking band use mid' | translate }}
-                      </button>
-                      <button type="button" class="btn btn-outline-primary btn-sm" (click)="applyBandPreset('km', 'max')">
-                        {{ 'Booking band use max' | translate }}
-                      </button>
-                    </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 mt-2">
-            <h6 class="mb-2 booking-section-title">{{ 'Booking Information' | translate }}</h6>
-          </div>
-          <div class="col-12">
-            @if (bookingSettings()) {
-              <div class="booking-smart-hint booking-restrictions-hint">
-                <div class="booking-restrictions-hint__title">{{ 'Booking Restrictions' | translate }}</div>
-                <div class="booking-restrictions-hint__items">
-                  @if (bookingSettings()?.dateOfExp) {
-                    <span class="booking-restrictions-hint__item">• {{ 'Allow booking if driving license is expired' | translate }}</span>
-                  }
-                  @if (bookingSettings()?.dateOfExpWithNation) {
-                    <span class="booking-restrictions-hint__item">• {{ 'Allow booking if license and nationality documents are expired' | translate }}</span>
-                  }
-                  @if (bookingSettings()?.expDateAndInsuranceExp) {
-                    <span class="booking-restrictions-hint__item">
-                      • {{ 'Allow booking if vehicle registration and insurance are expired' | translate }}
-                    </span>
-                  }
-                  @if (bookingSettings()?.showBookingDistanceGps) {
-                    <span class="booking-restrictions-hint__item">• {{ 'Show interrupted GPS distance in contract' | translate }}</span>
-                  }
-                </div>
-              </div>
-            }
-            @if (contractLimitWarnings().length > 0) {
-              <div class="booking-smart-hint booking-limits-alert">
-                <div class="booking-limits-alert__title">{{ 'Booking contract limits exceeded title' | translate }}</div>
-                @for (warning of contractLimitWarnings(); track warning) {
-                  <div class="booking-limits-alert__item">• {{ warning }}</div>
-                }
-              </div>
-            }
-          </div>
-          <input type="hidden" formControlName="branchId" />
-          <div class="col-md-3 booking-key-field">
-            <app-date-picker mode="datetime" formControlName="startDate" label="Start Date" />
-          </div>
-          @if (!editMode()) {
-            <div class="col-md-3">
-              <app-date-picker mode="datetime" formControlName="dateReturnVehical" label="Vehicle Return Date" />
-            </div>
-          }
-          @if (editMode()) {
-            <div class="col-md-3 booking-key-field">
-              <label class="form-label">{{ 'Count Of Days' | translate }} <span class="text-danger">*</span></label>
-              <input class="form-control" type="number" min="1" formControlName="countOfDay" />
-            </div>
-          }
-          @if (editMode() && lastPaymentIsPosting()) {
-            <div class="col-12">
-              <div class="alert alert-info mb-0" role="alert">
-                إذا أردت أي تعديل في السندات لهذا الحجز، اذهب إلى صفحة السندات.
-              </div>
-            </div>
-          }
-          @if (editMode() && !lastPaymentIsPosting()) {
-            <div class="col-12 mt-2">
-              <h6 class="mb-2 booking-section-title">{{ 'Contract section settlement' | translate }}</h6>
-            </div>
-            <div class="col-12">
-              <div class="booking-subsection-title">{{ 'Payment Arrangement' | translate }}</div>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Payment Type' | translate }}</label>
-              <app-smooth-select
-                formControlName="paymentType"
-                [ariaLabel]="'Payment Type' | translate"
-                [placeholder]="'Payment Type' | translate"
-                [options]="paymentTypeSelectOptions()"
-              />
-            </div>
-            <div class="col-md-3 booking-key-field">
-              <label class="form-label">{{ 'Paid Amount' | translate }}</label>
-              <input
-                class="form-control"
-                type="number"
-                min="0"
-                step="0.01"
-                formControlName="paid"
-                [readonly]="!canEditLastVoucherPaid()"
-              />
-              @if (minimumPaidAtCreateWarning(); as paidWarning) {
-                <div class="form-text text-danger fw-semibold">{{ paidWarning }}</div>
+      <form [formGroup]="form" (ngSubmit)="onFormSubmit($event)">
+        @if (!editMode()) {
+        <div class="booking-wizard-layout">
+          <div class="booking-wizard-main">
+            <nav class="booking-wizard-stepper" [attr.aria-label]="'Booking wizard progress' | translate">
+              @for (label of wizardStepLabels(); track label; let i = $index) {
+                <button
+                  type="button"
+                  class="booking-wizard-stepper__item"
+                  [class.booking-wizard-stepper__item--active]="createWizardStep() === i"
+                  [class.booking-wizard-stepper__item--done]="createWizardStep() > i"
+                  [disabled]="i > createWizardStep()"
+                  (click)="wizardGoTo(i)"
+                >
+                  <span class="booking-wizard-stepper__index">{{ i + 1 }}</span>
+                  <span class="booking-wizard-stepper__label">{{ label }}</span>
+                </button>
               }
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Paid Cash' | translate }}</label>
-              <input class="form-control" type="number" min="0" step="0.01" formControlName="paidCash" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Paid Bank' | translate }}</label>
-              <input class="form-control" type="number" min="0" step="0.01" formControlName="paidBank" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Cash Account' | translate }}</label>
-              <app-smooth-select
-                formControlName="idCash"
-                [ariaLabel]="'Cash Account' | translate"
-                [placeholder]="'Select cash account'"
-                [options]="cashSelectOptions()"
-              />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Bank Account' | translate }}</label>
-              <app-smooth-select
-                formControlName="idBank"
-                [ariaLabel]="'Bank Account' | translate"
-                [placeholder]="'Select bank'"
-                [options]="bankSelectOptions()"
-              />
-            </div>
-            <div class="col-12">
-              <div class="table-responsive">
-                <table class="table table-sm table-bordered align-middle mb-0">
-                  <thead>
-                    <tr>
-                      <th>{{ 'Payment Number' | translate }}</th>
-                      <th>{{ 'Bond Type' | translate }}</th>
-                      <th>{{ 'Payment Type' | translate }}</th>
-                      <th>{{ 'Paid Amount' | translate }}</th>
-                      <th>{{ 'Paid Cash' | translate }}</th>
-                      <th>{{ 'Paid Bank' | translate }}</th>
-                      <th>{{ 'Created At' | translate }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @if (!lastPayment()) {
-                      <tr>
-                        <td colspan="7" class="text-center text-muted py-3">
-                          {{ 'No linked voucher payments for this booking' | translate }}
-                        </td>
-                      </tr>
+            </nav>
+
+            <div class="booking-wizard-step-panel">
+              @switch (createWizardStep()) {
+                @case (0) {
+                  <section class="booking-wizard-section">
+                    <h6 class="booking-wizard-section__title">{{ 'Booking wizard customer search' | translate }}</h6>
+                    <div class="booking-wizard-card booking-wizard-card--search">
+                      <label class="form-label">{{ 'Identity Number' | translate }} <span class="text-danger">*</span></label>
+                      <div class="booking-wizard-search-row">
+                        <input
+                          class="form-control customer-iqama-input"
+                          formControlName="customerIqama"
+                          maxlength="10"
+                          inputmode="numeric"
+                          [placeholder]="'Identity Number' | translate"
+                          (paste)="onCustomerIqamaPaste($event)"
+                          aria-autocomplete="list"
+                        />
+                        <button type="button" class="btn btn-outline-primary" (click)="wizardSearchCustomer()">
+                          {{ 'Booking wizard search' | translate }}
+                        </button>
+                      </div>
+                    </div>
+
+                    @if (selectedCustomer(); as customer) {
+                      <div class="booking-wizard-card booking-wizard-card--readonly">
+                        <h6 class="booking-wizard-card__title">{{ 'Booking wizard customer summary' | translate }}</h6>
+                        <dl class="booking-wizard-kv">
+                          <div><dt>{{ 'Arabic Name' | translate }}</dt><dd>{{ customerBasicFieldValue('Arabic Name') }}</dd></div>
+                          <div><dt>{{ 'Primary Mobile Number' | translate }}</dt><dd>{{ customerBasicFieldValue('Primary Mobile Number') }}</dd></div>
+                          <div><dt>{{ 'Nationality' | translate }}</dt><dd>{{ customerBasicFieldValue('Nationality') }}</dd></div>
+                          <div><dt>{{ 'Driving License Number' | translate }}</dt><dd>{{ customerBasicFieldValue('Driving License Number') }}</dd></div>
+                          <div><dt>{{ 'Driving License Expiry Date' | translate }}</dt><dd>{{ customerBasicFieldValue('Driving License Expiry Date') }}</dd></div>
+                        </dl>
+                      </div>
+                      <div class="booking-wizard-field booking-key-field">
+                        <label class="form-label">{{ 'Rental Contract Number' | translate }} <span class="text-danger">*</span></label>
+                        <input
+                          class="form-control"
+                          formControlName="numberBookingINBasame"
+                          maxlength="10"
+                          [placeholder]="'Example Basame Booking Number' | translate"
+                        />
+                      </div>
                     } @else {
-                      <tr>
-                        <td>{{ liveLastPaymentRow()?.paymentNumber || '-' }}</td>
-                        <td>{{ bondTypeLabel(liveLastPaymentRow()?.bondType) }}</td>
-                        <td>{{ paymentTypeLabel(liveLastPaymentRow()?.paymentType) }}</td>
-                        <td>{{ moneyOrDash(liveLastPaymentRow()?.paid) }}</td>
-                        <td>{{ moneyOrDash(liveLastPaymentRow()?.paidCash) }}</td>
-                        <td>{{ moneyOrDash(liveLastPaymentRow()?.paidBank) }}</td>
-                        <td>{{ dateOrDash(liveLastPaymentRow()?.createdAt) }}</td>
-                      </tr>
+                      <h6 class="booking-wizard-section__title">{{ 'Booking wizard customer basic' | translate }}</h6>
+                      <div class="booking-wizard-grid">
+                        <div class="booking-wizard-field">
+                          <label class="form-label">{{ 'Arabic Name' | translate }} <span class="text-danger">*</span></label>
+                          <input class="form-control" formControlName="customerNameAr" />
+                        </div>
+                        <div class="booking-wizard-field">
+                          <label class="form-label">{{ 'Primary Mobile Number' | translate }} <span class="text-danger">*</span></label>
+                          <input class="form-control" formControlName="customerFirstMobileNumber" />
+                        </div>
+                        <div class="booking-wizard-field">
+                          <label class="form-label">{{ 'Nationality' | translate }} <span class="text-danger">*</span></label>
+                          <div class="nationality-field position-relative">
+                            <input
+                              class="form-control"
+                              formControlName="customerNationality"
+                              maxlength="200"
+                              autocomplete="off"
+                              (focus)="onNationalityFocus()"
+                              (input)="onNationalityInput()"
+                              (blur)="onNationalityBlur()"
+                            />
+                            @if (nationalitySuggestionsOpen() && nationalitySuggestions().length > 0) {
+                              <ul class="nationality-suggestions list-group position-absolute w-100 shadow-sm" role="listbox">
+                                @for (s of nationalitySuggestions(); track s.canonicalValue) {
+                                  <li class="list-group-item p-0 nationality-suggestions__item" role="option">
+                                    <button
+                                      type="button"
+                                      class="btn btn-link nationality-suggestions__btn text-start w-100 py-2 px-3 text-decoration-none"
+                                      (mousedown)="pickNationalitySuggestion($event, s)"
+                                    >
+                                      {{ s.label }}
+                                    </button>
+                                  </li>
+                                }
+                              </ul>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <h6 class="booking-wizard-section__title">{{ 'Booking wizard customer extra' | translate }}</h6>
+                      <div class="booking-wizard-grid">
+                        <div class="booking-wizard-field">
+                          <label class="form-label">{{ 'Driving License Number' | translate }}</label>
+                          <input class="form-control" formControlName="customerDrivingLicenseNumber" />
+                        </div>
+                        <div class="booking-wizard-field">
+                          <app-date-picker formControlName="customerDateDrivinglicense" label="Driving License Expiry Date" />
+                        </div>
+                        <div class="booking-wizard-field">
+                          <app-date-picker formControlName="customerBirthDay" label="Date of Birth" />
+                        </div>
+                      </div>
+                      <h6 class="booking-wizard-section__title">{{ 'Booking wizard contract fields' | translate }}</h6>
+                      <div class="booking-wizard-grid">
+                        <div class="booking-wizard-field booking-key-field">
+                          <label class="form-label">{{ 'Rental Contract Number' | translate }} <span class="text-danger">*</span></label>
+                          <input
+                            class="form-control"
+                            formControlName="numberBookingINBasame"
+                            maxlength="10"
+                            [placeholder]="'Example Basame Booking Number' | translate"
+                          />
+                        </div>
+                        <div class="booking-wizard-field">
+                          <label class="form-label">{{ 'Address' | translate }}</label>
+                          <input class="form-control" formControlName="customerAddress" />
+                        </div>
+                      </div>
                     }
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          }
-          @if (!editMode()) {
-            <div class="col-12">
-              <div class="booking-subsection-title">{{ 'Pricing And Discount' | translate }}</div>
-            </div>
-          }
-          @if (!editMode()) {
-          <div class="col-md-3 booking-key-field">
-            <label class="form-label">{{ 'Count Of Days' | translate }} <span class="text-danger">*</span></label>
-            <input class="form-control" type="number" min="1" formControlName="countOfDay" />
-          </div>
-          @if (showBookingDistanceGpsEnabled()) {
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Travelled Distance GPS' | translate }}</label>
-              <input
-                class="form-control"
-                formControlName="distancetraveledgps"
-                [placeholder]="'Example GPS Distance' | translate"
-              />
-            </div>
-          }
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Discount' | translate }}</label>
-            <input class="form-control" type="number" min="0" step="0.01" formControlName="discount" />
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Discount Type' | translate }}</label>
-            <app-smooth-select
-              formControlName="discountType"
-              [ariaLabel]="'Discount Type' | translate"
-              [placeholder]="'Discount Type' | translate"
-              [options]="discountTypeSelectOptions()"
-            />
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Total Tax' | translate }}</label>
-            <input class="form-control" type="number" min="0" step="0.01" formControlName="totaltax" />
-            @if (bookingSettings() && bookingSettings()!.id > 0) {
-              <div class="form-text">
-                {{ 'Booking tax auto hint' | translate: { rate: bookingSettings()?.tax ?? 0 } }}
-              </div>
-            }
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{ 'Applied Discount Value' | translate }}</label>
-            <input class="form-control" [value]="discountAppliedValue()" readonly />
-          </div>
-          <div class="col-12">
-            <div class="decision-summary">
-              <div class="decision-summary__item">
-                <span class="decision-summary__label">{{ 'Expected Amount' | translate }}</span>
-                <strong class="decision-summary__value">{{ expectedAmount() }}</strong>
-              </div>
-              <div class="decision-summary__item">
-                <span class="decision-summary__label">{{ 'Amount After Tax And Discount' | translate }}</span>
-                <strong class="decision-summary__value">{{ amountAfterTaxAndDiscount() }}</strong>
-              </div>
-              <div class="decision-summary__item">
-                <span class="decision-summary__label">{{ 'Remaining Amount' | translate }}</span>
-                <strong class="decision-summary__value">{{ remainingAmount() }}</strong>
-              </div>
-              <div class="decision-summary__item">
-                <span class="decision-summary__label">{{ 'Overpaid Amount' | translate }}</span>
-                <strong class="decision-summary__value">{{ overpaidAmount() }}</strong>
-              </div>
-            </div>
-          </div>
-          }
-          @if (!editMode()) {
-            <div class="col-12">
-              <div class="booking-subsection-title">{{ 'Payment Arrangement' | translate }}</div>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Payment Type' | translate }}</label>
-              <app-smooth-select
-                formControlName="paymentType"
-                [ariaLabel]="'Payment Type' | translate"
-                [placeholder]="'Payment Type' | translate"
-                [options]="paymentTypeSelectOptions()"
-              />
-            </div>
-            <div class="col-md-3 booking-key-field">
-              <label class="form-label">{{ 'Paid Amount' | translate }}</label>
-              <input class="form-control" type="number" min="0" step="0.01" formControlName="paid" />
-              @if (minimumPaidAtCreateWarning(); as paidWarning) {
-                <div class="form-text text-danger fw-semibold">{{ paidWarning }}</div>
+                  </section>
+                }
+                @case (1) {
+                  <section class="booking-wizard-section">
+                    <h6 class="booking-wizard-section__title">{{ 'Vehicle Information' | translate }}</h6>
+                    <div class="booking-wizard-field booking-key-field">
+                      <label class="form-label">{{ 'Plate Number' | translate }} <span class="text-danger">*</span></label>
+                      <app-smooth-select
+                        formControlName="vehicleId"
+                        [ariaLabel]="'Plate Number' | translate"
+                        [placeholder]="'Select vehicle'"
+                        [options]="vehicleSelectOptions()"
+                        [searchable]="true"
+                      />
+                    </div>
+                    @if (selectedVehicle()) {
+                      <div class="booking-wizard-card booking-wizard-card--readonly">
+                        <h6 class="booking-wizard-card__title">{{ 'Booking wizard vehicle summary' | translate }}</h6>
+                        <dl class="booking-wizard-kv booking-wizard-kv--cols-3">
+                          <div><dt>{{ 'Vehicle Type' | translate }}</dt><dd>{{ vehicleInfoValue('type') }}</dd></div>
+                          <div><dt>{{ 'Year' | translate }}</dt><dd>{{ vehicleInfoValue('year') }}</dd></div>
+                          <div><dt>{{ 'Color' | translate }}</dt><dd>{{ vehicleInfoValue('color') }}</dd></div>
+                        </dl>
+                      </div>
+                      <div class="booking-wizard-card booking-wizard-card--readonly">
+                        <h6 class="booking-wizard-card__title">{{ 'Booking wizard vehicle documents' | translate }}</h6>
+                        <dl class="booking-wizard-kv booking-wizard-kv--cols-3">
+                          <div><dt>{{ 'Insurance Expiry Date' | translate }}</dt><dd>{{ vehicleInfoValue('insuranceExpires') }}</dd></div>
+                          <div><dt>{{ 'Insurance Policy Number' | translate }}</dt><dd>{{ vehicleInfoValue('insurancePolicyNumber') }}</dd></div>
+                          <div><dt>{{ 'Registration Expiry Date' | translate }}</dt><dd>{{ vehicleInfoValue('validityCarRegistration') }}</dd></div>
+                        </dl>
+                      </div>
+                    }
+                    <div class="booking-wizard-field booking-key-field">
+                      <label class="form-label">{{ 'Checkout Counter' | translate }}</label>
+                      <input class="form-control" type="number" min="0" formControlName="checkoutCounter" />
+                    </div>
+                    <h6 class="booking-wizard-section__title">{{ 'Booking category pricing bands' | translate }}</h6>
+                    <p class="form-text mb-2">{{ 'Booking band smart hint' | translate }}</p>
+                    <ng-container [ngTemplateOutlet]="wizardBandDaily" />
+                    <ng-container [ngTemplateOutlet]="wizardBandHour" />
+                    <ng-container [ngTemplateOutlet]="wizardBandKm" />
+                  </section>
+                }
+                @case (2) {
+                  <section class="booking-wizard-section">
+                    <h6 class="booking-wizard-section__title">{{ 'Booking wizard rental period' | translate }}</h6>
+                    <input type="hidden" formControlName="branchId" />
+                    <div class="booking-wizard-grid">
+                      <div class="booking-wizard-field booking-key-field">
+                        <app-date-picker mode="datetime" formControlName="startDate" label="Start Date" />
+                      </div>
+                      <div class="booking-wizard-field booking-key-field">
+                        <label class="form-label">{{ 'Count Of Days' | translate }} <span class="text-danger">*</span></label>
+                        <input class="form-control" type="number" min="1" formControlName="countOfDay" />
+                      </div>
+                    </div>
+                    <div class="booking-wizard-derived">
+                      <div>
+                        <span class="booking-wizard-derived__label">{{ 'Booking wizard expected return' | translate }}</span>
+                        <strong>{{ wizardExpectedReturnDisplay() }}</strong>
+                      </div>
+                      <div>
+                        <span class="booking-wizard-derived__label">{{ 'Booking wizard rental duration' | translate }}</span>
+                        <strong>{{ wizardRentalDurationDisplay() }}</strong>
+                      </div>
+                    </div>
+                    @if (bookingSettings()) {
+                      <div class="booking-restrictions-hint">
+                        <div class="booking-restrictions-hint__title">{{ 'Booking Restrictions' | translate }}</div>
+                        <div class="booking-restrictions-hint__items">
+                          @if (bookingSettings()?.dateOfExp) {
+                            <span class="booking-restrictions-hint__item">• {{ 'Allow booking if driving license is expired' | translate }}</span>
+                          }
+                          @if (bookingSettings()?.dateOfExpWithNation) {
+                            <span class="booking-restrictions-hint__item">• {{ 'Allow booking if license and nationality documents are expired' | translate }}</span>
+                          }
+                          @if (bookingSettings()?.expDateAndInsuranceExp) {
+                            <span class="booking-restrictions-hint__item">• {{ 'Allow booking if vehicle registration and insurance are expired' | translate }}</span>
+                          }
+                          @if (bookingSettings()?.showBookingDistanceGps) {
+                            <span class="booking-restrictions-hint__item">• {{ 'Show interrupted GPS distance in contract' | translate }}</span>
+                          }
+                        </div>
+                      </div>
+                    }
+                    @if (contractLimitWarnings().length > 0) {
+                      <div class="booking-limits-alert">
+                        <div class="booking-limits-alert__title">{{ 'Booking contract limits exceeded title' | translate }}</div>
+                        @for (warning of contractLimitWarnings(); track warning) {
+                          <div class="booking-limits-alert__item">• {{ warning }}</div>
+                        }
+                      </div>
+                    }
+                    @if (showBookingDistanceGpsEnabled()) {
+                      <div class="booking-wizard-field">
+                        <label class="form-label">{{ 'Travelled Distance GPS' | translate }}</label>
+                        <input class="form-control" formControlName="distancetraveledgps" [placeholder]="'Example GPS Distance' | translate" />
+                      </div>
+                    }
+                    <h6 class="booking-wizard-section__title">{{ 'Pricing And Discount' | translate }}</h6>
+                    <div class="booking-wizard-grid">
+                      <div class="booking-wizard-field">
+                        <label class="form-label">{{ 'Discount Type' | translate }}</label>
+                        <app-smooth-select
+                          formControlName="discountType"
+                          [ariaLabel]="'Discount Type' | translate"
+                          [placeholder]="'Discount Type' | translate"
+                          [options]="discountTypeSelectOptions()"
+                        />
+                      </div>
+                      <div class="booking-wizard-field">
+                        <label class="form-label">{{ 'Discount' | translate }}</label>
+                        <input class="form-control" type="number" min="0" step="0.01" formControlName="discount" />
+                      </div>
+                      <div class="booking-wizard-field">
+                        <label class="form-label">{{ 'Total Tax' | translate }}</label>
+                        <input class="form-control" type="number" min="0" step="0.01" formControlName="totaltax" />
+                        @if (bookingSettings() && bookingSettings()!.id > 0) {
+                          <div class="form-text">{{ 'Booking tax auto hint' | translate: { rate: bookingSettings()?.tax ?? 0 } }}</div>
+                        }
+                      </div>
+                      <div class="booking-wizard-field">
+                        <label class="form-label">{{ 'Applied Discount Value' | translate }}</label>
+                        <input class="form-control" [value]="discountAppliedValue()" readonly />
+                      </div>
+                    </div>
+                  </section>
+                }
+                @case (3) {
+                  <section class="booking-wizard-section">
+                    <h6 class="booking-wizard-section__title">{{ 'Payment Arrangement' | translate }}</h6>
+                    <div class="booking-wizard-grid">
+                      <div class="booking-wizard-field">
+                        <label class="form-label">{{ 'Payment Type' | translate }}</label>
+                        <app-smooth-select
+                          formControlName="paymentType"
+                          [ariaLabel]="'Payment Type' | translate"
+                          [placeholder]="'Payment Type' | translate"
+                          [options]="paymentTypeSelectOptions()"
+                        />
+                      </div>
+                      <div class="booking-wizard-field booking-key-field">
+                        <label class="form-label">{{ 'Paid Amount' | translate }}</label>
+                        <input class="form-control" type="number" min="0" step="0.01" formControlName="paid" />
+                        @if (minimumPaidAtCreateWarning(); as paidWarning) {
+                          <div class="form-text text-danger fw-semibold">{{ paidWarning }}</div>
+                        }
+                      </div>
+                      @if (paymentTypeIsCash() || paymentTypeIsMixed()) {
+                        <div class="booking-wizard-field">
+                          <label class="form-label">{{ 'Cash Account' | translate }} <span class="text-danger">*</span></label>
+                          <app-smooth-select
+                            formControlName="idCash"
+                            [ariaLabel]="'Cash Account' | translate"
+                            [placeholder]="'Select cash account'"
+                            [options]="cashSelectOptions()"
+                          />
+                        </div>
+                        <div class="booking-wizard-field">
+                          <label class="form-label">{{ 'Paid Cash' | translate }}</label>
+                          <input class="form-control" type="number" min="0" step="0.01" formControlName="paidCash" />
+                        </div>
+                      }
+                      @if (paymentTypeIsBankOnly() || paymentTypeIsMixed()) {
+                        <div class="booking-wizard-field">
+                          <label class="form-label">{{ 'Bank Account' | translate }} <span class="text-danger">*</span></label>
+                          <app-smooth-select
+                            formControlName="idBank"
+                            [ariaLabel]="'Bank Account' | translate"
+                            [placeholder]="'Select bank'"
+                            [options]="bankSelectOptions()"
+                            [searchable]="true"
+                          />
+                        </div>
+                        <div class="booking-wizard-field">
+                          <label class="form-label">{{ 'Paid Bank' | translate }}</label>
+                          <input class="form-control" type="number" min="0" step="0.01" formControlName="paidBank" />
+                        </div>
+                      }
+                    </div>
+                    <div class="booking-wizard-field">
+                      <label class="form-label">{{ 'Notes' | translate }}</label>
+                      <textarea class="form-control" rows="3" formControlName="note"></textarea>
+                    </div>
+                  </section>
+                }
+                @default {
+                  <section class="booking-wizard-section booking-wizard-review">
+                    <h6 class="booking-wizard-section__title">{{ 'Booking wizard step review' | translate }}</h6>
+                    <div class="booking-wizard-review-grid">
+                      <article class="booking-wizard-card booking-wizard-card--readonly">
+                        <h6 class="booking-wizard-card__title">{{ 'Customer Information' | translate }}</h6>
+                        @if (selectedCustomer()) {
+                          <dl class="booking-wizard-kv">
+                            <div><dt>{{ 'Identity Number' | translate }}</dt><dd>{{ form.controls.customerIqama.value }}</dd></div>
+                            <div><dt>{{ 'Arabic Name' | translate }}</dt><dd>{{ customerBasicFieldValue('Arabic Name') }}</dd></div>
+                            <div><dt>{{ 'Primary Mobile Number' | translate }}</dt><dd>{{ customerBasicFieldValue('Primary Mobile Number') }}</dd></div>
+                          </dl>
+                        } @else {
+                          <dl class="booking-wizard-kv">
+                            <div><dt>{{ 'Identity Number' | translate }}</dt><dd>{{ form.controls.customerIqama.value }}</dd></div>
+                            <div><dt>{{ 'Arabic Name' | translate }}</dt><dd>{{ form.controls.customerNameAr.value }}</dd></div>
+                            <div><dt>{{ 'Primary Mobile Number' | translate }}</dt><dd>{{ form.controls.customerFirstMobileNumber.value }}</dd></div>
+                          </dl>
+                        }
+                        <p class="mb-0"><strong>{{ 'Rental Contract Number' | translate }}:</strong> {{ form.controls.numberBookingINBasame.value }}</p>
+                      </article>
+                      <article class="booking-wizard-card booking-wizard-card--readonly">
+                        <h6 class="booking-wizard-card__title">{{ 'Vehicle Information' | translate }}</h6>
+                        <dl class="booking-wizard-kv">
+                          <div><dt>{{ 'Plate Number' | translate }}</dt><dd>{{ vehicleInfoValue('plateNumber') }}</dd></div>
+                          <div><dt>{{ 'Checkout Counter' | translate }}</dt><dd>{{ form.controls.checkoutCounter.value }}</dd></div>
+                          <div><dt>{{ 'Daily Price' | translate }}</dt><dd>{{ formatMoney(form.controls.priceInDay.value) }}</dd></div>
+                        </dl>
+                      </article>
+                      <article class="booking-wizard-card booking-wizard-card--readonly">
+                        <h6 class="booking-wizard-card__title">{{ 'Booking Information' | translate }}</h6>
+                        <dl class="booking-wizard-kv">
+                          <div><dt>{{ 'Start Date' | translate }}</dt><dd>{{ form.controls.startDate.value }}</dd></div>
+                          <div><dt>{{ 'Count Of Days' | translate }}</dt><dd>{{ form.controls.countOfDay.value }}</dd></div>
+                          <div><dt>{{ 'Booking wizard expected return' | translate }}</dt><dd>{{ wizardExpectedReturnDisplay() }}</dd></div>
+                        </dl>
+                      </article>
+                      <article class="booking-wizard-card booking-wizard-card--readonly">
+                        <h6 class="booking-wizard-card__title">{{ 'Payment Arrangement' | translate }}</h6>
+                        <dl class="booking-wizard-kv">
+                          <div><dt>{{ 'Payment Type' | translate }}</dt><dd>{{ paymentTypeLabel(form.controls.paymentType.value) }}</dd></div>
+                          <div><dt>{{ 'Paid Amount' | translate }}</dt><dd>{{ formatMoney(form.controls.paid.value) }}</dd></div>
+                        </dl>
+                      </article>
+                    </div>
+                  </section>
+                }
               }
             </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Paid Cash' | translate }}</label>
-              <input class="form-control" type="number" min="0" step="0.01" formControlName="paidCash" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Paid Bank' | translate }}</label>
-              <input class="form-control" type="number" min="0" step="0.01" formControlName="paidBank" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Cash Account' | translate }}</label>
-              <app-smooth-select
-                formControlName="idCash"
-                [ariaLabel]="'Cash Account' | translate"
-                [placeholder]="'Select cash account'"
-                [options]="cashSelectOptions()"
-              />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ 'Bank Account' | translate }}</label>
-              <app-smooth-select
-                formControlName="idBank"
-                [ariaLabel]="'Bank Account' | translate"
-                [placeholder]="'Select bank'"
-                [options]="bankSelectOptions()"
-              />
-            </div>
 
-            <div class="col-12">
-              <label class="form-label">{{ 'Notes' | translate }}</label>
-              <textarea class="form-control" rows="2" formControlName="note"></textarea>
+            <div class="booking-wizard-nav">
+              <button type="button" class="btn btn-cancel" [disabled]="wizardIsFirstStep()" (click)="wizardPrev()">
+                {{ 'Booking wizard previous' | translate }}
+              </button>
+              @if (!wizardIsReviewStep()) {
+                <button type="button" class="btn btn-primary" (click)="wizardNext()">
+                  {{ 'Booking wizard next' | translate }}
+                </button>
+              }
             </div>
-          }
+          </div>
+
+          <aside class="booking-wizard-summary" [attr.aria-label]="'Booking wizard financial summary' | translate">
+            <h6 class="booking-wizard-summary__title">{{ 'Booking wizard financial summary' | translate }}</h6>
+            <dl class="booking-wizard-summary__list">
+              <div><dt>{{ 'Expected Amount' | translate }}</dt><dd>{{ expectedAmount() }}</dd></div>
+              <div><dt>{{ 'Amount After Tax And Discount' | translate }}</dt><dd>{{ amountAfterTaxAndDiscount() }}</dd></div>
+              <div><dt>{{ 'Paid Amount' | translate }}</dt><dd>{{ formatMoney(form.controls.paid.value) }}</dd></div>
+              <div><dt>{{ 'Remaining Amount' | translate }}</dt><dd>{{ remainingAmount() }}</dd></div>
+              <div><dt>{{ 'Overpaid Amount' | translate }}</dt><dd>{{ overpaidAmount() }}</dd></div>
+            </dl>
+          </aside>
         </div>
 
+        <ng-template #wizardBandDaily>
+          <div class="booking-band-block">
+            <div class="booking-band-block__title">{{ 'Booking band daily block title' | translate }}</div>
+            <div class="row g-2 align-items-end">
+              <div class="col-6 col-md-2">
+                <label class="form-label">{{ 'Booking band daily min' | translate }}</label>
+                <input class="form-control booking-band-boundary" type="number" readonly tabindex="-1" formControlName="priceDayBandLow" />
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">{{ 'Booking band daily max' | translate }}</label>
+                <input class="form-control booking-band-boundary" type="number" readonly tabindex="-1" formControlName="priceDayBandHigh" />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label">{{ 'Booking band contract value daily' | translate }} <span class="text-danger">*</span></label>
+                <input class="form-control" type="number" min="0" step="0.01" formControlName="priceInDay" />
+                @if (contractPriceBandHintDaily(); as hint) {
+                  <div class="form-text text-warning booking-band-contract-hint">{{ hint }}</div>
+                }
+              </div>
+              <div class="col-12 col-md-4">
+                <div class="booking-band-block__preset-label">{{ 'Booking band preset label' | translate }}</div>
+                <div class="contract-flow-segment" role="group" [attr.aria-label]="'Booking band preset label' | translate">
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('day', 'min')">{{ 'Booking band use min' | translate }}</button>
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('day', 'mid')">{{ 'Booking band use mid' | translate }}</button>
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('day', 'max')">{{ 'Booking band use max' | translate }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+        <ng-template #wizardBandHour>
+          <div class="booking-band-block">
+            <div class="booking-band-block__title">{{ 'Booking band hour block title' | translate }}</div>
+            <div class="row g-2 align-items-end">
+              <div class="col-6 col-md-2">
+                <label class="form-label">{{ 'Booking band hour extra min' | translate }}</label>
+                <input class="form-control booking-band-boundary" type="number" readonly tabindex="-1" formControlName="priceHourExtraBandLow" />
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">{{ 'Booking band hour extra max' | translate }}</label>
+                <input class="form-control booking-band-boundary" type="number" readonly tabindex="-1" formControlName="priceHourExtraBandHigh" />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label">{{ 'Booking band contract value hour' | translate }} <span class="text-danger">*</span></label>
+                <input class="form-control" type="number" min="0" step="0.01" formControlName="priceHoureExtra" />
+                @if (contractPriceBandHintHour(); as hint) {
+                  <div class="form-text text-warning booking-band-contract-hint">{{ hint }}</div>
+                }
+              </div>
+              <div class="col-12 col-md-4">
+                <div class="booking-band-block__preset-label">{{ 'Booking band preset label' | translate }}</div>
+                <div class="contract-flow-segment" role="group" [attr.aria-label]="'Booking band preset label' | translate">
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('hour', 'min')">{{ 'Booking band use min' | translate }}</button>
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('hour', 'mid')">{{ 'Booking band use mid' | translate }}</button>
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('hour', 'max')">{{ 'Booking band use max' | translate }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+        <ng-template #wizardBandKm>
+          <div class="booking-band-block">
+            <div class="booking-band-block__title">{{ 'Booking band km block title' | translate }}</div>
+            <div class="row g-2 align-items-end">
+              <div class="col-6 col-md-2">
+                <label class="form-label">{{ 'Booking band km extra min' | translate }}</label>
+                <input class="form-control booking-band-boundary" type="number" readonly tabindex="-1" formControlName="priceKmExtraBandLow" />
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">{{ 'Booking band km extra max' | translate }}</label>
+                <input class="form-control booking-band-boundary" type="number" readonly tabindex="-1" formControlName="priceKmExtraBandHigh" />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label">{{ 'Booking band contract value km' | translate }} <span class="text-danger">*</span></label>
+                <input class="form-control" type="number" min="0" step="0.01" formControlName="priceKmExtra" />
+                @if (contractPriceBandHintKm(); as hint) {
+                  <div class="form-text text-warning booking-band-contract-hint">{{ hint }}</div>
+                }
+              </div>
+              <div class="col-12 col-md-4">
+                <div class="booking-band-block__preset-label">{{ 'Booking band preset label' | translate }}</div>
+                <div class="contract-flow-segment" role="group" [attr.aria-label]="'Booking band preset label' | translate">
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('km', 'min')">{{ 'Booking band use min' | translate }}</button>
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('km', 'mid')">{{ 'Booking band use mid' | translate }}</button>
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('km', 'max')">{{ 'Booking band use max' | translate }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+
+        } @else {
+        @if (loading() && !editBooking()) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary"></div>
+          </div>
+        } @else {
+        <div class="contract-flow-page contract-flow-edit">
+          <input type="hidden" formControlName="branchId" />
+
+          <header class="contract-flow-header">
+            <div class="contract-flow-header__head">
+              <div>
+                <h2 class="contract-flow-header__title">{{ 'Edit Booking' | translate }}</h2>
+                @if (editBooking(); as item) {
+                  <p class="contract-flow-header__ref">
+                    {{ 'Contract Number' | translate }}: {{ editContractNumber(item) }}
+                  </p>
+                }
+              </div>
+              @if (editBooking(); as item) {
+                <app-status-badge
+                  [label]="editStatusLabelKey() | translate"
+                  [tone]="editStatusTone()"
+                />
+              }
+            </div>
+            @if (editBooking(); as item) {
+              <p class="contract-flow-header__meta">
+                {{ 'Booking edit hero customer' | translate }}: {{ editCustomerDisplay(item) }}
+                · {{ 'Booking edit hero vehicle' | translate }}: {{ editVehicleHeadline(item) }}
+              </p>
+            }
+          </header>
+
+          <div class="contract-flow-meta" role="region" [attr.aria-label]="'Booking edit summary strip' | translate">
+            <span class="contract-flow-meta__chip">
+              {{ 'Contract summary status label' | translate }}:
+              <strong>{{ editStatusLabelKey() | translate }}</strong>
+            </span>
+            <span class="contract-flow-meta__chip">
+              {{ 'Count Of Days' | translate }}:
+              <strong>{{ form.controls.countOfDay.value ?? '—' }}</strong>
+            </span>
+            <span class="contract-flow-meta__chip">
+              {{ 'Daily Price' | translate }}:
+              <strong>{{ formatMoney(form.controls.priceInDay.value) }}</strong>
+            </span>
+            <span class="contract-flow-meta__chip">
+              {{ 'Paid total' | translate }}:
+              <strong>{{ formatMoney(editSummaryPaid()) }}</strong>
+            </span>
+            <span class="contract-flow-meta__chip contract-flow-meta__chip--emph">
+              {{ 'Remaining Amount' | translate }}:
+              <strong>{{ formatMoney(editSummaryRemaining()) }}</strong>
+            </span>
+          </div>
+
+          <div class="contract-flow-layout">
+            <div class="contract-flow-main">
+              <details class="contract-flow-section contract-flow-section--fold">
+                <summary class="contract-flow-section__title">{{ 'Customer Information' | translate }}</summary>
+                <dl class="contract-flow-kv contract-flow-kv--2">
+                  <div>
+                    <dt>{{ 'Identity Number' | translate }}</dt>
+                    <dd>{{ form.controls.customerIqama.value || '—' }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Arabic Name' | translate }}</dt>
+                    <dd>
+                      {{
+                        selectedCustomer()
+                          ? customerBasicFieldValue('Arabic Name')
+                          : form.controls.customerNameAr.value || '—'
+                      }}
+                    </dd>
+                  </div>
+                </dl>
+              </details>
+
+              <section class="contract-flow-section">
+                <h3 class="contract-flow-section__title">{{ 'Vehicle Information' | translate }}</h3>
+                <div class="contract-flow-grid contract-flow-grid--2">
+                  <div class="contract-flow-field">
+                    <label class="form-label">{{ 'Booking edit plate search' | translate }}</label>
+                    <input
+                      class="form-control"
+                      [value]="vehiclePlateLookup()"
+                      (input)="onVehiclePlateLookupChange($any($event.target).value)"
+                      (blur)="applyVehicleByPlateLookup()"
+                      [placeholder]="'Plate Number' | translate"
+                    />
+                  </div>
+                  <div class="contract-flow-field contract-flow-field--key">
+                    <label class="form-label">{{ 'Plate Number' | translate }} <span class="text-danger">*</span></label>
+                    <app-smooth-select
+                      formControlName="vehicleId"
+                      [ariaLabel]="'Plate Number' | translate"
+                      [placeholder]="'Select vehicle'"
+                      [options]="vehicleSelectOptions()"
+                      [searchable]="true"
+                    />
+                  </div>
+                </div>
+                @if (selectedVehicle()) {
+                  <dl class="contract-flow-kv contract-flow-kv--3 mt-2">
+                    <div><dt>{{ 'Vehicle Type' | translate }}</dt><dd>{{ vehicleInfoValue('type') }}</dd></div>
+                    <div><dt>{{ 'Year' | translate }}</dt><dd>{{ vehicleInfoValue('year') }}</dd></div>
+                    <div><dt>{{ 'Color' | translate }}</dt><dd>{{ vehicleInfoValue('color') }}</dd></div>
+                  </dl>
+                  <dl class="contract-flow-kv contract-flow-kv--3 mt-2">
+                    <div><dt>{{ 'Insurance Expiry Date' | translate }}</dt><dd>{{ vehicleInfoValue('insuranceExpires') }}</dd></div>
+                    <div><dt>{{ 'Registration Expiry Date' | translate }}</dt><dd>{{ vehicleInfoValue('validityCarRegistration') }}</dd></div>
+                    <div><dt>{{ 'Insurance Policy Number' | translate }}</dt><dd>{{ vehicleInfoValue('insurancePolicyNumber') }}</dd></div>
+                  </dl>
+                }
+                <div class="contract-flow-field contract-flow-field--key mt-2">
+                  <label class="form-label">{{ 'Checkout Counter' | translate }}</label>
+                  <input class="form-control" type="number" min="0" formControlName="checkoutCounter" />
+                </div>
+              </section>
+
+              <section class="contract-flow-section">
+                <h3 class="contract-flow-section__title">{{ 'Booking category pricing bands' | translate }}</h3>
+                <p class="form-text mb-2">{{ 'Booking band smart hint' | translate }}</p>
+                <details class="contract-flow-band" open>
+                  <summary>{{ 'Booking band daily block title' | translate }}</summary>
+                  <div class="contract-flow-band__body">
+                    <ng-container [ngTemplateOutlet]="wizardBandDaily" />
+                  </div>
+                </details>
+                <details class="contract-flow-band">
+                  <summary>{{ 'Booking band hour block title' | translate }}</summary>
+                  <div class="contract-flow-band__body">
+                    <ng-container [ngTemplateOutlet]="wizardBandHour" />
+                  </div>
+                </details>
+                <details class="contract-flow-band">
+                  <summary>{{ 'Booking band km block title' | translate }}</summary>
+                  <div class="contract-flow-band__body">
+                    <ng-container [ngTemplateOutlet]="wizardBandKm" />
+                  </div>
+                </details>
+              </section>
+
+              <section class="contract-flow-section">
+                <h3 class="contract-flow-section__title">{{ 'Booking edit duration card' | translate }}</h3>
+                <div class="contract-flow-grid contract-flow-grid--2">
+                  <div class="contract-flow-field contract-flow-field--key">
+                    <app-date-picker mode="datetime" formControlName="startDate" label="Start Date" />
+                  </div>
+                  <div class="contract-flow-field contract-flow-field--key">
+                    <label class="form-label">{{ 'Count Of Days' | translate }} <span class="text-danger">*</span></label>
+                    <input class="form-control" type="number" min="1" formControlName="countOfDay" />
+                  </div>
+                  <div class="contract-flow-field contract-flow-field--readonly">
+                    <label class="form-label">{{ 'Vehicle Return Date' | translate }}</label>
+                    <input class="form-control" readonly [value]="editExpectedReturnDisplay()" />
+                  </div>
+                </div>
+                @if (bookingSettings()) {
+                  <div class="alert alert-light contract-flow-alert mt-2 mb-0" role="status">
+                    <div class="booking-restrictions-hint__title">{{ 'Booking Restrictions' | translate }}</div>
+                    <div class="booking-restrictions-hint__items">
+                      @if (bookingSettings()?.dateOfExp) {
+                        <span class="booking-restrictions-hint__item">• {{ 'Allow booking if driving license is expired' | translate }}</span>
+                      }
+                      @if (bookingSettings()?.dateOfExpWithNation) {
+                        <span class="booking-restrictions-hint__item">• {{ 'Allow booking if license and nationality documents are expired' | translate }}</span>
+                      }
+                      @if (bookingSettings()?.expDateAndInsuranceExp) {
+                        <span class="booking-restrictions-hint__item">• {{ 'Allow booking if vehicle registration and insurance are expired' | translate }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+                @if (contractLimitWarnings().length > 0) {
+                  <div class="alert alert-warning contract-flow-alert mt-2 mb-0" role="alert">
+                    <div class="booking-limits-alert__title">{{ 'Booking contract limits exceeded title' | translate }}</div>
+                    @for (warning of contractLimitWarnings(); track warning) {
+                      <div class="booking-limits-alert__item">• {{ warning }}</div>
+                    }
+                  </div>
+                }
+              </section>
+
+              <section class="contract-flow-section">
+                <h3 class="contract-flow-section__title">{{ 'Payment Arrangement' | translate }}</h3>
+                @if (lastPaymentIsPosting()) {
+                  <div class="alert alert-info mb-0" role="alert">
+                    <strong>{{ 'Booking edit voucher posted title' | translate }}</strong>
+                    <p class="mb-0 mt-1">{{ 'Booking edit voucher posted body' | translate }}</p>
+                  </div>
+                } @else {
+                  <div class="contract-flow-grid contract-flow-grid--2">
+                    <div class="contract-flow-field">
+                      <label class="form-label">{{ 'Payment Type' | translate }}</label>
+                      <app-smooth-select
+                        formControlName="paymentType"
+                        [ariaLabel]="'Payment Type' | translate"
+                        [placeholder]="'Payment Type' | translate"
+                        [options]="paymentTypeSelectOptions()"
+                      />
+                    </div>
+                    <div class="contract-flow-field contract-flow-field--key">
+                      <label class="form-label">{{ 'Paid Amount' | translate }}</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        formControlName="paid"
+                        [readonly]="!canEditLastVoucherPaid()"
+                      />
+                    </div>
+                    @if (paymentTypeAllowsCashAccount()) {
+                      <div class="contract-flow-field">
+                        <label class="form-label">{{ 'Cash Account' | translate }}</label>
+                        <app-smooth-select
+                          formControlName="idCash"
+                          [ariaLabel]="'Cash Account' | translate"
+                          [placeholder]="'Select cash account'"
+                          [options]="cashSelectOptions()"
+                        />
+                      </div>
+                      <div class="contract-flow-field">
+                        <label class="form-label">{{ 'Paid Cash' | translate }}</label>
+                        <input class="form-control" type="number" min="0" step="0.01" formControlName="paidCash" />
+                      </div>
+                    }
+                    @if (paymentTypeAllowsBankAccount()) {
+                      <div class="contract-flow-field">
+                        <label class="form-label">{{ 'Bank Account' | translate }}</label>
+                        <app-smooth-select
+                          formControlName="idBank"
+                          [ariaLabel]="'Bank Account' | translate"
+                          [placeholder]="'Select bank'"
+                          [options]="bankSelectOptions()"
+                          [searchable]="true"
+                        />
+                      </div>
+                      <div class="contract-flow-field">
+                        <label class="form-label">{{ 'Paid Bank' | translate }}</label>
+                        <input class="form-control" type="number" min="0" step="0.01" formControlName="paidBank" />
+                      </div>
+                    }
+                  </div>
+                }
+              </section>
+
+              @if (lastPayment()) {
+                <section class="contract-flow-section">
+                  <h3 class="contract-flow-section__title">{{ 'Booking edit last voucher card' | translate }}</h3>
+                  <dl class="contract-flow-kv contract-flow-kv--2">
+                    <div><dt>{{ 'Payment Number' | translate }}</dt><dd>{{ liveLastPaymentRow()?.paymentNumber || '—' }}</dd></div>
+                    <div><dt>{{ 'Bond Type' | translate }}</dt><dd>{{ bondTypeLabel(liveLastPaymentRow()?.bondType) }}</dd></div>
+                    <div><dt>{{ 'Payment Type' | translate }}</dt><dd>{{ paymentTypeLabel(liveLastPaymentRow()?.paymentType) }}</dd></div>
+                    <div><dt>{{ 'Paid Amount' | translate }}</dt><dd>{{ moneyOrDash(liveLastPaymentRow()?.paid) }}</dd></div>
+                    <div><dt>{{ 'Created At' | translate }}</dt><dd>{{ dateOrDash(liveLastPaymentRow()?.createdAt) }}</dd></div>
+                  </dl>
+                  <button type="button" class="btn btn-outline-primary btn-sm mt-2" (click)="navigateToPaymentVouchers()">
+                    {{ 'Booking edit view vouchers' | translate }}
+                  </button>
+                </section>
+              }
+
+              <details class="contract-flow-section contract-flow-section--fold">
+                <summary class="contract-flow-section__title">{{ 'Booking edit extra card' | translate }}</summary>
+                <div class="contract-flow-grid contract-flow-grid--2 mt-2">
+                  <div class="contract-flow-field">
+                    <label class="form-label">{{ 'Basame Booking Number' | translate }}</label>
+                    <input class="form-control" formControlName="numberBookingINBasame" maxlength="10" />
+                  </div>
+                  <div class="contract-flow-field">
+                    <label class="form-label">{{ 'Usage Place' | translate }}</label>
+                    <input class="form-control" formControlName="placeUSE" />
+                  </div>
+                  @if (showBookingDistanceGpsEnabled()) {
+                    <div class="contract-flow-field">
+                      <label class="form-label">{{ 'Travelled Distance GPS' | translate }}</label>
+                      <input class="form-control" formControlName="distancetraveledgps" [placeholder]="'Example GPS Distance' | translate" />
+                    </div>
+                  }
+                  <div class="contract-flow-field contract-flow-field--span-2">
+                    <label class="form-label">{{ 'Notes' | translate }}</label>
+                    <textarea class="form-control" rows="2" formControlName="note"></textarea>
+                  </div>
+                  <div class="contract-flow-field">
+                    <label class="form-label">{{ 'Discount' | translate }}</label>
+                    <input class="form-control" type="number" min="0" step="0.01" formControlName="discount" />
+                  </div>
+                  <div class="contract-flow-field">
+                    <label class="form-label">{{ 'Total Tax' | translate }}</label>
+                    <input class="form-control" type="number" min="0" step="0.01" formControlName="totaltax" />
+                    @if (bookingSettings() && bookingSettings()!.id > 0) {
+                      <div class="form-text">{{ 'Booking tax auto hint' | translate: { rate: bookingSettings()?.tax ?? 0 } }}</div>
+                    }
+                  </div>
+                </div>
+              </details>
+            </div>
+
+            <aside class="contract-flow-aside" [attr.aria-label]="'Booking edit live summary' | translate">
+              <h3 class="contract-flow-invoice__title">{{ 'Contract flow section invoice' | translate }}</h3>
+              <div class="contract-flow-aside-block">
+                <div class="contract-flow-aside-block__title">{{ 'Booking Information' | translate }}</div>
+                <dl class="contract-flow-kv">
+                  <div><dt>{{ 'Count Of Days' | translate }}</dt><dd>{{ form.controls.countOfDay.value ?? '—' }}</dd></div>
+                  <div><dt>{{ 'Booking wizard expected return' | translate }}</dt><dd>{{ editExpectedReturnDisplay() }}</dd></div>
+                </dl>
+              </div>
+              <div class="contract-flow-aside-block">
+                <div class="contract-flow-aside-block__title">{{ 'Booking edit summary pricing' | translate }}</div>
+                <dl class="contract-flow-kv">
+                  <div><dt>{{ 'Daily Price' | translate }}</dt><dd>{{ formatMoney(form.controls.priceInDay.value) }}</dd></div>
+                  <div><dt>{{ 'Hourly Extra Price' | translate }}</dt><dd>{{ formatMoney(form.controls.priceHoureExtra.value) }}</dd></div>
+                  <div><dt>{{ 'Extra KM Price' | translate }}</dt><dd>{{ formatMoney(form.controls.priceKmExtra.value) }}</dd></div>
+                </dl>
+              </div>
+              <div class="contract-flow-aside-block">
+                <div class="contract-flow-aside-block__title">{{ 'Booking wizard financial summary' | translate }}</div>
+                <dl class="contract-flow-kv">
+                  <div><dt>{{ 'TOTAL' | translate }}</dt><dd>{{ formatMoney(editSummaryGrandTotal()) }}</dd></div>
+                  <div><dt>{{ 'Paid total' | translate }}</dt><dd>{{ formatMoney(editSummaryPaid()) }}</dd></div>
+                  <div><dt>{{ 'Remaining Amount' | translate }}</dt><dd>{{ formatMoney(editSummaryRemaining()) }}</dd></div>
+                </dl>
+              </div>
+            </aside>
+          </div>
+        </div>
+        }
+
+        <ng-template #wizardBandDaily>
+          <div class="booking-band-block">
+            <div class="row g-2 align-items-end">
+              <div class="col-6 col-md-3">
+                <label class="form-label">{{ 'Booking band daily min' | translate }}</label>
+                <input class="form-control booking-band-boundary" type="number" readonly tabindex="-1" formControlName="priceDayBandLow" />
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">{{ 'Booking band daily max' | translate }}</label>
+                <input class="form-control booking-band-boundary" type="number" readonly tabindex="-1" formControlName="priceDayBandHigh" />
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">{{ 'Booking band contract value daily' | translate }}</label>
+                <input class="form-control" type="number" min="0" step="0.01" formControlName="priceInDay" />
+                @if (contractPriceBandHintDaily(); as hint) {
+                  <div class="form-text text-warning booking-band-contract-hint">{{ hint }}</div>
+                }
+              </div>
+              <div class="col-12">
+                <div class="contract-flow-segment" role="group" [attr.aria-label]="'Booking band preset label' | translate">
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('day', 'min')">{{ 'Booking band use min' | translate }}</button>
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('day', 'mid')">{{ 'Booking band use mid' | translate }}</button>
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('day', 'max')">{{ 'Booking band use max' | translate }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+        <ng-template #wizardBandHour>
+          <div class="booking-band-block">
+            <div class="row g-2 align-items-end">
+              <div class="col-6 col-md-3">
+                <label class="form-label">{{ 'Booking band hour extra min' | translate }}</label>
+                <input class="form-control booking-band-boundary" type="number" readonly tabindex="-1" formControlName="priceHourExtraBandLow" />
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">{{ 'Booking band hour extra max' | translate }}</label>
+                <input class="form-control booking-band-boundary" type="number" readonly tabindex="-1" formControlName="priceHourExtraBandHigh" />
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">{{ 'Booking band contract value hour' | translate }}</label>
+                <input class="form-control" type="number" min="0" step="0.01" formControlName="priceHoureExtra" />
+                @if (contractPriceBandHintHour(); as hint) {
+                  <div class="form-text text-warning booking-band-contract-hint">{{ hint }}</div>
+                }
+              </div>
+              <div class="col-12">
+                <div class="contract-flow-segment" role="group" [attr.aria-label]="'Booking band preset label' | translate">
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('hour', 'min')">{{ 'Booking band use min' | translate }}</button>
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('hour', 'mid')">{{ 'Booking band use mid' | translate }}</button>
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('hour', 'max')">{{ 'Booking band use max' | translate }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+        <ng-template #wizardBandKm>
+          <div class="booking-band-block">
+            <div class="row g-2 align-items-end">
+              <div class="col-6 col-md-3">
+                <label class="form-label">{{ 'Booking band km extra min' | translate }}</label>
+                <input class="form-control booking-band-boundary" type="number" readonly tabindex="-1" formControlName="priceKmExtraBandLow" />
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">{{ 'Booking band km extra max' | translate }}</label>
+                <input class="form-control booking-band-boundary" type="number" readonly tabindex="-1" formControlName="priceKmExtraBandHigh" />
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">{{ 'Booking band contract value km' | translate }}</label>
+                <input class="form-control" type="number" min="0" step="0.01" formControlName="priceKmExtra" />
+                @if (contractPriceBandHintKm(); as hint) {
+                  <div class="form-text text-warning booking-band-contract-hint">{{ hint }}</div>
+                }
+              </div>
+              <div class="col-12">
+                <div class="contract-flow-segment" role="group" [attr.aria-label]="'Booking band preset label' | translate">
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('km', 'min')">{{ 'Booking band use min' | translate }}</button>
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('km', 'mid')">{{ 'Booking band use mid' | translate }}</button>
+                  <button type="button" class="contract-flow-segment__btn" (click)="applyBandPreset('km', 'max')">{{ 'Booking band use max' | translate }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+        }
         <div class="app-form-actions">
-          <button class="btn btn-primary" type="submit" [disabled]="loading()">
-            {{ (editMode() ? 'Update Booking' : 'Create Booking') | translate }}
-          </button>
+          @if (!editMode()) {
+            @if (wizardIsReviewStep()) {
+              <button class="btn btn-primary" type="button" [disabled]="loading()" (click)="wizardSubmitFromReview()">
+                {{ 'Create Booking' | translate }}
+              </button>
+            }
+          } @else {
+            <button class="btn btn-primary" type="submit" [disabled]="loading()">
+              {{ 'Update Booking' | translate }}
+            </button>
+          }
           <a class="btn btn-cancel" routerLink="/booking">{{ 'Cancel' | translate }}</a>
         </div>
       </form>

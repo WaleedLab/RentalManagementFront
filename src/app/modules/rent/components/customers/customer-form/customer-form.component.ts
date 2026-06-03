@@ -5,14 +5,13 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { startWith } from 'rxjs';
+import { merge, startWith } from 'rxjs';
 
 import { TENANT_ADMIN_ROLES } from '../../../../../core/auth/access.constants';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { FieldValueStateDirective } from '../../../../../shared/directives/field-value-state.directive';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-upload.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
@@ -33,7 +32,6 @@ import { CustomerSubscriptionService } from '../../../services/subscriptions/cus
     TranslateModule,
     FieldValueStateDirective,
     FileUploadComponent,
-    PageHeaderComponent,
     SmoothSelectComponent,
     DatePickerComponent,
   ],
@@ -44,10 +42,9 @@ export class CustomerFormComponent implements OnInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
   private static readonly ARABIC_NAME_REGEX = /^[\u0600-\u06FF\s.'-]{2,200}$/;
   private static readonly ENGLISH_NAME_REGEX = /^[A-Za-z\s.'-]{2,200}$/;
-  private static readonly PHONE_REGEX = /^(?:(?:\+966|00966)(?:5\d{8}|1\d{8})|0(?:5\d{8}|1\d{8}))$/;
-  private static readonly IDENTITY_REGEX = /^[A-Za-z0-9-]{5,50}$/;
-  private static readonly LICENSE_REGEX = /^[A-Za-z0-9-]{3,50}$/;
-  private static readonly HIJRI_DATE_REGEX = /^[0-9/\-]{3,20}$/;
+  private static readonly NATIONAL_ID_REGEX = /^\d{10,50}$/;
+  private static readonly MOBILE_REGEX = /^\d{10}$/;
+  private static readonly HIJRI_DATE_REGEX = /^\d{2}\/\d{2}\/\d{4}$/;
 
   private fb = inject(NonNullableFormBuilder);
   private destroyRef = inject(DestroyRef);
@@ -234,6 +231,78 @@ export class CustomerFormComponent implements OnInit {
   nationalitySuggestions = signal<string[]>([]);
   issuePlaceSuggestions = signal<string[]>([]);
   returnTo = signal('/customers');
+  /** Bumps when form values/status change so aside summary computeds refresh. */
+  private formProgressTick = signal(0);
+  /** When true, typing identity copies into licence number until user edits licence differently. */
+  private licenceSyncedFromIdentity = true;
+
+  identitySectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return (
+      f.nameAr.valid &&
+      f.idNationality.valid &&
+      f.nationality.valid &&
+      f.dateIdNationality.valid
+    );
+  });
+
+  licenseSectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return f.licenceNo.valid && f.dateDrivinglicense.valid && f.dateDrivinglicenseHajri.valid;
+  });
+
+  contactSectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.form.controls.firstMobileNumber.valid;
+  });
+
+  imageSectionComplete = computed(() => {
+    this.formProgressTick();
+    return !!(String(this.previewUrl() ?? '').trim() || this.selectedImage());
+  });
+
+  profileCompletionPercent = computed(() => {
+    this.formProgressTick();
+    let done = 0;
+    if (this.identitySectionComplete()) done++;
+    if (this.licenseSectionComplete()) done++;
+    if (this.contactSectionComplete()) done++;
+    if (this.imageSectionComplete()) done++;
+    return Math.round((done / 4) * 100);
+  });
+
+  currentWorkflowStep = computed(() => {
+    this.formProgressTick();
+    if (!this.identitySectionComplete()) return 1;
+    if (!this.licenseSectionComplete()) return 2;
+    if (!this.contactSectionComplete()) return 3;
+    if (!this.imageSectionComplete()) return 4;
+    return 5;
+  });
+
+  private static readonly WORKFLOW_SECTION_IDS = [
+    'customer-form-section-identity',
+    'customer-form-section-license',
+    'customer-form-section-contact',
+    'customer-form-section-photo',
+  ] as const;
+
+  focusWorkflowSection(step: 1 | 2 | 3 | 4): void {
+    const sectionId = CustomerFormComponent.WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('customer-form-section--focus');
+    window.setTimeout(() => section.classList.remove('customer-form-section--focus'), 1400);
+  }
 
   form = this.fb.group({
     nameAr: [
@@ -253,24 +322,24 @@ export class CustomerFormComponent implements OnInit {
       '',
       [
         Validators.required,
-        Validators.maxLength(20),
-        Validators.pattern(CustomerFormComponent.PHONE_REGEX),
+        Validators.maxLength(10),
+        Validators.pattern(CustomerFormComponent.MOBILE_REGEX),
       ],
     ],
     secondMobileNumber: [
       '',
-      [Validators.maxLength(20), Validators.pattern(CustomerFormComponent.PHONE_REGEX)],
+      [Validators.maxLength(10), Validators.pattern(CustomerFormComponent.MOBILE_REGEX)],
     ],
     thirdMobileNumber: [
       '',
-      [Validators.maxLength(20), Validators.pattern(CustomerFormComponent.PHONE_REGEX)],
+      [Validators.maxLength(10), Validators.pattern(CustomerFormComponent.MOBILE_REGEX)],
     ],
     idNationality: [
       '',
       [
         Validators.required,
         Validators.maxLength(50),
-        Validators.pattern(CustomerFormComponent.IDENTITY_REGEX),
+        Validators.pattern(CustomerFormComponent.NATIONAL_ID_REGEX),
       ],
     ],
     licenceNo: [
@@ -278,7 +347,7 @@ export class CustomerFormComponent implements OnInit {
       [
         Validators.required,
         Validators.maxLength(50),
-        Validators.pattern(CustomerFormComponent.LICENSE_REGEX),
+        Validators.pattern(CustomerFormComponent.NATIONAL_ID_REGEX),
       ],
     ],
     dateDrivinglicense: ['', [Validators.required]],
@@ -309,6 +378,10 @@ export class CustomerFormComponent implements OnInit {
       this.returnTo.set(returnToRaw);
     }
 
+    merge(this.form.valueChanges, this.form.statusChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formProgressTick.update(n => n + 1));
+
     this.loadCustomerSubscriptions();
     this.rentalCount.set(0);
     this.initializeNationalitySuggestions();
@@ -319,6 +392,8 @@ export class CustomerFormComponent implements OnInit {
     this.form.controls.nationality.valueChanges
       .pipe(startWith(this.form.controls.nationality.value), takeUntilDestroyed(this.destroyRef))
       .subscribe(value => this.updateIssuePlaceSuggestions(value));
+
+    this.wireIdentityToLicenceSync();
 
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -345,7 +420,7 @@ export class CustomerFormComponent implements OnInit {
           dateDrivinglicense: this.toDateInputValue(
             customer.dateDrivinglicense || customer.drivingLicenseExpiryDate,
           ),
-          dateDrivinglicenseHajri: customer.dateDrivinglicenseHajri || '',
+          dateDrivinglicenseHajri: this.normalizeHijriSlashInput(customer.dateDrivinglicenseHajri),
           dateIdNationality: this.toDateInputValue(customer.dateIdNationality),
           nationality: customer.nationality || '',
           birthDay: this.toDateInputValue(customer.birthDay || customer.dateOfBirth),
@@ -363,6 +438,8 @@ export class CustomerFormComponent implements OnInit {
         });
 
         this.syncSubscriptionAssignmentModeWithCustomer();
+        this.refreshLicenceSyncFromIdentity();
+        this.formProgressTick.update(n => n + 1);
       },
       error: err =>
         this.toast.error(err?.message || this.translate.instant('Failed to load customer')),
@@ -372,6 +449,32 @@ export class CustomerFormComponent implements OnInit {
 
   onImageSelected(file: File | null): void {
     this.selectedImage.set(file);
+    this.formProgressTick.update(n => n + 1);
+  }
+
+  private wireIdentityToLicenceSync(): void {
+    this.form.controls.idNationality.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(idRaw => {
+        if (!this.licenceSyncedFromIdentity) {
+          return;
+        }
+        this.form.controls.licenceNo.setValue(String(idRaw ?? '').trim());
+      });
+
+    this.form.controls.licenceNo.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(licRaw => {
+        const lic = String(licRaw ?? '').trim();
+        const id = String(this.form.controls.idNationality.value ?? '').trim();
+        this.licenceSyncedFromIdentity = lic === id;
+      });
+  }
+
+  private refreshLicenceSyncFromIdentity(): void {
+    const id = String(this.form.controls.idNationality.value ?? '').trim();
+    const lic = String(this.form.controls.licenceNo.value ?? '').trim();
+    this.licenceSyncedFromIdentity = lic === id;
   }
 
   private toDateInputValue(value?: string): string {
@@ -381,6 +484,27 @@ export class CustomerFormComponent implements OnInit {
 
     const normalized = String(value);
     return normalized.length >= 10 ? normalized.slice(0, 10) : normalized;
+  }
+
+  /** Normalize dd/MM/yyyy for legacy 3-digit Hijri years and slash padding. */
+  private normalizeHijriSlashInput(value?: string): string {
+    const raw = String(value ?? '').trim();
+    if (!raw) {
+      return '';
+    }
+
+    const match = raw.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{3,4})$/);
+    if (!match) {
+      return raw;
+    }
+
+    const day = match[1].padStart(2, '0');
+    const month = match[2].padStart(2, '0');
+    let year = Number(match[3]);
+    if (year >= 400 && year <= 999) {
+      year += 600;
+    }
+    return `${day}/${month}/${String(year).padStart(4, '0')}`;
   }
 
   private isArabicUi(): boolean {

@@ -329,6 +329,7 @@
   "Vehicle status updated successfully": "تم تحديث حالة المركبة بنجاح",
   "Failed to update vehicle status": "فشل تحديث حالة المركبة",
   "Save": "حفظ",
+  "Pagination page of": "صفحة {{page}} من {{total}}",
   "Close": "إغلاق",
   "Gregorian": "ميلادي",
   "Hijri": "هجري",

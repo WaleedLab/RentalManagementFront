@@ -1,0 +1,522 @@
+// Unified contract flow layout (finish, suspend, edit, details read surfaces)
+.contract-flow-page {
+  padding-bottom: 1.5rem;
+  background: var(--app-contract-flow-page-bg);
+}
+
+/* Inside main shell: inherit global page backdrop instead of painting a solid block */
+.page-body .contract-flow-page {
+  background: transparent;
+}
+
+.contract-flow-header {
+  margin-bottom: 1rem;
+}
+
+.contract-flow-header__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--rt-text);
+}
+
+.contract-flow-header__meta {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--app-contract-flow-kv-label);
+  line-height: 1.45;
+}
+
+.contract-flow-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.65rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--app-contract-flow-meta-border);
+  background: var(--app-contract-flow-meta-bg);
+}
+
+.contract-flow-meta__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--rt-text-secondary);
+}
+
+.contract-flow-meta__chip strong {
+  color: var(--rt-text);
+  font-weight: 600;
+}
+
+.contract-flow-meta__chip--emph strong {
+  color: var(--app-contract-flow-invoice-title);
+}
+
+.contract-flow-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--app-contract-flow-aside-width);
+  gap: 1rem 1.15rem;
+  align-items: start;
+}
+
+@media (max-width: 1199px) {
+  .contract-flow-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contract-flow-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.contract-flow-aside {
+  position: sticky;
+  top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+@media (max-width: 1199px) {
+  .contract-flow-aside {
+    position: static;
+  }
+}
+
+.contract-flow-section {
+  border-radius: 14px;
+  border: 1px solid var(--app-contract-flow-card-border);
+  background: var(--app-contract-flow-card-bg);
+  padding: 0.9rem 1rem 1rem;
+}
+
+.contract-flow-section--reason {
+  border-color: var(--app-contract-flow-reason-border);
+  background: var(--app-contract-flow-reason-bg);
+}
+
+.contract-flow-section__title {
+  margin: 0 0 0.75rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--app-contract-flow-section-title);
+}
+
+.contract-flow-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 767px) {
+  .contract-flow-pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contract-flow-info-card {
+  border-radius: 12px;
+  border: 1px solid var(--app-contract-flow-card-border);
+  background: var(--app-contract-flow-readonly-bg);
+  padding: 0.7rem 0.8rem;
+}
+
+.contract-flow-info-card__title {
+  margin: 0 0 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--app-contract-flow-section-title);
+}
+
+.contract-flow-kv {
+  display: grid;
+  gap: 0.45rem 0.65rem;
+  margin: 0;
+}
+
+.contract-flow-kv--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.contract-flow-kv--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 767px) {
+  .contract-flow-kv--3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contract-flow-kv > div {
+  min-width: 0;
+}
+
+.contract-flow-kv dt {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--app-contract-flow-kv-label);
+}
+
+.contract-flow-kv dd {
+  margin: 0.1rem 0 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--app-contract-flow-kv-value);
+  word-break: break-word;
+}
+
+.contract-flow-grid {
+  display: grid;
+  gap: 0.65rem 0.75rem;
+}
+
+.contract-flow-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.contract-flow-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 991px) {
+  .contract-flow-grid--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575px) {
+  .contract-flow-grid--2,
+  .contract-flow-grid--3,
+  .contract-flow-kv--2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contract-flow-field .form-label {
+  font-size: 0.8rem;
+  color: var(--app-wizard-field-label);
+}
+
+.contract-flow-stat {
+  display: flex;
+  align-items: center;
+  min-height: calc(1.5em + 0.75rem + 2px);
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--bs-border-radius, 0.375rem);
+  border: 1px solid var(--rt-border);
+  background: var(--app-contract-flow-readonly-bg);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--app-contract-flow-kv-value);
+}
+
+.contract-flow-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+}
+
+@media (max-width: 575px) {
+  .contract-flow-kpi-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contract-flow-kpi {
+  text-align: center;
+  padding: 0.55rem 0.45rem;
+  border-radius: 10px;
+  border: 1px solid var(--app-contract-flow-kpi-border);
+  background: var(--app-contract-flow-kpi-bg);
+}
+
+.contract-flow-kpi__value {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--app-contract-flow-kpi-value);
+  line-height: 1.2;
+}
+
+.contract-flow-kpi--excess .contract-flow-kpi__value {
+  color: var(--app-contract-flow-kpi-excess);
+}
+
+.contract-flow-kpi__label {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  color: var(--app-contract-flow-kv-label);
+}
+
+.contract-flow-invoice {
+  border-radius: 14px;
+  border: 1px solid var(--app-contract-flow-invoice-border);
+  background: var(--app-contract-flow-invoice-bg);
+  box-shadow: var(--app-contract-flow-invoice-shadow);
+  padding: 0.95rem 1rem 1.05rem;
+}
+
+.contract-flow-invoice__title {
+  margin: 0 0 0.7rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--app-contract-flow-invoice-title);
+}
+
+.contract-flow-invoice__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contract-flow-invoice__line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.84rem;
+  color: var(--rt-text-secondary);
+}
+
+.contract-flow-invoice__line strong {
+  color: var(--rt-text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.contract-flow-invoice__line--minus strong {
+  color: var(--rt-success);
+}
+
+.contract-flow-invoice__line--total {
+  margin-top: 0.45rem;
+  padding-top: 0.55rem;
+  border-top: 1px dashed var(--app-contract-flow-invoice-border);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--rt-text);
+}
+
+.contract-flow-invoice__line--total strong {
+  font-size: 1.05rem;
+  color: var(--app-contract-flow-invoice-title);
+}
+
+.contract-flow-segment {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid var(--app-contract-flow-segment-border);
+  background: var(--app-contract-flow-segment-bg);
+}
+
+.contract-flow-segment__btn {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--rt-text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.28rem 0.65rem;
+  border-radius: 7px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.contract-flow-segment__btn:hover {
+  color: var(--rt-text);
+  background: var(--rt-hover-bg);
+}
+
+.contract-flow-segment__btn--active,
+.contract-flow-segment__btn:active {
+  background: var(--app-contract-flow-segment-active-bg);
+  border-color: var(--app-contract-flow-segment-active-border);
+  color: var(--app-contract-flow-segment-active-text);
+}
+
+.contract-flow-audit {
+  border-radius: 12px;
+  border: 1px solid var(--app-contract-flow-card-border);
+  padding: 0.35rem 0.75rem;
+}
+
+.contract-flow-audit summary {
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--rt-text-muted);
+  padding: 0.35rem 0;
+}
+
+.contract-flow-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.contract-flow-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.contract-flow-hint--danger {
+  color: var(--rt-error);
+}
+
+.contract-flow-hint--muted {
+  color: var(--rt-text-muted);
+}
+
+.contract-flow-link-btn {
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0;
+}
+
+.contract-flow-link-btn:hover {
+  text-decoration: underline;
+}
+
+.contract-flow-aside-block + .contract-flow-aside-block {
+  margin-top: 0.65rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--app-wizard-nav-divider);
+}
+
+.contract-flow-aside-block__title {
+  margin-bottom: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--app-contract-flow-kv-label);
+}
+
+.contract-flow-edit .contract-flow-header__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.contract-flow-section--fold summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.contract-flow-section--fold summary::-webkit-details-marker {
+  display: none;
+}
+
+.contract-flow-section--fold .contract-flow-section__title {
+  margin-bottom: 0;
+}
+
+.contract-flow-field--span-2 {
+  grid-column: 1 / -1;
+}
+
+/* Customer form: keep fields inside section cards; flatten embedded date pickers */
+.customer-form-page {
+  .customer-form-section {
+    overflow: visible;
+  }
+
+  .customer-form-fold__body {
+    padding: 0 1rem 1.15rem;
+  }
+
+  @media (min-width: 992px) {
+    .customer-form-fold__body {
+      padding: 1rem 1rem 1.2rem;
+    }
+  }
+
+  .customer-form-field {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .customer-form-field .form-control,
+  .customer-form-field textarea.form-control {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  app-date-picker {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  app-date-picker .date-picker {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  app-date-picker .date-trigger {
+    width: 100%;
+    max-width: 100%;
+    min-height: 38px;
+    height: auto;
+    padding: 0.375rem 0.65rem;
+    border-radius: var(--bs-border-radius, 0.375rem);
+    border: 1px solid var(--app-contract-flow-card-border);
+    background: var(--app-form-empty-bg);
+    box-shadow: none;
+    gap: 0.45rem;
+    box-sizing: border-box;
+  }
+
+  app-date-picker .date-trigger:hover:not(:disabled),
+  app-date-picker .date-picker.open .date-trigger {
+    border-color: rgba(var(--rt-brand-primary-rgb), 0.55);
+    box-shadow: 0 0 0 0.15rem rgba(var(--rt-brand-primary-rgb), 0.12);
+  }
+
+  app-date-picker .date-icon {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 6px;
+    box-shadow: none;
+  }
+
+  app-date-picker .date-value {
+    min-width: 6.75rem;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  app-date-picker .date-value.placeholder {
+    color: var(--app-form-placeholder-color);
+    font-weight: 500;
+  }
+
+  app-date-picker .calendar-panel {
+    z-index: 300;
+  }
+}

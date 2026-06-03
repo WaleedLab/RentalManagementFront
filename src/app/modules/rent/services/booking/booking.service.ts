@@ -12,6 +12,7 @@ import {
   BookingExtensionRequest,
   BookingFilters,
   BookingUpdateRequest,
+  CloseBookingRequest,
   FinshBookingRequest,
   SuspendedBookingRequest,
 } from '../../models';
@@ -25,6 +26,10 @@ import { normalizeTrafficBooking } from '../../models/booking/traffic-booking.no
 export class BookingService {
   private api = inject(BaseService);
   private readonly base = 'Booking';
+  /**
+   * Backend `CreateBookingCommand.BirthDay` is optional; when omitted the API still accepts a sentinel.
+   */
+  private static readonly UNKNOWN_BIRTH_DAY = '1900-01-01T00:00:00';
 
   getList(
     params: {
@@ -138,7 +143,9 @@ export class BookingService {
   }
 
   create(body: BookingCreateRequest): Observable<unknown> {
-    return this.api.postData(this.base, this.toCreateBookingPayload(body));
+    return this.api.postData(this.base, this.toCreateBookingPayload(body), {
+      suppressErrorToast: true,
+    });
   }
 
   /**
@@ -146,8 +153,10 @@ export class BookingService {
    * (see `PaymentCountService` / `VehicleService`). Duplicate critical fields here to avoid 400.
    */
   private toCreateBookingPayload(body: BookingCreateRequest): Record<string, unknown> {
+    const { birthDay: birthDayRaw, ...bodyWithoutBirthDay } = body;
+    const birthDay = birthDayRaw?.trim() || BookingService.UNKNOWN_BIRTH_DAY;
     return {
-      ...body,
+      ...bodyWithoutBirthDay,
       NameAr: body.nameAr,
       FirstMobileNumber: body.firstMobileNumber,
       Address: body.address,
@@ -177,16 +186,17 @@ export class BookingService {
       PaymentType: body.paymentType,
       IdCountingCustVehicle: body.idCountingCustVehicle ?? body.idCountingCust,
       idCountingCustVehicle: body.idCountingCustVehicle ?? body.idCountingCust,
-      BirthDay: body.birthDay,
+      BirthDay: birthDay,
+      birthDay,
+      NumberOfHoursExcess: body.numberOfHoursExcess,
+      NumberKmExcess: body.numberKmExcess,
+      DayExcess: body.dayExcess,
       NumberBookingINBasame: body.numberBookingINBasame,
       FleetId: body.fleetId,
       IdBranch: body.idBranch,
       BranchId: body.idBranch,
       IdCustomer: body.idCustomer,
       Distancetraveledgps: body.distancetraveledgps,
-      NumberOfHoursExcess: body.numberOfHoursExcess,
-      NumberKmExcess: body.numberKmExcess,
-      DayExcess: body.dayExcess,
       Discount: body.discount,
       CheckinCounter: body.checkinCounter,
       PriceInMonth: body.priceInMonth,
@@ -214,6 +224,17 @@ export class BookingService {
       catchError(() => this.api.postData(`${this.base}/Extension`, payload, { suppressErrorToast: true })),
       catchError(() => this.api.putData(`${this.base}/Extend`, payload, { suppressErrorToast: true })),
       catchError(() => this.api.postData(`${this.base}/Extend`, payload)),
+    );
+  }
+
+  /**
+   * `CloseBookingCommand` — **POST `Booking/close`**
+   * (sets `Stutus` to `close`; generic PUT update does not change status on the server).
+   */
+  close(body: CloseBookingRequest): Observable<unknown> {
+    const payload = this.toCloseBookingPayload(body);
+    return this.api.postData(`${this.base}/close`, payload, { suppressErrorToast: true }).pipe(
+      catchError(() => this.api.postData(`${this.base}/Close`, payload)),
     );
   }
 
@@ -453,6 +474,51 @@ export class BookingService {
       out['PaidBank'] = b.paidBank;
     }
 
+    return out;
+  }
+
+  /** `CloseBookingCommand` — PascalCase duplicates for ASP.NET model binding. */
+  private toCloseBookingPayload(b: CloseBookingRequest): Record<string, unknown> {
+    const out: Record<string, unknown> = {
+      id: b.id,
+      Id: b.id,
+      dateReturnVehical: b.dateReturnVehical,
+      DateReturnVehical: b.dateReturnVehical,
+      checkinCounter: b.checkinCounter,
+      CheckinCounter: b.checkinCounter,
+      idVehicle: b.idVehicle,
+      IdVehicle: b.idVehicle,
+      idCustomer: b.idCustomer,
+      IdCustomer: b.idCustomer,
+      idBranch: b.idBranch,
+      IdBranch: b.idBranch,
+      fleetId: b.fleetId,
+      FleetId: b.fleetId,
+      paid: b.paid,
+      Paid: b.paid,
+      paymentType: b.paymentType,
+      PaymentType: b.paymentType,
+    };
+    if (b.note !== undefined && b.note !== '') {
+      out['note'] = b.note;
+      out['Note'] = b.note;
+    }
+    if (b.idBank) {
+      out['idBank'] = b.idBank;
+      out['IdBank'] = b.idBank;
+    }
+    if (b.idCash) {
+      out['idCash'] = b.idCash;
+      out['IdCash'] = b.idCash;
+    }
+    if (b.paidCash !== undefined && b.paidCash !== null) {
+      out['paidCash'] = b.paidCash;
+      out['PaidCash'] = b.paidCash;
+    }
+    if (b.paidBank !== undefined && b.paidBank !== null) {
+      out['paidBank'] = b.paidBank;
+      out['PaidBank'] = b.paidBank;
+    }
     return out;
   }
 

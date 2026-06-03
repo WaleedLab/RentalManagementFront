@@ -175,6 +175,68 @@ html body.light-only {
   --app-btn-outline-shadow-hover: 0 12px 20px -12px rgba(var(--rt-brand-primary-rgb), 0.32);
   --app-btn-focus-ring: 0 0 0 0.18rem rgba(var(--rt-brand-primary-rgb), 0.24);
   --app-btn-focus-shadow: 0 10px 18px -14px rgba(var(--rt-brand-primary-rgb), 0.42);
+
+  /* Stepped forms (booking create wizard) */
+  --app-wizard-track-bg: linear-gradient(180deg, var(--rt-card-bg) 0%, var(--rt-card-elevated-bg) 100%);
+  --app-wizard-track-border: var(--rt-border);
+  --app-wizard-step-surface: var(--rt-card-elevated-bg);
+  --app-wizard-step-border: var(--rt-border);
+  --app-wizard-step-text: var(--rt-text-muted);
+  --app-wizard-step-active-bg: rgba(var(--rt-brand-primary-rgb), 0.1);
+  --app-wizard-step-active-border: rgba(var(--rt-brand-primary-rgb), 0.5);
+  --app-wizard-step-active-text: var(--rt-brand-primary-strong);
+  --app-wizard-step-done-border: rgba(var(--rt-success-rgb), 0.38);
+  --app-wizard-step-done-text: var(--rt-success);
+  --app-wizard-step-index-bg: var(--rt-hover-bg);
+  --app-wizard-step-index-active-bg: var(--rt-brand-primary);
+  --app-wizard-on-brand: #ffffff;
+  --app-wizard-section-title: var(--rt-brand-primary-strong);
+  --app-wizard-card-bg: linear-gradient(180deg, var(--rt-card-bg) 0%, var(--rt-card-elevated-bg) 100%);
+  --app-wizard-card-border: var(--rt-border);
+  --app-wizard-card-search-bg: linear-gradient(180deg, rgba(var(--rt-brand-primary-rgb), 0.08) 0%, var(--rt-card-bg) 100%);
+  --app-wizard-card-search-border: rgba(var(--rt-brand-primary-rgb), 0.28);
+  --app-wizard-card-readonly-bg: var(--rt-hover-bg);
+  --app-wizard-kv-label: var(--rt-text-muted);
+  --app-wizard-kv-value: var(--rt-text);
+  --app-wizard-field-label: var(--rt-text-secondary);
+  --app-wizard-derived-border: rgba(var(--rt-brand-primary-rgb), 0.35);
+  --app-wizard-derived-bg: rgba(var(--rt-brand-primary-rgb), 0.06);
+  --app-wizard-summary-bg: linear-gradient(180deg, rgba(var(--rt-brand-primary-rgb), 0.1) 0%, var(--rt-card-elevated-bg) 100%);
+  --app-wizard-summary-border: rgba(var(--rt-brand-primary-rgb), 0.22);
+  --app-wizard-summary-shadow: 0 16px 32px -28px rgba(var(--rt-shadow-rgb), 0.4);
+  --app-wizard-summary-title: var(--rt-brand-primary-strong);
+  --app-wizard-nav-divider: var(--rt-divider);
+
+  /* Contract flow (finish, suspend, edit, details) — aliases wizard + accents */
+  --app-contract-flow-page-bg: var(--rt-bg);
+  --app-contract-flow-card-bg: var(--app-wizard-card-bg);
+  --app-contract-flow-card-border: var(--app-wizard-card-border);
+  --app-contract-flow-section-title: var(--app-wizard-section-title);
+  --app-contract-flow-kv-label: var(--app-wizard-kv-label);
+  --app-contract-flow-kv-value: var(--app-wizard-kv-value);
+  --app-contract-flow-readonly-bg: var(--app-wizard-card-readonly-bg);
+  --app-contract-flow-meta-bg: var(--app-wizard-derived-bg);
+  --app-contract-flow-meta-border: var(--app-wizard-derived-border);
+  --app-contract-flow-invoice-bg: var(--app-wizard-summary-bg);
+  --app-contract-flow-invoice-border: var(--app-wizard-summary-border);
+  --app-contract-flow-invoice-shadow: var(--app-wizard-summary-shadow);
+  --app-contract-flow-invoice-title: var(--app-wizard-summary-title);
+  --app-contract-flow-reason-bg: linear-gradient(
+    135deg,
+    rgba(var(--rt-warning-rgb), 0.14) 0%,
+    rgba(var(--rt-warning-rgb), 0.04) 100%
+  );
+  --app-contract-flow-reason-border: rgba(var(--rt-warning-rgb), 0.42);
+  --app-contract-flow-kpi-bg: var(--app-wizard-step-surface);
+  --app-contract-flow-kpi-border: var(--app-wizard-step-border);
+  --app-contract-flow-kpi-value: var(--rt-brand-primary-strong);
+  --app-contract-flow-kpi-excess: var(--rt-error);
+  --app-contract-flow-segment-bg: var(--rt-hover-bg);
+  --app-contract-flow-segment-border: var(--rt-border);
+  --app-contract-flow-segment-active-bg: rgba(var(--rt-brand-primary-rgb), 0.12);
+  --app-contract-flow-segment-active-border: rgba(var(--rt-brand-primary-rgb), 0.45);
+  --app-contract-flow-segment-active-text: var(--rt-brand-primary-strong);
+  --app-contract-flow-aside-width: 22rem;
 }
 
 // -----------------------------------------------------------------------------
@@ -348,6 +410,68 @@ html[data-bs-theme='dark'] {
   --app-btn-outline-shadow-hover: 0 14px 28px -12px rgba(var(--rt-accent-rgb), 0.2);
   --app-btn-focus-ring: 0 0 0 4px rgba(var(--rt-accent-rgb), 0.18);
   --app-btn-focus-shadow: 0 12px 24px -14px rgba(var(--rt-accent-rgb), 0.2);
+
+  /* Stepped forms (booking create wizard) */
+  --app-wizard-track-bg: linear-gradient(180deg, var(--rt-card-bg) 0%, var(--rt-card-elevated-bg) 100%);
+  --app-wizard-track-border: var(--rt-border);
+  --app-wizard-step-surface: var(--rt-card-elevated-bg);
+  --app-wizard-step-border: var(--rt-border);
+  --app-wizard-step-text: var(--rt-text-muted);
+  --app-wizard-step-active-bg: rgba(var(--rt-brand-primary-rgb), 0.18);
+  --app-wizard-step-active-border: rgba(var(--rt-brand-primary-rgb), 0.55);
+  --app-wizard-step-active-text: var(--rt-brand-primary-soft);
+  --app-wizard-step-done-border: rgba(var(--rt-success-rgb), 0.42);
+  --app-wizard-step-done-text: var(--rt-success);
+  --app-wizard-step-index-bg: var(--rt-hover-bg);
+  --app-wizard-step-index-active-bg: var(--rt-brand-primary);
+  --app-wizard-on-brand: #ffffff;
+  --app-wizard-section-title: var(--rt-brand-primary-soft);
+  --app-wizard-card-bg: linear-gradient(180deg, var(--rt-card-bg) 0%, var(--rt-card-elevated-bg) 100%);
+  --app-wizard-card-border: var(--rt-border);
+  --app-wizard-card-search-bg: linear-gradient(180deg, rgba(var(--rt-brand-primary-rgb), 0.14) 0%, var(--rt-card-bg) 100%);
+  --app-wizard-card-search-border: rgba(var(--rt-brand-primary-rgb), 0.38);
+  --app-wizard-card-readonly-bg: var(--rt-hover-bg);
+  --app-wizard-kv-label: var(--rt-text-muted);
+  --app-wizard-kv-value: var(--rt-text);
+  --app-wizard-field-label: var(--rt-text-secondary);
+  --app-wizard-derived-border: rgba(var(--rt-brand-primary-rgb), 0.4);
+  --app-wizard-derived-bg: rgba(var(--rt-brand-primary-rgb), 0.1);
+  --app-wizard-summary-bg: linear-gradient(180deg, rgba(var(--rt-brand-primary-rgb), 0.14) 0%, var(--rt-card-elevated-bg) 100%);
+  --app-wizard-summary-border: rgba(var(--rt-brand-primary-rgb), 0.32);
+  --app-wizard-summary-shadow: 0 16px 32px -28px rgba(var(--rt-shadow-rgb), 0.55);
+  --app-wizard-summary-title: var(--rt-brand-primary-soft);
+  --app-wizard-nav-divider: var(--rt-divider);
+
+  /* Contract flow (finish, suspend, edit, details) */
+  --app-contract-flow-page-bg: var(--rt-bg);
+  --app-contract-flow-card-bg: var(--app-wizard-card-bg);
+  --app-contract-flow-card-border: var(--app-wizard-card-border);
+  --app-contract-flow-section-title: var(--app-wizard-section-title);
+  --app-contract-flow-kv-label: var(--app-wizard-kv-label);
+  --app-contract-flow-kv-value: var(--app-wizard-kv-value);
+  --app-contract-flow-readonly-bg: var(--app-wizard-card-readonly-bg);
+  --app-contract-flow-meta-bg: var(--app-wizard-derived-bg);
+  --app-contract-flow-meta-border: var(--app-wizard-derived-border);
+  --app-contract-flow-invoice-bg: var(--app-wizard-summary-bg);
+  --app-contract-flow-invoice-border: var(--app-wizard-summary-border);
+  --app-contract-flow-invoice-shadow: var(--app-wizard-summary-shadow);
+  --app-contract-flow-invoice-title: var(--app-wizard-summary-title);
+  --app-contract-flow-reason-bg: linear-gradient(
+    135deg,
+    rgba(var(--rt-warning-rgb), 0.22) 0%,
+    rgba(var(--rt-warning-rgb), 0.06) 100%
+  );
+  --app-contract-flow-reason-border: rgba(var(--rt-warning-rgb), 0.48);
+  --app-contract-flow-kpi-bg: var(--app-wizard-step-surface);
+  --app-contract-flow-kpi-border: var(--app-wizard-step-border);
+  --app-contract-flow-kpi-value: var(--rt-brand-primary-soft);
+  --app-contract-flow-kpi-excess: var(--rt-error);
+  --app-contract-flow-segment-bg: var(--rt-hover-bg);
+  --app-contract-flow-segment-border: var(--rt-border);
+  --app-contract-flow-segment-active-bg: rgba(var(--rt-brand-primary-rgb), 0.2);
+  --app-contract-flow-segment-active-border: rgba(var(--rt-brand-primary-rgb), 0.55);
+  --app-contract-flow-segment-active-text: var(--rt-brand-primary-soft);
+  --app-contract-flow-aside-width: 22rem;
 }
 
 // -----------------------------------------------------------------------------

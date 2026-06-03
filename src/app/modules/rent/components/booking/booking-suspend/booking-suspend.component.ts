@@ -8,9 +8,11 @@ import { catchError, forkJoin, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch-id.util';
+import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 import {
   SmoothSelectComponent,
   SmoothSelectOption,
@@ -21,6 +23,10 @@ import { CashAccount } from '../../../../finance/models/cash/cash-account.model'
 import { CashAccountService } from '../../../../finance/services/cash/cash-account.service';
 import { PaymentCountService } from '../../../../finance/services/payment-counts/payment-count.service';
 import { Booking, BookingSuspendedStatus, SuspendedBookingRequest } from '../../../models';
+import {
+  bookingStatusTone,
+  bookingStatusTranslationKey,
+} from '../../../models/booking/booking-status.utils';
 import { normalizeSetting } from '../../../models/settings/setting.normalizer';
 import { Setting } from '../../../models/settings/setting.model';
 import { BookingService } from '../../../services/booking/booking.service';
@@ -48,13 +54,23 @@ import {
 @Component({
   selector: 'app-booking-suspend',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, PageHeaderComponent, SmoothSelectComponent, DatePickerComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    TranslateModule,
+    PageHeaderComponent,
+    SmoothSelectComponent,
+    DatePickerComponent,
+    StatusBadgeComponent,
+  ],
   templateUrl: './booking-suspend.component.html',
   styleUrl: './booking-suspend.component.scss',
 })
 export class BookingSuspendComponent implements OnInit {
   /** `BondTypePaymentcountEnum.Receipt` — matches backend suspend receipt flow. */
   private static readonly BOND_TYPE_RECEIPT = 2;
+  private static readonly SUSPEND_REASON_MAX = 500;
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -67,6 +83,7 @@ export class BookingSuspendComponent implements OnInit {
   private settingService = inject(SettingService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
+  private confirmService = inject(ConfirmService);
 
   booking = signal<Booking | null>(null);
   vehicleBranchId = signal<number | null>(null);
@@ -78,7 +95,6 @@ export class BookingSuspendComponent implements OnInit {
   returnOdometerText = signal('');
   repairs = signal(0);
   traffic = signal(0);
-  notes = signal('');
   /** Required — sent as `Note` on `SuspendedBookingCommand`. */
   suspendReason = signal('');
   suspendStatus = signal<BookingSuspendedStatus>('Suspended_due_to_sum_money');
@@ -261,7 +277,7 @@ export class BookingSuspendComponent implements OnInit {
     return !v.odometerOk || !v.timeOk;
   });
 
-  numberKmExcessComputed = computed(() => {
+  odometerDrivenKm = computed(() => {
     const b = this.booking();
     if (!b) {
       return 0;
@@ -271,7 +287,11 @@ export class BookingSuspendComponent implements OnInit {
     if (ret === null) {
       return 0;
     }
-    const driven = Math.max(0, ret - checkout);
+    return Math.max(0, ret - checkout);
+  });
+
+  numberKmExcessComputed = computed(() => {
+    const driven = this.odometerDrivenKm();
     const allow = this.totalKmAllowance();
     return Math.max(0, Math.trunc(driven - allow));
   });
@@ -358,6 +378,75 @@ export class BookingSuspendComponent implements OnInit {
     return Math.max(0, Math.round((total - paid) * 100) / 100);
   });
 
+  computedRentalTotal = computed(() => {
+    const b = this.booking();
+    if (!b) {
+      return 0;
+    }
+    const priceInDay = Number(b.priceInDay ?? 0) || 0;
+    return Math.round(this.billingElapsedDays() * priceInDay * 100) / 100;
+  });
+
+  suspendReasonCharsLeft = computed(() =>
+    Math.max(0, BookingSuspendComponent.SUSPEND_REASON_MAX - this.suspendReason().length),
+  );
+
+  suspendStatusBadge = computed((): { label: string; className: string } | null => {
+    if (this.suspendStatus() === 'Suspended_due_to_accident') {
+      return {
+        label: this.translate.instant('Contract suspend badge accident'),
+        className: 'rt-badge--error',
+      };
+    }
+    return {
+      label: this.translate.instant('Contract suspend badge money'),
+      className: 'rt-badge--warning',
+    };
+  });
+
+  balanceCoverageBadge = computed((): { label: string; className: string } | null => {
+    const balance = this.balanceDisplay();
+    if (balance <= 0.009) {
+      return {
+        label: this.translate.instant('Contract suspend badge fully covered'),
+        className: 'rt-badge--success',
+      };
+    }
+    return {
+      label: this.translate.instant('Contract suspend badge amount due'),
+      className: 'rt-badge--warning',
+    };
+  });
+
+  expectedReturnDisplay = computed(() => {
+    const value = String(this.returnDateTime() ?? '').trim();
+    if (!value) {
+      return '—';
+    }
+    return this.formatDateTime(value);
+  });
+
+  contractDurationDisplay = computed(() => {
+    const b = this.booking();
+    if (!b) {
+      return '—';
+    }
+    const booked = Math.max(0, Math.trunc(Number(b.countOfDay ?? 0) || 0));
+    const billed = this.billingElapsedDays();
+    if (billed > booked) {
+      return this.translate.instant('Contract suspend duration billed', { booked, billed });
+    }
+    return this.translate.instant('Contract suspend rental days', { count: booked || billed });
+  });
+
+  finalBalanceAfterPayment = computed(() => {
+    return Math.max(
+      0,
+      Math.round((this.balanceDisplay() - Math.max(0, Number(this.settlementPaidAmount()) || 0)) * 100) /
+        100,
+    );
+  });
+
   constructor() {
     effect(() => {
       if (this.suspendLocked()) {
@@ -408,17 +497,59 @@ export class BookingSuspendComponent implements OnInit {
     return !this.canSuspend(this.booking());
   }
 
-  pageSubtitle(item: Booking): string {
-    return this.translate.instant('Contract details subtitle', {
-      branch: this.valueOrDash(item.branchName),
-      fleet: this.fleetDisplay(item),
+  pageHeaderMeta(item: Booking): string {
+    const statusKey = `Booking status.${String(item.status ?? '').trim()}`;
+    const statusLabel = this.translate.instant(statusKey);
+    const status =
+      statusLabel === statusKey
+        ? this.translate.instant('Booking status.Unknown')
+        : statusLabel;
+    return this.translate.instant('Contract suspend header meta', {
       ref: this.valueOrDash(item.bookingNumber || item.id),
+      customer: this.valueOrDash(item.customerName),
+      plate: this.valueOrDash(item.vehiclePlateNumber),
+      status,
     });
+  }
+
+  selectedSuspendStatusLabel(): string {
+    const key = `Booking status.${this.suspendStatus()}`;
+    const label = this.translate.instant(key);
+    return label === key ? this.suspendStatus() : label;
+  }
+
+  bookingStatusLabel(item: Booking): string {
+    const key = `Booking status.${String(item.status ?? '').trim()}`;
+    const label = this.translate.instant(key);
+    return label === key ? this.translate.instant('Booking status.Unknown') : label;
   }
 
   fleetDisplay(item: Booking): string {
     const name = String(item.fleetName ?? '').trim();
     return name || this.valueOrDash(item.fleetId);
+  }
+
+  contractNumber(item: Booking): string {
+    return String(item.numberBookingINBasame ?? item.bookingNumber ?? item.id ?? '').trim() || '—';
+  }
+
+  statusBadgeLabelKey(status: Booking['status']): string {
+    return bookingStatusTranslationKey(status);
+  }
+
+  statusBadgeTone(status: Booking['status']): 'success' | 'warning' | 'danger' | 'secondary' | 'info' {
+    return bookingStatusTone(status);
+  }
+
+  vehicleTypeDisplay(item: Booking): string {
+    return this.valueOrDash(item.vehicleName ?? item.vehicleCategoryLabel);
+  }
+
+  dateOrDash(iso: string | undefined): string {
+    if (!iso?.trim()) {
+      return '—';
+    }
+    return this.formatDateTime(iso);
   }
 
   valueOrDash(value: string | number | null | undefined): string {
@@ -479,12 +610,10 @@ export class BookingSuspendComponent implements OnInit {
     this.traffic.set(Number.isFinite(n) ? Math.max(0, n) : 0);
   }
 
-  onNotesChange(value: string): void {
-    this.notes.set(String(value ?? ''));
-  }
-
   onSuspendReasonChange(value: string): void {
-    this.suspendReason.set(String(value ?? ''));
+    this.suspendReason.set(
+      String(value ?? '').slice(0, BookingSuspendComponent.SUSPEND_REASON_MAX),
+    );
   }
 
   onSuspendStatusChange(value: string): void {
@@ -605,10 +734,6 @@ export class BookingSuspendComponent implements OnInit {
       return;
     }
 
-    const ok = window.confirm(this.translate.instant('Contract suspend confirm'));
-    if (!ok) {
-      return;
-    }
     const fleetId = this.authState.fleetId() ?? '';
     const idBooking = this.toBookingNumericId(item.id);
     const idBranch = resolveContractPaymentBranch({
@@ -740,6 +865,27 @@ export class BookingSuspendComponent implements OnInit {
       paymentType,
     };
 
+    const confirmMessage = [
+      this.translate.instant('Contract suspend confirm body'),
+      this.translate.instant('Contract suspend confirm status line', {
+        status: this.selectedSuspendStatusLabel(),
+      }),
+    ].join('\n');
+
+    this.confirmService
+      .confirm(
+        this.translate.instant('Contract suspend confirm title'),
+        confirmMessage,
+      )
+      .subscribe(confirmed => {
+        if (!confirmed) {
+          return;
+        }
+        this.executeSuspend(suspendPayload, item);
+      });
+  }
+
+  private executeSuspend(suspendPayload: SuspendedBookingRequest, item: Booking): void {
     this.saving.set(true);
     this.bookingService.suspend(suspendPayload).subscribe({
       next: () => {
@@ -833,7 +979,6 @@ export class BookingSuspendComponent implements OnInit {
     this.returnOdometerText.set('');
     this.repairs.set(Math.max(0, Number(b.totalMaintance ?? 0) || 0));
     this.traffic.set(Math.max(0, Number(b.totalTrafic ?? 0) || 0));
-    this.notes.set(String(b.notes ?? ''));
 
     const ext = b as Booking & {
       paymentType?: number;

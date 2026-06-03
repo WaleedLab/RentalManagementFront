@@ -169,8 +169,8 @@ export interface BookingCreateRequest {
   idCountingCustVehicle?: string;
   /** @deprecated Prefer `idCountingCustVehicle`; kept for older payloads. */
   idCountingCust?: string;
-  /** Required by backend `CreateBookingCommand.BirthDay` (non-nullable). */
-  birthDay: string;
+  /** Sent to backend `CreateBookingCommand.BirthDay` when a valid Gregorian date is available. */
+  birthDay?: string;
   numberBookingINBasame: string;
   fleetId: string;
   /** Required by backend `CreateBookingCommand.IdBranch` (non-nullable long). */
@@ -304,6 +304,24 @@ export type BookingSuspendedStatus = 'Suspended_due_to_accident' | 'Suspended_du
 export interface SuspendedBookingRequest extends FinshBookingRequest {
   bondType: number;
   stutus: BookingSuspendedStatus;
+}
+
+/** POST `Booking/close` — maps to `CloseBookingCommand` (sets `Stutus` to `close`, history, vehicle available). */
+export interface CloseBookingRequest {
+  id: number;
+  dateReturnVehical: string;
+  note?: string;
+  checkinCounter: number;
+  idVehicle: number;
+  idCustomer: number;
+  idBranch: number;
+  fleetId: string;
+  paid: number;
+  paymentType: number;
+  idBank?: string;
+  idCash?: string;
+  paidCash?: number;
+  paidBank?: number;
 }
 
 const BOOKING_MONEY_EPS = 1e-6;

@@ -25,15 +25,21 @@ import {
   switchMap,
 } from 'rxjs';
 
+import { normalizeApiError } from '../../../../../core/api/api-response.utils';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch-id.util';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 import {
   SmoothSelectComponent,
   SmoothSelectOption,
 } from '../../../../../shared/ui/smooth-select/smooth-select.component';
+import {
+  bookingStatusTone,
+  bookingStatusTranslationKey,
+} from '../../../models/booking/booking-status.utils';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 import { Bank } from '../../../../finance/models/banks/bank.model';
 import { CashAccount } from '../../../../finance/models/cash/cash-account.model';
@@ -73,6 +79,7 @@ import {
     RouterLink,
     TranslateModule,
     PageHeaderComponent,
+    StatusBadgeComponent,
     SmoothSelectComponent,
     DatePickerComponent,
     ...SHARED_FORM_FIELD_DIRECTIVES,
@@ -196,8 +203,63 @@ export class BookingFormComponent implements OnInit {
   editVehiclePlate = signal('');
   vehiclePlateLookup = signal('');
   editBookingId = signal<number | null>(null);
+  editBooking = signal<Booking | null>(null);
   originalPaidSnapshot = signal<number | null | undefined>(undefined);
   editMode = computed(() => this.editBookingId() !== null);
+
+  /** Create flow: 0 customer → 1 vehicle → 2 booking → 3 payment → 4 review */
+  private static readonly WIZARD_STEP_KEYS = [
+    'Booking wizard step customer',
+    'Booking wizard step vehicle',
+    'Booking wizard step booking',
+    'Booking wizard step payment',
+    'Booking wizard step review',
+  ] as const;
+
+  createWizardStep = signal(0);
+
+  wizardStepLabels = computed(() => {
+    this.i18nTick();
+    return BookingFormComponent.WIZARD_STEP_KEYS.map(key => this.translate.instant(key));
+  });
+
+  wizardIsFirstStep = computed(() => this.createWizardStep() === 0);
+  wizardIsReviewStep = computed(() => this.createWizardStep() === 4);
+
+  /** Bumped when start/days/return dates change so wizard derived fields re-render (computed does not track FormControl). */
+  private readonly bookingScheduleRevision = signal(0);
+
+  wizardExpectedReturnDisplay = computed(() => {
+    this.bookingScheduleRevision();
+    this.i18nTick();
+    let value = String(this.form.controls.dateReturnVehical.value ?? '').trim();
+    if (!value) {
+      value = this.computeReturnDateTimeLocalFromStartAndDays();
+    }
+    if (!value) {
+      return '—';
+    }
+    return this.formatWizardDateTime(value);
+  });
+
+  editExpectedReturnDisplay = computed(() => this.wizardExpectedReturnDisplay());
+
+  editSummaryPaid = computed(() => this.displayedPaidTotalForEdit());
+
+  editSummaryRemaining = computed(() => this.remainingAmount());
+
+  editSummaryGrandTotal = computed(() => this.amountAfterTaxAndDiscount());
+
+  wizardRentalDurationDisplay = computed(() => {
+    this.bookingScheduleRevision();
+    this.i18nTick();
+    const days = Math.max(0, Math.trunc(Number(this.form.controls.countOfDay.value) || 0));
+    if (days <= 0) {
+      return '—';
+    }
+    return this.translate.instant('Booking wizard rental days', { count: days });
+  });
+
   private readonly i18nTick = signal(0);
   customerSelectOptions = computed<SmoothSelectOption[]>(() => {
     this.i18nTick();
@@ -290,6 +352,8 @@ export class BookingFormComponent implements OnInit {
     resolver: (customer: Customer) => string;
     /** When set, this field can show auxiliary text in `resolver` but still block booking until true. */
     isComplete?: (customer: Customer) => boolean;
+    /** When true, field is shown for review but does not block booking creation. */
+    optional?: boolean;
   }> = [
     {
       label: 'Identity Number',
@@ -328,6 +392,7 @@ export class BookingFormComponent implements OnInit {
     {
       label: 'Date of Birth',
       resolver: customer => this.valueOf(customer.birthDay ?? customer.dateOfBirth),
+      optional: true,
     },
   ];
 
@@ -512,7 +577,10 @@ export class BookingFormComponent implements OnInit {
 
     merge(this.form.controls.startDate.valueChanges, this.form.controls.countOfDay.valueChanges)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.syncDatesFromStartAndDays());
+      .subscribe(() => {
+        this.syncDatesFromStartAndDays();
+        this.bumpBookingScheduleDisplay();
+      });
 
     merge(
       this.form.controls.countOfDay.valueChanges,
@@ -635,6 +703,17 @@ export class BookingFormComponent implements OnInit {
     this.refreshContractLimitWarnings();
   }
 
+  onFormSubmit(event: Event): void {
+    if (!this.editMode()) {
+      event.preventDefault();
+      if (this.wizardIsReviewStep()) {
+        this.wizardSubmitFromReview();
+      }
+      return;
+    }
+    this.save();
+  }
+
   save(): void {
     this.prepareFormBeforeSave();
     if (this.form.invalid) {
@@ -746,10 +825,6 @@ export class BookingFormComponent implements OnInit {
       }
 
       birthDayOut = this.resolveCustomerBirthForBookingApi(selectedCustomer);
-      if (!birthDayOut) {
-        this.toast.error(this.translate.instant('Booking missing customer birth date'));
-        return;
-      }
 
       nameArOut = (selectedCustomer.nameAr || selectedCustomer.fullName || '').trim();
       firstMobileNumberOut = this.normalizeSaudiMobile(
@@ -782,7 +857,7 @@ export class BookingFormComponent implements OnInit {
       const manualNationality = raw.customerNationality.trim();
       const manualLicense = this.bookingCalendarDateToApi(raw.customerDateDrivinglicense);
       const manualBirth = this.bookingCalendarDateToApi(raw.customerBirthDay);
-      if (!manualNameAr || !manualMobile || !manualNationality || !manualLicense || !manualBirth) {
+      if (!manualNameAr || !manualMobile || !manualNationality || !manualLicense) {
         this.toast.error(
           this.translate.instant('Complete customer basic information before booking'),
         );
@@ -896,7 +971,7 @@ export class BookingFormComponent implements OnInit {
       paidBank: coerceFormNumber(raw.paidBank),
       paymentType: raw.paymentType,
       idCountingCustVehicle,
-      birthDay: birthDayOut,
+      ...(birthDayOut ? { birthDay: birthDayOut } : {}),
       numberBookingINBasame: raw.numberBookingINBasame.trim(),
       fleetId,
       idBranch,
@@ -1036,7 +1111,72 @@ export class BookingFormComponent implements OnInit {
     });
   }
 
+  editPageSubtitle(): string {
+    const item = this.editBooking();
+    if (!item) {
+      return this.translate.instant('Booking edit loading context');
+    }
+    return this.translate.instant('Booking edit header meta', {
+      ref: this.editContractNumber(item),
+      customer: this.editCustomerDisplay(item),
+      vehicle: this.editVehicleHeadline(item),
+    });
+  }
+
+  editContractNumber(item: Booking | null = this.editBooking()): string {
+    if (!item) {
+      return '—';
+    }
+    return (
+      String(item.numberBookingINBasame ?? item.bookingNumber ?? item.id ?? '').trim() || '—'
+    );
+  }
+
+  editCustomerDisplay(item: Booking | null = this.editBooking()): string {
+    if (!item) {
+      return '—';
+    }
+    const name = String(item.customerName ?? '').trim();
+    return name || this.valueOf(item.customerId) || '—';
+  }
+
+  editVehicleHeadline(item: Booking | null = this.editBooking()): string {
+    const vehicle = this.selectedVehicle();
+    const fromVehicle = vehicle
+      ? [vehicle.make, vehicle.model].filter(Boolean).join(' ').trim()
+      : '';
+    const name = fromVehicle || String(item?.vehicleName ?? '').trim();
+    const year = vehicle?.year ?? vehicle?.yearMake ?? item?.vehicleYear;
+    if (name && year) {
+      return `${name} ${year}`;
+    }
+    return name || (year ? String(year) : '—');
+  }
+
+  editStatusLabelKey(): string {
+    const status = this.editBooking()?.status;
+    return status ? bookingStatusTranslationKey(status) : 'Booking status.Unknown';
+  }
+
+  editStatusTone(): 'success' | 'warning' | 'danger' | 'secondary' | 'info' {
+    const status = this.editBooking()?.status;
+    return status ? bookingStatusTone(status) : 'secondary';
+  }
+
+  navigateToPaymentVouchers(): void {
+    void this.router.navigate(['/payment-counts']);
+  }
+
+  paymentTypeAllowsCashAccount(): boolean {
+    return this.paymentTypeIsCash() || this.paymentTypeIsMixed();
+  }
+
+  paymentTypeAllowsBankAccount(): boolean {
+    return this.paymentTypeIsBankOnly() || this.paymentTypeIsMixed();
+  }
+
   private patchFormFromBooking(booking: Booking): void {
+    this.editBooking.set(booking);
     this.originalPaidSnapshot.set(booking.paidtotal ?? booking.paidAmount ?? 0);
     this.editVehicleId.set(this.valueOf(booking.vehicleId));
     this.editVehiclePlate.set(this.valueOf(booking.vehiclePlateNumber));
@@ -1304,8 +1444,31 @@ export class BookingFormComponent implements OnInit {
     return date.toLocaleString();
   }
 
-  /** `postData` throws `Error` when API returns `succeeded: false` with HTTP 200 (interceptor does not run). */
+  /** Surfaces ASP.NET ValidationProblemDetails and Result envelope errors (single toast in form). */
   private bookingCreateErrorMessage(err: unknown): string {
+    if (err instanceof HttpErrorResponse) {
+      const aspNetFieldErrors = this.extractAspNetValidationMessages(err.error);
+      const normalized = normalizeApiError(err);
+      const combined = [
+        ...new Set(
+          [
+            ...aspNetFieldErrors,
+            ...normalized.errors,
+            ...Object.values(normalized.propertyErrors).flat(),
+          ]
+            .map(item => String(item).trim())
+            .filter(
+              item =>
+                item.length > 0 &&
+                !/^one or more validation errors occurred\.?$/i.test(item),
+            ),
+        ),
+      ];
+      if (combined.length > 0) {
+        return combined.join(' ');
+      }
+      return this.translate.instant('Booking data is incomplete. Please fill in the required fields.');
+    }
     if (err instanceof Error) {
       const raw = err.message.replace(/^Booking:\s*/i, '').trim();
       const hinted = this.bookingCreateErrorHint(raw);
@@ -1318,6 +1481,20 @@ export class BookingFormComponent implements OnInit {
       return raw || this.translate.instant('Booking create failed');
     }
     return this.translate.instant('Booking create failed');
+  }
+
+  private extractAspNetValidationMessages(errorBody: unknown): string[] {
+    if (!errorBody || typeof errorBody !== 'object') {
+      return [];
+    }
+    const errors = (errorBody as Record<string, unknown>)['errors'];
+    if (!errors || typeof errors !== 'object' || Array.isArray(errors)) {
+      return [];
+    }
+    return Object.values(errors as Record<string, unknown>)
+      .flatMap(value => (Array.isArray(value) ? value : [value]))
+      .map(item => String(item).trim())
+      .filter(Boolean);
   }
 
   /** Frontend-only hints for known backend payment/booking errors. */
@@ -1632,14 +1809,14 @@ export class BookingFormComponent implements OnInit {
       if (!this.bookingCalendarDateToApi(raw.customerDateDrivinglicense)) {
         missing.push(this.translate.instant('Driving License Expiry Date'));
       }
-      if (!this.bookingCalendarDateToApi(raw.customerBirthDay)) {
-        missing.push(this.translate.instant('Date of Birth'));
-      }
       return missing;
     }
 
     const missing = this.customerBasicFields
       .filter(field => {
+        if (field.optional) {
+          return false;
+        }
         if (field.isComplete) {
           return !field.isComplete(customer);
         }
@@ -1663,6 +1840,217 @@ export class BookingFormComponent implements OnInit {
       return '—';
     }
     return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value);
+  }
+
+  wizardSearchCustomer(): void {
+    this.customerLookupByIqama();
+  }
+
+  wizardGoTo(step: number): void {
+    const target = Math.max(0, Math.min(step, BookingFormComponent.WIZARD_STEP_KEYS.length - 1));
+    const current = this.createWizardStep();
+    if (target <= current) {
+      this.createWizardStep.set(target);
+      this.onWizardStepActivated(target);
+      this.scrollWizardToTop();
+      return;
+    }
+    for (let s = current; s < target; s++) {
+      if (!this.validateWizardStep(s, { silent: false })) {
+        return;
+      }
+    }
+    this.createWizardStep.set(target);
+    this.onWizardStepActivated(target);
+    this.scrollWizardToTop();
+  }
+
+  wizardNext(): void {
+    if (!this.validateWizardStep(this.createWizardStep())) {
+      return;
+    }
+    const next = Math.min(
+      this.createWizardStep() + 1,
+      BookingFormComponent.WIZARD_STEP_KEYS.length - 1,
+    );
+    this.createWizardStep.set(next);
+    this.onWizardStepActivated(next);
+    this.scrollWizardToTop();
+  }
+
+  wizardPrev(): void {
+    const prev = Math.max(0, this.createWizardStep() - 1);
+    this.createWizardStep.set(prev);
+    this.onWizardStepActivated(prev);
+    this.scrollWizardToTop();
+  }
+
+  wizardSubmitFromReview(): void {
+    if (!this.validateWizardStep(3, { silent: false })) {
+      this.createWizardStep.set(3);
+      return;
+    }
+    const ok = window.confirm(this.translate.instant('Booking wizard create confirm'));
+    if (!ok) {
+      return;
+    }
+    this.save();
+  }
+
+  private scrollWizardToTop(): void {
+    const el = this.hostEl.nativeElement.querySelector('.booking-wizard-step-panel');
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  formatWizardDateTime(value: string): string {
+    const text = String(value ?? '').trim();
+    if (!text) {
+      return '—';
+    }
+    const d = new Date(text);
+    if (Number.isNaN(d.getTime())) {
+      return text;
+    }
+    return d.toLocaleString(this.translate.currentLang || 'ar', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  private validateWizardStep(step: number, options?: { silent?: boolean }): boolean {
+    const silent = options?.silent ?? false;
+    const fail = (message: string, controlNames?: string[]): false => {
+      if (!silent) {
+        this.toast.error(message);
+        if (controlNames?.length) {
+          for (const name of controlNames) {
+            this.form.get(name)?.markAsTouched();
+          }
+          focusFirstInvalidControl(this.hostEl.nativeElement);
+        }
+      }
+      return false;
+    };
+
+    if (step === 0) {
+      const iqamaCtrl = this.form.controls.customerIqama;
+      const basameCtrl = this.form.controls.numberBookingINBasame;
+      iqamaCtrl.markAsTouched();
+      basameCtrl.markAsTouched();
+      if (iqamaCtrl.invalid) {
+        return fail(
+          this.translate.instant('Identity Number must be 10 digits'),
+          ['customerIqama'],
+        );
+      }
+      if (basameCtrl.invalid) {
+        return fail(
+          this.translate.instant('Booking wizard basame required'),
+          ['numberBookingINBasame'],
+        );
+      }
+      const customer = this.selectedCustomer();
+      if (customer) {
+        const missing = this.getMissingCustomerBasicFields(customer);
+        if (missing.length > 0) {
+          return fail(
+            `${this.translate.instant('Complete customer basic information before booking')}: ${missing.join('، ')}`,
+          );
+        }
+        return true;
+      }
+      const raw = this.form.getRawValue();
+      if (
+        !raw.customerNameAr.trim() ||
+        !raw.customerFirstMobileNumber.trim() ||
+        !raw.customerNationality.trim()
+      ) {
+        return fail(
+          this.translate.instant('Complete customer basic information before booking'),
+          ['customerNameAr', 'customerFirstMobileNumber', 'customerNationality'],
+        );
+      }
+      if (!this.bookingCalendarDateToApi(raw.customerDateDrivinglicense)) {
+        return fail(
+          this.translate.instant('Driving License Expiry Date'),
+          ['customerDateDrivinglicense'],
+        );
+      }
+      return true;
+    }
+
+    if (step === 1) {
+      const names = ['vehicleId', 'checkoutCounter', 'priceInDay', 'priceHoureExtra', 'priceKmExtra'];
+      for (const name of names) {
+        this.form.get(name)?.markAsTouched();
+      }
+      if (this.form.controls.vehicleId.invalid) {
+        return fail(this.translate.instant('Booking invalid vehicle selection'), ['vehicleId']);
+      }
+      if (!this.selectedVehicle()) {
+        return fail(this.translate.instant('Booking invalid vehicle selection'), ['vehicleId']);
+      }
+      for (const name of ['priceInDay', 'priceHoureExtra', 'priceKmExtra']) {
+        const ctrl = this.form.get(name);
+        if (ctrl?.invalid) {
+          const label = BookingFormComponent.FORM_CONTROL_LABEL_KEYS[name];
+          return fail(
+            label ? this.translate.instant(label) : name,
+            [name],
+          );
+        }
+      }
+      return true;
+    }
+
+    if (step === 2) {
+      this.form.controls.startDate.markAsTouched();
+      this.form.controls.countOfDay.markAsTouched();
+      if (this.form.controls.startDate.invalid) {
+        return fail(this.translate.instant('Start Date'), ['startDate']);
+      }
+      if (this.form.controls.countOfDay.invalid) {
+        return fail(this.translate.instant('Count Of Days'), ['countOfDay']);
+      }
+      const raw = this.form.getRawValue();
+      if (new Date(raw.endDate) < new Date(raw.startDate)) {
+        return fail(this.translate.instant('End date cannot be before start date'), ['startDate']);
+      }
+      const warnings = this.buildContractLimitWarnings();
+      if (warnings.length > 0) {
+        return fail(
+          `${this.translate.instant('Booking contract limits exceeded title')}: ${warnings[0]}`,
+        );
+      }
+      return true;
+    }
+
+    if (step === 3) {
+      this.prepareFormBeforeSave();
+      const settings = this.bookingSettings();
+      if (settings && settings.id > 0) {
+        const minPaid = Math.max(0, Number(settings.minValue) || 0);
+        const paidAtBooking = Math.max(0, Number(this.form.controls.paid.value) || 0);
+        if (paidAtBooking < minPaid) {
+          return fail(
+            this.translate.instant('Booking minimum paid at create not met', {
+              min: minPaid,
+              paid: paidAtBooking,
+            }),
+            ['paid'],
+          );
+        }
+      }
+      if (!this.validatePaymentInputs()) {
+        return false;
+      }
+      return true;
+    }
+
+    return true;
   }
 
   formatRange(low?: number | null, high?: number | null): string {
@@ -1803,8 +2191,17 @@ export class BookingFormComponent implements OnInit {
     this.form.patchValue({ total: this.amountAfterTaxAndDiscount() }, { emitEvent: false });
   }
 
-  /** Sync hidden numerics, contract dates, and totals immediately before validation/submit. */
+  /** Sync hidden numerics, contract dates, branch, and totals immediately before validation/submit. */
   private prepareFormBeforeSave(): void {
+    const vehicle = this.selectedVehicle();
+    const resolvedBranchId = resolveContractPaymentBranch({
+      vehicleBranchId: vehicle?.branchId,
+      bookingBranchId: this.form.controls.branchId.value,
+      loginBranchId: this.authState.branchId(),
+    });
+    if (resolvedBranchId > 0) {
+      this.form.patchValue({ branchId: resolvedBranchId }, { emitEvent: false });
+    }
     this.seedHiddenNumericDefaults();
     this.syncDatesFromStartAndDays();
     this.applyAutoTaxFromSettings();
@@ -2328,22 +2725,38 @@ export class BookingFormComponent implements OnInit {
     }
   }
 
-  /** Auto-calculate end/return dates from start date and number of days. */
-  private syncDatesFromStartAndDays(): void {
+  private bumpBookingScheduleDisplay(): void {
+    this.bookingScheduleRevision.update(n => n + 1);
+  }
+
+  /** Rental period step (index 2): refresh derived return date / duration labels. */
+  private onWizardStepActivated(step: number): void {
+    if (step === 2) {
+      this.syncDatesFromStartAndDays();
+      this.bumpBookingScheduleDisplay();
+    }
+  }
+
+  /** ISO local datetime from start + day count (same rule as syncDatesFromStartAndDays). */
+  private computeReturnDateTimeLocalFromStartAndDays(): string {
     const start = this.form.controls.startDate.value?.trim();
     const daysRaw = Number(this.form.controls.countOfDay.value ?? 0);
     const days = Math.max(0, Number.isFinite(daysRaw) ? Math.floor(daysRaw) : 0);
     if (!start || days <= 0) {
-      return;
+      return '';
     }
     const startDate = new Date(start);
     if (Number.isNaN(startDate.getTime())) {
-      return;
+      return '';
     }
     const endDate = new Date(startDate);
-    // Day-based rental follows 24-hour periods: +N days from start date.
     endDate.setDate(endDate.getDate() + days);
-    const computed = this.toDateTimeLocalValue(endDate);
+    return this.toDateTimeLocalValue(endDate);
+  }
+
+  /** Auto-calculate end/return dates from start date and number of days. */
+  private syncDatesFromStartAndDays(): void {
+    const computed = this.computeReturnDateTimeLocalFromStartAndDays();
     if (!computed) {
       return;
     }
@@ -2419,9 +2832,7 @@ export class BookingFormComponent implements OnInit {
     return { api, hijriPrimaryBlocked: false, needGregorianHint: false };
   }
 
-  /**
-   * Backend `BirthDay` is non-nullable `DateTime` — omitting or sending an unparseable value can break create/history.
-   */
+  /** Returns a Gregorian API date when available; empty string when birth date is missing (booking still allowed). */
   private resolveCustomerBirthForBookingApi(customer: Customer): string {
     const c = customer;
     const iso = this.isoOrRaw(c.birthDay) || this.isoOrRaw(c.dateOfBirth);
@@ -2615,6 +3026,10 @@ export class BookingFormComponent implements OnInit {
   private validatePaymentInputs(): boolean {
     const raw = this.form.getRawValue();
     const paid = Math.max(0, Number(raw.paid) || 0);
+    if (paid <= 0) {
+      return true;
+    }
+
     const paidCash = Math.max(0, Number(raw.paidCash) || 0);
     const paidBank = Math.max(0, Number(raw.paidBank) || 0);
     const type = Number(raw.paymentType) || 1;

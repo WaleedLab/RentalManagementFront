@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { catchError, forkJoin, of } from 'rxjs';
@@ -10,10 +10,25 @@ import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
-import { Booking, BookingUpdateRequest, Setting } from '../../../models';
+import {
+  SmoothSelectComponent,
+  SmoothSelectOption,
+} from '../../../../../shared/ui/smooth-select/smooth-select.component';
+import { Bank } from '../../../../finance/models/banks/bank.model';
+import { BankService } from '../../../../finance/services/banks/bank.service';
+import { CashAccount } from '../../../../finance/models/cash/cash-account.model';
+import { CashAccountService } from '../../../../finance/services/cash/cash-account.service';
+import { PaymentCountService } from '../../../../finance/services/payment-counts/payment-count.service';
+import { Booking, CloseBookingRequest, Setting } from '../../../models';
 import { BookingService } from '../../../services/booking/booking.service';
 import { SettingService } from '../../../services/settings/setting.service';
 import { VehicleService } from '../../../services/vehicles/vehicle.service';
+import {
+  distributeSettlementByPaymentType,
+  parseSettlementMoneyInput,
+  roundSettlementMoney,
+  settlementMoneyInputDisplay,
+} from '../booking-settlement-payment.util';
 import {
   CloseRulesInput,
   CloseRulesSettings,
@@ -35,7 +50,14 @@ import {
 @Component({
   selector: 'app-booking-close',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslateModule, PageHeaderComponent, DatePickerComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    TranslateModule,
+    PageHeaderComponent,
+    DatePickerComponent,
+    SmoothSelectComponent,
+  ],
   templateUrl: './booking-close.component.html',
   styleUrl: './booking-close.component.scss',
 })
@@ -45,6 +67,9 @@ export class BookingCloseComponent implements OnInit {
   private authState = inject(AuthStateService);
   private bookingService = inject(BookingService);
   private vehicleService = inject(VehicleService);
+  private bankService = inject(BankService);
+  private cashAccountService = inject(CashAccountService);
+  private paymentCountService = inject(PaymentCountService);
   private settingService = inject(SettingService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
@@ -60,6 +85,70 @@ export class BookingCloseComponent implements OnInit {
   notes = signal('');
   /** Non-null when the warning modal should show (plain translated text). */
   warningMessage = signal<string | null>(null);
+
+  paymentMethod = signal(1);
+  bankAccount = signal('');
+  cashAccount = signal('');
+  paidCash = signal(0);
+  paidBank = signal(0);
+  /** Refund amount sent as `Paid` on close (backend creates payment voucher when positive). */
+  refundAmount = signal(0);
+  private refundUserEdited = signal(false);
+
+  banks = signal<Bank[]>([]);
+  cashAccounts = signal<CashAccount[]>([]);
+  bookingsPaymentSumFromApi = signal<number | null>(null);
+
+  paymentTypeOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('Cash'), value: 1 },
+    { label: this.translate.instant('Network/POS'), value: 2 },
+    { label: this.translate.instant('Cheque'), value: 3 },
+    { label: this.translate.instant('Bank Transfer'), value: 4 },
+    { label: this.translate.instant('Bank/Cash'), value: 5 },
+  ]);
+
+  cashAccountOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('Select cash account'), value: '' },
+    ...this.cashAccounts().map(c => ({
+      label: c.name || '-',
+      value: String(c.id),
+    })),
+  ]);
+
+  bankAccountOptions = computed<SmoothSelectOption[]>(() => [
+    { label: this.translate.instant('Select bank'), value: '' },
+    ...this.banks().map(b => ({
+      label: b.name || '-',
+      value: String(b.id),
+    })),
+  ]);
+
+  /** Paid total from payment-counts sum API, else booking `paidtotal`. */
+  paymentsTotalDisplay = computed(() => {
+    const fromApi = this.bookingsPaymentSumFromApi();
+    if (fromApi !== null && fromApi !== undefined && Number.isFinite(fromApi)) {
+      return Math.max(0, fromApi);
+    }
+    const b = this.booking();
+    return Math.max(0, Number(b?.paidtotal ?? b?.paidAmount ?? 0) || 0);
+  });
+
+  constructor() {
+    effect(() => {
+      if (this.closeLocked()) {
+        return;
+      }
+      this.paymentsTotalDisplay();
+      if (this.refundUserEdited()) {
+        return;
+      }
+      const amount = this.paymentsTotalDisplay();
+      if (this.refundAmount() !== amount) {
+        this.refundAmount.set(amount);
+      }
+      this.applyRefundDistribution(amount, this.paymentMethod());
+    });
+  }
 
   ngOnInit(): void {
     const id = String(this.route.snapshot.paramMap.get('id') ?? '').trim();
@@ -299,6 +388,82 @@ export class BookingCloseComponent implements OnInit {
     this.notes.set(String(value ?? ''));
   }
 
+  onPaymentMethodChange(value: string): void {
+    const parsed = Number(value);
+    const next = Number.isFinite(parsed) && parsed >= 1 && parsed <= 5 ? parsed : 1;
+    this.paymentMethod.set(next);
+    this.applyPaymentTypeRules(next);
+    this.applyRefundDistribution(this.refundAmount(), next);
+  }
+
+  useFullPaidAsRefund(): void {
+    if (this.closeLocked()) {
+      return;
+    }
+    this.refundUserEdited.set(false);
+    const amount = this.paymentsTotalDisplay();
+    this.refundAmount.set(amount);
+    this.applyRefundDistribution(amount, this.paymentMethod());
+  }
+
+  onBankChange(value: string): void {
+    this.bankAccount.set(String(value ?? '').trim());
+  }
+
+  onCashChange(value: string): void {
+    this.cashAccount.set(String(value ?? '').trim());
+  }
+
+  onPaidCashChange(value: string): void {
+    const cash = parseSettlementMoneyInput(value);
+    if (this.paymentMethod() === 5) {
+      const target = this.refundAmount();
+      this.paidCash.set(cash);
+      this.paidBank.set(roundSettlementMoney(Math.max(0, target - cash)));
+      this.refundUserEdited.set(true);
+      return;
+    }
+    this.paidCash.set(cash);
+    this.refundAmount.set(cash);
+    this.refundUserEdited.set(true);
+  }
+
+  onPaidBankChange(value: string): void {
+    const bank = parseSettlementMoneyInput(value);
+    if (this.paymentMethod() === 5) {
+      const target = this.refundAmount();
+      this.paidBank.set(bank);
+      this.paidCash.set(roundSettlementMoney(Math.max(0, target - bank)));
+      this.refundUserEdited.set(true);
+      return;
+    }
+    this.paidBank.set(bank);
+    this.refundAmount.set(bank);
+    this.refundUserEdited.set(true);
+  }
+
+  onRefundAmountInput(value: string): void {
+    if (this.closeLocked()) {
+      return;
+    }
+    this.refundUserEdited.set(true);
+    const amount = parseSettlementMoneyInput(value);
+    this.refundAmount.set(amount);
+    this.applyRefundDistribution(amount, this.paymentMethod());
+  }
+
+  refundMoneyField(value: number): string | number {
+    return settlementMoneyInputDisplay(value);
+  }
+
+  paymentTypeAllowsCashAccount(): boolean {
+    return this.paymentMethod() === 1 || this.paymentMethod() === 5;
+  }
+
+  paymentTypeAllowsBankAccount(): boolean {
+    return [2, 3, 4, 5].includes(this.paymentMethod());
+  }
+
   submit(): void {
     const item = this.booking();
     const s = this.settings();
@@ -364,46 +529,81 @@ export class BookingCloseComponent implements OnInit {
 
     const idCustomer = this.toBookingNumericId(item.customerId);
     const idVehicle = this.toBookingNumericId(item.vehicleId);
-    if (!idCustomer) {
+    if (!idCustomer || !idVehicle) {
       this.toast.error(this.translate.instant('Contract finish missing ids'));
       return;
     }
 
-    const payload: BookingUpdateRequest = {
+    const paymentType = Number(this.paymentMethod()) || 1;
+    const bankId = this.bankCashIdOrUndefined(this.bankAccount());
+    const cashId = this.bankCashIdOrUndefined(this.cashAccount());
+    const paidCash = Math.max(0, Number(this.paidCash()) || 0);
+    const paidBank = Math.max(0, Number(this.paidBank()) || 0);
+    const paidTotal = roundSettlementMoney(paidCash + paidBank);
+    const refundTotal = roundSettlementMoney(this.refundAmount());
+
+    if (refundTotal > 0) {
+      if (paymentType === 1 && !cashId) {
+        this.toast.error(this.translate.instant('Contract finish cash required'));
+        return;
+      }
+      if ([2, 3, 4].includes(paymentType) && !bankId) {
+        this.toast.error(this.translate.instant('Contract finish bank required'));
+        return;
+      }
+      if (paymentType === 5) {
+        if (!bankId || !cashId) {
+          this.toast.error(this.translate.instant('Contract finish mixed required'));
+          return;
+        }
+        if (paidCash <= 0 && paidBank <= 0) {
+          this.toast.error(this.translate.instant('Contract finish mixed amounts required'));
+          return;
+        }
+        if (!bankId && paidBank > 0) {
+          this.toast.error(this.translate.instant('Contract finish bank required'));
+          return;
+        }
+        if (!cashId && paidCash > 0) {
+          this.toast.error(this.translate.instant('Contract finish cash required'));
+          return;
+        }
+        if (paidTotal !== refundTotal) {
+          this.toast.error(this.translate.instant('Paid cash and bank must equal paid amount'));
+          return;
+        }
+      }
+      if (paidTotal !== refundTotal) {
+        this.toast.error(this.translate.instant('Paid cash and bank must equal paid amount'));
+        return;
+      }
+    }
+
+    const payload: CloseBookingRequest = {
       id: idBooking,
       idCustomer,
-      idVehicle: idVehicle ?? undefined,
+      idVehicle,
       idBranch,
-      checkoutCounter: item.checkoutCounter,
-      checkinCounter: validation.returnOdom,
-      countOfDay: item.countOfDay,
-      total: item.totalAmount,
-      discount: item.discount,
-      priceInDay: item.priceInDay,
-      priceInMonth: item.priceInMonth,
-      allowTo: item.allowTo,
-      countKMExtra: item.countKMExtra,
-      priceHoureExtra: item.priceHoureExtra,
-      priceKmExtra: item.priceKmExtra,
-      otherExpenses: item.otherExpenses,
-      totaltax: item.totaltax ?? undefined,
-      startDate: item.startDate,
-      endDate: item.endDate,
+      fleetId,
       dateReturnVehical: returnIso,
       note: this.notes().trim() || undefined,
-      placeUSE: item.placeUSE,
-      numberBookingINBasame: item.numberBookingINBasame,
-      distancetraveledgps: item.distancetraveledgps,
-      totalTrafic: item.totalTrafic,
-      totalMaintance: item.totalMaintance,
-      totalReceivedVehicle: item.totalReceivedVehicle,
-      transportationFees: item.transportationFees,
-      idCountingCustVehicle: item.idCountingCustVehicle,
-      stutus: 'close',
+      checkinCounter: validation.returnOdom,
+      paid: refundTotal,
+      paymentType,
     };
+    if (refundTotal > 0) {
+      if (bankId) {
+        payload.idBank = bankId;
+      }
+      if (cashId) {
+        payload.idCash = cashId;
+      }
+      payload.paidCash = paidCash;
+      payload.paidBank = paidBank;
+    }
 
     this.saving.set(true);
-    this.bookingService.update(payload).subscribe({
+    this.bookingService.close(payload).subscribe({
       next: () => {
         this.toast.success(this.translate.instant('Contract close success'));
         this.router.navigate(['/booking', item.id, 'details']);
@@ -443,6 +643,8 @@ export class BookingCloseComponent implements OnInit {
       }
       this.booking.set(b);
       this.settings.set(st);
+      this.patchPaymentFromBooking(b);
+      this.loadBookingsPaymentSum(b.id, fleetId);
       this.loadVehicleBranch(b, fleetId);
       const existing = Number(b.checkinCounter);
       if (Number.isFinite(existing) && existing > 0) {
@@ -459,15 +661,119 @@ export class BookingCloseComponent implements OnInit {
     const vehicleId = String(booking.vehicleId ?? '').trim();
     if (!vehicleId) {
       this.vehicleBranchId.set(null);
+      this.loadLookups();
       return;
     }
     this.vehicleService.getById(vehicleId, fleetId).subscribe({
       next: vehicle => {
         const branch = Number(vehicle?.branchId ?? 0);
         this.vehicleBranchId.set(Number.isFinite(branch) && branch > 0 ? branch : null);
+        this.loadLookups();
       },
-      error: () => this.vehicleBranchId.set(null),
+      error: () => {
+        this.vehicleBranchId.set(null);
+        this.loadLookups();
+      },
     });
+  }
+
+  private loadBookingsPaymentSum(bookingId: string, fleetId: string): void {
+    const idBooking = this.toBookingNumericId(bookingId);
+    if (!idBooking) {
+      this.bookingsPaymentSumFromApi.set(null);
+      return;
+    }
+    this.bookingsPaymentSumFromApi.set(null);
+    this.paymentCountService
+      .getSumForBooking(idBooking, fleetId)
+      .pipe(catchError(() => of(null)))
+      .subscribe(sum => {
+        this.bookingsPaymentSumFromApi.set(sum);
+      });
+  }
+
+  private patchPaymentFromBooking(b: Booking): void {
+    const ext = b as Booking & {
+      paymentType?: number;
+      idBank?: string;
+      idCash?: string;
+      paidCash?: number;
+      paidBank?: number;
+    };
+    const pt = Number(ext.paymentType);
+    this.paymentMethod.set(Number.isFinite(pt) && pt >= 1 && pt <= 5 ? pt : 1);
+    this.bankAccount.set(String(ext.idBank ?? '').trim());
+    this.cashAccount.set(String(ext.idCash ?? '').trim());
+    this.paidCash.set(Math.max(0, Number(ext.paidCash ?? 0) || 0));
+    this.paidBank.set(Math.max(0, Number(ext.paidBank ?? 0) || 0));
+    this.refundUserEdited.set(false);
+    this.refundAmount.set(0);
+    this.applyPaymentTypeRules(this.paymentMethod());
+  }
+
+  private loadLookups(): void {
+    const fleetId = this.authState.fleetId() || undefined;
+    const idBranch = resolveContractPaymentBranch({
+      vehicleBranchId: this.vehicleBranchId(),
+      bookingBranchId: this.booking()?.branchId,
+      loginBranchId: this.authState.branchId(),
+    });
+    forkJoin({
+      banks: this.bankService.getList(fleetId).pipe(catchError(() => of([]))),
+      cashAccounts: this.cashAccountService.getList(fleetId, idBranch).pipe(catchError(() => of([]))),
+    }).subscribe(({ banks, cashAccounts }) => {
+      this.banks.set(banks ?? []);
+      this.cashAccounts.set(cashAccounts ?? []);
+      this.applyPaymentTypeRules(this.paymentMethod());
+    });
+  }
+
+  private applyPaymentTypeRules(type: number): void {
+    const banksList = this.banks();
+    const cashList = this.cashAccounts();
+    const firstBankId = banksList.length > 0 ? String(banksList[0].id ?? '').trim() : '';
+    const firstCashId = cashList.length > 0 ? String(cashList[0].id ?? '').trim() : '';
+
+    if (type === 1) {
+      this.bankAccount.set('');
+      if (!this.cashAccount() && firstCashId) {
+        this.cashAccount.set(firstCashId);
+      }
+      this.paidBank.set(0);
+      return;
+    }
+
+    if ([2, 3, 4].includes(type)) {
+      this.cashAccount.set('');
+      if (!this.bankAccount() && firstBankId) {
+        this.bankAccount.set(firstBankId);
+      }
+      this.paidCash.set(0);
+      return;
+    }
+
+    if (!this.bankAccount() && firstBankId) {
+      this.bankAccount.set(firstBankId);
+    }
+    if (!this.cashAccount() && firstCashId) {
+      this.cashAccount.set(firstCashId);
+    }
+  }
+
+  private applyRefundDistribution(amount: number, type: number): void {
+    const split = distributeSettlementByPaymentType(
+      amount,
+      type,
+      Number(this.paidCash()) || 0,
+      Number(this.paidBank()) || 0,
+    );
+    this.paidCash.set(split.paidCash);
+    this.paidBank.set(split.paidBank);
+  }
+
+  private bankCashIdOrUndefined(value: string): string | undefined {
+    const s = String(value ?? '').trim().replace(/^\{|\}$/g, '');
+    return s ? s : undefined;
   }
 
   private buildCloseWarningMessages(

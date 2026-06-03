@@ -11,6 +11,7 @@ import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 import {
   SmoothSelectComponent,
   SmoothSelectOption,
@@ -21,6 +22,10 @@ import { CashAccount } from '../../../../finance/models/cash/cash-account.model'
 import { CashAccountService } from '../../../../finance/services/cash/cash-account.service';
 import { PaymentCountService } from '../../../../finance/services/payment-counts/payment-count.service';
 import { Booking, FinshBookingRequest } from '../../../models';
+import {
+  bookingStatusTone,
+  bookingStatusTranslationKey,
+} from '../../../models/booking/booking-status.utils';
 import { normalizeSetting } from '../../../models/settings/setting.normalizer';
 import { Setting } from '../../../models/settings/setting.model';
 import { BookingService } from '../../../services/booking/booking.service';
@@ -48,7 +53,16 @@ import {
 @Component({
   selector: 'app-booking-finish',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, PageHeaderComponent, SmoothSelectComponent, DatePickerComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    TranslateModule,
+    PageHeaderComponent,
+    SmoothSelectComponent,
+    DatePickerComponent,
+    StatusBadgeComponent,
+  ],
   templateUrl: './booking-finish.component.html',
   styleUrl: './booking-finish.component.scss',
 })
@@ -242,7 +256,7 @@ export class BookingFinishComponent implements OnInit {
     return !v.odometerOk || !v.timeOk;
   });
 
-  numberKmExcessComputed = computed(() => {
+  odometerDrivenKm = computed(() => {
     const b = this.booking();
     if (!b) {
       return 0;
@@ -252,9 +266,22 @@ export class BookingFinishComponent implements OnInit {
     if (ret === null) {
       return 0;
     }
-    const driven = Math.max(0, ret - checkout);
+    return Math.max(0, ret - checkout);
+  });
+
+  numberKmExcessComputed = computed(() => {
+    const driven = this.odometerDrivenKm();
     const allow = this.totalKmAllowance();
     return Math.max(0, Math.trunc(driven - allow));
+  });
+
+  computedRentalTotal = computed(() => {
+    const b = this.booking();
+    if (!b) {
+      return 0;
+    }
+    const priceInDay = Number(b.priceInDay ?? 0) || 0;
+    return Math.round(this.billingElapsedDays() * priceInDay * 100) / 100;
   });
 
   extraKmTotal = computed(() => {
@@ -391,6 +418,29 @@ export class BookingFinishComponent implements OnInit {
   fleetDisplay(item: Booking): string {
     const name = String(item.fleetName ?? '').trim();
     return name || this.valueOrDash(item.fleetId);
+  }
+
+  contractNumber(item: Booking): string {
+    return String(item.numberBookingINBasame ?? item.bookingNumber ?? item.id ?? '').trim() || '—';
+  }
+
+  statusBadgeLabelKey(status: Booking['status']): string {
+    return bookingStatusTranslationKey(status);
+  }
+
+  statusBadgeTone(status: Booking['status']): 'success' | 'warning' | 'danger' | 'secondary' | 'info' {
+    return bookingStatusTone(status);
+  }
+
+  vehicleTypeDisplay(item: Booking): string {
+    return this.valueOrDash(item.vehicleName ?? item.vehicleCategoryLabel);
+  }
+
+  dateOrDash(iso: string | undefined): string {
+    if (!iso?.trim()) {
+      return '—';
+    }
+    return this.formatDateTime(iso);
   }
 
   valueOrDash(value: string | number | null | undefined): string {
