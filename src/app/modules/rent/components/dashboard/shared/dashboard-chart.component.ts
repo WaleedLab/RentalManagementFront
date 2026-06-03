@@ -130,34 +130,51 @@ export class DashboardChartComponent implements AfterViewInit, OnChanges, OnDest
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: isRadial,
-            position: 'bottom',
-            labels: { color: '#64748b', boxWidth: 10 },
+        layout: {
+          padding: {
+            top: 4,
+            right: 4,
+            bottom: 4,
+            left: 4,
           },
         },
-        scales: isRadial
-          ? {}
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            enabled: true,
+          },
+        },
+        ...(isRadial
+          ? {
+              cutout: '62%',
+            }
           : {
-              y: {
-                beginAtZero: true,
-                grid: {
-                  color: 'rgba(148, 163, 184, 0.18)',
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  grid: {
+                    color: 'rgba(148, 163, 184, 0.18)',
+                  },
+                  ticks: {
+                    color: '#64748b',
+                    padding: 6,
+                  },
                 },
-                ticks: {
-                  color: '#64748b',
+                x: {
+                  grid: {
+                    display: false,
+                  },
+                  ticks: {
+                    color: '#64748b',
+                    padding: 6,
+                    maxRotation: 45,
+                    minRotation: 0,
+                  },
                 },
               },
-              x: {
-                grid: {
-                  display: false,
-                },
-                ticks: {
-                  color: '#64748b',
-                },
-              },
-            },
+            }),
       },
     };
 

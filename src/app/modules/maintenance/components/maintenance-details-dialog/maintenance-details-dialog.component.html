@@ -1,0 +1,168 @@
+<div class="maintenance-details-dialog" [attr.dir]="dialogDir">
+  <div class="modal-header maintenance-details-dialog__header">
+    <h5 class="modal-title">{{ title }}</h5>
+    <button
+      type="button"
+      class="btn-close maintenance-details-dialog__close"
+      [attr.aria-label]="'Close' | translate"
+      (click)="close()"
+    ></button>
+  </div>
+
+  <div class="modal-body maintenance-details-dialog__body">
+    <p class="maintenance-details-dialog__message">{{ message }}</p>
+
+    <div class="maintenance-details-dialog__meta">
+      <div class="maintenance-details-dialog__row">
+        <span class="maintenance-details-dialog__label">{{ 'maintenance.colPlate' | translate }}</span>
+        <span class="maintenance-details-dialog__value">{{ plateNumber || '-' }}</span>
+      </div>
+      <div class="maintenance-details-dialog__row">
+        <span class="maintenance-details-dialog__label">{{ 'maintenance.details.linesTotal' | translate }}</span>
+        <span class="maintenance-details-dialog__value">{{ formatMoney(detailsTotal()) }}</span>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="text-center py-4">
+        <div class="spinner-border text-primary" role="status" aria-live="polite"></div>
+      </div>
+    } @else {
+      <section class="maintenance-details-dialog__section">
+        <div class="maintenance-details-dialog__section-head">
+          <h6 class="maintenance-details-dialog__section-title">
+            {{ 'maintenance.details.existingTitle' | translate }}
+          </h6>
+          <span class="maintenance-details-dialog__count">{{ details().length }}</span>
+        </div>
+
+        @if (!details().length) {
+          <p class="maintenance-details-dialog__empty">{{ 'maintenance.details.empty' | translate }}</p>
+        } @else {
+          <div class="table-responsive maintenance-details-dialog__table-wrap">
+            <table class="table table-sm align-middle maintenance-details-dialog__table">
+              <thead>
+                <tr>
+                  <th>{{ 'maintenance.sparePart.colName' | translate }}</th>
+                  <th>{{ 'maintenance.supplier.colName' | translate }}</th>
+                  <th class="text-end">{{ 'maintenance.details.colPrice' | translate }}</th>
+                  <th class="text-end">{{ 'maintenance.details.colTax' | translate }}</th>
+                  <th>{{ 'maintenance.details.colInvoiceNo' | translate }}</th>
+                  <th>{{ 'maintenance.details.colInvoiceDate' | translate }}</th>
+                  <th class="text-end">{{ 'Actions' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of details(); track row.id) {
+                  <tr>
+                    <td>{{ row.sparePartName || row.idSparePartName }}</td>
+                    <td>{{ row.supplierName || row.idSupplier }}</td>
+                    <td class="text-end">{{ formatMoney(row.price) }}</td>
+                    <td class="text-end">{{ formatMoney(row.tax) }}</td>
+                    <td>{{ row.numberInvoice }}</td>
+                    <td>{{ formatDate(row.dateInvoice) }}</td>
+                    <td class="text-end">
+                      <button
+                        type="button"
+                        class="table-action-icon table-action-icon--danger"
+                        [disabled]="isDeleting(row.id)"
+                        (click)="deleteDetail(row)"
+                        [attr.aria-label]="'Delete' | translate"
+                        [title]="'Delete' | translate"
+                      >
+                        @if (isDeleting(row.id)) {
+                          <span class="spinner-border spinner-border-sm" role="status"></span>
+                        } @else {
+                          <i class="fa-solid fa-trash"></i>
+                        }
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+      <section class="maintenance-details-dialog__section">
+        <div class="maintenance-details-dialog__section-head">
+          <h6 class="maintenance-details-dialog__section-title">
+            {{ 'maintenance.details.addTitle' | translate }}
+          </h6>
+        </div>
+        <p class="maintenance-details-dialog__hint">{{ 'maintenance.details.addHint' | translate }}</p>
+
+        <form class="maintenance-details-dialog__form" [formGroup]="form" (ngSubmit)="addDetail()">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ 'maintenance.sparePart.fieldName' | translate }}</label>
+              <app-smooth-select
+                [options]="sparePartOptions()"
+                [value]="form.controls.idSparePartName.value ?? ''"
+                (valueChange)="onSparePartChange($event)"
+                [ariaLabel]="'maintenance.sparePart.fieldName' | translate"
+                [placeholder]="'maintenance.sparePart.selectPart' | translate"
+              />
+              @if (form.controls.idSparePartName.touched && form.controls.idSparePartName.invalid) {
+                <div class="text-danger small mt-1">{{ 'maintenance.details.invalidSparePart' | translate }}</div>
+              }
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">{{ 'maintenance.fieldSupplier' | translate }}</label>
+              <app-smooth-select
+                [options]="supplierOptions()"
+                [value]="form.controls.idSupplier.value ?? ''"
+                (valueChange)="onSupplierChange($event)"
+                [ariaLabel]="'maintenance.fieldSupplier' | translate"
+                [placeholder]="'maintenance.supplierPlaceholder' | translate"
+              />
+              @if (form.controls.idSupplier.touched && form.controls.idSupplier.invalid) {
+                <div class="text-danger small mt-1">{{ 'maintenance.details.invalidSupplier' | translate }}</div>
+              }
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">{{ 'maintenance.details.fieldPrice' | translate }}</label>
+              <input class="form-control" type="number" min="0" step="0.01" formControlName="price" />
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">{{ 'maintenance.details.fieldTax' | translate }}</label>
+              <input class="form-control" type="number" min="0" step="0.01" formControlName="tax" />
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">{{ 'maintenance.details.fieldInvoiceNo' | translate }}</label>
+              <input class="form-control" type="number" min="0" step="1" formControlName="numberInvoice" />
+            </div>
+
+            <div class="col-md-6">
+              <app-date-picker
+                formControlName="dateInvoice"
+                [label]="'maintenance.details.fieldInvoiceDate' | translate"
+              />
+              @if (form.controls.dateInvoice.touched && form.controls.dateInvoice.invalid) {
+                <div class="text-danger small mt-1">{{ 'maintenance.details.invalidInvoiceDate' | translate }}</div>
+              }
+            </div>
+          </div>
+
+          <div class="maintenance-details-dialog__form-actions">
+            <button class="btn btn-primary" type="submit" [disabled]="saving()">
+              @if (saving()) {
+                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+              }
+              {{ 'maintenance.details.addAction' | translate }}
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+  </div>
+
+  <div class="modal-footer maintenance-details-dialog__footer">
+    <button type="button" class="btn btn-cancel" (click)="close()">{{ 'Close' | translate }}</button>
+  </div>
+</div>

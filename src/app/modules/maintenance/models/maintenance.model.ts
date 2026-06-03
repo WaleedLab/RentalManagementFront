@@ -70,3 +70,12 @@ export interface MaintenanceAcceptRequest {
   /** Computed: start + duration days. */
   endDate: string;
 }
+
+/** `FinshMaintenceCommand` — `MaintenanceRouting.Finsh` → PUT `Maintenance/Finsh/{id}`. */
+export interface MaintenanceFinishRequest {
+  id: string | number;
+  fleetId: string;
+  endDate: string;
+  /** Sum of detail line price + tax. */
+  total: number;
+}

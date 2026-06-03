@@ -20,6 +20,15 @@ export class TrafficViolationService {
   private api = inject(BaseService);
   private readonly base = 'TrafficViolation';
 
+  /** `GET TrafficViolation/List` — `GetTrafficViolationsQuery` (fleet only). */
+  getList(fleetId?: string | null): Observable<TrafficViolation[]> {
+    return this.api
+      .getData<unknown[]>(`${this.base}/List`, {
+        ...buildFleetQueryParams(fleetId, 'both'),
+      })
+      .pipe(map(items => (items ?? []).map(normalizeTrafficViolation)));
+  }
+
   getPaginated(params: TrafficViolationFilters): Observable<PaginatedAggregatorResponse<TrafficViolation>> {
     const orderBy = params.orderBy ?? 0;
     const direction = params.orderByDirection ?? 'DESC';

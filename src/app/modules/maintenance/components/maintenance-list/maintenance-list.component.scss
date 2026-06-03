@@ -10,3 +10,69 @@
 .maintenance-table th {
   white-space: nowrap;
 }
+
+.maintenance-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.75rem;
+  padding: 0.34rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(var(--rt-shadow-rgb, 15 23 42), 0.08);
+}
+
+.maintenance-status-badge--pending {
+  color: #164a82;
+  background: color-mix(in srgb, var(--rt-info) 24%, #ffffff 76%);
+  border-color: color-mix(in srgb, var(--rt-info) 58%, transparent);
+}
+
+.maintenance-status-badge--in-progress {
+  color: #7a4d00;
+  background: color-mix(in srgb, var(--rt-warning) 28%, #ffffff 72%);
+  border-color: color-mix(in srgb, var(--rt-warning) 62%, transparent);
+}
+
+.maintenance-status-badge--completed {
+  color: #0b6b4f;
+  background: color-mix(in srgb, var(--rt-success) 24%, #ffffff 76%);
+  border-color: color-mix(in srgb, var(--rt-success) 58%, transparent);
+}
+
+.maintenance-status-badge--unknown {
+  color: var(--app-table-muted-color);
+  background: color-mix(in srgb, var(--app-table-muted-color) 14%, transparent);
+  border-color: color-mix(in srgb, var(--app-table-muted-color) 32%, transparent);
+}
+
+:host-context(body.dark-only) {
+  .maintenance-status-badge {
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .maintenance-status-badge--pending {
+    color: #b8dcff;
+    background: color-mix(in srgb, var(--rt-info) 42%, rgba(var(--c-0f172a-rgb), 0.92) 58%);
+    border-color: color-mix(in srgb, var(--rt-info) 72%, transparent);
+  }
+
+  .maintenance-status-badge--in-progress {
+    color: #ffe08a;
+    background: color-mix(in srgb, var(--rt-warning) 38%, rgba(var(--c-0f172a-rgb), 0.92) 62%);
+    border-color: color-mix(in srgb, var(--rt-warning) 72%, transparent);
+  }
+
+  .maintenance-status-badge--completed {
+    color: #8ef0cf;
+    background: color-mix(in srgb, var(--rt-success) 38%, rgba(var(--c-0f172a-rgb), 0.92) 62%);
+    border-color: color-mix(in srgb, var(--rt-success) 72%, transparent);
+  }
+}

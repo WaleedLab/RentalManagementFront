@@ -25,6 +25,13 @@ import {
   MaintenanceAcceptDialogComponent,
   MaintenanceAcceptDialogResult,
 } from '../maintenance-accept-dialog/maintenance-accept-dialog.component';
+import {
+  MaintenanceDetailsDialogComponent,
+} from '../maintenance-details-dialog/maintenance-details-dialog.component';
+import {
+  MaintenanceFinishDialogComponent,
+  MaintenanceFinishDialogResult,
+} from '../maintenance-finish-dialog/maintenance-finish-dialog.component';
 import { MaintenanceBranchService } from '../../services/maintenance-branch.service';
 import { MaintenanceService } from '../../services/maintenance.service';
 
@@ -67,6 +74,7 @@ export class MaintenanceListComponent implements OnInit {
   branchId = signal<number | ''>('');
   deletingIds = signal<string[]>([]);
   acceptingIds = signal<string[]>([]);
+  finishingIds = signal<string[]>([]);
   private readonly languageTick = signal(0);
 
   branchFilterOptions = computed<SmoothSelectOption[]>(() => {
@@ -165,6 +173,66 @@ export class MaintenanceListComponent implements OnInit {
     return this.acceptingIds().includes(id);
   }
 
+  canManageDetails(row: Maintenance): boolean {
+    return this.isInProgress(row);
+  }
+
+  canFinish(row: Maintenance): boolean {
+    return this.isInProgress(row);
+  }
+
+  isFinishing(id: string): boolean {
+    return this.finishingIds().includes(id);
+  }
+
+  isInProgress(row: Maintenance): boolean {
+    const status = row.status;
+    if (status === 'InProgress' || status === 1) {
+      return true;
+    }
+    if (typeof status === 'string' && status.trim().toLowerCase() === 'inprogress') {
+      return true;
+    }
+    return false;
+  }
+
+  openDetailsDialog(row: Maintenance): void {
+    const fleetId = this.authState.fleetId()?.trim();
+    if (!fleetId) {
+      this.toast.error(this.translate.instant('FleetId is required'));
+      return;
+    }
+
+    const modalRef = this.modal.open(MaintenanceDetailsDialogComponent, {
+      centered: true,
+      size: 'lg',
+      scrollable: true,
+      windowClass: 'maintenance-details-modal',
+    });
+
+    const label = row.plateNumber || `#${row.id}`;
+    modalRef.componentInstance.title = this.translate.instant('maintenance.details.title');
+    modalRef.componentInstance.message = this.translate.instant('maintenance.details.message', {
+      vehicle: label,
+    });
+    modalRef.componentInstance.plateNumber = label;
+    modalRef.componentInstance.maintenanceId = row.id;
+    modalRef.componentInstance.fleetId = fleetId;
+
+    let changed = false;
+    const dialog = modalRef.componentInstance as MaintenanceDetailsDialogComponent;
+    dialog.result.subscribe(value => {
+      if (value) {
+        changed = true;
+      }
+    });
+    modalRef.closed.subscribe(() => {
+      if (changed) {
+        this.load();
+      }
+    });
+  }
+
   openAcceptDialog(row: Maintenance): void {
     const fleetId = this.authState.fleetId()?.trim();
     if (!fleetId) {
@@ -202,6 +270,47 @@ export class MaintenanceListComponent implements OnInit {
           this.toast.error(err?.message ?? this.translate.instant('maintenance.accept.failed')),
         complete: () =>
           this.acceptingIds.update(ids => ids.filter(id => id !== row.id)),
+      });
+    });
+  }
+
+  openFinishDialog(row: Maintenance): void {
+    const fleetId = this.authState.fleetId()?.trim();
+    if (!fleetId) {
+      this.toast.error(this.translate.instant('FleetId is required'));
+      return;
+    }
+
+    const modalRef = this.modal.open(MaintenanceFinishDialogComponent, {
+      centered: true,
+      windowClass: 'maintenance-finish-modal',
+    });
+
+    const label = row.plateNumber || `#${row.id}`;
+    modalRef.componentInstance.title = this.translate.instant('maintenance.finish.title');
+    modalRef.componentInstance.message = this.translate.instant('maintenance.finish.message', {
+      vehicle: label,
+    });
+    modalRef.componentInstance.plateNumber = label;
+    modalRef.componentInstance.maintenanceId = row.id;
+    modalRef.componentInstance.fleetId = fleetId;
+
+    const dialog = modalRef.componentInstance as MaintenanceFinishDialogComponent;
+    dialog.result.subscribe((payload: MaintenanceFinishDialogResult) => {
+      if (!payload) {
+        return;
+      }
+
+      this.finishingIds.update(ids => [...ids, row.id]);
+      this.api.finish(payload).subscribe({
+        next: () => {
+          this.toast.success(this.translate.instant('maintenance.finish.success'));
+          this.load();
+        },
+        error: err =>
+          this.toast.error(err?.message ?? this.translate.instant('maintenance.finish.failed')),
+        complete: () =>
+          this.finishingIds.update(ids => ids.filter(id => id !== row.id)),
       });
     });
   }
@@ -261,6 +370,42 @@ export class MaintenanceListComponent implements OnInit {
     return this.isArabicUi()
       ? branch.nameAr || branch.nameEn || String(branch.id)
       : branch.nameEn || branch.nameAr || String(branch.id);
+  }
+
+  statusBadgeClass(status: number | string | unknown): string {
+    return `maintenance-status-badge maintenance-status-badge--${this.resolveStatusTone(status)}`;
+  }
+
+  private resolveStatusTone(
+    status: number | string | unknown,
+  ): 'pending' | 'in-progress' | 'completed' | 'unknown' {
+    if (typeof status === 'string' && status.trim()) {
+      const normalized = status.trim().toLowerCase().replace(/[\s_-]/g, '');
+      if (normalized === 'pending') {
+        return 'pending';
+      }
+      if (normalized === 'inprogress') {
+        return 'in-progress';
+      }
+      if (normalized === 'completed') {
+        return 'completed';
+      }
+    }
+
+    const numeric = typeof status === 'number' ? status : Number(status);
+    if (Number.isFinite(numeric)) {
+      if (numeric === 0) {
+        return 'pending';
+      }
+      if (numeric === 1) {
+        return 'in-progress';
+      }
+      if (numeric === 2) {
+        return 'completed';
+      }
+    }
+
+    return 'unknown';
   }
 
   statusLabel(status: number | string | unknown): string {

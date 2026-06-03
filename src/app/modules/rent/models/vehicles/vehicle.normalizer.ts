@@ -110,7 +110,8 @@ export function normalizeVehicle(raw: unknown): Vehicle {
       pick<string>(source, 'branchNameEn', 'BranchNameEn'),
     categoryVehicleId: String(categoryVehicleIdResolved ?? ''),
     idCategoryVehicle: idCategoryVehicle ?? null,
-    categoryName: pick<string>(source, 'categoryName', 'CategoryName'),
+    categoryName:
+      pick<string>(source, 'categoryName', 'CategoryName', 'categoryVehicleName', 'CategoryVehicleName'),
     serialNumber: serialNumber,
     engine: engine,
     yearMake: yearMake,
