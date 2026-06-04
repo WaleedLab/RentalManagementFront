@@ -306,6 +306,14 @@ export interface SuspendedBookingRequest extends FinshBookingRequest {
   stutus: BookingSuspendedStatus;
 }
 
+/**
+ * POST `Booking/TranslateBooking` — `TranslateBookingCommand` (sets `Stutus` to `translate`).
+ */
+export interface TranslateBookingRequest {
+  id: number;
+  fleetId: string;
+}
+
 /** POST `Booking/close` — maps to `CloseBookingCommand` (sets `Stutus` to `close`, history, vehicle available). */
 export interface CloseBookingRequest {
   id: number;

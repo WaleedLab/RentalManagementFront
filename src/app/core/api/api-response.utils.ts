@@ -11,23 +11,79 @@ export function unwrapEnvelope<T>(response: ResultEnvelope<T>): T {
   return response.data;
 }
 
+function readEnvelopeStringList(envelope: Record<string, unknown>, key: string): string[] {
+  const raw = envelope[key];
+  if (Array.isArray(raw)) {
+    return raw.map(item => String(item)).filter(Boolean);
+  }
+  return [];
+}
+
+function readEnvelopePropertyErrors(envelope: Record<string, unknown>): Record<string, string[]> {
+  const raw = envelope['propertyErrors'] ?? envelope['PropertyErrors'];
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+    return raw as Record<string, string[]>;
+  }
+  return {};
+}
+
+export function extractApiErrorBodyMessage(errorBody: unknown): string | null {
+  if (typeof errorBody === 'string') {
+    const t = errorBody.trim();
+    return t.length > 0 ? t.slice(0, 800) : null;
+  }
+  if (!errorBody || typeof errorBody !== 'object') {
+    return null;
+  }
+  const e = errorBody as Record<string, unknown>;
+  const errors = [
+    ...readEnvelopeStringList(e, 'errors'),
+    ...readEnvelopeStringList(e, 'Errors'),
+  ];
+  if (errors.length) {
+    return errors.join(' ').slice(0, 800);
+  }
+  const propertyErrors = readEnvelopePropertyErrors(e);
+  const validationMessages = Object.values(propertyErrors).flatMap(value =>
+    Array.isArray(value) ? value.map(item => String(item)).filter(Boolean) : [],
+  );
+  if (validationMessages.length) {
+    return validationMessages.join(' ').slice(0, 800);
+  }
+  const message = e['message'] ?? e['Message'];
+  if (typeof message === 'string' && message.trim()) {
+    return message.trim().slice(0, 800);
+  }
+  const title = typeof e['title'] === 'string' ? e['title'].trim() : '';
+  const detail = typeof e['detail'] === 'string' ? e['detail'].trim() : '';
+  if (title || detail) {
+    return `${title}${title && detail ? ': ' : ''}${detail}`.trim();
+  }
+  return null;
+}
+
 export function normalizeApiError(error: unknown): NormalizedApiError {
   if (error instanceof HttpErrorResponse) {
-    const envelope = error.error ?? {};
-    const errors = Array.isArray(envelope.errors)
-      ? envelope.errors.map((item: unknown) => String(item))
-      : [];
-    const propertyErrors =
-      envelope.propertyErrors && typeof envelope.propertyErrors === 'object'
-        ? (envelope.propertyErrors as Record<string, string[]>)
+    const envelope =
+      error.error && typeof error.error === 'object'
+        ? (error.error as Record<string, unknown>)
         : {};
+    const errors = [
+      ...readEnvelopeStringList(envelope, 'errors'),
+      ...readEnvelopeStringList(envelope, 'Errors'),
+    ];
+    const propertyErrors = readEnvelopePropertyErrors(envelope);
     const validationMessages = Object.values(propertyErrors).flatMap(value =>
-      Array.isArray(value) ? value.map(item => String(item)) : [],
+      Array.isArray(value) ? value.map(item => String(item)).filter(Boolean) : [],
     );
+    const fromBody = extractApiErrorBodyMessage(error.error);
     const message =
       errors[0] ||
       validationMessages[0] ||
-      envelope.message ||
+      fromBody ||
+      (typeof envelope['message'] === 'string' ? envelope['message'] : '') ||
+      (typeof envelope['Message'] === 'string' ? envelope['Message'] : '') ||
+      (error.status === 404 ? 'API endpoint not found' : '') ||
       error.message ||
       'Unexpected error';
 

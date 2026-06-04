@@ -1052,6 +1052,33 @@ body.dark-only .page-wrapper.compact-wrapper .page-header .header-wrapper .toggl
       .sidebar-wrapper.close_icon .logo-icon-wrapper,
       .sidebar-wrapper.close_icon:hover .logo-icon-wrapper {
         display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        /* نفس ارتفاع الهيدر (`--app-compact-header-offset`) لمحاذاة الشعار مع الشريط العلوي */
+        min-height: var(--app-compact-header-offset) !important;
+        height: var(--app-compact-header-offset) !important;
+        padding: 6px 8px !important;
+        box-sizing: border-box !important;
+        flex-shrink: 0 !important;
+
+        a {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          width: 100% !important;
+          height: 100% !important;
+          min-width: 0 !important;
+        }
+
+        img {
+          display: block !important;
+          width: auto !important;
+          height: auto !important;
+          max-width: calc(100% - 4px) !important;
+          max-height: calc(var(--app-compact-header-offset) - 12px) !important;
+          object-fit: contain !important;
+          margin-inline: auto !important;
+        }
       }
 
       .page-body {

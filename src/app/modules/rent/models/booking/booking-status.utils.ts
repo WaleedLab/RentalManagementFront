@@ -198,7 +198,7 @@ export const BOOKING_STATUS_THEME: Record<BookingStatusKey, BookingStatusTheme> 
     'accident',
   ),
   translate: bookingStatusThemeFromTokens(
-    { labelAr: 'تحويل', labelEn: 'Transferred', iconClass: 'fa-solid fa-right-left' },
+    { labelAr: 'ذمم', labelEn: 'Receivables', iconClass: 'fa-solid fa-building-columns' },
     'translate',
   ),
   close: bookingStatusThemeFromTokens(
@@ -210,7 +210,7 @@ export const BOOKING_STATUS_THEME: Record<BookingStatusKey, BookingStatusTheme> 
     'extension',
   ),
   Suspended_due_to_sum_money: bookingStatusThemeFromTokens(
-    { labelAr: 'ذمم', labelEn: 'Amount due', iconClass: 'fa-solid fa-building-columns' },
+    { labelAr: 'تعليق مالي', labelEn: 'Financial hold', iconClass: 'fa-solid fa-pause-circle' },
     'debt',
   ),
   Payment_on_account: bookingStatusThemeFromTokens(
@@ -227,9 +227,39 @@ export const BOOKING_STATUS_THEME: Record<BookingStatusKey, BookingStatusTheme> 
   ),
 };
 
+/** Maps normalized booking status → `_color-system.scss` token slug. */
+export function bookingStatusTokenSlug(status: string): BookingStatusTokenSlug {
+  const key = bookingStatusFromCode(status);
+  switch (key) {
+    case 'open':
+      return 'open';
+    case 'extension':
+      return 'extension';
+    case 'finsh':
+      return 'finished';
+    case 'close':
+      return 'closed';
+    case 'Suspended_due_to_accident':
+      return 'accident';
+    case 'Suspended_due_to_sum_money':
+      return 'debt';
+    case 'translate':
+      return 'translate';
+    case 'Payment_on_account':
+      return 'payment';
+    default:
+      return 'unknown';
+  }
+}
+
 export function getBookingStatusTheme(status: string): BookingStatusTheme {
-  const key = (status || 'Unknown') as BookingStatusKey;
+  const key = bookingStatusFromCode(status);
   return BOOKING_STATUS_THEME[key] ?? BOOKING_STATUS_THEME.Unknown;
+}
+
+/** Status pill modifier — pairs with rules in `_color-system.scss`. */
+export function getBookingStatusBadgeClass(status: string): string {
+  return `booking-status-pill--${bookingStatusTokenSlug(status)}`;
 }
 
 export function getBookingLegendItems(): Array<{
@@ -250,6 +280,18 @@ export function getBookingLegendItems(): Array<{
   );
 }
 
+/** Same tokens as booking list card left border (`_color-system.scss`). */
+const BOOKING_LIST_LEGEND_ACCENT: Partial<Record<BookingStatusKey, string>> = {
+  open: 'var(--app-booking-list-accent-open)',
+  extension: 'var(--app-booking-list-accent-extension)',
+  finsh: 'var(--app-booking-list-accent-finished)',
+  close: 'var(--app-booking-list-accent-closed)',
+  Suspended_due_to_accident: 'var(--app-booking-list-accent-suspended-accident)',
+  Suspended_due_to_sum_money: 'var(--app-booking-list-accent-suspended-debt)',
+  translate: 'var(--app-booking-list-accent-translate)',
+  Unknown: 'var(--app-booking-list-accent-unknown)',
+};
+
 /** Primary statuses shown in the booking list color guide (most common). */
 export const BOOKING_LIST_COLOR_GUIDE_KEYS: BookingStatusKey[] = [
   'open',
@@ -258,6 +300,7 @@ export const BOOKING_LIST_COLOR_GUIDE_KEYS: BookingStatusKey[] = [
   'close',
   'Suspended_due_to_accident',
   'Suspended_due_to_sum_money',
+  'translate',
 ];
 
 /** CSS modifier for booking list card status accent (uses --app-booking-list-accent-* tokens). */
@@ -276,6 +319,8 @@ export function getBookingListCardStatusClass(status: string): string {
       return 'booking-card--status-suspended-accident';
     case 'Suspended_due_to_sum_money':
       return 'booking-card--status-suspended-debt';
+    case 'translate':
+      return 'booking-card--status-translate';
     default:
       return 'booking-card--status-unknown';
   }
@@ -290,8 +335,8 @@ export function getBookingListColorGuideItems(
     return {
       key,
       label: useAr ? theme.labelAr : theme.labelEn,
-      /** نفس لون الشارة على كرت الحجز (`theme.color`). */
-      color: theme.color,
+      /** نفس لون الحافة على كرت الحجز — `--app-booking-list-accent-*`. */
+      color: BOOKING_LIST_LEGEND_ACCENT[key] ?? BOOKING_LIST_LEGEND_ACCENT.Unknown!,
     };
   });
 }
