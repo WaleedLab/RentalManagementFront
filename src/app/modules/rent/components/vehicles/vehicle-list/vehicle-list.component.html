@@ -119,8 +119,8 @@
               [ngClass]="getVehicleStatusChipClass(vehicle.status)"
               [attr.aria-label]="('Status' | translate) + ': ' + getStatusLabel(vehicle.status)"
             >
+              <span class="vehicle-card__status-label">{{ getStatusLabel(vehicle.status) }}</span>
               <span class="vehicle-card__status-dot" aria-hidden="true"></span>
-              <span>{{ getStatusLabel(vehicle.status) }}</span>
             </span>
             <div class="vehicle-card__media">
               <img
@@ -181,6 +181,20 @@
                 >
                   <i class="fa-solid fa-location-dot"></i>
                 </a>
+                <button
+                  class="table-action-icon table-action-icon--maintenance vehicle-card__action"
+                  type="button"
+                  [disabled]="!canAddToMaintenance(vehicle) || isAddingToMaintenance(vehicle.id)"
+                  (click)="addVehicleToMaintenance(vehicle)"
+                  [attr.aria-label]="'vehicles.addToMaintenance.action' | translate"
+                  [title]="'vehicles.addToMaintenance.action' | translate"
+                >
+                  @if (isAddingToMaintenance(vehicle.id)) {
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                  } @else {
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                  }
+                </button>
                 <button
                   class="table-action-icon table-action-icon--warning vehicle-card__action"
                   type="button"

@@ -310,19 +310,47 @@ html body.light-only {
   --app-fleet-plate-hover-shadow: 0 4px 12px -8px rgba(var(--rt-shadow-rgb), 0.22);
   --app-fleet-status-available-bg: rgba(var(--rt-success-rgb), 0.14);
   --app-fleet-status-available-fg: #14532d;
-  --app-fleet-status-available-border: rgba(var(--rt-success-rgb), 0.35);
+  --app-fleet-status-available-border: rgba(var(--rt-success-rgb), 0.45);
   --app-fleet-status-booked-bg: rgba(var(--rt-warning-rgb), 0.16);
   --app-fleet-status-booked-fg: #78350f;
-  --app-fleet-status-booked-border: rgba(var(--rt-warning-rgb), 0.38);
+  --app-fleet-status-booked-border: rgba(var(--rt-warning-rgb), 0.48);
   --app-fleet-status-maintenance-bg: rgba(var(--rt-error-rgb), 0.12);
   --app-fleet-status-maintenance-fg: #991b1b;
-  --app-fleet-status-maintenance-border: rgba(var(--rt-error-rgb), 0.34);
+  --app-fleet-status-maintenance-border: rgba(var(--rt-error-rgb), 0.44);
   --app-fleet-status-inactive-bg: rgba(var(--c-64748b-rgb), 0.14);
   --app-fleet-status-inactive-fg: #334155;
-  --app-fleet-status-inactive-border: rgba(var(--c-64748b-rgb), 0.32);
+  --app-fleet-status-inactive-border: rgba(var(--c-64748b-rgb), 0.4);
   --app-fleet-status-sold-bg: rgba(124, 58, 237, 0.12);
   --app-fleet-status-sold-fg: #5b21b6;
-  --app-fleet-status-sold-border: rgba(124, 58, 237, 0.35);
+  --app-fleet-status-sold-border: rgba(124, 58, 237, 0.42);
+  --app-fleet-status-pill-dot-ring: rgba(255, 255, 255, 0.88);
+  --app-fleet-status-pill-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.55) inset,
+    0 8px 20px -8px rgba(var(--rt-shadow-rgb), 0.28);
+  --app-fleet-status-pill-shadow-hover:
+    0 0 0 1px rgba(255, 255, 255, 0.62) inset,
+    0 10px 22px -8px rgba(var(--rt-shadow-rgb), 0.34);
+  --app-fleet-status-pill-available-bg: color-mix(
+    in srgb,
+    rgba(var(--rt-success-rgb), 0.22) 68%,
+    #ffffff 32%
+  );
+  --app-fleet-status-pill-booked-bg: color-mix(
+    in srgb,
+    rgba(var(--rt-warning-rgb), 0.24) 68%,
+    #ffffff 32%
+  );
+  --app-fleet-status-pill-maintenance-bg: color-mix(
+    in srgb,
+    rgba(var(--rt-error-rgb), 0.2) 68%,
+    #ffffff 32%
+  );
+  --app-fleet-status-pill-inactive-bg: color-mix(
+    in srgb,
+    rgba(var(--c-64748b-rgb), 0.2) 68%,
+    #ffffff 32%
+  );
+  --app-fleet-status-pill-sold-bg: color-mix(in srgb, rgba(124, 58, 237, 0.2) 68%, #ffffff 32%);
 
   /* Booking contract status — muted palette (badges, legend, list card accent, details) */
   --app-booking-status-open: #5b8fce;
@@ -776,20 +804,52 @@ html[data-bs-theme='dark'] {
   --app-fleet-plate-shadow: 0 1px 5px -2px rgba(var(--rt-shadow-rgb), 0.45);
   --app-fleet-plate-hover-shadow: 0 4px 14px -8px rgba(var(--rt-shadow-rgb), 0.55);
   --app-fleet-status-available-bg: rgba(var(--rt-success-rgb), 0.2);
-  --app-fleet-status-available-fg: #86efac;
-  --app-fleet-status-available-border: rgba(var(--rt-success-rgb), 0.42);
+  --app-fleet-status-available-fg: #bbf7d0;
+  --app-fleet-status-available-border: rgba(var(--rt-success-rgb), 0.55);
   --app-fleet-status-booked-bg: rgba(var(--rt-warning-rgb), 0.22);
   --app-fleet-status-booked-fg: #fde68a;
-  --app-fleet-status-booked-border: rgba(var(--rt-warning-rgb), 0.45);
+  --app-fleet-status-booked-border: rgba(var(--rt-warning-rgb), 0.55);
   --app-fleet-status-maintenance-bg: rgba(var(--rt-error-rgb), 0.2);
   --app-fleet-status-maintenance-fg: #fecaca;
-  --app-fleet-status-maintenance-border: rgba(var(--rt-error-rgb), 0.42);
+  --app-fleet-status-maintenance-border: rgba(var(--rt-error-rgb), 0.52);
   --app-fleet-status-inactive-bg: rgba(var(--c-64748b-rgb), 0.22);
-  --app-fleet-status-inactive-fg: #cbd5e1;
-  --app-fleet-status-inactive-border: rgba(var(--c-64748b-rgb), 0.4);
+  --app-fleet-status-inactive-fg: #e2e8f0;
+  --app-fleet-status-inactive-border: rgba(var(--c-64748b-rgb), 0.5);
   --app-fleet-status-sold-bg: rgba(167, 139, 250, 0.18);
-  --app-fleet-status-sold-fg: #ddd6fe;
-  --app-fleet-status-sold-border: rgba(167, 139, 250, 0.42);
+  --app-fleet-status-sold-fg: #ede9fe;
+  --app-fleet-status-sold-border: rgba(167, 139, 250, 0.52);
+  --app-fleet-status-pill-dot-ring: rgba(15, 23, 42, 0.72);
+  --app-fleet-status-pill-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+    0 10px 22px -8px rgba(0, 0, 0, 0.55);
+  --app-fleet-status-pill-shadow-hover:
+    0 0 0 1px rgba(255, 255, 255, 0.14) inset,
+    0 12px 26px -8px rgba(0, 0, 0, 0.62);
+  --app-fleet-status-pill-available-bg: color-mix(
+    in srgb,
+    rgba(var(--rt-success-rgb), 0.38) 72%,
+    rgba(var(--c-0f172a-rgb), 0.88) 28%
+  );
+  --app-fleet-status-pill-booked-bg: color-mix(
+    in srgb,
+    rgba(var(--rt-warning-rgb), 0.4) 72%,
+    rgba(var(--c-0f172a-rgb), 0.88) 28%
+  );
+  --app-fleet-status-pill-maintenance-bg: color-mix(
+    in srgb,
+    rgba(var(--rt-error-rgb), 0.36) 72%,
+    rgba(var(--c-0f172a-rgb), 0.88) 28%
+  );
+  --app-fleet-status-pill-inactive-bg: color-mix(
+    in srgb,
+    rgba(var(--c-64748b-rgb), 0.42) 72%,
+    rgba(var(--c-0f172a-rgb), 0.88) 28%
+  );
+  --app-fleet-status-pill-sold-bg: color-mix(
+    in srgb,
+    rgba(167, 139, 250, 0.34) 72%,
+    rgba(var(--c-0f172a-rgb), 0.88) 28%
+  );
 
   --app-booking-status-open: #6e9ed4;
   --app-booking-status-open-soft: #8ab3de;
