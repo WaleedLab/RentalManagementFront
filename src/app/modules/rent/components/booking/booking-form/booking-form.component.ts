@@ -28,6 +28,11 @@ import {
 import { normalizeApiError } from '../../../../../core/api/api-response.utils';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch-id.util';
+import {
+  isValidMobileNumber,
+  mobileNumberValidators,
+  sanitizeMobileDigits,
+} from '../../../../../shared/utils/mobile-number.util';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
@@ -370,6 +375,8 @@ export class BookingFormComponent implements OnInit {
     {
       label: 'Primary Mobile Number',
       resolver: customer => this.valueOf(customer.firstMobileNumber ?? customer.phoneNumber),
+      isComplete: customer =>
+        isValidMobileNumber(customer.firstMobileNumber ?? customer.phoneNumber ?? ''),
     },
     {
       label: 'Driving License Expiry Date',
@@ -410,7 +417,7 @@ export class BookingFormComponent implements OnInit {
       ],
     ],
     customerNameAr: ['', [Validators.maxLength(200)]],
-    customerFirstMobileNumber: ['', [Validators.maxLength(20)]],
+    customerFirstMobileNumber: ['', mobileNumberValidators({ required: false })],
     customerAddress: ['', [Validators.maxLength(500)]],
     customerNationality: ['', [Validators.maxLength(200)]],
     customerDrivingLicenseNumber: ['', [Validators.maxLength(50)]],
@@ -827,11 +834,15 @@ export class BookingFormComponent implements OnInit {
       birthDayOut = this.resolveCustomerBirthForBookingApi(selectedCustomer);
 
       nameArOut = (selectedCustomer.nameAr || selectedCustomer.fullName || '').trim();
-      firstMobileNumberOut = this.normalizeSaudiMobile(
+      firstMobileNumberOut = sanitizeMobileDigits(
         this.normalizeAsciiDigits(
           (selectedCustomer.firstMobileNumber || selectedCustomer.phoneNumber || '').trim(),
         ),
       );
+      if (!isValidMobileNumber(firstMobileNumberOut)) {
+        this.toast.error(this.translate.instant('Primary mobile number is required and must be valid.'));
+        return;
+      }
       addressOut = (selectedCustomer.address || '').trim();
       nationalityOut = (selectedCustomer.nationality || '').trim();
       drivingLicenseApi = licenseResult.api;
@@ -851,7 +862,7 @@ export class BookingFormComponent implements OnInit {
           : Number(selectedCustomer.id) || 0;
     } else {
       const manualNameAr = raw.customerNameAr.trim();
-      const manualMobile = this.normalizeSaudiMobile(
+      const manualMobile = sanitizeMobileDigits(
         this.normalizeAsciiDigits(raw.customerFirstMobileNumber.trim()),
       );
       const manualNationality = raw.customerNationality.trim();
@@ -861,6 +872,10 @@ export class BookingFormComponent implements OnInit {
         this.toast.error(
           this.translate.instant('Complete customer basic information before booking'),
         );
+        return;
+      }
+      if (!isValidMobileNumber(manualMobile)) {
+        this.toast.error(this.translate.instant('Primary mobile number is required and must be valid.'));
         return;
       }
       nameArOut = manualNameAr;
@@ -1802,6 +1817,8 @@ export class BookingFormComponent implements OnInit {
       }
       if (!this.valueOf(raw.customerFirstMobileNumber)) {
         missing.push(this.translate.instant('Primary Mobile Number'));
+      } else if (!isValidMobileNumber(raw.customerFirstMobileNumber)) {
+        missing.push(this.translate.instant('Primary mobile number is required and must be valid.'));
       }
       if (!this.valueOf(raw.customerNationality)) {
         missing.push(this.translate.instant('Nationality'));
@@ -1971,6 +1988,12 @@ export class BookingFormComponent implements OnInit {
         return fail(
           this.translate.instant('Complete customer basic information before booking'),
           ['customerNameAr', 'customerFirstMobileNumber', 'customerNationality'],
+        );
+      }
+      if (!isValidMobileNumber(raw.customerFirstMobileNumber)) {
+        return fail(
+          this.translate.instant('Primary mobile number is required and must be valid.'),
+          ['customerFirstMobileNumber'],
         );
       }
       if (!this.bookingCalendarDateToApi(raw.customerDateDrivinglicense)) {
@@ -3068,22 +3091,9 @@ export class BookingFormComponent implements OnInit {
     return true;
   }
 
-  /** Common Saudi local format → E.164 (+9665xxxxxxxx) when applicable. */
+  /** Keep only local mobile digits (max 10). */
   private normalizeSaudiMobile(value: string): string {
-    const v = value.replace(/\s+/g, '');
-    if (/^\+9665\d{8}$/.test(v)) {
-      return v;
-    }
-    if (/^009665\d{8}$/.test(v)) {
-      return `+966${v.slice(4)}`;
-    }
-    if (/^05\d{8}$/.test(v)) {
-      return `+966${v.slice(1)}`;
-    }
-    if (/^5\d{8}$/.test(v)) {
-      return `+966${v}`;
-    }
-    return value.trim();
+    return sanitizeMobileDigits(value);
   }
 
   /** Send API-friendly ISO dates when possible; otherwise pass through trimmed string. */

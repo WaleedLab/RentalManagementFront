@@ -8,11 +8,12 @@ import { normalizePaginatedResponse } from '../../../shared/utils/paginated-resp
 import {
   Maintenance,
   MaintenanceAcceptRequest,
+  MaintenanceByBookingSummary,
   MaintenanceFilters,
   MaintenanceFinishRequest,
   MaintenanceUpsertRequest,
 } from '../models/maintenance.model';
-import { normalizeMaintenance } from '../models/maintenance.normalizer';
+import { normalizeMaintenance, normalizeMaintenanceByBookingSummary } from '../models/maintenance.normalizer';
 
 /**
  * Matches `MaintenanceRouting`:
@@ -79,6 +80,23 @@ export class MaintenanceService {
     return this.api
       .getData<unknown>(`${this.base}/${encodedId}/${encodedFleet}`)
       .pipe(map(raw => normalizeMaintenance(raw)));
+  }
+
+  /**
+   * `GET Maintenance/GetTotal/{idbooking}/{fleetid}` — maintenance linked to a booking (accident flow).
+   */
+  getTotalByBooking(idBooking: number, fleetId: string): Observable<MaintenanceByBookingSummary | null> {
+    const fid = normalizeFleetId(fleetId);
+    if (!fid || !Number.isFinite(idBooking) || idBooking <= 0) {
+      return throwError(() => new Error('FleetId and booking id are required'));
+    }
+    const encodedBooking = encodeURIComponent(String(idBooking));
+    const encodedFleet = encodeURIComponent(fid);
+    return this.api
+      .getData<unknown>(`${this.base}/GetTotal/${encodedBooking}/${encodedFleet}`, undefined, {
+        suppressErrorToast: true,
+      })
+      .pipe(map(raw => (raw == null ? null : normalizeMaintenanceByBookingSummary(raw))));
   }
 
   create(body: MaintenanceUpsertRequest): Observable<unknown> {

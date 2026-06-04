@@ -109,16 +109,18 @@ export function bookingStatusTone(
 ): 'success' | 'warning' | 'danger' | 'secondary' | 'info' {
   switch (status) {
     case 'finsh':
-    case 'close':
       return 'success';
+    case 'close':
+      return 'secondary';
     case 'Suspended_due_to_accident':
+      return 'danger';
     case 'Suspended_due_to_sum_money':
       return 'warning';
     case 'translate':
     case 'extension':
       return 'info';
     case 'Payment_on_account':
-      return 'secondary';
+      return 'info';
     case 'open':
       return 'info';
     default:
@@ -151,124 +153,78 @@ export interface BookingStatusTheme {
   chartColor: string;
 }
 
+/** Token slug in `_color-system.scss` → `--app-booking-status-{slug}*` */
+type BookingStatusTokenSlug =
+  | 'open'
+  | 'extension'
+  | 'finished'
+  | 'closed'
+  | 'accident'
+  | 'debt'
+  | 'translate'
+  | 'payment'
+  | 'unknown';
+
+function bookingStatusThemeFromTokens(
+  meta: Pick<BookingStatusTheme, 'labelAr' | 'labelEn' | 'iconClass'>,
+  slug: BookingStatusTokenSlug,
+): BookingStatusTheme {
+  const base = `--app-booking-status-${slug}`;
+  return {
+    ...meta,
+    color: `var(${base})`,
+    textColor: `var(${base}-fg)`,
+    bgLight: `var(${base}-surface)`,
+    bgDark: `var(${base}-surface-strong)`,
+    borderLight: `var(${base}-border)`,
+    borderDark: `var(${base}-border)`,
+    gradient: `var(${base}-badge)`,
+    chartColor: `var(${base})`,
+  };
+}
+
+/** Muted operational palette — values live in `src/styles/_color-system.scss`. */
 export const BOOKING_STATUS_THEME: Record<BookingStatusKey, BookingStatusTheme> = {
-  open: {
-    labelAr: 'مفتوح',
-    labelEn: 'Open',
-    iconClass: 'fa-solid fa-circle-play',
-    color: '#5B7A9E',
-    textColor: '#f8fafc',
-    bgLight: '#E9EEF5',
-    bgDark: '#243B52',
-    borderLight: '#CFDAE8',
-    borderDark: '#7A92AC',
-    gradient: 'linear-gradient(145deg, #94ABC4 0%, #6D87A8 100%)',
-    chartColor: '#5B7A9E',
-  },
-  finsh: {
-    labelAr: 'مصفى',
-    labelEn: 'Finished',
-    iconClass: 'fa-solid fa-circle-xmark',
-    color: '#558A6C',
-    textColor: '#f8fafc',
-    bgLight: '#E7F0EA',
-    bgDark: '#234030',
-    borderLight: '#B8D4C4',
-    borderDark: '#6FA384',
-    gradient: 'linear-gradient(145deg, #9BB8A8 0%, #679578 100%)',
-    chartColor: '#558A6C',
-  },
-  Suspended_due_to_accident: {
-    labelAr: 'معلق بسبب حادث',
-    labelEn: 'Suspended - Accident',
-    iconClass: 'fa-solid fa-car-burst',
-    color: '#5C6773',
-    textColor: '#f8fafc',
-    bgLight: '#E8EAED',
-    bgDark: '#2A3441',
-    borderLight: '#C0C5CD',
-    borderDark: '#75808D',
-    gradient: 'linear-gradient(145deg, #8895A3 0%, #5A6672 100%)',
-    chartColor: '#5C6773',
-  },
-  translate: {
-    labelAr: 'تحويل',
-    labelEn: 'Transferred',
-    iconClass: 'fa-solid fa-right-left',
-    color: '#6D6290',
-    textColor: '#f8fafc',
-    bgLight: '#EBE8F2',
-    bgDark: '#3A3158',
-    borderLight: '#C9C0DA',
-    borderDark: '#8B7EAA',
-    gradient: 'linear-gradient(145deg, #A598BF 0%, #7B6E9E 100%)',
-    chartColor: '#6D6290',
-  },
-  close: {
-    labelAr: 'مغلق',
-    labelEn: 'Closed',
-    iconClass: 'fa-solid fa-lock',
-    color: '#6D727A',
-    textColor: '#f8fafc',
-    bgLight: '#ECECED',
-    bgDark: '#363A40',
-    borderLight: '#C8CACF',
-    borderDark: '#868A92',
-    gradient: 'linear-gradient(145deg, #9A9EA6 0%, #6F737B 100%)',
-    chartColor: '#6D727A',
-  },
-  extension: {
-    labelAr: 'تمديد',
-    labelEn: 'Extension',
-    iconClass: 'fa-solid fa-clock-rotate-left',
-    color: '#9E7840',
-    textColor: '#2d261c',
-    bgLight: '#F7F1E8',
-    bgDark: '#4A3B26',
-    borderLight: '#E0D4C4',
-    borderDark: '#C4AE88',
-    gradient: 'linear-gradient(180deg, #f3eadb 0%, #e4d4bc 100%)',
-    chartColor: '#9E7840',
-  },
-  Suspended_due_to_sum_money: {
-    labelAr: 'معلق بسبب مبلغ مالي',
-    labelEn: 'Suspended - Amount Due',
-    iconClass: 'fa-solid fa-building-columns',
-    color: '#546E7A',
-    textColor: '#f8fafc',
-    bgLight: '#E6ECEF',
-    bgDark: '#243844',
-    borderLight: '#B5C4CC',
-    borderDark: '#6F8794',
-    gradient: 'linear-gradient(145deg, #7F939E 0%, #526B78 100%)',
-    chartColor: '#546E7A',
-  },
-  Payment_on_account: {
-    labelAr: 'دفعة على الحساب',
-    labelEn: 'Payment on Account',
-    iconClass: 'fa-solid fa-money-check-dollar',
-    color: '#4A8B7A',
-    textColor: '#f8fafc',
-    bgLight: '#E4F2EE',
-    bgDark: '#1D4339',
-    borderLight: '#A8D4C8',
-    borderDark: '#5CA890',
-    gradient: 'linear-gradient(145deg, #8BC4B4 0%, #559882 100%)',
-    chartColor: '#4A8B7A',
-  },
-  Unknown: {
-    labelAr: 'غير معروف',
-    labelEn: 'Unknown',
-    iconClass: 'fa-solid fa-circle-question',
-    color: '#75808E',
-    textColor: '#f8fafc',
-    bgLight: '#E8EBEF',
-    bgDark: '#3A4250',
-    borderLight: '#B9C0CA',
-    borderDark: '#8A939F',
-    gradient: 'linear-gradient(145deg, #A8B0BC 0%, #7C8694 100%)',
-    chartColor: '#75808E',
-  },
+  open: bookingStatusThemeFromTokens(
+    { labelAr: 'مفتوح', labelEn: 'Open', iconClass: 'fa-solid fa-circle-play' },
+    'open',
+  ),
+  finsh: bookingStatusThemeFromTokens(
+    { labelAr: 'مصفى', labelEn: 'Finished', iconClass: 'fa-solid fa-circle-check' },
+    'finished',
+  ),
+  Suspended_due_to_accident: bookingStatusThemeFromTokens(
+    { labelAr: 'حادث', labelEn: 'Accident', iconClass: 'fa-solid fa-car-burst' },
+    'accident',
+  ),
+  translate: bookingStatusThemeFromTokens(
+    { labelAr: 'تحويل', labelEn: 'Transferred', iconClass: 'fa-solid fa-right-left' },
+    'translate',
+  ),
+  close: bookingStatusThemeFromTokens(
+    { labelAr: 'إغلاق', labelEn: 'Closed', iconClass: 'fa-solid fa-lock' },
+    'closed',
+  ),
+  extension: bookingStatusThemeFromTokens(
+    { labelAr: 'تمديد', labelEn: 'Extension', iconClass: 'fa-solid fa-clock-rotate-left' },
+    'extension',
+  ),
+  Suspended_due_to_sum_money: bookingStatusThemeFromTokens(
+    { labelAr: 'ذمم', labelEn: 'Amount due', iconClass: 'fa-solid fa-building-columns' },
+    'debt',
+  ),
+  Payment_on_account: bookingStatusThemeFromTokens(
+    {
+      labelAr: 'دفعة على الحساب',
+      labelEn: 'Payment on Account',
+      iconClass: 'fa-solid fa-money-check-dollar',
+    },
+    'payment',
+  ),
+  Unknown: bookingStatusThemeFromTokens(
+    { labelAr: 'غير معروف', labelEn: 'Unknown', iconClass: 'fa-solid fa-circle-question' },
+    'unknown',
+  ),
 };
 
 export function getBookingStatusTheme(status: string): BookingStatusTheme {
@@ -292,4 +248,76 @@ export function getBookingLegendItems(): Array<{
       iconClass: value.iconClass,
     }),
   );
+}
+
+/** Primary statuses shown in the booking list color guide (most common). */
+export const BOOKING_LIST_COLOR_GUIDE_KEYS: BookingStatusKey[] = [
+  'open',
+  'extension',
+  'finsh',
+  'close',
+  'Suspended_due_to_accident',
+  'Suspended_due_to_sum_money',
+];
+
+/** CSS modifier for booking list card status accent (uses --app-booking-list-accent-* tokens). */
+export function getBookingListCardStatusClass(status: string): string {
+  const key = bookingStatusFromCode(status);
+  switch (key) {
+    case 'open':
+      return 'booking-card--status-open';
+    case 'extension':
+      return 'booking-card--status-extension';
+    case 'finsh':
+      return 'booking-card--status-finished';
+    case 'close':
+      return 'booking-card--status-closed';
+    case 'Suspended_due_to_accident':
+      return 'booking-card--status-suspended-accident';
+    case 'Suspended_due_to_sum_money':
+      return 'booking-card--status-suspended-debt';
+    default:
+      return 'booking-card--status-unknown';
+  }
+}
+
+export function getBookingListColorGuideItems(
+  lang: string,
+): Array<{ key: BookingStatusKey; label: string; color: string }> {
+  const useAr = (lang || 'ar').toLowerCase().startsWith('ar');
+  return BOOKING_LIST_COLOR_GUIDE_KEYS.map(key => {
+    const theme = BOOKING_STATUS_THEME[key];
+    return {
+      key,
+      label: useAr ? theme.labelAr : theme.labelEn,
+      /** نفس لون الشارة على كرت الحجز (`theme.color`). */
+      color: theme.color,
+    };
+  });
+}
+
+/** CSS custom properties for status-tinted surfaces (cards, hero cells, badges). */
+export function getBookingStatusSurfaceStyle(status: string): Record<string, string> {
+  const theme = getBookingStatusTheme(status);
+  return {
+    '--booking-status-bg-light': theme.bgLight,
+    '--booking-status-bg-dark': theme.bgDark,
+    '--booking-status-border-light': theme.borderLight,
+    '--booking-status-border-dark': theme.borderDark,
+    '--booking-status-accent': theme.color,
+    '--booking-status-chart': theme.chartColor,
+  };
+}
+
+export function getBookingStatusBadgeStyle(status: string): Record<string, string> {
+  const theme = getBookingStatusTheme(status);
+  return {
+    '--booking-badge-bg': theme.gradient,
+    '--booking-badge-color': theme.textColor,
+    '--booking-badge-border-light': theme.borderLight,
+    '--booking-badge-border-dark': theme.borderDark,
+    background: theme.gradient,
+    color: theme.textColor,
+    borderColor: theme.borderLight,
+  };
 }

@@ -32,6 +32,61 @@ export function canBookingEditAction(booking: Booking): boolean {
   return isBookingFullActions(booking);
 }
 
+/** عقد معلّق — حادث. */
+export function isBookingSuspendedDueToAccident(
+  booking: Pick<Booking, 'status'> | null | undefined,
+): boolean {
+  return String(booking?.status ?? '').trim() === 'Suspended_due_to_accident';
+}
+
+/** عقد معلّق — ذمم / مبالغ مستحقة. */
+export function isBookingSuspendedDueToSumMoney(
+  booking: Pick<Booking, 'status'> | null | undefined,
+): boolean {
+  return String(booking?.status ?? '').trim() === 'Suspended_due_to_sum_money';
+}
+
+/** مسار إنهاء العقد حسب الحالة. */
+export function bookingFinishRoute(booking: Pick<Booking, 'id' | 'status'>): (string | number)[] {
+  if (isBookingSuspended(booking)) {
+    return ['/booking', booking.id, 'finish-suspended'];
+  }
+  return ['/booking', booking.id, 'finish'];
+}
+
+/** مفتاح ترجمة زر الإنهاء. */
+export function bookingFinishLabelKey(booking: Pick<Booking, 'status'>): string {
+  if (isBookingSuspendedDueToAccident(booking)) {
+    return 'Booking card finish after accident';
+  }
+  if (isBookingSuspendedDueToSumMoney(booking)) {
+    return 'Booking card finish after debt';
+  }
+  return 'Booking card finish';
+}
+
+/** صنف CSS لزر الإنهاء في البطاقات والتفاصيل. */
+export function bookingFinishActionClass(booking: Pick<Booking, 'status'>): string {
+  if (isBookingSuspendedDueToAccident(booking)) {
+    return 'booking-card__action--finish-suspended-accident';
+  }
+  if (isBookingSuspendedDueToSumMoney(booking)) {
+    return 'booking-card__action--finish-suspended-debt';
+  }
+  return 'booking-card__action--finish';
+}
+
+/** صنف Bootstrap لزر الإنهاء في شريط التفاصيل. */
+export function bookingFinishToolbarButtonClass(booking: Pick<Booking, 'status'>): string {
+  if (isBookingSuspendedDueToAccident(booking)) {
+    return 'btn-outline-danger';
+  }
+  if (isBookingSuspendedDueToSumMoney(booking)) {
+    return 'btn-outline-warning';
+  }
+  return 'btn-outline-success';
+}
+
 export function canBookingFinishAction(booking: Booking): boolean {
   return isBookingFullActions(booking) || isBookingSuspended(booking);
 }
@@ -53,7 +108,7 @@ export function canBookingExtendAction(booking: Booking): boolean {
   return isBookingFullActions(booking);
 }
 
-export type BookingCardActionId = 'view' | 'track' | 'close' | 'finish' | 'print';
+export type BookingCardActionId = 'view' | 'edit' | 'track' | 'close' | 'finish' | 'print';
 
 const BOOKING_CARD_MAIN_ACTION_LIMIT = 3;
 
@@ -62,29 +117,18 @@ export function bookingCardPrintInMain(booking: Booking): boolean {
   return canBookingPrintAction(booking) && !isBookingFullActions(booking);
 }
 
-/** أول 3 إجراءات فقط في الشريط — الباقي داخل ⋯ */
+/** شريط الكرت: عرض → تعديل → إنهاء (حتى 3) — الباقي داخل ⋯ */
 export function bookingCardMainActionIds(booking: Booking): BookingCardActionId[] {
-  const main: BookingCardActionId[] = ['view', 'track'];
-  const optional: BookingCardActionId[] = [];
+  const main: BookingCardActionId[] = ['view'];
 
+  if (canBookingEditAction(booking)) {
+    main.push('edit');
+  }
   if (canBookingFinishAction(booking)) {
-    optional.push('finish');
-  }
-  if (canBookingCloseAction(booking)) {
-    optional.push('close');
-  }
-  if (bookingCardPrintInMain(booking)) {
-    optional.push('print');
+    main.push('finish');
   }
 
-  for (const id of optional) {
-    if (main.length >= BOOKING_CARD_MAIN_ACTION_LIMIT) {
-      break;
-    }
-    main.push(id);
-  }
-
-  return main;
+  return main.slice(0, BOOKING_CARD_MAIN_ACTION_LIMIT);
 }
 
 export function bookingCardActionInMain(booking: Booking, action: BookingCardActionId): boolean {
@@ -110,11 +154,20 @@ export function bookingCardPrintInMenu(booking: Booking): boolean {
   return bookingCardPrintInMain(booking) && !bookingCardActionInMain(booking, 'print');
 }
 
-/** إظهار قائمة ⋯ فقط عند وجود إجراء واحد على الأقل. */
+export function bookingCardTrackInMenu(booking: Booking): boolean {
+  return !bookingCardActionInMain(booking, 'track');
+}
+
+export function bookingCardEditInMenu(booking: Booking): boolean {
+  return canBookingEditAction(booking) && !bookingCardActionInMain(booking, 'edit');
+}
+
+/** إظهار قائمة ⋯ عند وجود إجراء واحد على الأقل (التتبع دائماً في القائمة). */
 export function bookingCardMoreMenuVisible(booking: Booking): boolean {
   return (
+    bookingCardTrackInMenu(booking) ||
+    bookingCardEditInMenu(booking) ||
     canBookingSuspendAction(booking) ||
-    canBookingEditAction(booking) ||
     canBookingExtendAction(booking) ||
     bookingCardPrintInMenu(booking) ||
     bookingCardCloseInMenu(booking) ||

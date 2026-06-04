@@ -281,6 +281,9 @@
 
         <section class="contract-flow-section">
           <h2 class="contract-flow-section__title">{{ 'Contract flow section payment' | translate }}</h2>
+          @if (isMoneySuspend()) {
+            <p class="contract-flow-hint mb-2">{{ 'Contract suspend money payment hint' | translate }}</p>
+          }
           <div class="contract-flow-grid contract-flow-grid--2">
             <div class="contract-flow-field">
               <label class="form-label">
@@ -297,18 +300,23 @@
             </div>
             <div class="contract-flow-field">
               <label class="form-label">
-                {{ 'Contract finish paid at settlement' | translate }} <span class="text-danger">*</span>
+                {{ 'Contract finish paid at settlement' | translate }}
+                @if (hasSettlementPayment()) {
+                  <span class="text-danger">*</span>
+                } @else if (isMoneySuspend()) {
+                  <span class="text-muted small">({{ 'Contract suspend payment optional' | translate }})</span>
+                }
               </label>
               <input
                 class="form-control"
                 type="number"
                 min="0"
                 step="0.01"
-                [value]="settlementPaidAmount()"
+                [value]="settlementMoneyField(settlementPaidAmount())"
                 [disabled]="suspendLocked()"
                 (input)="onSettlementPaidInput($any($event.target).value)"
               />
-              @if (!suspendLocked()) {
+              @if (isMoneySuspend() && !suspendLocked()) {
                 <button
                   type="button"
                   class="btn btn-link btn-sm p-0 mt-1 contract-flow-link-btn"
@@ -321,7 +329,10 @@
             @if (paymentTypeAllowsCashAccount()) {
               <div class="contract-flow-field">
                 <label class="form-label">
-                  {{ 'Contract finish cash account' | translate }} <span class="text-danger">*</span>
+                  {{ 'Contract finish cash account' | translate }}
+                  @if (hasSettlementPayment()) {
+                    <span class="text-danger">*</span>
+                  }
                 </label>
                 <app-smooth-select
                   [value]="cashAccount()"
@@ -348,7 +359,10 @@
             @if (paymentTypeAllowsBankAccount()) {
               <div class="contract-flow-field">
                 <label class="form-label">
-                  {{ 'Contract finish bank account' | translate }} <span class="text-danger">*</span>
+                  {{ 'Contract finish bank account' | translate }}
+                  @if (hasSettlementPayment()) {
+                    <span class="text-danger">*</span>
+                  }
                 </label>
                 <app-smooth-select
                   [value]="bankAccount()"
@@ -375,28 +389,6 @@
             }
           </div>
         </section>
-
-        <details class="contract-flow-audit">
-          <summary>{{ 'Contract flow section audit' | translate }}</summary>
-          <dl class="contract-flow-kv contract-flow-kv--2 mt-2">
-            <div>
-              <dt>{{ 'Created By' | translate }}</dt>
-              <dd>{{ valueOrDash(item.createdBy) }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'Created At' | translate }}</dt>
-              <dd>{{ dateOrDash(item.createdAt) }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'Updated By' | translate }}</dt>
-              <dd>{{ valueOrDash(item.updatedBy) }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'Updated At' | translate }}</dt>
-              <dd>{{ dateOrDash(item.updatedAt) }}</dd>
-            </div>
-          </dl>
-        </details>
 
         <div class="contract-flow-actions">
           <a class="btn btn-cancel" [routerLink]="['/booking', item.id, 'details']">{{ 'Contract suspend back details' | translate }}</a>

@@ -16,5 +16,6 @@ export * from './settings/setting.model';
 export * from './traffic-violations/traffic-violation.model';
 export * from './users/user.model';
 export * from './vehicles/vehicle.model';
+export * from './vehicles/vehicle-fallback-image';
 
 

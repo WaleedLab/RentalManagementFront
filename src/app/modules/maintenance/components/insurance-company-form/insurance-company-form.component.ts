@@ -8,6 +8,10 @@ import { AuthStateService } from '../../../../core/auth/auth-state.service';
 import { SHARED_FORM_FIELD_DIRECTIVES } from '../../../../shared/forms/shared-form-field.imports';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { focusFirstInvalidControl } from '../../../../shared/utils/focus-first-invalid-control.util';
+import {
+  optionalMobileNumberValidators,
+  sanitizeMobileDigits,
+} from '../../../../shared/utils/mobile-number.util';
 import { PageHeaderComponent } from '../../../../shared/ui/page-header/page-header.component';
 import { InsuranceCompanyUpsertRequest } from '../../models/insurance-company.model';
 import { InsuranceCompanyService } from '../../services/insurance-company.service';
@@ -44,7 +48,7 @@ export class InsuranceCompanyFormComponent implements OnInit {
   form = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(200)]],
     address: ['', [Validators.maxLength(500)]],
-    phoneNumber: ['', [Validators.maxLength(50)]],
+    phoneNumber: ['', optionalMobileNumberValidators()],
   });
 
   ngOnInit(): void {
@@ -61,7 +65,7 @@ export class InsuranceCompanyFormComponent implements OnInit {
         this.form.patchValue({
           name: row.name ?? '',
           address: row.address ?? '',
-          phoneNumber: row.phoneNumber ?? '',
+          phoneNumber: sanitizeMobileDigits(row.phoneNumber ?? ''),
         });
         this.initializing.set(false);
       },
@@ -89,7 +93,7 @@ export class InsuranceCompanyFormComponent implements OnInit {
       fleetId,
       name: raw.name.trim(),
       address: raw.address.trim() || null,
-      phoneNumber: raw.phoneNumber.trim() || null,
+      phoneNumber: sanitizeMobileDigits(raw.phoneNumber.trim()) || null,
     };
 
     this.saving.set(true);

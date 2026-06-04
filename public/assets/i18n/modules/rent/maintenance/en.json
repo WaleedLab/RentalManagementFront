@@ -183,7 +183,7 @@
   "maintenance.supplier.fieldTaxRecord": "Tax record",
   "maintenance.supplier.fieldAccountNumber": "Account number",
   "maintenance.supplier.invalidName": "Supplier name is required.",
-  "maintenance.supplier.invalidPhone": "Phone number is required.",
+  "maintenance.supplier.invalidPhone": "Phone number is required and must be exactly 10 digits.",
   "maintenance.supplier.invalidEmail": "Enter a valid email address.",
   "maintenance.supplier.created": "Supplier saved.",
   "maintenance.supplier.updated": "Supplier updated.",

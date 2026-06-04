@@ -42,3 +42,30 @@ export function distributeSettlementByPaymentType(
   const half = roundSettlementMoney(n / 2);
   return { paidCash: half, paidBank: roundSettlementMoney(n - half) };
 }
+
+export function settlementTotalsMatch(a: number, b: number, epsilon = 0.009): boolean {
+  return Math.abs(roundSettlementMoney(a) - roundSettlementMoney(b)) <= epsilon;
+}
+
+/** Resolve cash/bank split from settlement amount — use before API submit. */
+export function resolveSettlementPaidAmounts(
+  settlementAmount: number,
+  paymentType: number,
+  prevCash: number,
+  prevBank: number,
+): { paidCash: number; paidBank: number; paidTotal: number; settlementTotal: number } {
+  const settlementTotal = roundSettlementMoney(settlementAmount);
+  const split = distributeSettlementByPaymentType(
+    settlementTotal,
+    paymentType,
+    prevCash,
+    prevBank,
+  );
+  const paidTotal = roundSettlementMoney(split.paidCash + split.paidBank);
+  return {
+    paidCash: split.paidCash,
+    paidBank: split.paidBank,
+    paidTotal,
+    settlementTotal,
+  };
+}

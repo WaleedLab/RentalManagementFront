@@ -14,7 +14,6 @@ import {
   SmoothSelectComponent,
   SmoothSelectOption,
 } from '../../../../../shared/ui/smooth-select/smooth-select.component';
-import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 import { Bank } from '../../../../finance/models/banks/bank.model';
 import { CashAccount } from '../../../../finance/models/cash/cash-account.model';
@@ -26,6 +25,8 @@ import { Booking, BookingStatus } from '../../../models';
 import {
   bookingStatusTone,
   bookingStatusTranslationKey,
+  getBookingStatusBadgeStyle,
+  getBookingStatusSurfaceStyle,
 } from '../../../models/booking/booking-status.utils';
 import { BookingService } from '../../../services/booking/booking.service';
 import { VehicleService } from '../../../services/vehicles/vehicle.service';
@@ -41,6 +42,9 @@ import {
   canBookingFinishAction,
   canBookingPrintAction,
   canBookingSuspendAction,
+  bookingFinishLabelKey,
+  bookingFinishRoute,
+  bookingFinishToolbarButtonClass,
 } from '../booking-card-actions.util';
 
 type BookingDetailsToolbarAction = 'suspend' | 'extend' | 'print' | 'finish' | 'closeContract';
@@ -52,7 +56,6 @@ export type ContractDetailsTabId =
   | 'photos'
   | 'settlement'
   | 'vouchers'
-  | 'audit'
   | 'extra';
 
 @Component({
@@ -63,7 +66,6 @@ export type ContractDetailsTabId =
     RouterLink,
     TranslateModule,
     PageHeaderComponent,
-    StatusBadgeComponent,
     SmoothSelectComponent,
     DatePickerComponent,
   ],
@@ -139,7 +141,6 @@ export class BookingDetailsComponent implements OnInit {
     { id: 'photos', labelKey: 'Contract details tab photos' },
     { id: 'settlement', labelKey: 'Contract details tab settlement' },
     { id: 'vouchers', labelKey: 'Contract details tab vouchers' },
-    { id: 'audit', labelKey: 'Contract details tab audit' },
     { id: 'extra', labelKey: 'Contract details tab extra' },
   ];
 
@@ -152,6 +153,14 @@ export class BookingDetailsComponent implements OnInit {
 
   statusBadgeLabelKey(status: BookingStatus): string {
     return bookingStatusTranslationKey(status);
+  }
+
+  statusSurfaceStyle(status: BookingStatus): Record<string, string> {
+    return getBookingStatusSurfaceStyle(status);
+  }
+
+  statusBadgeStyle(status: BookingStatus): Record<string, string> {
+    return getBookingStatusBadgeStyle(status);
   }
 
   contractNumber(item: Booking): string {
@@ -991,6 +1000,8 @@ export class BookingDetailsComponent implements OnInit {
   canCloseAction = canBookingCloseAction;
   canEditAction = canBookingEditAction;
   canFinishAction = canBookingFinishAction;
+  finishActionClass = bookingFinishToolbarButtonClass;
+  finishActionLabelKey = bookingFinishLabelKey;
   canPrintAction = canBookingPrintAction;
   canSuspendAction = canBookingSuspendAction;
   canExtendAction = canBookingExtendAction;
@@ -1001,7 +1012,7 @@ export class BookingDetailsComponent implements OnInit {
       return;
     }
     if (action === 'finish') {
-      this.router.navigate(['/booking', item.id, 'finish']);
+      this.router.navigate(bookingFinishRoute(item));
       return;
     }
     if (action === 'closeContract' && !this.canCloseAction(item)) {

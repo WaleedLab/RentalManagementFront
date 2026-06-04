@@ -1,0 +1,872 @@
+إذا كنت تريد ملف **Skill / Design System Prompt** يُستخدم مع أي AI أو مصمم أو مطور UI بحيث يعيد تصميم صفحات:
+
+* العملاء
+* إنشاء الحجز
+* تعديل الحجز
+* تفاصيل العقد
+* إنهاء العقد
+* تعليق العقد
+
+بنفس الفلسفة البصرية، فهذا نص جاهز:
+
+---
+
+# Rental Management Enterprise UX/UI Skill
+
+## Role
+
+Act as a Senior UX Architect, Enterprise Product Designer, and Angular SaaS Design Expert.
+
+Your mission is to redesign every page in this Car Rental Management System using a unified design language focused on:
+
+* Speed of use
+* Low cognitive load
+* Enterprise usability
+* Dark & Light theme consistency
+* Arabic RTL first
+* Minimal clicks
+* High information density without clutter
+* Fast employee onboarding
+* Consistent component behavior across all modules
+
+---
+
+# Core Design Philosophy
+
+This is not a marketing website.
+
+This is a business operation system used daily by:
+
+* Receptionists
+* Rental agents
+* Branch managers
+* Finance staff
+* Fleet operators
+
+Therefore:
+
+Avoid decorative design.
+
+Optimize for:
+
+* Efficiency
+* Accuracy
+* Visibility
+* Fast data entry
+
+Every screen must answer:
+
+1. What am I looking at?
+2. What should I do next?
+3. What information is important right now?
+
+within 3 seconds.
+
+---
+
+# Global Layout Standard
+
+Every page must follow:
+
+## Header
+
+Contains:
+
+* Page title
+* Description
+* Breadcrumb
+* Main action buttons
+
+Example:
+
+Customer Details
+
+View customer information and rental history.
+
+---
+
+## Body Structure
+
+Never show more than 5–7 editable fields in one visual group.
+
+Split large forms into sections.
+
+Use:
+
+Accordion Sections
+
+or
+
+Tabbed Sections
+
+or
+
+Step Sections
+
+depending on complexity.
+
+---
+
+# Standard Card Structure
+
+Each card contains:
+
+### Card Header
+
+Icon + Title
+
+Example:
+
+👤 Customer Information
+
+🚗 Vehicle Information
+
+💰 Financial Summary
+
+📄 Contract Information
+
+---
+
+### Card Content
+
+Grouped inputs.
+
+---
+
+### Card Footer
+
+Optional actions.
+
+---
+
+# Customer Page Layout
+
+## Section 1
+
+Identity Information
+
+* Full Name Arabic
+* Full Name English
+* Nationality
+* Birth Date
+* National ID
+
+---
+
+## Section 2
+
+Contact Information
+
+* Mobile
+* Email
+* Additional Phones
+* Address
+
+---
+
+## Section 3
+
+Driving License
+
+* License Number
+* Expiration Date
+* Hijri Date
+* Issue Place
+
+---
+
+## Right Sidebar
+
+Progress Card
+
+Show:
+
+✓ Identity Completed
+
+✓ Contact Completed
+
+✓ License Completed
+
+✓ Photo Uploaded
+
+instead of permanent form fields.
+
+---
+
+# Booking Creation Layout
+
+Use 4-step wizard.
+
+## Step 1
+
+Customer
+
+* ID Search
+* Existing Customer Card
+
+or
+
+New Customer Form
+
+---
+
+## Step 2
+
+Vehicle
+
+Vehicle card with:
+
+* Plate
+* Type
+* Color
+* Year
+* Insurance Status
+
+Price ranges displayed as:
+
+Daily Price
+
+[ Low ] [ Medium ] [ High ]
+
+instead of multiple editable fields.
+
+---
+
+## Step 3
+
+Booking Information
+
+* Start Date
+* Days
+* Expected Return
+
+Live summary card:
+
+Rental Cost
+
+Tax
+
+Discount
+
+Total
+
+---
+
+## Step 4
+
+Payment
+
+Payment Method
+
+Cash
+
+Network
+
+Transfer
+
+Mixed
+
+Show only relevant fields.
+
+Never display all payment controls simultaneously.
+
+---
+
+# Booking Edit Layout
+
+Use same structure as Create Booking.
+
+Never redesign separately.
+
+Users must feel:
+
+"I already know this screen."
+
+---
+
+# Booking Details Layout
+
+Read-only dashboard.
+
+Sections:
+
+Customer
+
+Vehicle
+
+Contract
+
+Payments
+
+History
+
+System Log
+
+Use Information Cards.
+
+Avoid large vertical tables.
+
+---
+
+# Contract Finish Layout
+
+Most important screen.
+
+Structure:
+
+## Section 1
+
+Contract Summary
+
+Read only.
+
+---
+
+## Section 2
+
+Return Information
+
+Editable:
+
+* Return Date
+* Return Odometer
+
+---
+
+## Section 3
+
+Extra Charges
+
+Editable:
+
+* Traffic Violations
+* Repairs
+
+Live calculations.
+
+---
+
+## Section 4
+
+Financial Settlement
+
+Sticky summary card.
+
+Always visible.
+
+Shows:
+
+Rental
+
+Extra Hours
+
+Extra KM
+
+Repairs
+
+Violations
+
+Tax
+
+Paid
+
+Remaining
+
+---
+
+## Section 5
+
+Payment Collection
+
+Dynamic fields.
+
+---
+
+# Contract Suspension Layout
+
+Same as Finish Contract.
+
+Add top section:
+
+## Suspension Information
+
+* Suspension Type
+* Suspension Reason
+
+Everything else identical.
+
+Consistency is mandatory.
+
+---
+
+# Visual Hierarchy Rules
+
+Priority 1
+
+Actions
+
+Priority 2
+
+Warnings
+
+Priority 3
+
+Financial Totals
+
+Priority 4
+
+Input Fields
+
+Priority 5
+
+Secondary Information
+
+---
+
+# Forms Rules
+
+Never use long vertical forms.
+
+Maximum:
+
+2 columns desktop
+
+1 column mobile
+
+---
+
+Group related inputs.
+
+Avoid isolated fields.
+
+---
+
+# Dropdown Rules
+
+For lists over 20 items:
+
+Use searchable dropdown.
+
+Never force scrolling.
+
+---
+
+# Tables Rules
+
+Every table must support:
+
+* Search
+* Sort
+* Pagination
+* Column visibility
+
+---
+
+# Dark Theme
+
+Professional fleet management appearance.
+
+Colors:
+
+Background:
+#071B14
+
+Surface:
+#0F2233
+
+Card:
+#142B40
+
+Primary:
+#2C7CC0
+
+Success:
+#18A982
+
+Warning:
+#D97706
+
+Danger:
+#DC2626
+
+Text:
+#F8FAFC
+
+Secondary Text:
+#A6B7C8
+
+Border:
+#274057
+
+---
+
+# Light Theme
+
+Background:
+#F5F7FA
+
+Surface:
+#FFFFFF
+
+Card:
+#FFFFFF
+
+Primary:
+#0F4C81
+
+Success:
+#0E8F6A
+
+Warning:
+#C56A00
+
+Danger:
+#C62828
+
+Text:
+#0F172A
+
+Secondary Text:
+#64748B
+
+Border:
+#D8E1EA
+
+---
+
+# Accessibility
+
+Must satisfy:
+
+WCAG AA
+
+Minimum contrast:
+
+4.5:1
+
+---
+
+# Final Goal
+
+Every page in the system must feel like part of one product.
+
+Customer Page
+
+Booking Page
+
+Edit Booking
+
+Contract Details
+
+Finish Contract
+
+Suspend Contract
+
+must share:
+
+* Same layout
+* Same cards
+* Same spacing
+* Same visual hierarchy
+* Same interaction patterns
+
+so a new employee can learn the entire system in less than 30 minutes.
+
+---
+
+# Saudi Plate Design Standard
+
+## Vehicle List Enhancement
+
+The plate number must never be displayed as plain text.
+
+The plate should visually resemble a real Saudi vehicle plate.
+
+This becomes the primary visual identifier of the vehicle card.
+
+---
+
+# Plate Component Layout
+
+Display:
+
+Arabic Letters
+Arabic Numbers
+
+English Letters
+English Numbers
+
+Example:
+
+┌─────────────────────┐
+│       السعودية      │
+│                     │
+│ ١٢٣٤   أ ب ج       │
+│ ABC     1234       │
+└─────────────────────┘
+
+---
+
+# Visual Style
+
+Use a dedicated plate component.
+
+Class:
+
+vehicle-saudi-plate
+
+---
+
+# Plate Structure
+
+Top Area
+
+Small Saudi emblem or text:
+
+السعودية
+
+---
+
+Middle Area
+
+Arabic characters
+
+Arabic numbers
+
+Largest typography.
+
+---
+
+Bottom Area
+
+English transliteration
+
+English numbers
+
+Smaller typography.
+
+---
+
+# Dimensions
+
+Desktop:
+
+Width:
+220px
+
+Height:
+80px
+
+Mobile:
+
+Width:
+180px
+
+Height:
+65px
+
+---
+
+# Plate Colors
+
+Light Theme
+
+Background:
+#FFFFFF
+
+Border:
+#2B2B2B
+
+Text:
+#111111
+
+Divider:
+#BFC6D1
+
+---
+
+Dark Theme
+
+Background:
+#F8FAFC
+
+Border:
+#1E293B
+
+Text:
+#0F172A
+
+Divider:
+#CBD5E1
+
+Plate must remain realistic even inside dark mode.
+
+Never make the plate dark.
+
+Real plates remain white.
+
+---
+
+# Card Hierarchy
+
+Vehicle Card
+
+1. Vehicle Image
+
+2. Vehicle Plate (largest element)
+
+3. Vehicle Status
+
+4. Vehicle Information
+
+5. Actions
+
+The plate must be more visually prominent than:
+
+* Category
+* Branch
+* Daily Price
+
+---
+
+# Status Integration
+
+Status badge overlays corner of plate.
+
+Available
+
+Green
+
+Booked
+
+Amber
+
+Maintenance
+
+Red
+
+Inactive
+
+Gray
+
+Sold
+
+Purple
+
+---
+
+# Vehicle Card Layout
+
+Media Area
+
+Vehicle Image
+
+Status Badge
+
+Year Badge
+
+---
+
+Plate Area
+
+Saudi Plate Component
+
+---
+
+Information Area
+
+Category
+
+Branch
+
+Daily Price
+
+---
+
+Action Area
+
+Details
+
+Edit
+
+Tracking
+
+Status
+
+Delete
+
+---
+
+# Fleet UX Rule
+
+Reception employees identify vehicles faster by:
+
+1. Plate Number
+
+2. Vehicle Photo
+
+3. Vehicle Status
+
+Not by serial number.
+
+Therefore:
+
+Plate Number must always be visually prioritized over serialNumber.
+
+Serial Number becomes secondary metadata.
+
+---
+
+# Hover Interaction
+
+On hover:
+
+Plate receives subtle elevation.
+
+Vehicle image slightly scales.
+
+Status badge becomes more visible.
+
+No aggressive animations.
+
+Enterprise style only.
+
+---
+
+# Accessibility
+
+Plate contrast:
+
+WCAG AA minimum.
+
+Arabic and English text must remain readable at all zoom levels.
+
+---
+
+# Final Goal
+
+A user scanning 100 vehicles should identify a vehicle by its Saudi plate within less than one second.
+
+The plate should become the visual anchor of the entire vehicle card.
+
+---
+
+# Vehicle Card Proportions (Fleet List)
+
+Recommended vertical rhythm on each vehicle card:
+
+1. Vehicle image — 40%
+
+2. Saudi plate (realistic component) — 25%
+
+3. Status and year badges — 10%
+
+4. Category, branch, daily price — 15%
+
+5. Action buttons — 10%
+
+This layout should feel like a major rental fleet system, not a generic CRUD grid.
+
+---
+
+أستعمل ملف الألوان المركزي

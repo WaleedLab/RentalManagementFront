@@ -10,12 +10,18 @@ import { merge, startWith } from 'rxjs';
 import { TENANT_ADMIN_ROLES } from '../../../../../core/auth/access.constants';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { FieldValueStateDirective } from '../../../../../shared/directives/field-value-state.directive';
+import { MobileNumberInputDirective } from '../../../../../shared/directives/mobile-number-input.directive';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-upload.component';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
+import {
+  mobileNumberValidators,
+  optionalMobileNumberValidators,
+  sanitizeMobileDigits,
+} from '../../../../../shared/utils/mobile-number.util';
 import { CustomerUpsertRequest } from '../../../models';
 import { CustomerSubscription } from '../../../models/subscriptions/customer-subscription.model';
 import { BookingService } from '../../../services/booking/booking.service';
@@ -31,6 +37,7 @@ import { CustomerSubscriptionService } from '../../../services/subscriptions/cus
     RouterLink,
     TranslateModule,
     FieldValueStateDirective,
+    MobileNumberInputDirective,
     FileUploadComponent,
     SmoothSelectComponent,
     DatePickerComponent,
@@ -43,7 +50,6 @@ export class CustomerFormComponent implements OnInit {
   private static readonly ARABIC_NAME_REGEX = /^[\u0600-\u06FF\s.'-]{2,200}$/;
   private static readonly ENGLISH_NAME_REGEX = /^[A-Za-z\s.'-]{2,200}$/;
   private static readonly NATIONAL_ID_REGEX = /^\d{10,50}$/;
-  private static readonly MOBILE_REGEX = /^\d{10}$/;
   private static readonly HIJRI_DATE_REGEX = /^\d{2}\/\d{2}\/\d{4}$/;
 
   private fb = inject(NonNullableFormBuilder);
@@ -318,22 +324,9 @@ export class CustomerFormComponent implements OnInit {
       [Validators.maxLength(200), Validators.pattern(CustomerFormComponent.ENGLISH_NAME_REGEX)],
     ],
     email: ['', [Validators.email, Validators.maxLength(150)]],
-    firstMobileNumber: [
-      '',
-      [
-        Validators.required,
-        Validators.maxLength(10),
-        Validators.pattern(CustomerFormComponent.MOBILE_REGEX),
-      ],
-    ],
-    secondMobileNumber: [
-      '',
-      [Validators.maxLength(10), Validators.pattern(CustomerFormComponent.MOBILE_REGEX)],
-    ],
-    thirdMobileNumber: [
-      '',
-      [Validators.maxLength(10), Validators.pattern(CustomerFormComponent.MOBILE_REGEX)],
-    ],
+    firstMobileNumber: ['', mobileNumberValidators({ required: true })],
+    secondMobileNumber: ['', optionalMobileNumberValidators()],
+    thirdMobileNumber: ['', optionalMobileNumberValidators()],
     idNationality: [
       '',
       [
@@ -412,9 +405,11 @@ export class CustomerFormComponent implements OnInit {
           nameAr: customer.nameAr || customer.fullName || '',
           nameEn: customer.nameEn || '',
           email: customer.email || '',
-          firstMobileNumber: customer.firstMobileNumber || customer.phoneNumber || '',
-          secondMobileNumber: customer.secondMobileNumber || '',
-          thirdMobileNumber: customer.thirdMobileNumber || '',
+          firstMobileNumber: sanitizeMobileDigits(
+            customer.firstMobileNumber || customer.phoneNumber || '',
+          ),
+          secondMobileNumber: sanitizeMobileDigits(customer.secondMobileNumber || ''),
+          thirdMobileNumber: sanitizeMobileDigits(customer.thirdMobileNumber || ''),
           idNationality: customer.idNationality || customer.identityNumber || '',
           licenceNo: customer.licenceNo || customer.drivingLicenseNumber || '',
           dateDrivinglicense: this.toDateInputValue(
@@ -821,9 +816,9 @@ export class CustomerFormComponent implements OnInit {
       id: this.customerId() || undefined,
       nameAr: raw.nameAr,
       nameEn: raw.nameEn || undefined,
-      firstMobileNumber: raw.firstMobileNumber,
-      secondMobileNumber: raw.secondMobileNumber || undefined,
-      thirdMobileNumber: raw.thirdMobileNumber || undefined,
+      firstMobileNumber: sanitizeMobileDigits(raw.firstMobileNumber),
+      secondMobileNumber: sanitizeMobileDigits(raw.secondMobileNumber) || undefined,
+      thirdMobileNumber: sanitizeMobileDigits(raw.thirdMobileNumber) || undefined,
       address: raw.address || undefined,
       licenceNo: raw.licenceNo,
       idNationality: raw.idNationality,

@@ -169,6 +169,7 @@
   "Sold": "مباعة",
   "Previous": "السابق",
   "Primary Mobile Number": "رقم الجوال الأساسي",
+  "Primary mobile number is required and must be valid.": "رقم الجوال مطلوب ويجب أن يكون 10 أرقام فقط.",
   "Privilege created": "تم إنشاء الصلاحية",
   "Privilege List": "قائمة الصلاحيات",
   "Privilege updated": "تم تحديث الصلاحية",

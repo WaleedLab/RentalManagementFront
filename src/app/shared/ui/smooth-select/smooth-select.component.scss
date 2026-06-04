@@ -1,7 +1,10 @@
 :host {
   display: block;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   position: relative;
+  box-sizing: border-box;
 
   /* Light theme (default) */
   --ss-trigger-bg: linear-gradient(150deg, var(--c-ffffff) 0%, var(--c-f8fafc) 100%);
@@ -50,6 +53,9 @@
 
 .app-soft-select {
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .app-soft-select__trigger {

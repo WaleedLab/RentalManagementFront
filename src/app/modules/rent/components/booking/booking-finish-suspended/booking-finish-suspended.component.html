@@ -1,0 +1,221 @@
+<div class="container-fluid contract-flow-page contract-finish-suspended-page">
+  @if (loading()) {
+    <app-page-header [title]="pageTitleKey() | translate" [subtitle]="''" />
+    <div class="card">
+      <div class="card-body text-center py-5">
+        <div class="spinner-border text-primary"></div>
+      </div>
+    </div>
+  } @else if (booking(); as item) {
+    <app-page-header [title]="pageTitleKey() | translate" [subtitle]="''" />
+
+    <header class="contract-flow-header">
+      <div class="contract-flow-meta" role="region" [attr.aria-label]="'Contract flow meta strip' | translate">
+        <span class="contract-flow-meta__chip">
+          {{ 'Contract flow meta contract' | translate }}:
+          <strong>{{ contractNumber(item) }}</strong>
+        </span>
+        <span class="contract-flow-meta__chip">
+          {{ 'Contract flow meta branch' | translate }}:
+          <strong>{{ valueOrDash(item.branchName) }}</strong>
+        </span>
+        <app-status-badge
+          [label]="statusBadgeLabelKey(item.status) | translate"
+          [tone]="statusBadgeTone(item.status)"
+        />
+      </div>
+    </header>
+
+    <div class="contract-flow-layout">
+      <div class="contract-flow-main">
+        @if (finishLocked()) {
+          <div class="alert alert-warning mb-0" role="alert">
+            {{ 'Contract finish not allowed' | translate }}
+          </div>
+        }
+
+        <section class="contract-flow-section">
+          <h2 class="contract-flow-section__title">{{ 'Contract flow section contract' | translate }}</h2>
+          <dl class="contract-flow-kv contract-flow-kv--2">
+            <div>
+              <dt>{{ 'Start Date' | translate }}</dt>
+              <dd>{{ formatDateTime(item.startDate) }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'End Date' | translate }}</dt>
+              <dd>{{ formatDateTime(item.endDate) }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'Contract finish plate' | translate }}</dt>
+              <dd>{{ valueOrDash(item.vehiclePlateNumber) }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'Contract flow customer name' | translate }}</dt>
+              <dd>{{ valueOrDash(item.customerName) }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        @if (isAccidentFlow()) {
+          <section class="contract-flow-section">
+            <h2 class="contract-flow-section__title">{{ 'Contract finish suspended maintenance section' | translate }}</h2>
+            @if (maintenanceMissing()) {
+              <div class="alert alert-danger mb-0" role="alert">
+                {{ 'Contract finish suspended maintenance required' | translate }}
+              </div>
+            } @else {
+              <dl class="contract-flow-kv contract-flow-kv--2">
+                <div>
+                  <dt>{{ 'maintenance.colStatus' | translate }}</dt>
+                  <dd>{{ maintenanceStatusLabelKey() | translate }}</dd>
+                </div>
+                <div>
+                  <dt>{{ 'maintenance.colTotal' | translate }}</dt>
+                  <dd>{{ moneyOrDash(maintenanceTotalDisplay()) }}</dd>
+                </div>
+              </dl>
+              @if (!maintenanceCompleted()) {
+                <div class="alert alert-warning mt-3 mb-0" role="alert">
+                  {{ 'Contract finish suspended maintenance not completed' | translate }}
+                </div>
+              }
+            }
+          </section>
+        }
+
+        <section class="contract-flow-section">
+          <h2 class="contract-flow-section__title">{{ 'Contract finish payment section' | translate }}</h2>
+          <div class="contract-flow-form-grid contract-flow-form-grid--2">
+            <div>
+              <label class="form-label">
+                {{ 'Contract finish payment method' | translate }} <span class="text-danger">*</span>
+              </label>
+              <app-smooth-select
+                [options]="paymentTypeOptions()"
+                [value]="paymentMethod()"
+                [disabled]="finishLocked()"
+                (valueChange)="onPaymentMethodChange($any($event))"
+              />
+            </div>
+            <div>
+              <label class="form-label">{{ 'Contract finish paid at settlement' | translate }}</label>
+              <input
+                type="text"
+                class="form-control"
+                inputmode="decimal"
+                [value]="settlementMoneyField(settlementPaidAmount())"
+                [disabled]="finishLocked()"
+                (input)="onSettlementPaidInput($any($event.target).value)"
+              />
+              <div class="form-text d-flex flex-wrap gap-2 align-items-center">
+                <span>
+                  {{ 'Contract finish settlement balance hint' | translate }}:
+                  <strong>{{ moneyOrDash(amountDueDisplay()) }}</strong>
+                </span>
+                @if (!finishLocked()) {
+                  <button type="button" class="btn btn-link btn-sm p-0 align-baseline" (click)="useBalanceAsSettlement()">
+                    {{ 'Contract finish use remaining balance' | translate }}
+                  </button>
+                }
+              </div>
+            </div>
+            @if (paymentTypeAllowsCashAccount()) {
+              <div>
+                <label class="form-label">
+                  {{ 'Contract finish cash account' | translate }} <span class="text-danger">*</span>
+                </label>
+                <app-smooth-select
+                  [options]="cashAccountOptions()"
+                  [value]="cashAccount()"
+                  [disabled]="finishLocked()"
+                  (valueChange)="onCashChange($any($event))"
+                />
+              </div>
+              <div>
+                <label class="form-label">{{ 'Contract finish paid cash' | translate }}</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  inputmode="decimal"
+                  [value]="settlementMoneyField(paidCash())"
+                  [disabled]="finishLocked() || paymentTypeIsBankOnly()"
+                  (input)="onPaidCashChange($any($event.target).value)"
+                />
+              </div>
+            }
+            @if (paymentTypeAllowsBankAccount()) {
+              <div>
+                <label class="form-label">
+                  {{ 'Contract finish bank account' | translate }} <span class="text-danger">*</span>
+                </label>
+                <app-smooth-select
+                  [options]="bankAccountOptions()"
+                  [value]="bankAccount()"
+                  [disabled]="finishLocked()"
+                  (valueChange)="onBankChange($any($event))"
+                />
+              </div>
+              <div>
+                <label class="form-label">{{ 'Contract finish paid bank' | translate }}</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  inputmode="decimal"
+                  [value]="settlementMoneyField(paidBank())"
+                  [disabled]="finishLocked() || paymentTypeIsCash()"
+                  (input)="onPaidBankChange($any($event.target).value)"
+                />
+              </div>
+            }
+          </div>
+        </section>
+
+        <div class="contract-flow-actions">
+          <a class="btn btn-outline-secondary" [routerLink]="['/booking', item.id, 'details']">
+            {{ 'Cancel' | translate }}
+          </a>
+          <button
+            type="button"
+            class="btn btn-success"
+            [disabled]="finishSubmitBlocked()"
+            (click)="submit()"
+          >
+            @if (saving()) {
+              <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+            }
+            {{ 'Contract finish suspended submit' | translate }}
+          </button>
+        </div>
+      </div>
+
+      <aside class="contract-flow-aside">
+        <div class="contract-flow-summary-card">
+          <h2 class="contract-flow-summary-card__title">{{ 'Contract finish grand total' | translate }}</h2>
+          <dl class="contract-flow-summary-list">
+            <div>
+              <dt>{{ 'Contract finish payments total' | translate }}</dt>
+              <dd>{{ moneyOrDash(paymentsTotalDisplay()) }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'Contract finish balance' | translate }}</dt>
+              <dd>{{ moneyOrDash(contractBalanceDisplay()) }}</dd>
+            </div>
+            @if (isAccidentFlow()) {
+              <div>
+                <dt>{{ 'Contract finish suspended maintenance total' | translate }}</dt>
+                <dd>{{ moneyOrDash(maintenanceTotalDisplay()) }}</dd>
+              </div>
+            }
+          </dl>
+          <div class="contract-flow-summary-card__total">
+            <span>{{ 'Contract finish suspended amount due' | translate }}</span>
+            <strong>{{ moneyOrDash(amountDueDisplay()) }}</strong>
+          </div>
+        </div>
+      </aside>
+    </div>
+  } @else {
+    <app-page-header [title]="pageTitleKey() | translate" [subtitle]="''" />
+    <div class="alert alert-danger">{{ 'Failed to load booking' | translate }}</div>
+  }
+</div>

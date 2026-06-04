@@ -1,8 +1,11 @@
 :host {
   display: block;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   position: relative;
   z-index: 0;
+  box-sizing: border-box;
 }
 
 :host(.date-picker-host--open) {
@@ -12,6 +15,8 @@
 .date-picker {
   position: relative;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .date-picker--compact .date-label {
@@ -35,11 +40,11 @@
 
 .date-picker--compact .date-value {
   flex: 1;
-  min-width: 6.75rem;
+  min-width: 0;
   font-size: 0.8125rem;
   font-weight: 600;
-  overflow: visible;
-  text-overflow: clip;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -64,6 +69,9 @@
 
 .date-trigger {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   min-height: 52px;
   padding: 0 16px;
   border-radius: 14px;
@@ -105,8 +113,12 @@
 
 .date-value {
   flex: 1;
+  min-width: 0;
   text-align: start;
   font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .date-value.placeholder {
@@ -294,6 +306,10 @@
   font-size: 12px;
   font-weight: 900;
   flex-shrink: 0;
+  max-width: 5.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .calendar-mode-switch {

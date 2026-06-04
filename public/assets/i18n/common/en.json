@@ -169,6 +169,7 @@
   "Sold": "Sold",
   "Previous": "Previous",
   "Primary Mobile Number": "Primary Mobile Number",
+  "Primary mobile number is required and must be valid.": "Primary mobile number is required and must be exactly 10 digits.",
   "Privilege created": "Privilege created",
   "Privilege List": "Privilege List",
   "Privilege updated": "Privilege updated",

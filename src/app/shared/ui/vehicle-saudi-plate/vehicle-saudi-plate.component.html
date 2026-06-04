@@ -1,0 +1,29 @@
+<div
+  class="vehicle-saudi-plate"
+  [class.vehicle-saudi-plate--minimal]="minimal()"
+  role="img"
+  [attr.aria-label]="plateNumber() || ('Saudi plate' | translate)"
+>
+  @if (!minimal()) {
+    <span class="vehicle-saudi-plate__header">{{ 'Saudi Arabia' | translate }}</span>
+    <div class="vehicle-saudi-plate__divider" aria-hidden="true"></div>
+  }
+
+  <div class="vehicle-saudi-plate__arabic" dir="rtl" lang="ar">
+    <span class="vehicle-saudi-plate__arabic-numbers">{{ display().arabicNumbers }}</span>
+    <span class="vehicle-saudi-plate__pair-divider" aria-hidden="true"></span>
+    <span class="vehicle-saudi-plate__arabic-letters">{{ display().arabicLetters }}</span>
+  </div>
+
+  <div class="vehicle-saudi-plate__divider" [class.vehicle-saudi-plate__divider--subtle]="!minimal()" aria-hidden="true"></div>
+
+  <div class="vehicle-saudi-plate__latin" dir="ltr" lang="en">
+    <span class="vehicle-saudi-plate__latin-letters">{{ display().englishLetters }}</span>
+    <span class="vehicle-saudi-plate__pair-divider" aria-hidden="true"></span>
+    <span class="vehicle-saudi-plate__latin-numbers">{{ display().englishNumbers }}</span>
+  </div>
+
+  @if (!minimal() && statusLabel()) {
+    <span class="vehicle-saudi-plate__badge" [ngClass]="badgeClass">{{ statusLabel() }}</span>
+  }
+</div>

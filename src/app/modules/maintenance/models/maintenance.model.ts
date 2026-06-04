@@ -36,6 +36,12 @@ export interface Maintenance {
   spareParts?: MaintenanceSparePartLine[];
 }
 
+/** `GET Maintenance/GetTotal/{idbooking}/{fleetid}` — `GetMaintenanceByIdBookingQueryResponse`. */
+export interface MaintenanceByBookingSummary {
+  status: number | string;
+  total: number | null;
+}
+
 export interface MaintenanceFilters {
   fleetId?: string | null;
   branchId?: number | null;

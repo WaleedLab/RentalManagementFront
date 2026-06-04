@@ -1,4 +1,4 @@
-import { Maintenance, MaintenanceSparePartLine } from './maintenance.model';
+import { Maintenance, MaintenanceByBookingSummary, MaintenanceSparePartLine } from './maintenance.model';
 
 function pickLoose(source: Record<string, unknown> | undefined, ...candidates: string[]): unknown {
   if (!source || typeof source !== 'object') {
@@ -138,4 +138,23 @@ export function normalizeMaintenance(raw: unknown): Maintenance {
       ),
     ),
   };
+}
+
+export function normalizeMaintenanceByBookingSummary(raw: unknown): MaintenanceByBookingSummary {
+  const r = (raw ?? {}) as Record<string, unknown>;
+  return {
+    status: normalizeMaintenanceStatus(pickLoose(r, 'status', 'Status')),
+    total: toNumber(pickLoose(r, 'total', 'Total')) ?? null,
+  };
+}
+
+export function isMaintenanceCompletedStatus(status: number | string): boolean {
+  if (typeof status === 'number') {
+    return status === 2;
+  }
+  const normalized = String(status ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]/g, '');
+  return normalized === 'completed' || normalized === '2';
 }
