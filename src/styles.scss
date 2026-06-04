@@ -10,6 +10,7 @@
 // Single source of truth for ALL colors (Light + Dark). Edit colors only there.
 // Imported last so its tokens override any legacy color declarations below.
 @import './styles/color-system';
+@import './styles/scrollbars';
 @import './styles/contract-flow-layout';
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 

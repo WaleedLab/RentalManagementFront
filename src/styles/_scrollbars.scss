@@ -1,0 +1,77 @@
+// =============================================================================
+//  Theme-aligned scrollbars (native + SimpleBar) — tokens from _color-system.scss
+// =============================================================================
+
+@mixin rt-themed-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rt-scrollbar-thumb) var(--rt-scrollbar-track);
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--rt-scrollbar-track);
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--rt-scrollbar-thumb);
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--rt-scrollbar-thumb-hover);
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+html:root,
+html body.light-only {
+  @include rt-themed-scrollbar;
+}
+
+html body.dark-only,
+html[data-bs-theme='dark'] {
+  @include rt-themed-scrollbar;
+}
+
+/* Sidebar: scroll without visible bar (see sidebar.scss) */
+.page-wrapper.compact-wrapper .page-body-wrapper .sidebar-wrapper {
+  #sidebar-menu,
+  .sidebar-links,
+  .sidebar-links.custom-scrollbar {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+
+    &::-webkit-scrollbar {
+      width: 0 !important;
+      height: 0 !important;
+      display: none !important;
+    }
+  }
+
+  .simplebar-track {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  .simplebar-scrollbar {
+    display: none !important;
+  }
+}
+
+.page-wrapper.compact-wrapper .page-body,
+.page-wrapper.compact-wrapper .page-body .container-fluid {
+  @include rt-themed-scrollbar;
+}
+
+.custom-scrollbar {
+  @include rt-themed-scrollbar;
+}

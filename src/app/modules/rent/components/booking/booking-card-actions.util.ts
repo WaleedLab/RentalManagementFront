@@ -1,4 +1,7 @@
 import { Booking } from '../../models';
+import { canBookingTranslateToDebtAction } from './booking-translate-debt.util';
+
+export { canBookingTranslateToDebtAction };
 
 /** عقد معلّق (حادث أو مبلغ). */
 export function isBookingSuspended(booking: Pick<Booking, 'status'> | null | undefined): boolean {
@@ -167,6 +170,7 @@ export function bookingCardMoreMenuVisible(booking: Booking): boolean {
   return (
     bookingCardTrackInMenu(booking) ||
     bookingCardEditInMenu(booking) ||
+    canBookingTranslateToDebtAction(booking) ||
     canBookingSuspendAction(booking) ||
     canBookingExtendAction(booking) ||
     bookingCardPrintInMenu(booking) ||

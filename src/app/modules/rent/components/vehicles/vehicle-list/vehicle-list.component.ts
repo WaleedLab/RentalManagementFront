@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -34,6 +34,7 @@ import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/
 import { SmoothSelectOption, SmoothSelectComponent } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { VehicleSaudiPlateComponent } from '../../../../../shared/ui/vehicle-saudi-plate/vehicle-saudi-plate.component';
 import { VehicleStatusDialogComponent } from '../../../../../shared/component/vehicle-status-dialog/vehicle-status-dialog.component';
+import { MaintenanceService } from '../../../../maintenance/services/maintenance.service';
 
 @Component({
   selector: 'app-vehicle-list',
@@ -58,9 +59,11 @@ export class VehicleListComponent implements OnInit {
   private static readonly DEFAULT_PAGE_SIZE = 10;
 
   private vehicleService = inject(VehicleService);
+  private maintenanceService = inject(MaintenanceService);
   private branchService = inject(BranchService);
   private categoryVehicleService = inject(CategoryVehicleService);
   private authState = inject(AuthStateService);
+  private router = inject(Router);
   private confirm = inject(ConfirmService);
   private modal = inject(NgbModal);
   private toast = inject(ToastService);
@@ -87,6 +90,7 @@ export class VehicleListComponent implements OnInit {
   loadFailed = signal(false);
   deletingIds = signal<Array<string | number>>([]);
   changingStatusIds = signal<Array<string | number>>([]);
+  addingMaintenanceIds = signal<Array<string | number>>([]);
   vehicleStatusCounts = signal<VehicleStatusCountItem[]>([]);
   vehicleStatusTotalCount = signal(0);
   expirationCounts = signal<VehicleExpirationCountItem[]>([]);
@@ -532,6 +536,78 @@ export class VehicleListComponent implements OnInit {
   isChangingStatus(id: string | number): boolean {
     const target = String(id);
     return this.changingStatusIds().some(currentId => String(currentId) === target);
+  }
+
+  isAddingToMaintenance(id: string | number): boolean {
+    const target = String(id);
+    return this.addingMaintenanceIds().some(currentId => String(currentId) === target);
+  }
+
+  canAddToMaintenance(vehicle: Vehicle): boolean {
+    return vehicle.status !== 'Maintenance' && vehicle.status !== 'Sold';
+  }
+
+  addVehicleToMaintenance(vehicle: Vehicle): void {
+    const fleetId = (this.authState.fleetId() ?? '').trim();
+    if (!fleetId) {
+      this.toast.error(this.translate.instant('FleetId is required'));
+      return;
+    }
+
+    const idVehicle = Number(vehicle.id);
+    if (!Number.isFinite(idVehicle) || idVehicle <= 0) {
+      return;
+    }
+
+    const vehicleName = this.getVehicleTitle(vehicle);
+    this.confirm
+      .confirm(
+        this.translate.instant('vehicles.addToMaintenance.title'),
+        this.translate.instant('vehicles.addToMaintenance.confirm', { vehicle: vehicleName }),
+      )
+      .subscribe(confirmed => {
+        if (!confirmed) {
+          return;
+        }
+
+        this.addingMaintenanceIds.update(ids => [...ids, vehicle.id]);
+        this.maintenanceService
+          .create({
+            fleetId,
+            idVehicle,
+            idBooking: null,
+            idInsurancecompanies: null,
+            note: null,
+          })
+          .subscribe({
+            next: row => {
+              this.toast.success(this.translate.instant('vehicles.addToMaintenance.success'));
+              this.vehicles.update(items =>
+                items.map(item =>
+                  String(item.id) === String(vehicle.id) ? { ...item, status: 'Maintenance' } : item,
+                ),
+              );
+              this.loadStatusCounts();
+
+              const maintenanceId = row.id;
+              if (maintenanceId && maintenanceId !== '0') {
+                this.router.navigate(['/maintenance', maintenanceId, 'edit'], {
+                  queryParams: { fleetId },
+                });
+              } else {
+                this.router.navigate(['/maintenance']);
+              }
+            },
+            error: err =>
+              this.toast.error(
+                err?.message ?? this.translate.instant('vehicles.addToMaintenance.failed'),
+              ),
+            complete: () =>
+              this.addingMaintenanceIds.update(ids =>
+                ids.filter(currentId => String(currentId) !== String(vehicle.id)),
+              ),
+          });
+      });
   }
 
   openChangeStatusDialog(vehicle: Vehicle): void {

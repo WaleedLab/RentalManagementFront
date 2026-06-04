@@ -16,6 +16,7 @@ import {
   FinshBookingRequest,
   FinshAfterSuspendedBookingRequest,
   SuspendedBookingRequest,
+  TranslateBookingRequest,
 } from '../../models';
 import { normalizeBooking } from '../../models/booking/booking.normalizer';
 import { TrafficBooking } from '../../models/booking/traffic-booking.model';
@@ -266,10 +267,17 @@ export class BookingService {
    */
   suspend(body: SuspendedBookingRequest): Observable<unknown> {
     const payload = this.toSuspendedBookingPayload(body);
-    return this.api.postData(`${this.base}/suspended`, payload, { suppressErrorToast: true }).pipe(
-      catchError(() => this.api.postData(`${this.base}/Suspended`, payload, { suppressErrorToast: true })),
-      catchError(() => this.api.postData(`${this.base}/suspend`, payload)),
+    return this.api.postData(`${this.base}/Suspended`, payload, { suppressErrorToast: true }).pipe(
+      catchError(() => this.api.postData(`${this.base}/suspended`, payload, { suppressErrorToast: true })),
     );
+  }
+
+  /**
+   * `TranslateBookingCommand` — POST `Booking/TranslateBooking` (Router.BookingRouting.TranslateBooking).
+   */
+  translateToDebt(body: TranslateBookingRequest): Observable<unknown> {
+    const payload = this.toTranslateBookingPayload(body);
+    return this.api.postData(`${this.base}/TranslateBooking`, payload, { suppressErrorToast: true });
   }
 
   /**
@@ -575,6 +583,17 @@ export class BookingService {
       BondType: b.bondType,
       stutus: b.stutus,
       Stutus: b.stutus,
+    };
+  }
+
+  /** `TranslateBookingCommand` — `Id` + `FleetId`. */
+  private toTranslateBookingPayload(b: TranslateBookingRequest): Record<string, unknown> {
+    const fleetId = normalizeFleetId(b.fleetId) ?? b.fleetId;
+    return {
+      id: b.id,
+      Id: b.id,
+      fleetId,
+      FleetId: fleetId,
     };
   }
 

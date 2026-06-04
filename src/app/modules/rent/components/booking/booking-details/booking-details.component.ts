@@ -7,6 +7,7 @@ import { catchError, forkJoin, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch-id.util';
+import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
@@ -25,6 +26,8 @@ import { Booking, BookingStatus } from '../../../models';
 import {
   bookingStatusTone,
   bookingStatusTranslationKey,
+  bookingStatusFromCode,
+  getBookingStatusBadgeClass,
   getBookingStatusBadgeStyle,
   getBookingStatusSurfaceStyle,
 } from '../../../models/booking/booking-status.utils';
@@ -42,12 +45,20 @@ import {
   canBookingFinishAction,
   canBookingPrintAction,
   canBookingSuspendAction,
+  canBookingTranslateToDebtAction,
   bookingFinishLabelKey,
   bookingFinishRoute,
   bookingFinishToolbarButtonClass,
 } from '../booking-card-actions.util';
+import { runBookingTranslateToDebt } from '../booking-translate-debt.util';
 
-type BookingDetailsToolbarAction = 'suspend' | 'extend' | 'print' | 'finish' | 'closeContract';
+type BookingDetailsToolbarAction =
+  | 'suspend'
+  | 'extend'
+  | 'print'
+  | 'finish'
+  | 'closeContract'
+  | 'translateToDebt';
 
 export type ContractDetailsTabId =
   | 'overview'
@@ -90,6 +101,7 @@ export class BookingDetailsComponent implements OnInit {
   private bankService = inject(BankService);
   private cashAccountService = inject(CashAccountService);
   private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
   private translate = inject(TranslateService);
 
   booking = signal<Booking | null>(null);
@@ -194,11 +206,12 @@ export class BookingDetailsComponent implements OnInit {
   }
 
   statusDisplayText(item: Booking): string {
-    const custom = String(item.statusDisplayName ?? '').trim();
-    if (custom) {
-      return custom;
-    }
-    return this.translate.instant(this.statusBadgeLabelKey(item.status));
+    const normalized = bookingStatusFromCode(item.status);
+    return this.translate.instant(bookingStatusTranslationKey(normalized));
+  }
+
+  statusBadgeClass(status: BookingStatus): string {
+    return getBookingStatusBadgeClass(status);
   }
 
   vehiclePhotoLabel(angle: string): string {
@@ -1005,6 +1018,7 @@ export class BookingDetailsComponent implements OnInit {
   canPrintAction = canBookingPrintAction;
   canSuspendAction = canBookingSuspendAction;
   canExtendAction = canBookingExtendAction;
+  canTranslateToDebtAction = canBookingTranslateToDebtAction;
 
   /** Toolbar actions: suspend, extend, print, close contract, finish (edit uses routerLink in template). */
   onDetailsToolbarAction(action: BookingDetailsToolbarAction, item: Booking): void {
@@ -1043,12 +1057,28 @@ export class BookingDetailsComponent implements OnInit {
       this.openBookingPrint(true);
       return;
     }
+    if (action === 'translateToDebt' && !this.canTranslateToDebtAction(item)) {
+      return;
+    }
+    if (action === 'translateToDebt') {
+      runBookingTranslateToDebt({
+        booking: item,
+        fleetId: this.authState.fleetId() || item.fleetId,
+        bookingService: this.bookingService,
+        confirmService: this.confirm,
+        toast: this.toast,
+        translate: (key: string) => this.translate.instant(key),
+        onSuccess: () => this.reloadBookingDetails(),
+      });
+      return;
+    }
     const labels: Record<BookingDetailsToolbarAction, string> = {
       suspend: 'تعليق',
       extend: 'تمديد',
       print: 'طباعة',
       finish: 'إنهاء',
       closeContract: 'إغلاق',
+      translateToDebt: 'تحويل إلى ذمم',
     };
     this.toast.info(`${labels[action]}: ${this.translate.instant('Details')}`);
     this.router.navigate(['/booking', item.id, 'details'], { queryParams: { action } });
@@ -1186,6 +1216,26 @@ export class BookingDetailsComponent implements OnInit {
     }
     const composed = parts.join(' - ');
     return composed || this.valueOrDash(item.branchName);
+  }
+
+  private reloadBookingDetails(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      return;
+    }
+    this.loading.set(true);
+    this.bookingService.getById(id, this.authState.fleetId() ?? '').subscribe({
+      next: booking => {
+        this.booking.set(booking);
+        this.loadVehicleBranch(booking);
+        this.loadPaymentSummaryForBooking(booking);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.toast.error(this.translate.instant('Failed to load booking'));
+      },
+    });
   }
 
   ngOnInit(): void {

@@ -185,6 +185,7 @@
             <div class="contract-dash-hero__status">
               <span
                 class="contract-dash-status-badge"
+                [ngClass]="statusBadgeClass(item.status)"
                 [ngStyle]="statusBadgeStyle(item.status)"
               >
                 {{ statusDisplayText(item) }}
@@ -251,6 +252,16 @@
               >
                 <i class="fa-solid fa-up-right-and-down-left-from-center me-1" aria-hidden="true"></i>
                 {{ 'Booking card menu extend' | translate }}
+              </button>
+            }
+            @if (canTranslateToDebtAction(item)) {
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-warning"
+                (click)="onDetailsToolbarAction('translateToDebt', item)"
+              >
+                <i class="fa-solid fa-building-columns me-1" aria-hidden="true"></i>
+                {{ 'Booking card translate to debt' | translate }}
               </button>
             }
             @if (canSuspendAction(item)) {

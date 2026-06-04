@@ -349,80 +349,80 @@
 }
 
 .vehicle-card__status-dot {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.55rem;
+  height: 0.55rem;
   border-radius: 50%;
   flex-shrink: 0;
   background: currentColor;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55);
+  box-shadow:
+    0 0 0 2px var(--app-fleet-status-pill-dot-ring),
+    0 0 8px color-mix(in srgb, currentColor 45%, transparent);
+}
+
+.vehicle-card__status-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .vehicle-status-chip--available {
   color: var(--app-fleet-status-available-fg);
-  background: var(--app-fleet-status-available-bg);
+  background: var(--app-fleet-status-pill-available-bg);
   border-color: var(--app-fleet-status-available-border);
 }
 
 .vehicle-status-chip--booked {
   color: var(--app-fleet-status-booked-fg);
-  background: var(--app-fleet-status-booked-bg);
+  background: var(--app-fleet-status-pill-booked-bg);
   border-color: var(--app-fleet-status-booked-border);
 }
 
 .vehicle-status-chip--maintenance {
   color: var(--app-fleet-status-maintenance-fg);
-  background: var(--app-fleet-status-maintenance-bg);
+  background: var(--app-fleet-status-pill-maintenance-bg);
   border-color: var(--app-fleet-status-maintenance-border);
 }
 
 .vehicle-status-chip--inactive {
   color: var(--app-fleet-status-inactive-fg);
-  background: var(--app-fleet-status-inactive-bg);
+  background: var(--app-fleet-status-pill-inactive-bg);
   border-color: var(--app-fleet-status-inactive-border);
 }
 
 .vehicle-status-chip--sold {
   color: var(--app-fleet-status-sold-fg);
-  background: var(--app-fleet-status-sold-bg);
+  background: var(--app-fleet-status-pill-sold-bg);
   border-color: var(--app-fleet-status-sold-border);
 }
 
 .vehicle-card__status-pill {
   position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  z-index: 5;
+  top: 0.58rem;
+  right: 0.62rem;
+  left: auto;
+  z-index: 6;
+  direction: ltr;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  min-height: 24px;
-  padding: 0.18rem 0.62rem;
+  gap: 0.4rem;
+  min-height: 26px;
+  padding: 0.28rem 0.72rem 0.28rem 0.78rem;
   border-radius: 999px;
   border: 1.5px solid transparent;
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   font-weight: 800;
   line-height: 1.2;
-  max-width: calc(100% - 1rem);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 6px 16px -10px rgba(var(--rt-shadow-rgb), 0.35);
+  letter-spacing: 0.01em;
+  max-width: calc(100% - 1.1rem);
+  backdrop-filter: blur(10px) saturate(1.15);
+  box-shadow: var(--app-fleet-status-pill-shadow);
   pointer-events: none;
-
-  span:last-child {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-[dir='rtl'] .vehicle-card__status-pill {
-  left: 0.5rem;
-  right: auto;
 }
 
 .vehicle-card:hover .vehicle-card__status-pill {
   transform: translateY(-1px);
-  box-shadow: 0 8px 18px -10px rgba(var(--rt-shadow-rgb), 0.38);
+  box-shadow: var(--app-fleet-status-pill-shadow-hover);
 }
 
 .vehicle-card__plate-zone {
@@ -563,6 +563,12 @@
   border-color: rgba(var(--c-ef4444-rgb), 0.34);
 }
 
+.vehicle-card__action.table-action-icon--maintenance {
+  color: var(--app-fleet-status-maintenance-fg);
+  background: var(--app-fleet-status-maintenance-bg);
+  border-color: var(--app-fleet-status-maintenance-border);
+}
+
 :host-context(body.dark-only),
 :host-context([data-bs-theme='dark']) {
   .vehicle-expiration-bar__loading {
@@ -677,6 +683,12 @@
     background: linear-gradient(145deg, rgba(var(--c-5a3438-rgb), 0.55), rgba(var(--c-2d1c1e-rgb), 0.52));
     border-color: rgba(var(--c-c48488-rgb), 0.38);
     color: rgba(var(--c-fee2e2-rgb), 0.94);
+  }
+
+  .vehicle-card__action.table-action-icon--maintenance {
+    color: var(--app-fleet-status-maintenance-fg);
+    background: color-mix(in srgb, var(--app-fleet-status-maintenance-bg) 72%, rgba(var(--c-0f172a-rgb), 0.28));
+    border-color: var(--app-fleet-status-maintenance-border);
   }
 
   .vehicle-card--status-success {

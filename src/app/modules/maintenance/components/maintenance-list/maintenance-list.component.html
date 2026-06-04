@@ -111,6 +111,7 @@
                     <a
                       class="table-action-icon table-action-icon--primary"
                       [routerLink]="['/maintenance', row.id, 'edit']"
+                      [queryParams]="row.fleetId ? { fleetId: row.fleetId } : null"
                       [attr.aria-label]="'Edit' | translate"
                       [title]="'Edit' | translate"
                     >

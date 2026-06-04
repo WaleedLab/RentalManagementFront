@@ -99,8 +99,10 @@ export class MaintenanceService {
       .pipe(map(raw => (raw == null ? null : normalizeMaintenanceByBookingSummary(raw))));
   }
 
-  create(body: MaintenanceUpsertRequest): Observable<unknown> {
-    return this.api.postData(this.base, this.toCommandPayload(body));
+  create(body: MaintenanceUpsertRequest): Observable<Maintenance> {
+    return this.api
+      .postData<unknown>(this.base, this.toCommandPayload(body))
+      .pipe(map(raw => normalizeMaintenance(raw)));
   }
 
   update(body: MaintenanceUpsertRequest): Observable<unknown> {

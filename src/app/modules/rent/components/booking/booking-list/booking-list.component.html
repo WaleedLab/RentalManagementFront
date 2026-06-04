@@ -63,7 +63,7 @@
       <div class="booking-command__legend" aria-label="Booking color guide">
         @for (guide of colorGuide(); track guide.key) {
           <span class="booking-legend-pill">
-            <span class="booking-legend-dot" [ngClass]="'booking-legend-dot--' + guide.key"></span>
+            <span class="booking-legend-dot" [style.background]="guide.color"></span>
             <span>{{ guide.label }}</span>
           </span>
         }
@@ -86,6 +86,7 @@
             <header class="booking-card__top">
               <span
                 class="booking-card__status-pill"
+                [ngClass]="getBookingStatusBadgeClass(booking.status)"
                 [ngStyle]="getBookingStatusBadgeStyle(booking.status)"
                 [attr.aria-label]="('Status' | translate) + ': ' + statusBadgeLabel(booking)"
               >
@@ -233,6 +234,17 @@
                         <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i>
                         <span>{{ cardFinishLabelKey(booking) | translate }}</span>
                       </a>
+                    }
+                    @if (canTranslateToDebtAction(booking)) {
+                      <button
+                        type="button"
+                        class="booking-card__menu-item booking-card__menu-item--translate-debt"
+                        role="menuitem"
+                        (click)="onTranslateToDebt(booking, bookingCardMore)"
+                      >
+                        <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
+                        <span>{{ 'Booking card translate to debt' | translate }}</span>
+                      </button>
                     }
                     @if (canSuspendAction(booking)) {
                       <a

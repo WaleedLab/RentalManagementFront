@@ -8,6 +8,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { normalizeApiError } from '../../../../../core/api/api-response.utils';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
+import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
@@ -19,8 +20,10 @@ import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared
 import { VehicleSaudiPlateComponent } from '../../../../../shared/ui/vehicle-saudi-plate/vehicle-saudi-plate.component';
 import { Booking, BookingStatus, Branch, VEHICLE_FALLBACK_IMAGE } from '../../../models';
 import {
+  bookingStatusFromCode,
   bookingStatusTranslationKey,
   getBookingListCardStatusClass,
+  getBookingStatusBadgeClass,
   getBookingListColorGuideItems,
   getBookingStatusBadgeStyle as buildBookingStatusBadgeStyle,
   getBookingStatusTheme,
@@ -44,7 +47,9 @@ import {
   canBookingExtendAction,
   canBookingFinishAction,
   canBookingSuspendAction,
+  canBookingTranslateToDebtAction,
 } from '../booking-card-actions.util';
+import { runBookingTranslateToDebt } from '../booking-translate-debt.util';
 
 @Component({
   selector: 'app-booking-list',
@@ -73,8 +78,8 @@ export class BookingListComponent implements OnInit {
   private branchService = inject(BranchService);
   private authState = inject(AuthStateService);
   private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
   private translate = inject(TranslateService);
-
   bookings = signal<Booking[]>([]);
   totalCount = signal(0);
   totalPages = signal(0);
@@ -135,6 +140,7 @@ export class BookingListComponent implements OnInit {
   });
 
   getBookingListCardStatusClass = getBookingListCardStatusClass;
+  getBookingStatusBadgeClass = getBookingStatusBadgeClass;
 
   getBookingStatusIconClass(status: BookingStatus): string {
     return getBookingStatusTheme(status).iconClass;
@@ -149,11 +155,8 @@ export class BookingListComponent implements OnInit {
   }
 
   statusBadgeLabel(booking: Booking): string {
-    const fromApi = (booking.statusDisplayName ?? '').trim();
-    if (fromApi) {
-      return fromApi;
-    }
-    return this.translate.instant(this.statusBadgeLabelKey(booking.status));
+    const normalized = bookingStatusFromCode(booking.status);
+    return this.translate.instant(bookingStatusTranslationKey(normalized));
   }
 
   customerCardLabel(booking: Booking): string {
@@ -216,6 +219,7 @@ export class BookingListComponent implements OnInit {
   canFinishAction = canBookingFinishAction;
   canSuspendAction = canBookingSuspendAction;
   canExtendAction = canBookingExtendAction;
+  canTranslateToDebtAction = canBookingTranslateToDebtAction;
   cardActionInMain = bookingCardActionInMain;
   cardFinishRoute = bookingFinishRoute;
   cardFinishLabelKey = bookingFinishLabelKey;
@@ -315,6 +319,19 @@ export class BookingListComponent implements OnInit {
     if (panel) {
       panel.open = false;
     }
+  }
+
+  onTranslateToDebt(booking: Booking, morePanel: HTMLDetailsElement | null): void {
+    this.closeBookingCardMore(morePanel);
+    runBookingTranslateToDebt({
+      booking,
+      fleetId: this.authState.fleetId() || booking.fleetId,
+      bookingService: this.bookingService,
+      confirmService: this.confirm,
+      toast: this.toast,
+      translate: (key: string) => this.translate.instant(key),
+      onSuccess: () => this.load(),
+    });
   }
 
   ngOnInit(): void {

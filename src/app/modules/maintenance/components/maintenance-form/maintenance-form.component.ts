@@ -66,16 +66,23 @@ export class MaintenanceFormComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    const fleetId = this.authState.fleetId() ?? undefined;
+    const fleetId = this.resolveFleetId() ?? undefined;
 
     this.loadVehicles(fleetId);
     this.loadInsuranceCompanies(fleetId);
 
     if (id) {
+      const idNum = Number(id);
+      if (!Number.isFinite(idNum) || idNum <= 0) {
+        this.toast.error(this.translate.instant('maintenance.loadOneFailed'));
+        this.initializing.set(false);
+        return;
+      }
       this.isEdit.set(true);
-      this.maintenanceId.set(id);
-      this.loadMaintenance(id);
+      this.maintenanceId.set(String(idNum));
+      this.loadMaintenance(String(idNum), fleetId);
     } else {
+      this.applyVehicleFromQuery();
       this.initializing.set(false);
     }
   }
@@ -102,7 +109,7 @@ export class MaintenanceFormComponent implements OnInit {
       return;
     }
 
-    const fleetId = (this.authState.fleetId() ?? '').trim();
+    const fleetId = (this.resolveFleetId() ?? '').trim();
     if (!fleetId) {
       this.toast.error(this.translate.instant('FleetId is required'));
       return;
@@ -144,9 +151,9 @@ export class MaintenanceFormComponent implements OnInit {
     });
   }
 
-  private loadMaintenance(id: string): void {
+  private loadMaintenance(id: string, fleetId?: string): void {
     this.initializing.set(true);
-    this.maintenanceService.getById(id, this.authState.fleetId()).subscribe({
+    this.maintenanceService.getById(id, fleetId ?? this.resolveFleetId()).subscribe({
       next: row => {
         this.form.patchValue({
           idVehicle: row.idVehicle,
@@ -171,7 +178,10 @@ export class MaintenanceFormComponent implements OnInit {
         catchError(() => of([] as MaintenanceVehicleOption[])),
         finalize(() => this.loadingVehicle.set(false)),
       )
-      .subscribe(vehicles => this.vehicleOptions.set(this.toVehicleOptions(vehicles)));
+      .subscribe(vehicles => {
+        this.vehicleOptions.set(this.toVehicleOptions(vehicles));
+        this.applyVehicleFromQuery();
+      });
   }
 
   private loadInsuranceCompanies(fleetId?: string): void {
@@ -209,5 +219,30 @@ export class MaintenanceFormComponent implements OnInit {
       return null;
     }
     return Number(value);
+  }
+
+  /** `?idVehicle=` from vehicle list → pre-select on create. */
+  private applyVehicleFromQuery(): void {
+    if (this.isEdit()) {
+      return;
+    }
+    const raw = this.route.snapshot.queryParamMap.get('idVehicle');
+    if (!raw) {
+      return;
+    }
+    const idVehicle = Number(raw);
+    if (!Number.isFinite(idVehicle) || idVehicle <= 0) {
+      return;
+    }
+    this.form.patchValue({ idVehicle });
+  }
+
+  /** Prefer fleet from list row (query) so edit matches `GetMaintenanceByIdQuery`. */
+  private resolveFleetId(): string | null {
+    const fromRoute = this.route.snapshot.queryParamMap.get('fleetId')?.trim();
+    if (fromRoute) {
+      return fromRoute;
+    }
+    return this.authState.fleetId();
   }
 }
