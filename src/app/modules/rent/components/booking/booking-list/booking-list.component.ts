@@ -9,13 +9,20 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { normalizeApiError } from '../../../../../core/api/api-response.utils';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
+import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
+import { ListCommandBarComponent } from '../../../../../shared/ui/list-command-bar/list-command-bar.component';
+import { ListContentShellComponent } from '../../../../../shared/ui/list-content-shell/list-content-shell.component';
 import { ListSearchFieldComponent } from '../../../../../shared/ui/list-search-field/list-search-field.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
-import { Booking, BookingStatus, Branch } from '../../../models';
+import { VehicleSaudiPlateComponent } from '../../../../../shared/ui/vehicle-saudi-plate/vehicle-saudi-plate.component';
+import { Booking, BookingStatus, Branch, VEHICLE_FALLBACK_IMAGE } from '../../../models';
 import {
   bookingStatusTranslationKey,
+  getBookingListCardStatusClass,
+  getBookingListColorGuideItems,
+  getBookingStatusBadgeStyle as buildBookingStatusBadgeStyle,
   getBookingStatusTheme,
 } from '../../../models/booking/booking-status.utils';
 import { BookingService } from '../../../services/booking/booking.service';
@@ -24,10 +31,14 @@ import { buildBookingTrackingQueryParams } from '../../../utils/booking-tracking
 import {
   bookingCardActionInMain,
   bookingCardCloseInMenu,
+  bookingCardEditInMenu,
   bookingCardFinishInMenu,
   bookingCardMoreMenuVisible,
-  bookingCardPrintInMain,
   bookingCardPrintInMenu,
+  bookingCardTrackInMenu,
+  bookingFinishActionClass,
+  bookingFinishLabelKey,
+  bookingFinishRoute,
   canBookingCloseAction,
   canBookingEditAction,
   canBookingExtendAction,
@@ -43,16 +54,20 @@ import {
     FormsModule,
     RouterLink,
     TranslateModule,
+    ListCommandBarComponent,
+    ListContentShellComponent,
     PaginationBarComponent,
     EmptyStateComponent,
     ListSearchFieldComponent,
     SmoothSelectComponent,
+    VehicleSaudiPlateComponent,
   ],
   templateUrl: './booking-list.component.html',
   styleUrl: './booking-list.component.scss',
 })
 export class BookingListComponent implements OnInit {
   private static readonly DEFAULT_PAGE_SIZE = 10;
+  private readonly vehicleFallbackImage = VEHICLE_FALLBACK_IMAGE;
 
   private bookingService = inject(BookingService);
   private branchService = inject(BranchService);
@@ -107,38 +122,26 @@ export class BookingListComponent implements OnInit {
     { label: this.translate.instant('Descending'), value: 'DESC' },
     { label: this.translate.instant('Ascending'), value: 'ASC' },
   ]);
-  colorGuide = [
-    { key: 'open', label: 'مفتوح', color: '#5B7A9E' },
-    { key: 'extension', label: 'تمديد', color: '#9E7840' },
-    { key: 'finsh', label: 'مصفى', color: '#558A6C' },
-    { key: 'close', label: 'إغلاق', color: '#6D727A' },
-    { key: 'suspend', label: 'تعليق', color: '#5C6773' },
-    { key: 'debts', label: 'ذمم', color: '#9B5560' },
-    { key: 'cases', label: 'قضايا', color: '#7A4A52' },
-  ] as const;
+  private langTick = signal(0);
+
+  colorGuide = computed(() => {
+    this.langTick();
+    return getBookingListColorGuideItems(this.translate.currentLang || 'ar');
+  });
+
+  pageSubtitle = computed(() => {
+    this.langTick();
+    return this.translate.instant('Bookings page subtitle');
+  });
+
+  getBookingListCardStatusClass = getBookingListCardStatusClass;
 
   getBookingStatusIconClass(status: BookingStatus): string {
     return getBookingStatusTheme(status).iconClass;
   }
 
   getBookingStatusBadgeStyle(status: BookingStatus): Record<string, string> {
-    const theme = getBookingStatusTheme(status);
-    return {
-      background: theme.gradient,
-      color: theme.textColor,
-      borderColor: theme.borderLight,
-    };
-  }
-
-  getBookingCardStyle(status: BookingStatus): Record<string, string> {
-    const theme = getBookingStatusTheme(status);
-    return {
-      '--booking-status-bg-light': theme.bgLight,
-      '--booking-status-bg-dark': theme.bgDark,
-      '--booking-status-border-light': theme.borderLight,
-      '--booking-status-border-dark': theme.borderDark,
-      '--booking-status-accent': theme.color,
-    };
+    return buildBookingStatusBadgeStyle(status);
   }
 
   statusBadgeLabelKey(status: BookingStatus): string {
@@ -180,6 +183,18 @@ export class BookingListComponent implements OnInit {
     return booking.vehicleId ? `#${booking.vehicleId}` : '—';
   }
 
+  bookingVehicleImage(booking: Booking): string {
+    const resolved = resolveMediaUrl(booking.vehicleImageUrl);
+    return resolved || this.vehicleFallbackImage;
+  }
+
+  onBookingVehicleImageError(event: Event): void {
+    const target = event.target as HTMLImageElement | null;
+    if (target && target.getAttribute('src') !== this.vehicleFallbackImage) {
+      target.setAttribute('src', this.vehicleFallbackImage);
+    }
+  }
+
   vehicleSerialLabel(booking: Booking): string {
     const serial = (booking.vehicleSerialNumber ?? '').trim();
     if (serial) {
@@ -202,6 +217,11 @@ export class BookingListComponent implements OnInit {
   canSuspendAction = canBookingSuspendAction;
   canExtendAction = canBookingExtendAction;
   cardActionInMain = bookingCardActionInMain;
+  cardFinishRoute = bookingFinishRoute;
+  cardFinishLabelKey = bookingFinishLabelKey;
+  cardFinishActionClass = bookingFinishActionClass;
+  cardTrackInMenu = bookingCardTrackInMenu;
+  cardEditInMenu = bookingCardEditInMenu;
 
   bookingTrackQueryParams(booking: Booking): Record<string, string> {
     return buildBookingTrackingQueryParams(booking);
@@ -211,68 +231,94 @@ export class BookingListComponent implements OnInit {
   cardMoreMenuVisible = bookingCardMoreMenuVisible;
   cardPrintInMenu = bookingCardPrintInMenu;
 
+  contractCardLabel(booking: Booking): string {
+    const number = (booking.bookingNumber ?? '').trim();
+    if (number) {
+      return number;
+    }
+    const basame = (booking.numberBookingINBasame ?? '').trim();
+    if (basame) {
+      return basame;
+    }
+    return String(booking.id ?? '').trim() || '—';
+  }
+
+  formatBookingDate(value: string | undefined): string {
+    const raw = (value ?? '').trim();
+    if (!raw) {
+      return '—';
+    }
+    const date = new Date(raw);
+    if (!Number.isFinite(date.getTime())) {
+      return raw;
+    }
+    const lang = this.translate.currentLang || this.translate.getDefaultLang() || 'ar';
+    return new Intl.DateTimeFormat(lang, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
+  }
+
+  endDateHighlightClass(booking: Booking): string {
+    const state = this.bookingEndDateState(booking);
+    if (state === 'overdue') {
+      return 'booking-card__date--overdue';
+    }
+    if (state === 'today') {
+      return 'booking-card__date--today';
+    }
+    return '';
+  }
+
+  endDateBadgeKey(booking: Booking): string | null {
+    const state = this.bookingEndDateState(booking);
+    if (state === 'overdue') {
+      return 'Booking return overdue';
+    }
+    if (state === 'today') {
+      return 'Booking return today';
+    }
+    return null;
+  }
+
+  private bookingEndDateState(booking: Booking): 'overdue' | 'today' | 'upcoming' | 'none' {
+    const status = String(booking.status ?? '').trim();
+    if (status === 'close' || status === 'finsh') {
+      return 'none';
+    }
+    const end = this.parseDateOnly(booking.endDate);
+    if (!end) {
+      return 'none';
+    }
+    const today = this.startOfLocalDay(new Date());
+    const endDay = this.startOfLocalDay(end);
+    if (endDay.getTime() < today.getTime()) {
+      return 'overdue';
+    }
+    if (endDay.getTime() === today.getTime()) {
+      return 'today';
+    }
+    return 'upcoming';
+  }
+
+  private parseDateOnly(value: string | undefined): Date | null {
+    const raw = (value ?? '').trim();
+    if (!raw) {
+      return null;
+    }
+    const date = new Date(raw);
+    return Number.isFinite(date.getTime()) ? date : null;
+  }
+
+  private startOfLocalDay(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
   closeBookingCardMore(panel: HTMLDetailsElement | null): void {
     if (panel) {
       panel.open = false;
     }
   }
 
-  updateCustomerTooltip(container: HTMLElement, booking: Booking): void {
-    this.updateFactTooltip(container, this.customerCardLabel(booking));
-  }
-
-  updateBranchTooltip(container: HTMLElement, booking: Booking): void {
-    this.updateFactTooltip(container, this.branchCardLabel(booking));
-  }
-
-  private updateFactTooltip(container: HTMLElement, fullText: string): void {
-    const valueEl = container.querySelector('.booking-fact__value') as HTMLElement | null;
-    if (!valueEl) {
-      container.removeAttribute('data-tooltip');
-      return;
-    }
-    const isTruncated = valueEl.scrollHeight > valueEl.clientHeight + 1 || valueEl.scrollWidth > valueEl.clientWidth;
-    if (!isTruncated) {
-      container.removeAttribute('data-tooltip');
-      return;
-    }
-    container.setAttribute('data-tooltip', fullText);
-  }
-
-  onBookingImageError(event: Event): void {
-    const img = event.target as HTMLImageElement | null;
-    if (!img) {
-      return;
-    }
-    img.style.display = 'none';
-    const fallback = img.nextElementSibling as HTMLElement | null;
-    if (fallback) {
-      fallback.classList.remove('booking-card__media-placeholder--hidden');
-    }
-  }
-
-  getBookingTitle(booking: Booking): string {
-    const n = (booking.bookingNumber ?? '').trim();
-    return n || String(booking.id);
-  }
-
-  bookingNumberLabel(booking: Booking): string {
-    const number = (booking.bookingNumber ?? '').trim();
-    if (number) {
-      return number;
-    }
-    return String(booking.id ?? '').trim() || '—';
-  }
-
-  bookingBasameNumberLabel(booking: Booking): string {
-    const basameNumber = (booking.numberBookingINBasame ?? '').trim();
-    if (basameNumber) {
-      return basameNumber;
-    }
-    return '—';
-  }
-
   ngOnInit(): void {
+    this.translate.onLangChange.subscribe(() => this.langTick.update(v => v + 1));
     this.loadBranches();
     this.load();
   }
@@ -324,13 +370,6 @@ export class BookingListComponent implements OnInit {
     this.orderByDirection.set(normalized);
     this.pageNumber.set(1);
     this.load();
-  }
-
-  formatBookingTotal(value: number | null | undefined): string {
-    const n = typeof value === 'number' && Number.isFinite(value) ? value : 0;
-    return new Intl.NumberFormat(this.translate.currentLang || this.translate.getDefaultLang() || 'en', {
-      maximumFractionDigits: 2,
-    }).format(n);
   }
 
   load(): void {

@@ -1,4 +1,3 @@
-@use '../../../styles/rent-command-bar';
 @use '../../../../../shared/styles/list-command-tokens';
 
 :host {
@@ -10,21 +9,12 @@
   @include list-command-tokens.list-command-tokens-dark;
 }
 
-:host-context(body.dark-only) ::ng-deep .fin-command,
-:host-context(body.dark-only) ::ng-deep .booking-list-shell {
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-
 .booking-list-page {
   padding-bottom: 1rem;
+  background: var(--app-booking-list-page-bg);
 }
 
-.booking-command {
-  margin-bottom: 16px;
-}
-
-.booking-command__toolbar {
+:host ::ng-deep .booking-command__toolbar {
   grid-template-columns: minmax(200px, 272px) repeat(4, minmax(118px, 1fr));
 }
 
@@ -32,14 +22,9 @@
   max-width: 272px;
 }
 
-.booking-search {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
-  align-items: center;
-}
-
 .booking-command__legend {
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -57,1466 +42,375 @@
 }
 
 .booking-legend-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(var(--rt-shadow-rgb), 0.1);
 }
 
-.booking-list-shell {
-  position: relative;
-  z-index: 1;
-  border-radius: 20px;
-  border: 1px solid var(--fin-border);
-  background: var(--fin-glass);
-  box-shadow: var(--fin-shadow);
+.booking-legend-dot--open {
+  background: var(--app-booking-status-open);
 }
 
-.booking-list-shell__body {
-  padding: 1rem 1.1rem 1.15rem;
+.booking-legend-dot--extension {
+  background: var(--app-booking-status-extension);
 }
 
-:host ::ng-deep .booking-command .app-soft-select__trigger {
-  min-height: 38px;
-  border-radius: 10px;
-  border-color: var(--fin-border);
-  background: var(--fin-input-bg);
-  color: var(--fin-text);
+.booking-legend-dot--finsh {
+  background: var(--app-booking-status-finished);
 }
 
-:host ::ng-deep .booking-command .app-soft-select__label {
-  color: var(--fin-text);
-  font-size: 0.84rem;
+.booking-legend-dot--close {
+  background: var(--app-booking-status-closed);
 }
 
-:host ::ng-deep .booking-command .fin-field:has(app-smooth-select.app-smooth-select-host--open),
-:host ::ng-deep .booking-command .fin-field:has(.date-picker-host--open) {
-  position: relative;
-  z-index: 500020;
-  overflow: visible;
+.booking-legend-dot--Suspended_due_to_accident {
+  background: var(--app-booking-status-accident);
 }
 
-:host ::ng-deep .booking-command:has(.app-smooth-select-host--open),
-:host ::ng-deep .booking-command:has(.date-picker-host--open) {
-  z-index: 500010;
+.booking-legend-dot--Suspended_due_to_sum_money {
+  background: var(--app-booking-status-debt);
 }
 
-@media (max-width: 1199.98px) {
-  .booking-command__toolbar {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .fin-field--search {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 767.98px) {
-  .booking-command__toolbar {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Card grid — aligned with `vehicle-card` rhythm */
 .booking-cards-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.72rem;
-  align-items: stretch;
-  isolation: isolate;
-  position: relative;
-  z-index: 0;
-
-  /* Card “more” menus extend below the grid; lift above the pagination bar while open. */
-  &:has(.booking-card__more[open]) {
-    z-index: 130;
-  }
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
 }
 
 .booking-card {
-  --booking-status-bg-light: var(--c-e2e8f0);
-  --booking-status-bg-dark: var(--c-334155);
-  --booking-status-border-light: var(--c-94a3b8);
-  --booking-status-border-dark: var(--c-64748b);
-  --booking-status-accent: var(--c-64748b);
-  position: relative;
-  flex: 1 1 255px;
-  width: clamp(255px, 24vw, 320px);
-  max-width: 320px;
   display: flex;
   flex-direction: column;
-  min-height: 100%;
-  z-index: 0;
-  border: 1px solid color-mix(in srgb, var(--booking-status-border-light) 34%, var(--c-eef0f3) 66%);
-  border-radius: 20px;
-  overflow: visible;
-  /* سطح محايد مع لمسة حالة خفيفة — دمج هادئ مع الخلفية */
-  background:
-    radial-gradient(circle at 14% -8%, color-mix(in srgb, var(--booking-status-accent) 5%, transparent), transparent 48%),
-    linear-gradient(180deg, var(--c-fbfcfd) 0%, var(--c-f1f3f6) 100%);
-  backdrop-filter: blur(12px) saturate(1.08);
-  -webkit-backdrop-filter: blur(12px) saturate(1.08);
-  box-shadow:
-    0 12px 28px -22px rgba(var(--rt-shadow-rgb), 0.14),
-    0 4px 10px -8px rgba(var(--rt-shadow-rgb), 0.08),
-    inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.48);
+  gap: 0.42rem;
+  padding: 0.52rem 0.62rem 0.48rem;
+  border: 1px solid var(--app-booking-list-card-border);
+  border-radius: 14px;
+  background: var(--app-booking-list-card-bg);
+  box-shadow: var(--app-booking-list-card-shadow);
+  border-inline-start: 4px solid var(--app-booking-list-accent-unknown);
+  min-width: 0;
   transition:
-    transform 0.24s ease,
-    box-shadow 0.24s ease,
-    border-color 0.24s ease,
-    background 0.24s ease;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    border: 1px solid color-mix(in srgb, var(--c-ffffff) 42%, transparent);
-    pointer-events: none;
-  }
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
 
   &:hover {
-    z-index: 30;
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--booking-status-border-light) 44%, var(--c-f8fafc) 56%);
-    box-shadow:
-      0 18px 34px -22px rgba(var(--rt-shadow-rgb), 0.18),
-      0 6px 14px -12px color-mix(in srgb, var(--booking-status-accent) 10%, transparent),
-      inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.55);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px -18px rgba(var(--rt-shadow-rgb), 0.2);
   }
 }
 
-.booking-card:focus-within,
-.booking-card:has(.booking-card__more[open]) {
-  z-index: 30;
+.booking-card--status-open {
+  border-inline-start-color: var(--app-booking-list-accent-open);
 }
 
-.booking-card__media {
-  position: relative;
-  aspect-ratio: 16 / 7;
+.booking-card--status-extension {
+  border-inline-start-color: var(--app-booking-list-accent-extension);
+}
+
+.booking-card--status-finished {
+  border-inline-start-color: var(--app-booking-list-accent-finished);
+}
+
+.booking-card--status-closed {
+  border-inline-start-color: var(--app-booking-list-accent-closed);
+}
+
+.booking-card--status-suspended-accident {
+  border-inline-start-color: var(--app-booking-list-accent-suspended-accident);
+}
+
+.booking-card--status-suspended-debt {
+  border-inline-start-color: var(--app-booking-list-accent-suspended-debt);
+}
+
+.booking-card--status-unknown {
+  border-inline-start-color: var(--app-booking-list-accent-unknown);
+}
+
+.booking-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.booking-card__status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  max-width: 58%;
+  padding: 0.16rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--booking-badge-border-light, transparent);
+  background: var(--booking-badge-bg, var(--rt-brand-primary));
+  color: var(--booking-badge-color, #fff);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
   overflow: hidden;
-  border-radius: 20px 20px 0 0;
-  /* تدرج خفيف يميّز الحالة دون صراخ لوني */
-  background: linear-gradient(
-    155deg,
-    color-mix(in srgb, var(--booking-status-accent) 12%, var(--c-f8fafc) 88%) 0%,
-    color-mix(in srgb, var(--booking-status-accent) 5%, var(--c-eef2f6) 95%) 100%
-  );
+  text-overflow: ellipsis;
+
+  i {
+    font-size: 0.62rem;
+    flex-shrink: 0;
+  }
 }
 
-.booking-card__media-image {
-  position: absolute;
-  inset: 0;
+.booking-card__contract-no {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--rt-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 42%;
+  text-align: end;
+}
+
+.booking-card__plate-zone {
+  padding: 0.24rem 0.28rem;
+  border-radius: 8px;
+  background: var(--app-booking-list-plate-zone-bg);
+  border: 1px solid var(--app-fleet-plate-zone-border, var(--rt-divider));
+}
+
+.booking-card__plate-row {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 44px;
+}
+
+.booking-card__plate-cell {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.booking-card__vehicle-thumb {
+  flex: 0 0 auto;
+  width: 4.25rem;
+  min-height: 44px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--rt-hover-bg);
+  border: 1px solid var(--rt-divider);
+  align-self: stretch;
+}
+
+.booking-card__vehicle-thumb-image {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.booking-card__media-placeholder {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  padding: 0.75rem;
-  text-align: center;
-  color: color-mix(in srgb, var(--booking-status-accent) 42%, var(--c-64748b) 58%);
-
-  i {
-    font-size: clamp(1.85rem, 7vw, 2.45rem);
-    opacity: 0.55;
-    filter: drop-shadow(0 4px 12px rgba(var(--rt-shadow-rgb), 0.12));
-  }
+:host ::ng-deep .booking-card__plate-cell app-vehicle-saudi-plate {
+  width: 100%;
+  max-width: 140px;
 }
 
-.booking-card__media-placeholder-text {
-  max-width: 92%;
-  font-size: 0.68rem;
+:host ::ng-deep .booking-card__plate-zone .vehicle-saudi-plate--minimal {
+  min-height: 44px;
+  padding: 0.22rem 0.38rem 0.26rem;
+  gap: 0.1rem;
+}
+
+:host ::ng-deep .booking-card__plate-zone .vehicle-saudi-plate--minimal .vehicle-saudi-plate__arabic {
+  font-size: 0.82rem;
+}
+
+:host ::ng-deep .booking-card__plate-zone .vehicle-saudi-plate--minimal .vehicle-saudi-plate__latin {
+  font-size: 0.58rem;
+}
+
+.booking-card__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem 0.4rem;
+}
+
+.booking-card__fact {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.booking-card__fact-label {
+  font-size: 0.6rem;
   font-weight: 700;
-  line-height: 1.35;
-  letter-spacing: 0.02em;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  color: var(--rt-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.booking-card__media-placeholder--hidden {
-  display: none;
-}
-
-.booking-card:hover .booking-card__media-inner i {
-  transform: scale(1.06);
-}
-
-.booking-card__media-inner {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(var(--c-ffffff-rgb), 0.42);
-  font-size: clamp(3rem, 12vw, 4.25rem);
-  transition: transform 0.35s ease;
-
-  i {
-    transition: transform 0.45s ease;
-    filter: drop-shadow(0 6px 18px rgba(var(--rt-shadow-rgb), 0.25));
-  }
-}
-
-.booking-card__media-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--booking-status-accent) 3.5%, transparent) 0%,
-    rgba(var(--c-0f172a-rgb), 0.26) 100%
-  );
-}
-
-.booking-card__quick-meta {
-  position: absolute;
-  inset-inline-start: 0.52rem;
-  bottom: 0.52rem;
-  z-index: 2;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.booking-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 22px;
-  padding: 0.12rem 0.45rem;
-  border-radius: 999px;
-  border: 1px solid rgba(var(--c-ffffff-rgb), 0.34);
-  background: rgba(var(--c-0f172a-rgb), 0.52);
-  color: var(--c-f8fafc);
-  font-size: 0.66rem;
+.booking-card__fact-value {
+  font-size: 0.74rem;
   font-weight: 700;
-  backdrop-filter: blur(8px) saturate(1.2);
-  -webkit-backdrop-filter: blur(8px) saturate(1.2);
-}
-
-.booking-chip--ghost {
-  background: rgba(var(--c-ffffff-rgb), 0.16);
-  border-color: rgba(var(--c-ffffff-rgb), 0.28);
-  color: rgba(var(--c-f8fafc-rgb), 0.95);
-  font-weight: 600;
-  max-width: 11rem;
+  color: var(--rt-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.booking-card__status {
-  position: absolute;
-  top: 0.5rem;
-  inset-inline-end: 0.5rem;
-  z-index: 2;
-}
-
-.booking-status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
-  box-shadow: 0 1px 3px rgba(var(--rt-shadow-rgb), 0.08);
-}
-
-.booking-status-badge i {
-  font-size: 14px;
-  line-height: 1;
-}
-
-.booking-card__body {
-  position: relative;
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  padding: 0.58rem 0.62rem 0.62rem;
-  border-radius: 0 0 20px 20px;
-  background: color-mix(in srgb, var(--booking-status-accent) 2.2%, var(--c-fafbfc) 97.8%);
-  border-top: 1px solid color-mix(in srgb, var(--booking-status-accent) 7%, rgba(var(--c-e2e8f0-rgb), 0.9));
-}
-
-.booking-card__head {
+.booking-card__dates {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-  align-items: stretch;
-  gap: 0.46rem;
-  margin-bottom: 0.46rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.28rem;
 }
 
-.booking-card__identity {
-  display: contents;
-}
-
-.booking-card__title {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.45;
-  color: inherit;
-  letter-spacing: 0.01em;
-}
-
-.booking-card__identity-list {
-  display: contents;
-}
-
-.booking-card__identity-item {
+.booking-card__date {
   display: grid;
   gap: 0.06rem;
-  width: 100%;
-  max-width: 100%;
-  padding: 0.2rem 0.38rem 0.24rem;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--booking-status-accent) 14%, var(--c-eef1f5) 86%);
-  border-inline-start: 2px solid color-mix(in srgb, var(--booking-status-accent) 36%, var(--c-e5e9ef) 64%);
-  background: linear-gradient(
-    180deg,
-    var(--c-ffffff) 0%,
-    color-mix(in srgb, var(--booking-status-accent) 4.5%, var(--c-ffffff) 95.5%) 100%
-  );
-  box-shadow: 0 6px 14px -14px rgba(var(--rt-shadow-rgb), 0.12);
-}
-
-.booking-card__identity-label {
-  font-size: 0.54rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  opacity: 0.76;
-  text-transform: uppercase;
-}
-
-.booking-card__identity-value {
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  overflow: visible;
-  text-overflow: clip;
-  white-space: normal;
-  word-break: break-all;
-}
-
-.booking-card__plate {
-  flex-shrink: 0;
-  position: relative;
-  display: inline-grid;
-  gap: 0.12rem;
   min-width: 0;
-  max-width: 100%;
-  padding: 0.24rem 0.42rem 0.3rem;
-  border-radius: 9px;
-  border: 1px solid color-mix(in srgb, var(--booking-status-accent) 20%, var(--c-dfe5ec) 80%);
-  border-inline-start: 2px solid color-mix(in srgb, var(--booking-status-accent) 40%, var(--c-dde3ea) 60%);
-  background: linear-gradient(
-    180deg,
-    var(--c-ffffff) 0%,
-    color-mix(in srgb, var(--booking-status-accent) 5%, var(--c-ffffff) 95%) 100%
-  );
-  box-shadow: 0 8px 16px -14px rgba(var(--rt-shadow-rgb), 0.12);
-  overflow: hidden;
+  padding: 0.22rem 0.32rem;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--rt-card-elevated-bg) 88%, transparent);
+  border: 1px solid var(--rt-border);
 }
 
-.booking-card__plate::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: 10px;
-  padding: 1px;
-  background:
-    linear-gradient(
-      135deg,
-      rgba(var(--c-ffffff-rgb), 0.65),
-      rgba(var(--c-e2e8f0-rgb), 0.38) 32%,
-      rgba(var(--c-94a3b8-rgb), 0.28) 62%,
-      rgba(var(--c-ffffff-rgb), 0.55)
-    );
-  pointer-events: none;
-  -webkit-mask:
-    linear-gradient(var(--c-ffffff) 0 0) content-box,
-    linear-gradient(var(--c-ffffff) 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0.8;
-}
-
-.booking-card__plate::after {
-  content: '';
-  position: absolute;
-  inset: 2px;
-  border-radius: 8px;
-  border-top: 1px solid rgba(var(--c-ffffff-rgb), 0.5);
-  border-bottom: 1px solid rgba(var(--c-94a3b8-rgb), 0.25);
-  background:
-    linear-gradient(
-      115deg,
-      transparent 8%,
-      rgba(var(--c-ffffff-rgb), 0.08) 26%,
-      rgba(var(--c-ffffff-rgb), 0.36) 42%,
-      rgba(var(--c-ffffff-rgb), 0.1) 56%,
-      transparent 76%
-    );
-  background-size: 220% 100%;
-  background-position: 120% 50%;
-  pointer-events: none;
-  opacity: 0.5;
-  transition:
-    background-position 260ms ease-out,
-    opacity 200ms ease-out;
-}
-
-.booking-card__plate:hover::after,
-.booking-card__plate:focus-visible::after {
-  background-position: -25% 50%;
-  opacity: 0.78;
-}
-
-.booking-card__identity-item--tooltip,
-.booking-card__plate--tooltip {
-  position: relative;
-}
-
-.booking-card__plate-wrap {
-  display: block;
-  min-width: 0;
-}
-
-.booking-card__identity-item--tooltip::after,
-.booking-card__plate--tooltip::after {
-  content: attr(data-top-tooltip);
-  position: absolute;
-  inset-inline-start: 50%;
-  bottom: calc(100% + 10px);
-  transform: translateX(-50%) translateY(4px) scale(0.96);
-  z-index: 80;
-  width: max-content;
-  max-width: min(260px, calc(100vw - 24px));
-  padding: 0.38rem 0.56rem;
-  border-radius: 10px;
-  border: 1px solid rgba(var(--c-3b82f6-rgb), 0.32);
-  background:
-    linear-gradient(145deg, rgba(var(--c-ffffff-rgb), 0.96), rgba(var(--c-f8fafc-rgb), 0.94)),
-    radial-gradient(circle at 20% 18%, rgba(var(--c-3b82f6-rgb), 0.2), transparent 55%);
-  color: var(--c-0f172a);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  line-height: 1.25;
-  white-space: normal;
-  box-shadow:
-    0 16px 24px -14px rgba(var(--rt-shadow-rgb), 0.35),
-    0 8px 14px -10px rgba(var(--c-3b82f6-rgb), 0.24);
-  backdrop-filter: blur(10px) saturate(1.2);
-  -webkit-backdrop-filter: blur(10px) saturate(1.2);
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity 0.16s ease,
-    transform 0.18s ease;
-}
-
-.booking-card__identity-item--tooltip::before,
-.booking-card__plate--tooltip::before {
-  content: '';
-  position: absolute;
-  inset-inline-start: 50%;
-  bottom: calc(100% + 5px);
-  transform: translateX(-50%) translateY(4px) rotate(45deg);
-  z-index: 79;
-  width: 9px;
-  height: 9px;
-  border-inline-end: 1px solid rgba(var(--c-3b82f6-rgb), 0.32);
-  border-bottom: 1px solid rgba(var(--c-3b82f6-rgb), 0.32);
-  background: rgba(var(--c-f8fafc-rgb), 0.95);
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity 0.16s ease,
-    transform 0.18s ease;
-}
-
-.booking-card__identity-item--tooltip[data-top-tooltip]:hover::after,
-.booking-card__identity-item--tooltip[data-top-tooltip]:hover::before,
-.booking-card__identity-item--tooltip[data-top-tooltip]:focus-visible::after,
-.booking-card__identity-item--tooltip[data-top-tooltip]:focus-visible::before,
-.booking-card__plate--tooltip[data-top-tooltip]:hover::after,
-.booking-card__plate--tooltip[data-top-tooltip]:hover::before,
-.booking-card__plate--tooltip[data-top-tooltip]:focus-visible::after,
-.booking-card__plate--tooltip[data-top-tooltip]:focus-visible::before {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.booking-card__identity-item--tooltip[data-top-tooltip]:hover::before,
-.booking-card__identity-item--tooltip[data-top-tooltip]:focus-visible::before,
-.booking-card__plate--tooltip[data-top-tooltip]:hover::before,
-.booking-card__plate--tooltip[data-top-tooltip]:focus-visible::before {
-  transform: translateX(-50%) translateY(0) rotate(45deg);
-}
-
-/* Edge-safe top tooltips for both directions */
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__identity-item--tooltip::after,
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__identity-item--tooltip::before,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__identity-item--tooltip::after,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__identity-item--tooltip::before,
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__plate--tooltip::after,
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__plate--tooltip::before,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__plate--tooltip::after,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__plate--tooltip::before {
-  inset-inline-start: 0;
-  inset-inline-end: auto;
-}
-
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__identity-item--tooltip::after,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__identity-item--tooltip::before,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__identity-item--tooltip::after,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__identity-item--tooltip::before,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__plate--tooltip::after,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__plate--tooltip::before,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__plate--tooltip::after,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__plate--tooltip::before {
-  inset-inline-start: auto;
-  inset-inline-end: 0;
-}
-
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__identity-item--tooltip::after,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__identity-item--tooltip::after,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__identity-item--tooltip::after,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__identity-item--tooltip::after,
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__plate--tooltip::after,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__plate--tooltip::after,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__plate--tooltip::after,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__plate--tooltip::after {
-  transform: translateX(0) translateY(4px) scale(0.96);
-}
-
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__identity-item--tooltip::before,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__identity-item--tooltip::before,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__identity-item--tooltip::before,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__identity-item--tooltip::before,
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__plate--tooltip::before,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__plate--tooltip::before,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__plate--tooltip::before,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__plate--tooltip::before {
-  transform: translateX(0) translateY(4px) rotate(45deg);
-}
-
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__identity-item--tooltip[data-top-tooltip]:hover::after,
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__identity-item--tooltip[data-top-tooltip]:focus-visible::after,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__identity-item--tooltip[data-top-tooltip]:hover::after,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__identity-item--tooltip[data-top-tooltip]:focus-visible::after,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__identity-item--tooltip[data-top-tooltip]:hover::after,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__identity-item--tooltip[data-top-tooltip]:focus-visible::after,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__identity-item--tooltip[data-top-tooltip]:hover::after,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__identity-item--tooltip[data-top-tooltip]:focus-visible::after,
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__plate--tooltip[data-top-tooltip]:hover::after,
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__plate--tooltip[data-top-tooltip]:focus-visible::after,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__plate--tooltip[data-top-tooltip]:hover::after,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__plate--tooltip[data-top-tooltip]:focus-visible::after,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__plate--tooltip[data-top-tooltip]:hover::after,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__plate--tooltip[data-top-tooltip]:focus-visible::after,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__plate--tooltip[data-top-tooltip]:hover::after,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__plate--tooltip[data-top-tooltip]:focus-visible::after {
-  transform: translateX(0) translateY(0);
-}
-
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__identity-item--tooltip[data-top-tooltip]:hover::before,
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__identity-item--tooltip[data-top-tooltip]:focus-visible::before,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__identity-item--tooltip[data-top-tooltip]:hover::before,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__identity-item--tooltip[data-top-tooltip]:focus-visible::before,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__identity-item--tooltip[data-top-tooltip]:hover::before,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__identity-item--tooltip[data-top-tooltip]:focus-visible::before,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__identity-item--tooltip[data-top-tooltip]:hover::before,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__identity-item--tooltip[data-top-tooltip]:focus-visible::before,
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__plate--tooltip[data-top-tooltip]:hover::before,
-:host-context([dir='ltr']) .booking-card__head > :first-child .booking-card__plate--tooltip[data-top-tooltip]:focus-visible::before,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__plate--tooltip[data-top-tooltip]:hover::before,
-:host-context([dir='ltr']) .booking-card__head > :last-child .booking-card__plate--tooltip[data-top-tooltip]:focus-visible::before,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__plate--tooltip[data-top-tooltip]:hover::before,
-:host-context([dir='rtl']) .booking-card__head > :first-child .booking-card__plate--tooltip[data-top-tooltip]:focus-visible::before,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__plate--tooltip[data-top-tooltip]:hover::before,
-:host-context([dir='rtl']) .booking-card__head > :last-child .booking-card__plate--tooltip[data-top-tooltip]:focus-visible::before {
-  transform: translateX(0) translateY(0) rotate(45deg);
-}
-
-.booking-card__plate-label {
-  font-size: 0.54rem;
+.booking-card__date-label {
+  font-size: 0.64rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  opacity: 0.72;
-  text-transform: uppercase;
+  color: var(--rt-text-muted);
 }
 
-.booking-card__plate-value {
-  font-size: 1.08rem;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  overflow: visible;
-  text-overflow: clip;
-  white-space: nowrap;
-  color: var(--c-0f172a);
-  text-shadow: none;
-}
-
-.booking-card__facts {
-  display: grid;
-  gap: 0.38rem;
-}
-
-.booking-fact {
+.booking-card__date-value {
   display: flex;
-  align-items: flex-start;
-  gap: 0.48rem;
-  padding: 0.42rem 0.48rem;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--booking-status-accent) 10%, var(--c-eef1f5) 90%);
-  border-inline-start: 2px solid color-mix(in srgb, var(--booking-status-accent) 34%, var(--c-e5e9ef) 66%);
-  background: linear-gradient(
-    180deg,
-    var(--c-ffffff) 0%,
-    color-mix(in srgb, var(--booking-status-accent) 4%, var(--c-f8fafc) 96%) 100%
-  );
-  min-height: 2.65rem;
-}
-
-.booking-fact--tooltip {
-  position: relative;
-  cursor: default;
-}
-
-.booking-fact--tooltip::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  inset-inline-start: 50%;
-  bottom: calc(100% + 10px);
-  transform: translateX(-50%) translateY(6px) scale(0.98);
-  z-index: 12;
-  width: max-content;
-  max-width: min(300px, 82vw);
-  padding: 0.46rem 0.64rem;
-  border-radius: 10px;
-  border: 1px solid rgba(var(--c-3b82f6-rgb), 0.28);
-  background:
-    linear-gradient(145deg, rgba(var(--c-ffffff-rgb), 0.95), rgba(var(--c-f8fafc-rgb), 0.92)),
-    radial-gradient(circle at 15% 15%, rgba(var(--c-3b82f6-rgb), 0.2), transparent 48%);
-  color: var(--c-0f172a);
-  font-size: 0.78rem;
-  font-weight: 700;
-  line-height: 1.35;
-  text-align: center;
-  letter-spacing: 0.01em;
-  white-space: normal;
-  box-shadow:
-    0 18px 28px -16px rgba(var(--rt-shadow-rgb), 0.35),
-    0 8px 16px -12px rgba(var(--c-3b82f6-rgb), 0.24);
-  backdrop-filter: blur(10px) saturate(1.2);
-  -webkit-backdrop-filter: blur(10px) saturate(1.2);
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity 0.18s ease,
-    transform 0.2s ease;
-}
-
-.booking-fact--tooltip::before {
-  content: '';
-  position: absolute;
-  inset-inline-start: 50%;
-  bottom: calc(100% + 4px);
-  transform: translateX(-50%) translateY(6px) rotate(45deg);
-  z-index: 11;
-  width: 10px;
-  height: 10px;
-  border-inline-end: 1px solid rgba(var(--c-3b82f6-rgb), 0.28);
-  border-bottom: 1px solid rgba(var(--c-3b82f6-rgb), 0.28);
-  background: rgba(var(--c-f8fafc-rgb), 0.94);
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity 0.18s ease,
-    transform 0.2s ease;
-}
-
-.booking-fact--tooltip[data-tooltip]:hover::after,
-.booking-fact--tooltip[data-tooltip]:hover::before {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.booking-fact--tooltip[data-tooltip]:hover::before {
-  transform: translateX(-50%) translateY(0) rotate(45deg);
-}
-
-.booking-fact__icon {
-  flex-shrink: 0;
-  display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  width: 1.65rem;
-  height: 1.65rem;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--booking-status-accent) 18%, var(--c-e2e8f0) 82%);
-  background: color-mix(in srgb, var(--booking-status-accent) 10%, var(--c-f1f5f9) 90%);
-  color: color-mix(in srgb, var(--booking-status-accent) 72%, var(--c-475569) 28%);
-  font-size: 0.72rem;
-}
-
-.booking-fact__icon--branch {
-  background: color-mix(in srgb, var(--booking-status-accent) 8%, var(--c-f8fafc) 92%);
-}
-
-.booking-fact__content {
-  display: grid;
-  gap: 0.1rem;
-  min-width: 0;
-  flex: 1 1 auto;
-}
-
-.booking-fact__label {
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.72;
-  line-height: 1.2;
-}
-
-.booking-fact__value {
-  font-size: 0.78rem;
+  gap: 0.2rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  line-height: 1.35;
-  color: var(--c-0f172a);
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  word-break: break-word;
+  color: var(--rt-text);
+}
+
+.booking-card__date-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+}
+
+.booking-card__date--overdue {
+  background: var(--app-booking-list-end-overdue-bg);
+  border-color: color-mix(in srgb, var(--app-booking-list-end-overdue-fg) 35%, transparent);
+
+  .booking-card__date-value,
+  .booking-card__date-label {
+    color: var(--app-booking-list-end-overdue-fg);
+  }
+
+  .booking-card__date-badge {
+    background: var(--app-booking-list-end-overdue-bg);
+    color: var(--app-booking-list-end-overdue-fg);
+    border: 1px solid color-mix(in srgb, var(--app-booking-list-end-overdue-fg) 40%, transparent);
+  }
+}
+
+.booking-card__date--today {
+  background: var(--app-booking-list-end-today-bg);
+  border-color: color-mix(in srgb, var(--app-booking-list-end-today-fg) 35%, transparent);
+
+  .booking-card__date-value,
+  .booking-card__date-label {
+    color: var(--app-booking-list-end-today-fg);
+  }
+
+  .booking-card__date-badge {
+    background: var(--app-booking-list-end-today-bg);
+    color: var(--app-booking-list-end-today-fg);
+    border: 1px solid color-mix(in srgb, var(--app-booking-list-end-today-fg) 40%, transparent);
+  }
 }
 
 .booking-card__actions {
-  margin-top: auto;
-  padding-top: 0.5rem;
-  border-top: 1px dashed rgba(var(--c-94a3b8-rgb), 0.34);
-  display: flex !important;
-  width: 100% !important;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.34rem;
-  overflow: visible;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  position: relative;
-}
-
-.booking-card__actions-main {
   display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.34rem;
-  flex: 1 1 auto;
-  min-width: 0;
-  width: 100%;
-}
-
-html[dir='rtl'] .booking-card__actions {
-  justify-content: space-between !important;
-}
-
-.booking-card__actions::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  display: none;
-}
-
-.booking-card__action,
-a.booking-card__action {
-  flex: 0 0 auto;
-  width: auto;
-  min-width: 34px;
-  height: 30px;
-  min-height: 30px;
-  border-radius: 9px;
-  padding: 0;
-  display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  border-width: 1px;
-  border-style: solid;
-  box-shadow: 0 10px 18px -16px rgba(var(--rt-shadow-rgb), 0.36);
-  text-decoration: none;
-  color: inherit;
+  gap: 0.28rem;
+  margin-top: 0.05rem;
+  padding-top: 0.32rem;
+  border-top: 1px solid var(--rt-divider);
 }
 
 .booking-card__more {
   position: relative;
-  flex: 0 0 auto;
-  margin-inline-start: auto;
-}
 
-.booking-card__more > summary {
-  list-style: none;
-  cursor: pointer;
-}
+  summary {
+    list-style: none;
+    cursor: pointer;
 
-.booking-card__more > summary::-webkit-details-marker {
-  display: none;
-}
-
-.booking-card__action--more {
-  border-color: rgba(var(--c-64748b-rgb), 0.42);
-  background: linear-gradient(145deg, rgba(var(--c-64748b-rgb), 0.2), rgba(var(--c-e2e8f0-rgb), 0.92));
-  color: rgba(var(--c-334155-rgb), 0.98);
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
 }
 
 .booking-card__more-menu {
   position: absolute;
   inset-inline-end: 0;
-  top: calc(100% + 6px);
-  z-index: 50;
-  min-width: 11.75rem;
+  bottom: calc(100% + 6px);
+  z-index: 12;
+  min-width: 168px;
   padding: 0.35rem;
-  border-radius: 12px;
-  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.38);
-  background: linear-gradient(180deg, var(--c-ffffff) 0%, var(--c-f1f5f9) 100%);
-  box-shadow:
-    0 18px 32px -14px rgba(var(--rt-shadow-rgb), 0.28),
-    0 6px 12px -8px rgba(var(--rt-shadow-rgb), 0.12);
-  display: flex;
-  flex-direction: column;
-  gap: 0.22rem;
+  border-radius: 10px;
+  border: 1px solid var(--rt-border);
+  background: var(--rt-card-bg);
+  box-shadow: 0 12px 28px -14px rgba(var(--rt-shadow-rgb), 0.28);
 }
 
-.booking-card__menu-item,
-a.booking-card__menu-item {
+.booking-card__menu-item {
   display: flex;
   align-items: center;
   gap: 0.45rem;
   width: 100%;
-  padding: 0.42rem 0.52rem;
-  border: none;
+  padding: 0.4rem 0.5rem;
   border-radius: 8px;
-  background: transparent;
+  color: var(--rt-text);
   font-size: 0.78rem;
-  font-weight: 700;
-  text-align: inherit;
+  font-weight: 600;
   text-decoration: none;
-  color: var(--c-0f172a);
-  cursor: pointer;
-  transition: background 0.14s ease;
-}
 
-.booking-card__menu-item:hover {
-  background: rgba(var(--c-94a3b8-rgb), 0.2);
-}
-
-.booking-card__menu-item:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.booking-card__menu-item i {
-  width: 1.1rem;
-  text-align: center;
-  flex-shrink: 0;
-  font-size: 0.82rem;
-}
-
-.booking-card__action i {
-  font-size: 0.82rem;
-  line-height: 1;
-}
-
-.booking-card__action--labeled {
-  gap: 0.32rem;
-  padding-inline: 0.42rem 0.5rem;
-  min-width: auto;
-  justify-content: center;
-}
-
-.booking-card__action-label {
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-/* Keep tooltip available even when action is disabled. */
-.booking-card__actions .booking-card__action:disabled,
-.booking-card__actions .booking-card__action[aria-disabled='true'] {
-  pointer-events: auto;
-  cursor: not-allowed;
-}
-
-.booking-card__action--tooltip {
-  position: relative;
-}
-
-.booking-card__action--tooltip::after {
-  content: attr(data-action-tooltip);
-  position: absolute;
-  inset-inline-start: 50%;
-  bottom: calc(100% + 10px);
-  transform: translateX(-50%) translateY(4px) scale(0.96);
-  z-index: 14;
-  width: max-content;
-  max-width: min(260px, calc(100vw - 24px));
-  padding: 0.38rem 0.56rem;
-  border-radius: 10px;
-  border: 1px solid rgba(var(--c-3b82f6-rgb), 0.32);
-  background:
-    linear-gradient(145deg, rgba(var(--c-ffffff-rgb), 0.96), rgba(var(--c-f8fafc-rgb), 0.94)),
-    radial-gradient(circle at 20% 18%, rgba(var(--c-3b82f6-rgb), 0.2), transparent 55%);
-  color: var(--c-0f172a);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  line-height: 1.25;
-  white-space: normal;
-  box-shadow:
-    0 16px 24px -14px rgba(var(--rt-shadow-rgb), 0.35),
-    0 8px 14px -10px rgba(var(--c-3b82f6-rgb), 0.24);
-  backdrop-filter: blur(10px) saturate(1.2);
-  -webkit-backdrop-filter: blur(10px) saturate(1.2);
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity 0.16s ease,
-    transform 0.18s ease;
-}
-
-.booking-card__action--tooltip::before {
-  content: '';
-  position: absolute;
-  inset-inline-start: 50%;
-  bottom: calc(100% + 5px);
-  transform: translateX(-50%) translateY(4px) rotate(45deg);
-  z-index: 13;
-  width: 9px;
-  height: 9px;
-  border-inline-end: 1px solid rgba(var(--c-3b82f6-rgb), 0.32);
-  border-bottom: 1px solid rgba(var(--c-3b82f6-rgb), 0.32);
-  background: rgba(var(--c-f8fafc-rgb), 0.95);
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity 0.16s ease,
-    transform 0.18s ease;
-}
-
-.booking-card__action--tooltip[data-action-tooltip]:hover::after,
-.booking-card__action--tooltip[data-action-tooltip]:hover::before,
-.booking-card__action--tooltip[data-action-tooltip]:focus-visible::after,
-.booking-card__action--tooltip[data-action-tooltip]:focus-visible::before {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.booking-card__action--tooltip[data-action-tooltip]:hover::before,
-.booking-card__action--tooltip[data-action-tooltip]:focus-visible::before {
-  transform: translateX(-50%) translateY(0) rotate(45deg);
-}
-
-/* Edge-safe placement for both LTR/RTL and wrapped action rows. */
-/* Keep centered tooltip behavior stable for wrapped rows */
-
-.booking-card__action.table-action-icon--info {
-  background: linear-gradient(145deg, rgba(var(--c-ffffff-rgb), 0.98), rgba(var(--c-f1f5f9-rgb), 0.94));
-}
-
-.booking-card__action--suspend {
-  border-color: rgba(var(--c-374151-rgb), 0.38);
-  background: linear-gradient(145deg, rgba(var(--c-374151-rgb), 0.18), rgba(var(--c-cbd5e1-rgb), 0.88));
-  color: rgba(var(--c-1f2937-rgb), 0.98);
-}
-
-.booking-card__action--cancel,
-.booking-card__action--close-contract {
-  border-color: rgba(var(--c-dc2626-rgb), 0.42);
-  background: linear-gradient(145deg, rgba(var(--c-dc2626-rgb), 0.2), rgba(var(--c-fee2e2-rgb), 0.9));
-  color: rgba(var(--c-b91c1c-rgb), 0.98);
-}
-
-.booking-card__action--edit {
-  border-color: rgba(var(--c-6b7280-rgb), 0.4);
-  background: linear-gradient(145deg, rgba(var(--c-64748b-rgb), 0.2), rgba(var(--c-e2e8f0-rgb), 0.88));
-  color: rgba(var(--c-334155-rgb), 0.98);
-}
-
-.booking-card__action--extend {
-  border-color: rgba(var(--c-f59e0b-rgb), 0.48);
-  background: linear-gradient(145deg, rgba(var(--c-f59e0b-rgb), 0.26), rgba(var(--c-fef3c7-rgb), 0.92));
-  color: rgba(var(--c-92400e-rgb), 0.98);
-}
-
-.booking-card__action--pay {
-  border-color: rgba(var(--c-be185d-rgb), 0.38);
-  background: linear-gradient(145deg, rgba(var(--c-be185d-rgb), 0.2), rgba(var(--c-fbcfe8-rgb), 0.9));
-  color: rgba(var(--c-9d174d-rgb), 0.98);
-}
-
-.booking-card__action--print {
-  border-color: rgba(var(--c-0e7490-rgb), 0.36);
-  background: linear-gradient(145deg, rgba(var(--c-0e7490-rgb), 0.18), rgba(var(--c-cffafe-rgb), 0.9));
-  color: rgba(var(--c-0e7490-rgb), 0.98);
-}
-
-.booking-card__action--finish {
-  border-color: rgba(var(--c-16a34a-rgb), 0.42);
-  background: linear-gradient(145deg, rgba(var(--c-16a34a-rgb), 0.22), rgba(var(--c-dcfce7-rgb), 0.9));
-  color: rgba(var(--c-15803d-rgb), 0.98);
-}
-
-.booking-card__action:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-:host-context([data-bs-theme='dark']),
-:host-context(body.dark-only) {
-  .booking-legend-item {
-    background: var(--c-111827);
-    border-color: var(--c-374151);
-    color: var(--c-f9fafb);
-  }
-
-  .booking-legend-code {
-    border-color: rgba(var(--c-64748b-rgb), 0.6);
-    background: rgba(var(--c-1e293b-rgb), 0.9);
-    color: var(--c-e2e8f0);
-  }
-
-  .booking-card {
-    border-color: color-mix(in srgb, var(--booking-status-border-dark) 26%, rgba(var(--c-0f172a-rgb), 0.38) 74%);
-    background:
-      radial-gradient(circle at 14% -8%, color-mix(in srgb, var(--booking-status-accent) 9%, transparent), transparent 50%),
-      linear-gradient(180deg, rgba(var(--c-1e2937-rgb), 0.78) 0%, rgba(var(--c-0b1923-rgb), 0.88) 100%);
-    backdrop-filter: blur(16px) saturate(1.15);
-    -webkit-backdrop-filter: blur(16px) saturate(1.15);
-    box-shadow:
-      0 18px 32px -20px rgba(var(--rt-shadow-rgb), 0.45),
-      0 6px 14px -10px rgba(var(--rt-shadow-rgb), 0.28),
-      inset 0 1px 0 rgba(var(--c-94a3b8-rgb), 0.08);
-
-    &:hover {
-      border-color: color-mix(in srgb, var(--booking-status-border-dark) 34%, rgba(var(--c-e2e8f0-rgb), 0.12) 66%);
-      box-shadow:
-        0 22px 40px -22px rgba(var(--rt-shadow-rgb), 0.52),
-        0 8px 18px -12px color-mix(in srgb, var(--booking-status-accent) 11%, transparent),
-        inset 0 1px 0 rgba(var(--c-94a3b8-rgb), 0.11);
-    }
-  }
-
-  .booking-card::before {
-    border-color: color-mix(in srgb, rgba(var(--c-e2e8f0-rgb), 0.14) 55%, transparent);
-  }
-
-  .booking-card__media {
-    background: linear-gradient(
-      155deg,
-      color-mix(in srgb, var(--booking-status-accent) 14%, var(--c-0f172a) 86%) 0%,
-      color-mix(in srgb, var(--booking-status-accent) 6%, var(--c-1e293b) 94%) 100%
-    );
-  }
-
-  .booking-card__media-placeholder {
-    color: color-mix(in srgb, var(--booking-status-accent) 48%, var(--c-cbd5e1) 52%);
-  }
-
-  .booking-card__media-placeholder-text {
-    color: rgba(var(--c-e2e8f0-rgb), 0.88);
-  }
-
-  .booking-card__media-inner {
-    color: rgba(var(--c-f8fafc-rgb), 0.28);
-  }
-
-  .booking-card__media-overlay {
-    background: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--booking-status-accent) 5%, transparent) 0%,
-      rgba(var(--c-020617-rgb), 0.52) 100%
-    );
-  }
-
-  .booking-chip {
-    background: rgba(var(--c-0f172a-rgb), 0.72);
-    border-color: rgba(var(--c-94a3b8-rgb), 0.34);
-    backdrop-filter: blur(10px) saturate(1.22);
-    -webkit-backdrop-filter: blur(10px) saturate(1.22);
-  }
-
-  .booking-chip--ghost {
-    background: rgba(var(--c-94a3b8-rgb), 0.18);
-  }
-
-  .booking-card__plate {
-    border-color: color-mix(in srgb, var(--booking-status-accent) 22%, rgba(var(--c-64748b-rgb), 0.42));
-    border-inline-start-color: color-mix(in srgb, var(--booking-status-accent) 52%, rgba(var(--c-94a3b8-rgb), 0.55) 48%);
-    background: linear-gradient(
-      180deg,
-      rgba(var(--c-1e293b-rgb), 0.9) 0%,
-      color-mix(in srgb, var(--booking-status-accent) 8%, rgba(var(--c-0f172a-rgb), 0.92) 92%) 100%
-    );
-  }
-
-  .booking-card__plate-value {
-    color: var(--c-f1f5f9);
-  }
-
-  .booking-card__body {
-    background: color-mix(in srgb, var(--booking-status-accent) 5%, rgba(var(--c-0f172a-rgb), 0.94) 95%);
-    border-top: 1px solid color-mix(in srgb, var(--booking-status-accent) 10%, rgba(var(--c-475569-rgb), 0.38));
-  }
-
-  .booking-card__identity-item {
-    border-color: color-mix(in srgb, var(--booking-status-accent) 16%, rgba(var(--c-64748b-rgb), 0.4));
-    border-inline-start-color: color-mix(in srgb, var(--booking-status-accent) 48%, rgba(var(--c-94a3b8-rgb), 0.45) 52%);
-    background: linear-gradient(
-      180deg,
-      rgba(var(--c-1e293b-rgb), 0.92) 0%,
-      color-mix(in srgb, var(--booking-status-accent) 7%, rgba(var(--c-0f172a-rgb), 0.95) 93%) 100%
-    );
-    box-shadow: 0 8px 16px -14px rgba(var(--rt-shadow-rgb), 0.42);
-  }
-
-  .booking-fact {
-    border-color: color-mix(in srgb, var(--booking-status-accent) 10%, rgba(var(--c-475569-rgb), 0.42));
-    border-inline-start-color: color-mix(in srgb, var(--booking-status-accent) 38%, rgba(var(--c-94a3b8-rgb), 0.4) 62%);
-    background: linear-gradient(
-      180deg,
-      rgba(var(--c-1e293b-rgb), 0.92) 0%,
-      color-mix(in srgb, var(--booking-status-accent) 6%, rgba(var(--c-0f172a-rgb), 0.94) 94%) 100%
-    );
-  }
-
-  .booking-fact__icon {
-    border-color: color-mix(in srgb, var(--booking-status-accent) 22%, rgba(var(--c-64748b-rgb), 0.45));
-    background: color-mix(in srgb, var(--booking-status-accent) 12%, rgba(var(--c-1e293b-rgb), 0.9) 88%);
-    color: color-mix(in srgb, var(--booking-status-accent) 55%, var(--c-e2e8f0) 45%);
-  }
-
-  .booking-fact__value {
-    color: var(--c-f1f5f9);
-  }
-
-  .booking-fact--tooltip::after {
-    border-color: rgba(var(--c-60a5fa-rgb), 0.4);
-    background:
-      linear-gradient(145deg, rgba(var(--c-1e293b-rgb), 0.94), rgba(var(--c-0f172a-rgb), 0.92)),
-      radial-gradient(circle at 15% 15%, rgba(var(--c-3b82f6-rgb), 0.26), transparent 52%);
-    color: rgba(var(--c-f1f5f9-rgb), 0.98);
-    box-shadow:
-      0 20px 30px -16px rgba(var(--rt-shadow-rgb), 0.62),
-      0 10px 18px -14px rgba(var(--c-3b82f6-rgb), 0.28);
-  }
-
-  .booking-fact--tooltip::before {
-    border-inline-end-color: rgba(var(--c-60a5fa-rgb), 0.4);
-    border-bottom-color: rgba(var(--c-60a5fa-rgb), 0.4);
-    background: rgba(var(--c-1e293b-rgb), 0.94);
-  }
-
-  .booking-card__actions {
-    border-top-color: rgba(var(--c-64748b-rgb), 0.46);
-    display: flex !important;
-    width: 100% !important;
-    justify-content: space-between !important;
-    flex-wrap: wrap;
-  }
-
-  html[dir='rtl'] .booking-card__actions {
-    justify-content: space-between !important;
-  }
-
-  .booking-card__action {
-    box-shadow: 0 12px 20px -16px rgba(var(--rt-shadow-rgb), 0.68);
-  }
-
-  .booking-card__action.table-action-icon--info {
-    background: linear-gradient(145deg, rgba(var(--c-1e293b-rgb), 0.9), rgba(var(--c-0f172a-rgb), 0.86));
-  }
-
-  .booking-card__action--tooltip::after {
-    border-color: rgba(var(--c-60a5fa-rgb), 0.44);
-    background:
-      linear-gradient(145deg, rgba(var(--c-1e293b-rgb), 0.95), rgba(var(--c-0f172a-rgb), 0.92)),
-      radial-gradient(circle at 20% 18%, rgba(var(--c-3b82f6-rgb), 0.28), transparent 55%);
-    color: rgba(var(--c-f1f5f9-rgb), 0.98);
-    box-shadow:
-      0 18px 26px -14px rgba(var(--rt-shadow-rgb), 0.66),
-      0 10px 16px -12px rgba(var(--c-3b82f6-rgb), 0.28);
-  }
-
-  .booking-card__action--tooltip::before {
-    border-inline-end-color: rgba(var(--c-60a5fa-rgb), 0.44);
-    border-bottom-color: rgba(var(--c-60a5fa-rgb), 0.44);
-    background: rgba(var(--c-1e293b-rgb), 0.94);
-  }
-
-  .booking-card__identity-item--tooltip::after,
-  .booking-card__plate--tooltip::after {
-    border-color: rgba(var(--c-60a5fa-rgb), 0.44);
-    background:
-      linear-gradient(145deg, rgba(var(--c-1e293b-rgb), 0.95), rgba(var(--c-0f172a-rgb), 0.92)),
-      radial-gradient(circle at 20% 18%, rgba(var(--c-3b82f6-rgb), 0.28), transparent 55%);
-    color: rgba(var(--c-f1f5f9-rgb), 0.98);
-    box-shadow:
-      0 18px 26px -14px rgba(var(--rt-shadow-rgb), 0.66),
-      0 10px 16px -12px rgba(var(--c-3b82f6-rgb), 0.28);
-  }
-
-  .booking-card__identity-item--tooltip::before,
-  .booking-card__plate--tooltip::before {
-    border-inline-end-color: rgba(var(--c-60a5fa-rgb), 0.44);
-    border-bottom-color: rgba(var(--c-60a5fa-rgb), 0.44);
-    background: rgba(var(--c-1e293b-rgb), 0.94);
-  }
-
-  .booking-card__action--suspend {
-    border-color: rgba(var(--c-94a3b8-rgb), 0.5);
-    background: linear-gradient(145deg, rgba(var(--c-334155-rgb), 0.9), rgba(var(--c-1e293b-rgb), 0.86));
-    color: rgba(var(--c-e2e8f0-rgb), 0.98);
-  }
-
-  .booking-card__action--cancel,
-  .booking-card__action--close-contract {
-    border-color: rgba(var(--c-f87171-rgb), 0.56);
-    background: linear-gradient(145deg, rgba(var(--c-dc2626-rgb), 0.38), rgba(var(--c-1e293b-rgb), 0.9));
-    color: rgba(var(--c-fee2e2-rgb), 0.98);
-  }
-
-  .booking-card__action--edit {
-    border-color: rgba(var(--c-94a3b8-rgb), 0.5);
-    background: linear-gradient(145deg, rgba(var(--c-475569-rgb), 0.4), rgba(var(--c-1e293b-rgb), 0.9));
-    color: rgba(var(--c-e2e8f0-rgb), 0.98);
-  }
-
-  .booking-card__action--extend {
-    border-color: rgba(var(--c-fbbf24-rgb), 0.6);
-    background: linear-gradient(145deg, rgba(var(--c-d97706-rgb), 0.46), rgba(var(--c-1e293b-rgb), 0.9));
-    color: rgba(var(--c-fef3c7-rgb), 0.98);
-  }
-
-  .booking-card__action--pay {
-    border-color: rgba(var(--c-f472b6-rgb), 0.56);
-    background: linear-gradient(145deg, rgba(var(--c-be185d-rgb), 0.4), rgba(var(--c-1e293b-rgb), 0.9));
-    color: rgba(var(--c-fbcfe8-rgb), 0.98);
-  }
-
-  .booking-card__action--print {
-    border-color: rgba(var(--c-67e8f9-rgb), 0.52);
-    background: linear-gradient(145deg, rgba(var(--c-0e7490-rgb), 0.4), rgba(var(--c-1e293b-rgb), 0.9));
-    color: rgba(var(--c-cffafe-rgb), 0.98);
-  }
-
-  .booking-card__action--finish {
-    border-color: rgba(var(--c-4ade80-rgb), 0.58);
-    background: linear-gradient(145deg, rgba(var(--c-16a34a-rgb), 0.42), rgba(var(--c-1e293b-rgb), 0.9));
-    color: rgba(var(--c-dcfce7-rgb), 0.98);
-  }
-
-  .booking-card__action--more {
-    border-color: rgba(var(--c-94a3b8-rgb), 0.5);
-    background: linear-gradient(145deg, rgba(var(--c-475569-rgb), 0.4), rgba(var(--c-1e293b-rgb), 0.9));
-    color: rgba(var(--c-e2e8f0-rgb), 0.98);
-  }
-
-  .booking-card__more-menu {
-    border-color: rgba(var(--c-64748b-rgb), 0.55);
-    background: linear-gradient(180deg, rgba(var(--c-1e293b-rgb), 0.98), rgba(var(--c-0f172a-rgb), 0.96));
-    box-shadow:
-      0 22px 40px -16px rgba(var(--rt-shadow-rgb), 0.75),
-      0 8px 16px -12px rgba(var(--rt-shadow-rgb), 0.45);
-  }
-
-  .booking-card__menu-item {
-    color: rgba(var(--c-f1f5f9-rgb), 0.94);
-  }
-
-  .booking-card__menu-item:hover {
-    background: rgba(var(--c-3b82f6-rgb), 0.16);
-  }
-
-  .booking-card__menu-item:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    color: rgba(var(--c-94a3b8-rgb), 0.55);
-  }
-
-  .booking-card__action:disabled {
-    border-color: rgba(var(--c-64748b-rgb), 0.4);
-    background: rgba(var(--c-1e293b-rgb), 0.56);
-    color: rgba(var(--c-94a3b8-rgb), 0.75);
-    opacity: 0.7;
+  &:hover {
+    background: var(--rt-hover-bg);
   }
 }
 
-@media (max-width: 575.98px) {
+:host-context(body.dark-only) .booking-card__status-pill {
+  border-color: var(--booking-badge-border-dark, transparent);
+}
+
+@media (max-width: 1399.98px) {
   .booking-cards-grid {
-    display: flex;
-    justify-content: stretch;
-    gap: 0.62rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1099.98px) {
+  .booking-cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767.98px) {
+  :host ::ng-deep .booking-command__toolbar {
+    grid-template-columns: 1fr;
   }
 
-  .booking-card {
-    width: 100%;
-    max-width: none;
-    flex: 1 1 100%;
-  }
-
-  .booking-card__head {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-    align-items: stretch;
-    gap: 0.42rem;
-    margin-bottom: 0.42rem;
-  }
-
-  .booking-card__actions {
-    gap: 0.34rem;
-  }
-
-  .booking-card {
-    border-radius: 14px;
-  }
-
-  .booking-card__media {
-    aspect-ratio: 16 / 6.2;
-    border-radius: 14px 14px 0 0;
-  }
-
-  .booking-card__status {
-    top: 0.42rem;
-    inset-inline-end: 0.42rem;
-  }
-
-  .booking-card__quick-meta {
-    inset-inline-start: 0.42rem;
-    bottom: 0.42rem;
-  }
-
-  .booking-chip {
-    min-height: 22px;
-    padding: 0.1rem 0.44rem;
-    font-size: 0.67rem;
-  }
-
-  .booking-card__body {
-    padding: 0.48rem 0.5rem 0.54rem;
-    border-radius: 0 0 14px 14px;
-  }
-
-  .booking-card__identity-list {
-    gap: 0.2rem;
-  }
-
-  .booking-card__identity-item {
-    padding: 0.2rem 0.36rem 0.24rem;
-    border-radius: 8px;
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .booking-card__identity-label {
-    font-size: 0.54rem;
-    letter-spacing: 0.05em;
-  }
-
-  .booking-card__identity-value {
-    font-size: 0.78rem;
-    letter-spacing: 0.02em;
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-    word-break: break-all;
-  }
-
-  .booking-card__plate {
-    min-width: 0;
-    max-width: 100%;
-    padding: 0.24rem 0.42rem 0.3rem;
-    border-radius: 9px;
-    gap: 0.02rem;
-  }
-
-  .booking-card__plate-label {
-    font-size: 0.54rem;
-  }
-
-  .booking-card__plate-value {
-    font-size: 0.98rem;
-    letter-spacing: 0.08em;
-    white-space: nowrap;
-    overflow: visible;
-    text-overflow: clip;
+  .booking-cards-grid {
+    grid-template-columns: 1fr;
   }
 
   .booking-card__facts {
-    gap: 0.34rem;
+    grid-template-columns: 1fr;
   }
-
-  .booking-fact {
-    padding: 0.38rem 0.44rem;
-    min-height: 2.5rem;
-  }
-
-  .booking-fact__value {
-    font-size: 0.74rem;
-  }
-
-  .booking-card__actions {
-    margin-top: 0.5rem;
-    padding-top: 0.46rem;
-    display: flex !important;
-    width: 100% !important;
-    justify-content: flex-start;
-    flex-wrap: nowrap;
-    align-items: center;
-    overflow: visible;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .booking-card__actions::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-    display: none;
-  }
-
-  .booking-card__action {
-    flex: 0 0 auto;
-    width: auto;
-    min-width: 34px;
-    height: 30px;
-    min-height: 30px;
-    border-radius: 9px;
-  }
-
-  .booking-card__action i {
-    font-size: 0.82rem;
-  }
-
 }

@@ -8,7 +8,15 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
-import { Branch, CategoryVehicle, Vehicle, VehicleOrderBy, VehicleOrderDirection, VehicleStatus } from '../../../models';
+import {
+  Branch,
+  CategoryVehicle,
+  Vehicle,
+  VehicleOrderBy,
+  VehicleOrderDirection,
+  VehicleStatus,
+  VEHICLE_FALLBACK_IMAGE,
+} from '../../../models';
 import { BranchService } from '../../../services/branches/branch.service';
 import { CategoryVehicleService } from '../../../services/category-vehicles/category-vehicle.service';
 import { ConfirmService } from '../../../../../shared/services/confirm.service';
@@ -24,7 +32,7 @@ import { ListSearchFieldComponent } from '../../../../../shared/ui/list-search-f
 import { ListContentShellComponent } from '../../../../../shared/ui/list-content-shell/list-content-shell.component';
 import { PaginationBarComponent } from '../../../../../shared/ui/pagination-bar/pagination-bar.component';
 import { SmoothSelectOption, SmoothSelectComponent } from '../../../../../shared/ui/smooth-select/smooth-select.component';
-import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
+import { VehicleSaudiPlateComponent } from '../../../../../shared/ui/vehicle-saudi-plate/vehicle-saudi-plate.component';
 import { VehicleStatusDialogComponent } from '../../../../../shared/component/vehicle-status-dialog/vehicle-status-dialog.component';
 
 @Component({
@@ -41,7 +49,7 @@ import { VehicleStatusDialogComponent } from '../../../../../shared/component/ve
     EmptyStateComponent,
     PaginationBarComponent,
     SmoothSelectComponent,
-    StatusBadgeComponent,
+    VehicleSaudiPlateComponent,
   ],
   templateUrl: './vehicle-list.component.html',
   styleUrl: './vehicle-list.component.scss',
@@ -59,7 +67,7 @@ export class VehicleListComponent implements OnInit {
   private translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly languageTick = signal(0);
-  private readonly vehicleFallbackImage = 'assets/images/rent_icon/car_defulte.png';
+  private readonly vehicleFallbackImage = VEHICLE_FALLBACK_IMAGE;
 
   vehicles = signal<Vehicle[]>([]);
   branches = signal<Branch[]>([]);
@@ -238,17 +246,28 @@ export class VehicleListComponent implements OnInit {
     }
   }
 
-  /** Card title: serial only (year & engine appear on the card badges). */
+  /** Primary card identity for accessibility and action labels. */
   getVehicleTitle(vehicle: Vehicle): string {
-    const serial = vehicle.serialNumber?.trim();
-    if (serial) {
-      return serial;
-    }
     const plate = vehicle.plateNumber?.trim();
     if (plate) {
       return plate;
     }
+    const serial = vehicle.serialNumber?.trim();
+    if (serial) {
+      return serial;
+    }
     return [vehicle.make, vehicle.model].filter(Boolean).join(' ').trim() || '-';
+  }
+
+  /** Secondary metadata — serial is never the primary visual anchor. */
+  getVehicleSecondaryLine(vehicle: Vehicle): string {
+    const serial = vehicle.serialNumber?.trim();
+    if (!serial) {
+      return '';
+    }
+
+    const prefix = this.translate.instant('Serial Number');
+    return `${prefix}: ${serial}`;
   }
 
   getBranchName(vehicle: Vehicle): string {
@@ -310,11 +329,22 @@ export class VehicleListComponent implements OnInit {
   }
 
   getStatusLabel(status: VehicleStatus): string {
-    if (status === 'Inactive') {
-      return this.translate.instant('Management');
-    }
-
     return this.translate.instant(status);
+  }
+
+  getVehicleStatusChipClass(status: VehicleStatus): string {
+    switch (status) {
+      case 'Available':
+        return 'vehicle-status-chip--available';
+      case 'Booked':
+        return 'vehicle-status-chip--booked';
+      case 'Maintenance':
+        return 'vehicle-status-chip--maintenance';
+      case 'Sold':
+        return 'vehicle-status-chip--sold';
+      default:
+        return 'vehicle-status-chip--inactive';
+    }
   }
 
   getVehicleCardStatusClass(status: VehicleStatus): string {
@@ -325,6 +355,8 @@ export class VehicleListComponent implements OnInit {
         return 'vehicle-card--status-warning';
       case 'Maintenance':
         return 'vehicle-card--status-danger';
+      case 'Sold':
+        return 'vehicle-card--status-sold';
       default:
         return 'vehicle-card--status-neutral';
     }

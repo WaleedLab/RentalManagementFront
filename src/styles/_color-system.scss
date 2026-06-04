@@ -237,6 +237,211 @@ html body.light-only {
   --app-contract-flow-segment-active-border: rgba(var(--rt-brand-primary-rgb), 0.45);
   --app-contract-flow-segment-active-text: var(--rt-brand-primary-strong);
   --app-contract-flow-aside-width: 22rem;
+
+  /* Contract details dashboard (hero meta cells + financial KPIs) */
+  --app-contract-dash-hero-bg: var(--app-wizard-card-bg);
+  --app-contract-dash-hero-border: var(--app-wizard-card-border);
+  --app-contract-dash-cell-bg: var(--rt-card-elevated-bg);
+  --app-contract-dash-cell-border: var(--rt-border);
+  --app-contract-dash-cell-label: var(--rt-text-muted);
+  --app-contract-dash-cell-value: var(--rt-text);
+  --app-contract-dash-kpi-total-bg: rgba(var(--rt-brand-primary-rgb), 0.1);
+  --app-contract-dash-kpi-total-border: rgba(var(--rt-brand-primary-rgb), 0.32);
+  --app-contract-dash-kpi-total-value: var(--rt-brand-primary-strong);
+  --app-contract-dash-kpi-paid-bg: rgba(var(--rt-success-rgb), 0.1);
+  --app-contract-dash-kpi-paid-border: rgba(var(--rt-success-rgb), 0.32);
+  --app-contract-dash-kpi-paid-value: var(--rt-success);
+  --app-contract-dash-kpi-remaining-bg: rgba(var(--rt-warning-rgb), 0.12);
+  --app-contract-dash-kpi-remaining-border: rgba(var(--rt-warning-rgb), 0.38);
+  --app-contract-dash-kpi-remaining-value: #b45309;
+  --app-contract-dash-card-bg: var(--app-wizard-card-readonly-bg);
+  --app-contract-dash-card-border: var(--rt-border);
+  --app-contract-dash-card-title: var(--rt-text);
+  --app-contract-dash-card-totals-bg: linear-gradient(
+    165deg,
+    rgba(var(--rt-brand-primary-rgb), 0.08) 0%,
+    var(--rt-card-elevated-bg) 100%
+  );
+  --app-contract-dash-card-totals-border: rgba(var(--rt-brand-primary-rgb), 0.35);
+  --app-contract-dash-breakdown-row-bg: var(--rt-card-elevated-bg);
+  --app-contract-dash-breakdown-row-border: var(--rt-border);
+  --app-contract-dash-breakdown-label: var(--rt-text-muted);
+  --app-contract-dash-breakdown-value: var(--rt-text);
+  --app-contract-dash-breakdown-totals-border: rgba(var(--rt-brand-primary-rgb), 0.32);
+  --app-contract-dash-gallery-item-bg: var(--rt-hover-bg);
+  --app-contract-dash-gallery-item-border: var(--rt-border);
+  --app-contract-dash-gallery-item-border-hover: rgba(var(--rt-brand-primary-rgb), 0.55);
+  --app-contract-dash-gallery-media-bg: var(--rt-table-header-bg);
+  --app-contract-dash-gallery-ph-text: var(--rt-text-muted);
+  --app-contract-dash-gallery-cap-bg: var(--rt-table-header-bg);
+  --app-contract-dash-gallery-cap-text: var(--rt-text-secondary);
+  --app-contract-dash-table-border: var(--app-table-border-color);
+  --app-contract-dash-table-head-bg: var(--app-table-head-bg);
+  --app-contract-dash-table-head-color: var(--app-table-head-color);
+  --app-contract-dash-table-cell-color: var(--app-table-text-color);
+  --app-contract-dash-table-row-bg: var(--rt-table-bg);
+  --app-contract-dash-hint: var(--rt-text-muted);
+  --app-contract-dash-kv-label: var(--app-wizard-kv-label);
+  --app-contract-dash-kv-value: var(--app-wizard-kv-value);
+
+  /* Fleet vehicle card — plate zone + Saudi plate (plate stays light in both themes) */
+  --app-fleet-plate-zone-bg: linear-gradient(
+    180deg,
+    var(--rt-card-elevated-bg) 0%,
+    var(--app-wizard-card-readonly-bg) 100%
+  );
+  --app-fleet-plate-zone-border: var(--rt-divider);
+  --app-fleet-plate-secondary: var(--rt-text-muted);
+  --app-fleet-plate-bg: #ffffff;
+  --app-fleet-plate-border: #2b2b2b;
+  --app-fleet-plate-text: #111111;
+  --app-fleet-plate-divider: #bfc6d1;
+  --app-fleet-plate-shadow: 0 1px 4px -2px rgba(var(--rt-shadow-rgb), 0.18);
+  --app-fleet-plate-hover-shadow: 0 4px 12px -8px rgba(var(--rt-shadow-rgb), 0.22);
+  --app-fleet-status-available-bg: rgba(var(--rt-success-rgb), 0.14);
+  --app-fleet-status-available-fg: #14532d;
+  --app-fleet-status-available-border: rgba(var(--rt-success-rgb), 0.35);
+  --app-fleet-status-booked-bg: rgba(var(--rt-warning-rgb), 0.16);
+  --app-fleet-status-booked-fg: #78350f;
+  --app-fleet-status-booked-border: rgba(var(--rt-warning-rgb), 0.38);
+  --app-fleet-status-maintenance-bg: rgba(var(--rt-error-rgb), 0.12);
+  --app-fleet-status-maintenance-fg: #991b1b;
+  --app-fleet-status-maintenance-border: rgba(var(--rt-error-rgb), 0.34);
+  --app-fleet-status-inactive-bg: rgba(var(--c-64748b-rgb), 0.14);
+  --app-fleet-status-inactive-fg: #334155;
+  --app-fleet-status-inactive-border: rgba(var(--c-64748b-rgb), 0.32);
+  --app-fleet-status-sold-bg: rgba(124, 58, 237, 0.12);
+  --app-fleet-status-sold-fg: #5b21b6;
+  --app-fleet-status-sold-border: rgba(124, 58, 237, 0.35);
+
+  /* Booking contract status — muted palette (badges, legend, list card accent, details) */
+  --app-booking-status-open: #5b8fce;
+  --app-booking-status-open-soft: #7ba5d6;
+  --app-booking-status-open-fg: #ffffff;
+  --app-booking-status-open-border: #a8bfd9;
+  --app-booking-status-open-surface: #e8f0f8;
+  --app-booking-status-open-surface-strong: #2a4a6e;
+  --app-booking-status-open-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-open-soft) 0%,
+    var(--app-booking-status-open) 100%
+  );
+
+  --app-booking-status-extension: #c4a05a;
+  --app-booking-status-extension-soft: #d4b87a;
+  --app-booking-status-extension-fg: #2f3640;
+  --app-booking-status-extension-border: #dcc99a;
+  --app-booking-status-extension-surface: #f7f2e8;
+  --app-booking-status-extension-surface-strong: #5c4a2a;
+  --app-booking-status-extension-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-extension-soft) 0%,
+    var(--app-booking-status-extension) 100%
+  );
+
+  --app-booking-status-finished: #4a9b7e;
+  --app-booking-status-finished-soft: #6aad94;
+  --app-booking-status-finished-fg: #ffffff;
+  --app-booking-status-finished-border: #9cc9b8;
+  --app-booking-status-finished-surface: #e8f4ef;
+  --app-booking-status-finished-surface-strong: #1f4a3c;
+  --app-booking-status-finished-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-finished-soft) 0%,
+    var(--app-booking-status-finished) 100%
+  );
+
+  --app-booking-status-closed: #7b8a9e;
+  --app-booking-status-closed-soft: #95a3b5;
+  --app-booking-status-closed-fg: #ffffff;
+  --app-booking-status-closed-border: #b8c2ce;
+  --app-booking-status-closed-surface: #f0f2f5;
+  --app-booking-status-closed-surface-strong: #3d4654;
+  --app-booking-status-closed-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-closed-soft) 0%,
+    var(--app-booking-status-closed) 100%
+  );
+
+  --app-booking-status-accident: #c96a6a;
+  --app-booking-status-accident-soft: #d88a8a;
+  --app-booking-status-accident-fg: #ffffff;
+  --app-booking-status-accident-border: #e0abab;
+  --app-booking-status-accident-surface: #faecec;
+  --app-booking-status-accident-surface-strong: #5c3232;
+  --app-booking-status-accident-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-accident-soft) 0%,
+    var(--app-booking-status-accident) 100%
+  );
+
+  --app-booking-status-debt: #c88b5a;
+  --app-booking-status-debt-soft: #d8a67a;
+  --app-booking-status-debt-fg: #ffffff;
+  --app-booking-status-debt-border: #e0bf9f;
+  --app-booking-status-debt-surface: #faf3eb;
+  --app-booking-status-debt-surface-strong: #5c422a;
+  --app-booking-status-debt-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-debt-soft) 0%,
+    var(--app-booking-status-debt) 100%
+  );
+
+  --app-booking-status-translate: #9b8bd4;
+  --app-booking-status-translate-soft: #afa3de;
+  --app-booking-status-translate-fg: #ffffff;
+  --app-booking-status-translate-border: #c5b9e8;
+  --app-booking-status-translate-surface: #f2effa;
+  --app-booking-status-translate-surface-strong: #443a66;
+  --app-booking-status-translate-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-translate-soft) 0%,
+    var(--app-booking-status-translate) 100%
+  );
+
+  --app-booking-status-payment: #5aadc4;
+  --app-booking-status-payment-soft: #78bdd0;
+  --app-booking-status-payment-fg: #ffffff;
+  --app-booking-status-payment-border: #9eceda;
+  --app-booking-status-payment-surface: #e8f5f8;
+  --app-booking-status-payment-surface-strong: #1f4a56;
+  --app-booking-status-payment-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-payment-soft) 0%,
+    var(--app-booking-status-payment) 100%
+  );
+
+  --app-booking-status-unknown: #8b95a3;
+  --app-booking-status-unknown-soft: #a3acb8;
+  --app-booking-status-unknown-fg: #ffffff;
+  --app-booking-status-unknown-border: #c0c7d0;
+  --app-booking-status-unknown-surface: #f2f4f6;
+  --app-booking-status-unknown-surface-strong: #3d4654;
+  --app-booking-status-unknown-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-unknown-soft) 0%,
+    var(--app-booking-status-unknown) 100%
+  );
+
+  /* Booking list — layout shell + accent aliases */
+  --app-booking-list-page-bg: var(--rt-bg);
+  --app-booking-list-filter-bg: var(--app-contract-flow-card-bg);
+  --app-booking-list-filter-border: var(--app-contract-flow-card-border);
+  --app-booking-list-card-bg: linear-gradient(165deg, var(--rt-card-bg) 0%, var(--rt-card-elevated-bg) 100%);
+  --app-booking-list-card-border: var(--rt-border);
+  --app-booking-list-card-shadow: 0 10px 22px -18px rgba(var(--rt-shadow-rgb), 0.14);
+  --app-booking-list-plate-zone-bg: var(--app-fleet-plate-zone-bg);
+  --app-booking-list-accent-open: var(--app-booking-status-open);
+  --app-booking-list-accent-extension: var(--app-booking-status-extension);
+  --app-booking-list-accent-finished: var(--app-booking-status-finished);
+  --app-booking-list-accent-closed: var(--app-booking-status-closed);
+  --app-booking-list-accent-suspended-accident: var(--app-booking-status-accident);
+  --app-booking-list-accent-suspended-debt: var(--app-booking-status-debt);
+  --app-booking-list-accent-unknown: var(--app-booking-status-unknown);
+  --app-booking-list-end-overdue-bg: rgba(201, 106, 106, 0.12);
+  --app-booking-list-end-overdue-fg: #b85a5a;
+  --app-booking-list-end-today-bg: rgba(196, 160, 90, 0.14);
+  --app-booking-list-end-today-fg: #9a7a42;
 }
 
 // -----------------------------------------------------------------------------
@@ -474,6 +679,209 @@ html[data-bs-theme='dark'] {
   --app-contract-flow-segment-active-border: rgba(var(--rt-brand-primary-rgb), 0.55);
   --app-contract-flow-segment-active-text: var(--rt-brand-primary-soft);
   --app-contract-flow-aside-width: 22rem;
+
+  /* Contract details dashboard (hero meta cells + financial KPIs) */
+  --app-contract-dash-hero-bg: var(--app-wizard-card-bg);
+  --app-contract-dash-hero-border: var(--app-wizard-card-border);
+  --app-contract-dash-cell-bg: var(--rt-card-elevated-bg);
+  --app-contract-dash-cell-border: var(--rt-border);
+  --app-contract-dash-cell-label: var(--rt-text-muted);
+  --app-contract-dash-cell-value: var(--rt-text);
+  --app-contract-dash-kpi-total-bg: rgba(var(--rt-brand-primary-rgb), 0.16);
+  --app-contract-dash-kpi-total-border: rgba(var(--rt-brand-primary-rgb), 0.42);
+  --app-contract-dash-kpi-total-value: var(--rt-brand-primary-soft);
+  --app-contract-dash-kpi-paid-bg: rgba(var(--rt-success-rgb), 0.14);
+  --app-contract-dash-kpi-paid-border: rgba(var(--rt-success-rgb), 0.42);
+  --app-contract-dash-kpi-paid-value: var(--rt-success);
+  --app-contract-dash-kpi-remaining-bg: rgba(var(--rt-warning-rgb), 0.16);
+  --app-contract-dash-kpi-remaining-border: rgba(var(--rt-warning-rgb), 0.48);
+  --app-contract-dash-kpi-remaining-value: #fbbf24;
+  --app-contract-dash-card-bg: var(--app-wizard-card-readonly-bg);
+  --app-contract-dash-card-border: var(--rt-border);
+  --app-contract-dash-card-title: var(--rt-text);
+  --app-contract-dash-card-totals-bg: linear-gradient(
+    165deg,
+    rgba(var(--rt-brand-primary-rgb), 0.18) 0%,
+    var(--rt-card-elevated-bg) 100%
+  );
+  --app-contract-dash-card-totals-border: rgba(var(--rt-brand-primary-rgb), 0.42);
+  --app-contract-dash-breakdown-row-bg: var(--rt-table-row-alt);
+  --app-contract-dash-breakdown-row-border: var(--rt-border);
+  --app-contract-dash-breakdown-label: var(--rt-text-muted);
+  --app-contract-dash-breakdown-value: var(--rt-text);
+  --app-contract-dash-breakdown-totals-border: rgba(var(--rt-brand-primary-rgb), 0.4);
+  --app-contract-dash-gallery-item-bg: var(--rt-table-bg);
+  --app-contract-dash-gallery-item-border: var(--rt-border);
+  --app-contract-dash-gallery-item-border-hover: rgba(var(--rt-brand-primary-rgb), 0.55);
+  --app-contract-dash-gallery-media-bg: var(--rt-table-header-bg);
+  --app-contract-dash-gallery-ph-text: var(--rt-text-muted);
+  --app-contract-dash-gallery-cap-bg: var(--rt-table-header-bg);
+  --app-contract-dash-gallery-cap-text: var(--rt-text-secondary);
+  --app-contract-dash-table-border: var(--app-table-border-color);
+  --app-contract-dash-table-head-bg: var(--app-table-head-bg);
+  --app-contract-dash-table-head-color: var(--app-table-head-color);
+  --app-contract-dash-table-cell-color: var(--app-table-text-color);
+  --app-contract-dash-table-row-bg: var(--rt-table-bg);
+  --app-contract-dash-hint: var(--rt-text-muted);
+  --app-contract-dash-kv-label: var(--rt-text-muted);
+  --app-contract-dash-kv-value: var(--rt-text);
+
+  /* Fleet vehicle card — plate zone + Saudi plate (plate stays light in both themes) */
+  --app-fleet-plate-zone-bg: linear-gradient(
+    180deg,
+    rgba(var(--c-1e293b-rgb), 0.72) 0%,
+    rgba(var(--c-0f172a-rgb), 0.88) 100%
+  );
+  --app-fleet-plate-zone-border: var(--rt-border);
+  --app-fleet-plate-secondary: var(--rt-text-muted);
+  --app-fleet-plate-bg: #f8fafc;
+  --app-fleet-plate-border: #1e293b;
+  --app-fleet-plate-text: #0f172a;
+  --app-fleet-plate-divider: #cbd5e1;
+  --app-fleet-plate-shadow: 0 1px 5px -2px rgba(var(--rt-shadow-rgb), 0.45);
+  --app-fleet-plate-hover-shadow: 0 4px 14px -8px rgba(var(--rt-shadow-rgb), 0.55);
+  --app-fleet-status-available-bg: rgba(var(--rt-success-rgb), 0.2);
+  --app-fleet-status-available-fg: #86efac;
+  --app-fleet-status-available-border: rgba(var(--rt-success-rgb), 0.42);
+  --app-fleet-status-booked-bg: rgba(var(--rt-warning-rgb), 0.22);
+  --app-fleet-status-booked-fg: #fde68a;
+  --app-fleet-status-booked-border: rgba(var(--rt-warning-rgb), 0.45);
+  --app-fleet-status-maintenance-bg: rgba(var(--rt-error-rgb), 0.2);
+  --app-fleet-status-maintenance-fg: #fecaca;
+  --app-fleet-status-maintenance-border: rgba(var(--rt-error-rgb), 0.42);
+  --app-fleet-status-inactive-bg: rgba(var(--c-64748b-rgb), 0.22);
+  --app-fleet-status-inactive-fg: #cbd5e1;
+  --app-fleet-status-inactive-border: rgba(var(--c-64748b-rgb), 0.4);
+  --app-fleet-status-sold-bg: rgba(167, 139, 250, 0.18);
+  --app-fleet-status-sold-fg: #ddd6fe;
+  --app-fleet-status-sold-border: rgba(167, 139, 250, 0.42);
+
+  --app-booking-status-open: #6e9ed4;
+  --app-booking-status-open-soft: #8ab3de;
+  --app-booking-status-open-fg: #f8fafc;
+  --app-booking-status-open-border: rgba(142, 179, 222, 0.5);
+  --app-booking-status-open-surface: rgba(91, 143, 206, 0.16);
+  --app-booking-status-open-surface-strong: #1a3352;
+  --app-booking-status-open-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-open-soft) 0%,
+    var(--app-booking-status-open) 100%
+  );
+
+  --app-booking-status-extension: #d4b06a;
+  --app-booking-status-extension-soft: #e0c88a;
+  --app-booking-status-extension-fg: #1f2933;
+  --app-booking-status-extension-border: rgba(212, 176, 106, 0.52);
+  --app-booking-status-extension-surface: rgba(196, 160, 90, 0.14);
+  --app-booking-status-extension-surface-strong: #4a3d22;
+  --app-booking-status-extension-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-extension-soft) 0%,
+    var(--app-booking-status-extension) 100%
+  );
+
+  --app-booking-status-finished: #5cad8e;
+  --app-booking-status-finished-soft: #72ba9c;
+  --app-booking-status-finished-fg: #f8fafc;
+  --app-booking-status-finished-border: rgba(114, 186, 156, 0.48);
+  --app-booking-status-finished-surface: rgba(74, 155, 126, 0.16);
+  --app-booking-status-finished-surface-strong: #1a4034;
+  --app-booking-status-finished-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-finished-soft) 0%,
+    var(--app-booking-status-finished) 100%
+  );
+
+  --app-booking-status-closed: #8a97a8;
+  --app-booking-status-closed-soft: #a0abb9;
+  --app-booking-status-closed-fg: #f8fafc;
+  --app-booking-status-closed-border: rgba(160, 171, 185, 0.48);
+  --app-booking-status-closed-surface: rgba(123, 138, 158, 0.14);
+  --app-booking-status-closed-surface-strong: #2a3440;
+  --app-booking-status-closed-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-closed-soft) 0%,
+    var(--app-booking-status-closed) 100%
+  );
+
+  --app-booking-status-accident: #d08080;
+  --app-booking-status-accident-soft: #dc9a9a;
+  --app-booking-status-accident-fg: #fff8f8;
+  --app-booking-status-accident-border: rgba(220, 154, 154, 0.5);
+  --app-booking-status-accident-surface: rgba(201, 106, 106, 0.18);
+  --app-booking-status-accident-surface-strong: #4a2c2c;
+  --app-booking-status-accident-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-accident-soft) 0%,
+    var(--app-booking-status-accident) 100%
+  );
+
+  --app-booking-status-debt: #d4a078;
+  --app-booking-status-debt-soft: #e0b494;
+  --app-booking-status-debt-fg: #fffaf5;
+  --app-booking-status-debt-border: rgba(224, 180, 148, 0.5);
+  --app-booking-status-debt-surface: rgba(200, 139, 90, 0.16);
+  --app-booking-status-debt-surface-strong: #4a3828;
+  --app-booking-status-debt-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-debt-soft) 0%,
+    var(--app-booking-status-debt) 100%
+  );
+
+  --app-booking-status-translate: #a89fd4;
+  --app-booking-status-translate-soft: #bab3de;
+  --app-booking-status-translate-fg: #f8f7fc;
+  --app-booking-status-translate-border: rgba(186, 179, 222, 0.5);
+  --app-booking-status-translate-surface: rgba(155, 139, 212, 0.16);
+  --app-booking-status-translate-surface-strong: #3a3258;
+  --app-booking-status-translate-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-translate-soft) 0%,
+    var(--app-booking-status-translate) 100%
+  );
+
+  --app-booking-status-payment: #6eb8c8;
+  --app-booking-status-payment-soft: #88c6d4;
+  --app-booking-status-payment-fg: #f8fafc;
+  --app-booking-status-payment-border: rgba(136, 198, 212, 0.48);
+  --app-booking-status-payment-surface: rgba(90, 173, 196, 0.16);
+  --app-booking-status-payment-surface-strong: #1a3d48;
+  --app-booking-status-payment-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-payment-soft) 0%,
+    var(--app-booking-status-payment) 100%
+  );
+
+  --app-booking-status-unknown: #94a3b1;
+  --app-booking-status-unknown-soft: #a8b4c0;
+  --app-booking-status-unknown-fg: #f8fafc;
+  --app-booking-status-unknown-border: rgba(168, 180, 192, 0.45);
+  --app-booking-status-unknown-surface: rgba(139, 149, 163, 0.14);
+  --app-booking-status-unknown-surface-strong: #2e3844;
+  --app-booking-status-unknown-badge: linear-gradient(
+    135deg,
+    var(--app-booking-status-unknown-soft) 0%,
+    var(--app-booking-status-unknown) 100%
+  );
+
+  --app-booking-list-page-bg: var(--rt-bg);
+  --app-booking-list-filter-bg: var(--app-contract-flow-card-bg);
+  --app-booking-list-filter-border: var(--app-contract-flow-card-border);
+  --app-booking-list-card-bg: linear-gradient(165deg, rgba(var(--c-1e293b-rgb), 0.88) 0%, rgba(var(--c-0f172a-rgb), 0.94) 100%);
+  --app-booking-list-card-border: var(--rt-border);
+  --app-booking-list-card-shadow: 0 12px 26px -18px rgba(var(--rt-shadow-rgb), 0.42);
+  --app-booking-list-plate-zone-bg: var(--app-fleet-plate-zone-bg);
+  --app-booking-list-accent-open: var(--app-booking-status-open);
+  --app-booking-list-accent-extension: var(--app-booking-status-extension);
+  --app-booking-list-accent-finished: var(--app-booking-status-finished);
+  --app-booking-list-accent-closed: var(--app-booking-status-closed);
+  --app-booking-list-accent-suspended-accident: var(--app-booking-status-accident);
+  --app-booking-list-accent-suspended-debt: var(--app-booking-status-debt);
+  --app-booking-list-accent-unknown: var(--app-booking-status-unknown);
+  --app-booking-list-end-overdue-bg: rgba(208, 128, 128, 0.2);
+  --app-booking-list-end-overdue-fg: #e8b4b4;
+  --app-booking-list-end-today-bg: rgba(212, 176, 106, 0.2);
+  --app-booking-list-end-today-fg: #e8d4a8;
 }
 
 // -----------------------------------------------------------------------------

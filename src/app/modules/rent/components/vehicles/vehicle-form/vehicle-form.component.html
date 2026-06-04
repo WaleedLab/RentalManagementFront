@@ -1,185 +1,570 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="getPageTitleKey() | translate"
-    [subtitle]="getPageSubtitleKey() | translate"
-  >
-    <a class="btn btn-outline-secondary" routerLink="/vehicles">{{ 'Back to Vehicles' | translate }}</a>
-  </app-page-header>
+<div class="container-fluid contract-flow-page contract-flow-edit vehicle-form-page">
+  <header class="contract-flow-header vehicle-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">{{ getPageTitleKey() | translate }}</h1>
+        <p class="contract-flow-header__meta mb-0">{{ getPageSubtitleKey() | translate }}</p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/vehicles">{{ 'Back to Vehicles' | translate }}</a>
+    </div>
+  </header>
 
-  <div class="row g-4">
-    <div class="col-lg-8">
-      <div class="card">
-        <div class="card-body">
-          <form class="app-form-value-state" [formGroup]="form" (ngSubmit)="save()">
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Branch' | translate }}</label>
-                <app-smooth-select
-                  formControlName="branchId"
-                  [ariaLabel]="'Branch' | translate"
-                  [placeholder]="'Select branch'"
-                  [options]="branchSelectOptions()"
-                  [disabled]="isViewMode()"
-                />
-                <div class="form-text">{{ 'Hint Vehicle Branch' | translate }}</div>
-                @if (!isViewMode() && form.controls.branchId.invalid && form.controls.branchId.touched) {
-                  <div class="text-danger small mt-1">{{ 'Branch is required.' | translate }}</div>
-                }
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Vehicle Category' | translate }}</label>
-                <app-smooth-select
-                  formControlName="idCategoryVehicle"
-                  [ariaLabel]="'Vehicle Category' | translate"
-                  [placeholder]="'Select category'"
-                  [options]="categorySelectOptions()"
-                  [disabled]="isViewMode()"
-                />
-                <div class="form-text">{{ 'Hint Vehicle Category' | translate }}</div>
-                @if (!isViewMode() && form.controls.idCategoryVehicle.invalid && form.controls.idCategoryVehicle.touched) {
-                  <div class="text-danger small mt-1">{{ 'Vehicle category is required.' | translate }}</div>
-                }
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Serial Number' | translate }}</label>
-                <input class="form-control" formControlName="serialNumber" maxlength="50" [placeholder]="'Example Serial Number' | translate" [readonly]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Serial Number' | translate }}</div>
-                @if (!isViewMode() && form.controls.serialNumber.invalid && form.controls.serialNumber.touched) {
-                  <div class="text-danger small mt-1">{{ 'Serial number is required and must be valid.' | translate }}</div>
-                }
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Engine' | translate }}</label>
-                <input class="form-control" formControlName="engine" maxlength="60" [placeholder]="'Example Engine' | translate" [readonly]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Engine' | translate }}</div>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Year' | translate }}</label>
-                <input class="form-control" type="number" formControlName="yearMake" [placeholder]="'Example Vehicle Year' | translate" [readonly]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Vehicle Year' | translate }}</div>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Plate Number' | translate }}</label>
-                <input class="form-control" formControlName="plateNumber" maxlength="10" [placeholder]="'Example Plate Number' | translate" [readonly]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Plate Number' | translate }}</div>
-                @if (!isViewMode() && form.controls.plateNumber.invalid && form.controls.plateNumber.touched) {
-                  <div class="text-danger small mt-1">{{ 'Plate number is required and must be valid.' | translate }}</div>
-                }
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'VIN' | translate }}</label>
-                <input class="form-control" formControlName="vin" maxlength="17" [placeholder]="'Example VIN' | translate" [readonly]="isViewMode()" />
-                <div class="form-text">{{ 'Hint VIN' | translate }}</div>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Color' | translate }}</label>
-                <input class="form-control" formControlName="color" maxlength="30" [placeholder]="'Example Vehicle Color' | translate" [readonly]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Vehicle Color' | translate }}</div>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Insurance Number' | translate }}</label>
-                <input class="form-control" formControlName="insuranceNumber" maxlength="50" [placeholder]="'Example Insurance Number' | translate" [readonly]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Insurance Number' | translate }}</div>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Insurance Type' | translate }}</label>
-                <input class="form-control" type="number" min="0" formControlName="insuranceType" [placeholder]="'Example Insurance Type' | translate" [readonly]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Insurance Type' | translate }}</div>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Insurance Expiry Date' | translate }}</label>
-                <app-date-picker formControlName="insuranceExpires" label="Insurance Expiry Date" [disabled]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Insurance Expiry Date' | translate }}</div>
-                @if (!isViewMode() && form.controls.insuranceExpires.invalid && form.controls.insuranceExpires.touched) {
-                  <div class="text-danger small mt-1">{{ 'Insurance expiry date is required.' | translate }}</div>
-                }
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'License Expiry Date' | translate }}</label>
-                <app-date-picker formControlName="licenseExpirationDate" label="License Expiration Date" [disabled]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Vehicle License Expiry Date' | translate }}</div>
-                @if (!isViewMode() && form.controls.licenseExpirationDate.invalid && form.controls.licenseExpirationDate.touched) {
-                  <div class="text-danger small mt-1">{{ 'License expiry date is required.' | translate }}</div>
-                }
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Insurance Policy Number' | translate }}</label>
-                <input class="form-control" formControlName="insurancePolicyNumber" maxlength="20" [placeholder]="'Example Insurance Policy Number' | translate" [readonly]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Insurance Policy Number' | translate }}</div>
-                @if (!isViewMode() && form.controls.insurancePolicyNumber.invalid && form.controls.insurancePolicyNumber.touched) {
-                  <div class="text-danger small mt-1">{{ 'Insurance policy number is required and must be valid.' | translate }}</div>
-                }
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Operating Card Date' | translate }}</label>
-                <app-date-picker formControlName="operatinCard" label="Operating Card Expiry" [disabled]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Operating Card Date' | translate }}</div>
-                @if (!isViewMode() && form.controls.operatinCard.invalid && form.controls.operatinCard.touched) {
-                  <div class="text-danger small mt-1">{{ 'Operating card date is required.' | translate }}</div>
-                }
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Registration Validity Date' | translate }}</label>
-                <app-date-picker formControlName="validityCarRegistration" label="Registration Validity" [disabled]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Registration Validity Date' | translate }}</div>
-                @if (!isViewMode() && form.controls.validityCarRegistration.invalid && form.controls.validityCarRegistration.touched) {
-                  <div class="text-danger small mt-1">{{ 'Registration validity date is required.' | translate }}</div>
-                }
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Mileage' | translate }}</label>
-                <input class="form-control" type="number" min="0" formControlName="countKm" [placeholder]="'Example Vehicle Mileage' | translate" [readonly]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Vehicle Mileage' | translate }}</div>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Seats' | translate }}</label>
-                <input class="form-control" type="number" min="0" formControlName="capacitOil" [placeholder]="'Example Vehicle Capacity' | translate" [readonly]="isViewMode()" />
-                <div class="form-text">{{ 'Hint Vehicle Capacity' | translate }}</div>
-              </div>
-              <div class="col-12">
-                <label class="form-label">{{ 'Notes' | translate }}</label>
-                <textarea class="form-control" rows="3" formControlName="notes" [placeholder]="'Example Vehicle Notes' | translate" [readonly]="isViewMode()"></textarea>
-                <div class="form-text">{{ 'Hint Vehicle Notes' | translate }}</div>
+  <div class="contract-flow-layout vehicle-form-layout">
+    <div class="contract-flow-main">
+      <form class="app-form-value-state vehicle-form" [formGroup]="form" (ngSubmit)="save()">
+        @if (!isViewMode()) {
+          <ol class="vehicle-form-workflow" [attr.aria-label]="'Vehicle form workflow steps' | translate">
+            <li>
+              <button
+                type="button"
+                class="vehicle-form-workflow__step"
+                [class.vehicle-form-workflow__step--done]="identitySectionComplete()"
+                [class.vehicle-form-workflow__step--current]="currentWorkflowStep() === 1"
+                [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+                [attr.aria-controls]="'vehicle-form-section-identity'"
+                (click)="focusWorkflowSection(1)"
+              >
+                <span class="vehicle-form-workflow__num">1</span>
+                <span>{{ 'Vehicle flow step identity' | translate }}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="vehicle-form-workflow__step"
+                [class.vehicle-form-workflow__step--done]="technicalSectionComplete()"
+                [class.vehicle-form-workflow__step--current]="currentWorkflowStep() === 2"
+                [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+                [attr.aria-controls]="'vehicle-form-section-technical'"
+                (click)="focusWorkflowSection(2)"
+              >
+                <span class="vehicle-form-workflow__num">2</span>
+                <span>{{ 'Vehicle flow step technical' | translate }}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="vehicle-form-workflow__step"
+                [class.vehicle-form-workflow__step--done]="insuranceSectionComplete()"
+                [class.vehicle-form-workflow__step--current]="currentWorkflowStep() === 3"
+                [attr.aria-current]="currentWorkflowStep() === 3 ? 'step' : null"
+                [attr.aria-controls]="'vehicle-form-section-insurance'"
+                (click)="focusWorkflowSection(3)"
+              >
+                <span class="vehicle-form-workflow__num">3</span>
+                <span>{{ 'Vehicle flow step insurance' | translate }}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="vehicle-form-workflow__step"
+                [class.vehicle-form-workflow__step--done]="attachmentsSectionComplete()"
+                [class.vehicle-form-workflow__step--current]="currentWorkflowStep() === 4"
+                [attr.aria-current]="currentWorkflowStep() === 4 ? 'step' : null"
+                [attr.aria-controls]="'vehicle-form-section-attachments'"
+                (click)="focusWorkflowSection(4)"
+              >
+                <span class="vehicle-form-workflow__num">4</span>
+                <span>{{ 'Vehicle flow step attachments' | translate }}</span>
+              </button>
+            </li>
+          </ol>
+        }
+
+        <div class="vehicle-form-fields-shell">
+          <!-- Section 1 — Vehicle Identity -->
+          <details id="vehicle-form-section-identity" class="vehicle-form-section vehicle-form-fold" open>
+            <summary class="vehicle-form-section__summary">
+              <span class="vehicle-form-section__step">1</span>
+              {{ 'Vehicle Section Identity Title' | translate }}
+            </summary>
+            <div class="vehicle-form-fold__body">
+              <header class="vehicle-form-section-head">
+                <span class="vehicle-form-section-head__icon" aria-hidden="true">🚗</span>
+                <div>
+                  <h2 class="vehicle-form-section-head__title">{{ 'Vehicle Section Identity Title' | translate }}</h2>
+                  <p class="vehicle-form-section-head__hint">{{ 'Vehicle Section Identity Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="vehicle-form-grid vehicle-form-grid--2">
+                <div class="vehicle-form-field">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Branch' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <app-smooth-select
+                    formControlName="branchId"
+                    [ariaLabel]="'Branch' | translate"
+                    [placeholder]="'Select branch'"
+                    [options]="branchSelectOptions()"
+                    [searchable]="true"
+                    [searchPlaceholder]="'Search...'"
+                    [disabled]="isViewMode()"
+                  />
+                  <p class="vehicle-form-hint">{{ 'Hint Vehicle Branch' | translate }}</p>
+                  @if (!isViewMode() && form.controls.branchId.invalid && form.controls.branchId.touched) {
+                    <div class="vehicle-form-hint vehicle-form-hint--danger">{{ 'Branch is required.' | translate }}</div>
+                  }
+                </div>
+                <div class="vehicle-form-field">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Vehicle Category' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <app-smooth-select
+                    formControlName="idCategoryVehicle"
+                    [ariaLabel]="'Vehicle Category' | translate"
+                    [placeholder]="'Select category'"
+                    [options]="categorySelectOptions()"
+                    [searchable]="true"
+                    [searchPlaceholder]="'Search...'"
+                    [disabled]="isViewMode()"
+                  />
+                  <p class="vehicle-form-hint">{{ 'Hint Vehicle Category' | translate }}</p>
+                  @if (!isViewMode() && form.controls.idCategoryVehicle.invalid && form.controls.idCategoryVehicle.touched) {
+                    <div class="vehicle-form-hint vehicle-form-hint--danger">{{ 'Vehicle category is required.' | translate }}</div>
+                  }
+                </div>
+                <div class="vehicle-form-field vehicle-form-field--plate">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Plate Number' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="plateNumber"
+                    maxlength="10"
+                    [placeholder]="'Example Plate Number' | translate"
+                    [readonly]="isViewMode()"
+                  />
+                  <p class="vehicle-form-hint">{{ 'Hint Plate Number' | translate }}</p>
+                  @if (!isViewMode() && form.controls.plateNumber.invalid && form.controls.plateNumber.touched) {
+                    <div class="vehicle-form-hint vehicle-form-hint--danger">{{ 'Plate number is required and must be valid.' | translate }}</div>
+                  }
+                </div>
+                <div class="vehicle-form-field">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Year' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    formControlName="yearMake"
+                    [placeholder]="'Example Vehicle Year' | translate"
+                    [readonly]="isViewMode()"
+                  />
+                  <p class="vehicle-form-hint">{{ 'Hint Vehicle Year' | translate }}</p>
+                </div>
+                <div class="vehicle-form-field">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Color' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="color"
+                    maxlength="30"
+                    [placeholder]="'Example Vehicle Color' | translate"
+                    [readonly]="isViewMode()"
+                  />
+                  <p class="vehicle-form-hint">{{ 'Hint Vehicle Color' | translate }}</p>
+                </div>
               </div>
             </div>
+          </details>
 
-            @if (!isViewMode()) {
-              <div class="app-form-actions">
-                <button class="btn btn-primary" type="submit" [disabled]="loading()">
-                  {{ (isEdit() ? 'Update Vehicle' : 'Create Vehicle') | translate }}
-                </button>
-                <a class="btn btn-cancel" routerLink="/vehicles">{{ 'Cancel' | translate }}</a>
+          <!-- Section 2 — Technical Information -->
+          <details id="vehicle-form-section-technical" class="vehicle-form-section vehicle-form-fold" open>
+            <summary class="vehicle-form-section__summary">
+              <span class="vehicle-form-section__step">2</span>
+              {{ 'Vehicle Section Technical Title' | translate }}
+            </summary>
+            <div class="vehicle-form-fold__body">
+              <header class="vehicle-form-section-head">
+                <span class="vehicle-form-section-head__icon" aria-hidden="true">⚙️</span>
+                <div>
+                  <h2 class="vehicle-form-section-head__title">{{ 'Vehicle Section Technical Title' | translate }}</h2>
+                  <p class="vehicle-form-section-head__hint">{{ 'Vehicle Section Technical Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="vehicle-form-grid vehicle-form-grid--2">
+                <div class="vehicle-form-field">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Serial Number' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="serialNumber"
+                    maxlength="50"
+                    [placeholder]="'Example Serial Number' | translate"
+                    [readonly]="isViewMode()"
+                  />
+                  <p class="vehicle-form-hint">{{ 'Hint Serial Number' | translate }}</p>
+                  @if (!isViewMode() && form.controls.serialNumber.invalid && form.controls.serialNumber.touched) {
+                    <div class="vehicle-form-hint vehicle-form-hint--danger">{{ 'Serial number is required and must be valid.' | translate }}</div>
+                  }
+                </div>
+                <div class="vehicle-form-field">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'VIN' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="vin"
+                    maxlength="17"
+                    [placeholder]="'Example VIN' | translate"
+                    [readonly]="isViewMode()"
+                  />
+                  <p class="vehicle-form-hint">{{ 'Vehicle VIN length hint' | translate }}</p>
+                </div>
+                <div class="vehicle-form-field">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Engine' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="engine"
+                    maxlength="60"
+                    [placeholder]="'Example Engine' | translate"
+                    [readonly]="isViewMode()"
+                  />
+                  <p class="vehicle-form-hint">{{ 'Hint Engine' | translate }}</p>
+                </div>
+                <div class="vehicle-form-field">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Seats' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    formControlName="capacitOil"
+                    [placeholder]="'Example Vehicle Capacity' | translate"
+                    [readonly]="isViewMode()"
+                  />
+                  <p class="vehicle-form-hint">{{ 'Hint Vehicle Capacity' | translate }}</p>
+                </div>
+                <div class="vehicle-form-field">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Mileage' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <div class="vehicle-form-input-group">
+                    <input
+                      class="form-control"
+                      type="number"
+                      min="0"
+                      formControlName="countKm"
+                      [placeholder]="'Example Vehicle Mileage' | translate"
+                      [readonly]="isViewMode()"
+                    />
+                    <span class="vehicle-form-input-group__suffix">{{ 'Vehicle mileage unit' | translate }}</span>
+                  </div>
+                  <p class="vehicle-form-hint">{{ 'Hint Vehicle Mileage' | translate }}</p>
+                </div>
               </div>
-            }
-          </form>
+            </div>
+          </details>
+
+          <!-- Section 3 — Insurance & Registration -->
+          <details id="vehicle-form-section-insurance" class="vehicle-form-section vehicle-form-fold" open>
+            <summary class="vehicle-form-section__summary">
+              <span class="vehicle-form-section__step">3</span>
+              {{ 'Vehicle Section Insurance Title' | translate }}
+            </summary>
+            <div class="vehicle-form-fold__body">
+              <header class="vehicle-form-section-head">
+                <span class="vehicle-form-section-head__icon" aria-hidden="true">🛡️</span>
+                <div>
+                  <h2 class="vehicle-form-section-head__title">{{ 'Vehicle Section Insurance Title' | translate }}</h2>
+                  <p class="vehicle-form-section-head__hint">{{ 'Vehicle Section Insurance Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="vehicle-form-grid vehicle-form-grid--2">
+                <div class="vehicle-form-field">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Insurance Number' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="insuranceNumber"
+                    maxlength="50"
+                    [placeholder]="'Example Insurance Number' | translate"
+                    [readonly]="isViewMode()"
+                  />
+                  <p class="vehicle-form-hint">{{ 'Hint Insurance Number' | translate }}</p>
+                </div>
+                <div class="vehicle-form-field">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Insurance Type' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    formControlName="insuranceType"
+                    [placeholder]="'Example Insurance Type' | translate"
+                    [readonly]="isViewMode()"
+                  />
+                  <p class="vehicle-form-hint">{{ 'Hint Insurance Type' | translate }}</p>
+                </div>
+                <div class="vehicle-form-field vehicle-form-field--wide">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Insurance Policy Number' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="insurancePolicyNumber"
+                    maxlength="20"
+                    [placeholder]="'Example Insurance Policy Number' | translate"
+                    [readonly]="isViewMode()"
+                  />
+                  <p class="vehicle-form-hint">{{ 'Hint Insurance Policy Number' | translate }}</p>
+                  @if (!isViewMode() && form.controls.insurancePolicyNumber.invalid && form.controls.insurancePolicyNumber.touched) {
+                    <div class="vehicle-form-hint vehicle-form-hint--danger">{{ 'Insurance policy number is required and must be valid.' | translate }}</div>
+                  }
+                </div>
+              </div>
+
+              <div class="vehicle-form-insurance-dates">
+                <p class="vehicle-form-insurance-dates__title">{{ 'Vehicle insurance dates group title' | translate }}</p>
+                <div class="vehicle-form-grid vehicle-form-grid--2">
+                  <div class="vehicle-form-field vehicle-form-date-field">
+                    <label class="vehicle-form-label">
+                      <span>{{ 'Insurance Expiry Date' | translate }}</span>
+                      <span class="vehicle-form-badge vehicle-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                    </label>
+                    <app-date-picker
+                      formControlName="insuranceExpires"
+                      label=""
+                      placeholder="datePicker.selectDate"
+                      [compact]="true"
+                      [disabled]="isViewMode()"
+                    />
+                    @if (dateExpiryState('insuranceExpires'); as expiry) {
+                      @if (expiry !== 'empty') {
+                        <span class="vehicle-form-date-badge" [ngClass]="dateExpiryBadgeClass(expiry)">
+                          {{ dateExpiryLabelKey(expiry) | translate }}
+                        </span>
+                      }
+                    }
+                    @if (!isViewMode() && form.controls.insuranceExpires.invalid && form.controls.insuranceExpires.touched) {
+                      <div class="vehicle-form-hint vehicle-form-hint--danger">{{ 'Insurance expiry date is required.' | translate }}</div>
+                    }
+                  </div>
+                  <div class="vehicle-form-field vehicle-form-date-field">
+                    <label class="vehicle-form-label">
+                      <span>{{ 'License Expiry Date' | translate }}</span>
+                      <span class="vehicle-form-badge vehicle-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                    </label>
+                    <app-date-picker
+                      formControlName="licenseExpirationDate"
+                      label=""
+                      placeholder="datePicker.selectDate"
+                      [compact]="true"
+                      [disabled]="isViewMode()"
+                    />
+                    @if (dateExpiryState('licenseExpirationDate'); as expiry) {
+                      @if (expiry !== 'empty') {
+                        <span class="vehicle-form-date-badge" [ngClass]="dateExpiryBadgeClass(expiry)">
+                          {{ dateExpiryLabelKey(expiry) | translate }}
+                        </span>
+                      }
+                    }
+                    @if (!isViewMode() && form.controls.licenseExpirationDate.invalid && form.controls.licenseExpirationDate.touched) {
+                      <div class="vehicle-form-hint vehicle-form-hint--danger">{{ 'License expiry date is required.' | translate }}</div>
+                    }
+                  </div>
+                  <div class="vehicle-form-field vehicle-form-date-field">
+                    <label class="vehicle-form-label">
+                      <span>{{ 'Operating Card Date' | translate }}</span>
+                      <span class="vehicle-form-badge vehicle-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                    </label>
+                    <app-date-picker
+                      formControlName="operatinCard"
+                      label=""
+                      placeholder="datePicker.selectDate"
+                      [compact]="true"
+                      [disabled]="isViewMode()"
+                    />
+                    @if (dateExpiryState('operatinCard'); as expiry) {
+                      @if (expiry !== 'empty') {
+                        <span class="vehicle-form-date-badge" [ngClass]="dateExpiryBadgeClass(expiry)">
+                          {{ dateExpiryLabelKey(expiry) | translate }}
+                        </span>
+                      }
+                    }
+                    @if (!isViewMode() && form.controls.operatinCard.invalid && form.controls.operatinCard.touched) {
+                      <div class="vehicle-form-hint vehicle-form-hint--danger">{{ 'Operating card date is required.' | translate }}</div>
+                    }
+                  </div>
+                  <div class="vehicle-form-field vehicle-form-date-field">
+                    <label class="vehicle-form-label">
+                      <span>{{ 'Registration Validity Date' | translate }}</span>
+                      <span class="vehicle-form-badge vehicle-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                    </label>
+                    <app-date-picker
+                      formControlName="validityCarRegistration"
+                      label=""
+                      placeholder="datePicker.selectDate"
+                      [compact]="true"
+                      [disabled]="isViewMode()"
+                    />
+                    @if (dateExpiryState('validityCarRegistration'); as expiry) {
+                      @if (expiry !== 'empty') {
+                        <span class="vehicle-form-date-badge" [ngClass]="dateExpiryBadgeClass(expiry)">
+                          {{ dateExpiryLabelKey(expiry) | translate }}
+                        </span>
+                      }
+                    }
+                    @if (!isViewMode() && form.controls.validityCarRegistration.invalid && form.controls.validityCarRegistration.touched) {
+                      <div class="vehicle-form-hint vehicle-form-hint--danger">{{ 'Registration validity date is required.' | translate }}</div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <!-- Section 4 — Attachments & Notes -->
+          <details id="vehicle-form-section-attachments" class="vehicle-form-section vehicle-form-fold" open>
+            <summary class="vehicle-form-section__summary">
+              <span class="vehicle-form-section__step">4</span>
+              {{ 'Vehicle Section Attachments Title' | translate }}
+            </summary>
+            <div class="vehicle-form-fold__body">
+              <header class="vehicle-form-section-head">
+                <span class="vehicle-form-section-head__icon" aria-hidden="true">📎</span>
+                <div>
+                  <h2 class="vehicle-form-section-head__title">{{ 'Vehicle Section Attachments Title' | translate }}</h2>
+                  <p class="vehicle-form-section-head__hint">{{ 'Vehicle Section Attachments Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="vehicle-form-grid vehicle-form-grid--2">
+                <div class="vehicle-form-field vehicle-form-field--wide">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Vehicle Image' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  @if (isViewMode()) {
+                    <div class="vehicle-form-upload-card vehicle-form-upload-card--preview">
+                      <img
+                        class="vehicle-form-upload-card__img"
+                        [src]="getPreviewImageUrl()"
+                        alt=""
+                        (error)="onPreviewImageError($event)"
+                      />
+                    </div>
+                  } @else {
+                    <div class="vehicle-form-upload-card">
+                      <app-file-upload
+                        [label]="''"
+                        [previewUrl]="previewUrl()"
+                        [fallbackPreviewUrl]="vehicleFallbackImage"
+                        (fileSelected)="onImageSelected($event)"
+                      />
+                    </div>
+                  }
+                  <p class="vehicle-form-hint">{{ 'Hint Vehicle Image' | translate }}</p>
+                </div>
+                <div class="vehicle-form-field vehicle-form-field--wide">
+                  <label class="vehicle-form-label">
+                    <span>{{ 'Notes' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <textarea
+                    class="form-control"
+                    rows="4"
+                    formControlName="notes"
+                    [placeholder]="'Example Vehicle Notes' | translate"
+                    [readonly]="isViewMode()"
+                  ></textarea>
+                  <p class="vehicle-form-hint">{{ 'Hint Vehicle Notes' | translate }}</p>
+                </div>
+              </div>
+            </div>
+          </details>
         </div>
-      </div>
+
+        @if (!isViewMode()) {
+          <div class="app-form-actions vehicle-form-actions">
+            <button class="btn btn-primary" type="submit" [disabled]="loading()">
+              {{ (isEdit() ? 'Update Vehicle' : 'Create Vehicle') | translate }}
+            </button>
+            <a class="btn btn-cancel" routerLink="/vehicles">{{ 'Cancel' | translate }}</a>
+          </div>
+        }
+      </form>
     </div>
 
-    <div class="col-lg-4">
-      @if (isViewMode()) {
-        <div class="card">
-          <div class="card-body">
-            <div class="vehicle-preview-image-wrap">
-              <img
-                class="img-fluid rounded border vehicle-preview-image"
-                [src]="getPreviewImageUrl()"
-                alt="vehicle-preview"
-                (error)="onPreviewImageError($event)"
-              />
+    <aside class="contract-flow-aside vehicle-form-aside" [attr.aria-label]="'Vehicle form summary' | translate">
+      <div class="vehicle-form-aside-card">
+        @if (isEdit()) {
+          <div class="vehicle-form-aside-status">
+            <span class="vehicle-form-aside-status__label">{{ 'Status' | translate }}</span>
+            <span class="vehicle-form-status-badge" [ngClass]="statusBadgeClass()">{{ statusDisplayLabel() }}</span>
+          </div>
+        }
+
+        @if (!isViewMode()) {
+          <div class="vehicle-form-progress">
+            <div class="vehicle-form-progress__head">
+              <span>{{ 'Vehicle flow profile completion' | translate }}</span>
+              <strong>{{ profileCompletionPercent() }}%</strong>
+            </div>
+            <div
+              class="vehicle-form-progress__track"
+              role="progressbar"
+              [attr.aria-valuenow]="profileCompletionPercent()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span class="vehicle-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
             </div>
           </div>
+
+          <ul class="vehicle-form-status-list">
+            <li [class.vehicle-form-status-list__item--done]="identitySectionComplete()">
+              <span class="vehicle-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'Vehicle flow summary identity' | translate }}</span>
+            </li>
+            <li [class.vehicle-form-status-list__item--done]="technicalSectionComplete()">
+              <span class="vehicle-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'Vehicle flow summary technical' | translate }}</span>
+            </li>
+            <li [class.vehicle-form-status-list__item--done]="insuranceSectionComplete()">
+              <span class="vehicle-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'Vehicle flow summary insurance' | translate }}</span>
+            </li>
+            <li [class.vehicle-form-status-list__item--done]="attachmentsSectionComplete()">
+              <span class="vehicle-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'Vehicle flow summary image' | translate }}</span>
+            </li>
+          </ul>
+        }
+
+        <div class="vehicle-form-aside-photo">
+          <span class="vehicle-form-aside-photo__label">{{ 'Vehicle Image' | translate }}</span>
+          @if (getPreviewImageUrl(); as preview) {
+            <img [src]="preview" alt="" class="vehicle-form-aside-photo__img" (error)="onPreviewImageError($event)" />
+          } @else {
+            <div class="vehicle-form-aside-photo__empty">
+              <span aria-hidden="true">🚗</span>
+              <span>{{ 'Vehicle photo placeholder' | translate }}</span>
+            </div>
+          }
         </div>
-      } @else {
-        <app-file-upload
-          [label]="'Vehicle Image' | translate"
-          [previewUrl]="previewUrl()"
-          [fallbackPreviewUrl]="'assets/images/rent_icon/car_defulte.png'"
-          (fileSelected)="onImageSelected($event)"
-        />
-        <div class="form-text mt-2">{{ 'Hint Vehicle Image' | translate }}</div>
-      }
-    </div>
+      </div>
+    </aside>
   </div>
 </div>
-

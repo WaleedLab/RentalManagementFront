@@ -1,12 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { map, of, switchMap } from 'rxjs';
+import { map, merge, of, switchMap } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
-import { Branch, CategoryVehicle, VehicleStatus, VehicleUpsertRequest } from '../../../models';
+import {
+  Branch,
+  CategoryVehicle,
+  VehicleStatus,
+  VehicleUpsertRequest,
+  VEHICLE_FALLBACK_IMAGE,
+} from '../../../models';
 import { FieldValueStateDirective } from '../../../../../shared/directives/field-value-state.directive';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { BranchService } from '../../../services/branches/branch.service';
@@ -15,9 +22,15 @@ import { VehicleService } from '../../../services/vehicles/vehicle.service';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-upload.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
+
+export type VehicleDateExpiryState = 'valid' | 'expiring' | 'expired' | 'empty';
+type VehicleDateControlName =
+  | 'insuranceExpires'
+  | 'licenseExpirationDate'
+  | 'operatinCard'
+  | 'validityCarRegistration';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -29,7 +42,6 @@ import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-firs
     TranslateModule,
     FieldValueStateDirective,
     FileUploadComponent,
-    PageHeaderComponent,
     SmoothSelectComponent,
     DatePickerComponent,
   ],
@@ -45,7 +57,15 @@ export class VehicleFormComponent implements OnInit {
   private static readonly INSURANCE_NUMBER_REGEX = /^[A-Za-z0-9-]{0,50}$/;
   private static readonly ENGINE_REGEX = /^[A-Za-z0-9.\s-]{0,60}$/;
 
+  private static readonly WORKFLOW_SECTION_IDS = [
+    'vehicle-form-section-identity',
+    'vehicle-form-section-technical',
+    'vehicle-form-section-insurance',
+    'vehicle-form-section-attachments',
+  ] as const;
+
   private fb = inject(NonNullableFormBuilder);
+  private destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authState = inject(AuthStateService);
@@ -62,9 +82,10 @@ export class VehicleFormComponent implements OnInit {
   loading = signal(false);
   selectedImage = signal<File | null>(null);
   previewUrl = signal<string | null>(null);
+  readonly vehicleFallbackImage = VEHICLE_FALLBACK_IMAGE;
   branches = signal<Branch[]>([]);
+  private formProgressTick = signal(0);
   categories = signal<CategoryVehicle[]>([]);
-  private readonly vehicleFallbackImage = 'assets/images/rent_icon/car_defulte.png';
   readonly statusSelectOptions: SmoothSelectOption[] = [
     { label: 'Available', value: 'Available' },
     { label: 'Booked', value: 'Booked' },
@@ -85,6 +106,53 @@ export class VehicleFormComponent implements OnInit {
       value: Number(category.id),
     })),
   ]);
+
+  identitySectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return f.branchId.valid && f.idCategoryVehicle.valid && f.plateNumber.valid && f.yearMake.valid;
+  });
+
+  technicalSectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.form.controls.serialNumber.valid;
+  });
+
+  insuranceSectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return (
+      f.insurancePolicyNumber.valid &&
+      f.insuranceExpires.valid &&
+      f.licenseExpirationDate.valid &&
+      f.operatinCard.valid &&
+      f.validityCarRegistration.valid
+    );
+  });
+
+  attachmentsSectionComplete = computed(() => {
+    this.formProgressTick();
+    return !!(String(this.previewUrl() ?? '').trim() || this.selectedImage());
+  });
+
+  profileCompletionPercent = computed(() => {
+    this.formProgressTick();
+    let done = 0;
+    if (this.identitySectionComplete()) done++;
+    if (this.technicalSectionComplete()) done++;
+    if (this.insuranceSectionComplete()) done++;
+    if (this.attachmentsSectionComplete()) done++;
+    return Math.round((done / 4) * 100);
+  });
+
+  currentWorkflowStep = computed(() => {
+    this.formProgressTick();
+    if (!this.identitySectionComplete()) return 1;
+    if (!this.technicalSectionComplete()) return 2;
+    if (!this.insuranceSectionComplete()) return 3;
+    if (!this.attachmentsSectionComplete()) return 4;
+    return 5;
+  });
 
   form = this.fb.group({
     fleetId: [this.authState.fleetId() || '', [Validators.required]],
@@ -111,6 +179,10 @@ export class VehicleFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    merge(this.form.valueChanges, this.form.statusChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formProgressTick.update(n => n + 1));
+
     this.isViewMode.set(Boolean(this.route.snapshot.data?.['viewOnly']));
     const fleetId = this.authState.fleetId();
     if (fleetId) {
@@ -169,6 +241,7 @@ export class VehicleFormComponent implements OnInit {
         if (this.isViewMode()) {
           this.form.disable({ emitEvent: false });
         }
+        this.formProgressTick.update(n => n + 1);
       },
       error: () => this.toast.error(this.translate.instant('Failed to load vehicle')),
       complete: () => this.loading.set(false),
@@ -180,6 +253,89 @@ export class VehicleFormComponent implements OnInit {
       return;
     }
     this.selectedImage.set(file);
+    this.formProgressTick.update(n => n + 1);
+  }
+
+  focusWorkflowSection(step: 1 | 2 | 3 | 4): void {
+    const sectionId = VehicleFormComponent.WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('vehicle-form-section--focus');
+    window.setTimeout(() => section.classList.remove('vehicle-form-section--focus'), 1400);
+  }
+
+  dateExpiryState(controlName: VehicleDateControlName): VehicleDateExpiryState {
+    this.formProgressTick();
+    return VehicleFormComponent.resolveDateExpiryState(this.form.controls[controlName].value);
+  }
+
+  dateExpiryBadgeClass(state: VehicleDateExpiryState): string {
+    return {
+      valid: 'vehicle-form-date-badge--valid',
+      expiring: 'vehicle-form-date-badge--expiring',
+      expired: 'vehicle-form-date-badge--expired',
+      empty: '',
+    }[state];
+  }
+
+  dateExpiryLabelKey(state: VehicleDateExpiryState): string {
+    return {
+      valid: 'Vehicle date status valid',
+      expiring: 'Vehicle date status expiring',
+      expired: 'Vehicle date status expired',
+      empty: '',
+    }[state];
+  }
+
+  statusDisplayLabel(): string {
+    const status = this.form.controls.status.value;
+    const keyMap: Record<VehicleStatus, string> = {
+      Available: 'Available',
+      Booked: 'Booked',
+      Maintenance: 'Maintenance',
+      Inactive: 'Inactive',
+      Sold: 'Sold',
+    };
+    return this.translate.instant(keyMap[status] ?? status);
+  }
+
+  statusBadgeClass(): string {
+    const status = this.form.controls.status.value;
+    if (status === 'Available') {
+      return 'vehicle-form-status-badge--success';
+    }
+    if (status === 'Booked' || status === 'Maintenance') {
+      return 'vehicle-form-status-badge--warning';
+    }
+    return 'vehicle-form-status-badge--neutral';
+  }
+
+  private static resolveDateExpiryState(value: string | null | undefined): VehicleDateExpiryState {
+    const text = String(value ?? '').trim();
+    if (!text) {
+      return 'empty';
+    }
+    const parsed = new Date(text.length >= 10 ? text.slice(0, 10) : text);
+    if (Number.isNaN(parsed.getTime())) {
+      return 'empty';
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    parsed.setHours(0, 0, 0, 0);
+    const diffDays = Math.floor((parsed.getTime() - today.getTime()) / 86_400_000);
+    if (diffDays < 0) {
+      return 'expired';
+    }
+    if (diffDays <= 30) {
+      return 'expiring';
+    }
+    return 'valid';
   }
 
   onPreviewImageError(event: Event): void {
@@ -220,7 +376,7 @@ export class VehicleFormComponent implements OnInit {
       return 'Preview vehicle information in read-only mode.';
     }
 
-    return 'Vehicle records with pricing, status, and image upload.';
+    return 'Vehicle form page subtitle';
   }
 
   private toDateInputValue(value?: string): string {

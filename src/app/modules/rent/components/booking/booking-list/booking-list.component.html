@@ -1,18 +1,14 @@
 <div class="container-fluid booking-list-page">
-  <section class="fin-command booking-command">
-    <div class="fin-command__row">
-      <div class="fin-command__brand">
-        <div class="fin-command__title-row">
-          <img class="fin-command__icon" src="assets/images/rent_icon/Booking.png" alt="" />
-          <h2 class="fin-command__title">{{ 'Bookings' | translate }}</h2>
-        </div>
-      </div>
-      <div class="fin-command__actions">
-        <a class="fin-btn fin-btn--primary" routerLink="/booking/create">{{ 'Create Booking' | translate }}</a>
-      </div>
-    </div>
+  <app-list-command-bar
+    [title]="'Bookings'"
+    [subtitle]="pageSubtitle()"
+    iconSrc="assets/images/rent_icon/Booking.png"
+    commandClass="booking-command"
+    toolbarClass="booking-command__toolbar"
+  >
+    <a commandActions class="fin-btn fin-btn--primary" routerLink="/booking/create">{{ 'Create Booking' | translate }}</a>
 
-    <div class="fin-command__toolbar booking-command__toolbar">
+    <ng-container commandToolbar>
       <app-list-search-field
         [placeholder]="'Search booking/customer/vehicle...'"
         [value]="search()"
@@ -61,278 +57,237 @@
           (valueChange)="onOrderDirectionChange($any($event))"
         />
       </label>
-    </div>
+    </ng-container>
 
-    <div class="fin-command__presets booking-command__legend" aria-label="Booking color guide">
-      @for (guide of colorGuide; track guide.key) {
-        <span class="booking-legend-pill">
-          <span class="booking-legend-dot" [style.background]="guide.color"></span>
-          <span>{{ guide.label }}</span>
-        </span>
-      }
-    </div>
-  </section>
+    <ng-container commandPresets>
+      <div class="booking-command__legend" aria-label="Booking color guide">
+        @for (guide of colorGuide(); track guide.key) {
+          <span class="booking-legend-pill">
+            <span class="booking-legend-dot" [ngClass]="'booking-legend-dot--' + guide.key"></span>
+            <span>{{ guide.label }}</span>
+          </span>
+        }
+      </div>
+    </ng-container>
+  </app-list-command-bar>
 
-  <div class="booking-list-shell">
-    <div class="booking-list-shell__body">
-      @if (loading() || loadFailed()) {
-        <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
-      } @else if (!bookings().length) {
-        <app-empty-state [title]="'No bookings found' | translate" [description]="'Create a booking after selecting a customer and an available vehicle.' | translate" />
-      } @else {
-        <div class="booking-cards-grid">
-          @for (booking of bookings(); track booking.id; let cardIndex = $index) {
-            <article class="booking-card" [ngStyle]="getBookingCardStyle(booking.status)">
-              <div class="booking-card__media">
-                <div class="booking-card__media-overlay"></div>
-                @if (booking.vehicleImageUrl) {
+  <app-list-content-shell>
+    @if (loading() || loadFailed()) {
+      <div class="text-center py-5"><div class="spinner-border text-primary" role="status" aria-live="polite"></div></div>
+    } @else if (!bookings().length) {
+      <app-empty-state
+        [title]="'No bookings found' | translate"
+        [description]="'Create a booking after selecting a customer and an available vehicle.' | translate"
+      />
+    } @else {
+      <div class="booking-cards-grid">
+        @for (booking of bookings(); track booking.id) {
+          <article class="booking-card" [ngClass]="getBookingListCardStatusClass(booking.status)">
+            <header class="booking-card__top">
+              <span
+                class="booking-card__status-pill"
+                [ngStyle]="getBookingStatusBadgeStyle(booking.status)"
+                [attr.aria-label]="('Status' | translate) + ': ' + statusBadgeLabel(booking)"
+              >
+                <i [class]="getBookingStatusIconClass(booking.status)" aria-hidden="true"></i>
+                <span>{{ statusBadgeLabel(booking) }}</span>
+              </span>
+              <span class="booking-card__contract-no" [attr.title]="contractCardLabel(booking)">
+                {{ contractCardLabel(booking) }}
+              </span>
+            </header>
+
+            <div class="booking-card__plate-zone">
+              <div class="booking-card__plate-row">
+                <div class="booking-card__plate-cell">
+                  <app-vehicle-saudi-plate [plateNumber]="booking.vehiclePlateNumber || ''" [minimal]="true" />
+                </div>
+                <div class="booking-card__vehicle-thumb">
                   <img
-                    class="booking-card__media-image"
-                    [src]="booking.vehicleImageUrl"
+                    class="booking-card__vehicle-thumb-image"
+                    [src]="bookingVehicleImage(booking)"
                     [alt]="vehicleCardLabel(booking)"
-                    (error)="onBookingImageError($event)"
+                    loading="lazy"
+                    decoding="async"
+                    (error)="onBookingVehicleImageError($event)"
                   />
-                  <div
-                    class="booking-card__media-placeholder booking-card__media-placeholder--hidden"
-                    aria-hidden="true"
-                  >
-                    <i class="fa-solid fa-car-side" aria-hidden="true"></i>
-                    <span class="booking-card__media-placeholder-text">{{ vehicleCardLabel(booking) }}</span>
-                  </div>
-                } @else {
-                  <div class="booking-card__media-placeholder" aria-hidden="true">
-                    <i class="fa-solid fa-car-side" aria-hidden="true"></i>
-                    <span class="booking-card__media-placeholder-text">{{ vehicleCardLabel(booking) }}</span>
-                  </div>
-                }
-                <div class="booking-card__status">
-                  <div class="booking-status-badge" [ngStyle]="getBookingStatusBadgeStyle(booking.status)">
-                    <i [class]="getBookingStatusIconClass(booking.status)"></i>
-                    <span>{{ statusBadgeLabel(booking) }}</span>
-                  </div>
                 </div>
               </div>
+            </div>
 
-              <div class="booking-card__body">
-                <div class="booking-card__head">
-                  <div class="booking-card__identity">
-                    <div class="booking-card__identity-list">
-                      <span
-                        class="booking-card__identity-item booking-card__identity-item--tooltip"
-                        [attr.data-top-tooltip]="bookingBasameNumberLabel(booking)"
-                      >
-                        <span class="booking-card__identity-label">{{ 'Contract Number' | translate }}</span>
-                        <span class="booking-card__identity-value">{{ bookingBasameNumberLabel(booking) }}</span>
-                      </span>
-                    </div>
-                  </div>
-                  <span
-                    class="booking-card__plate-wrap booking-card__plate--tooltip"
-                    [attr.data-top-tooltip]="booking.vehiclePlateNumber || '—'"
-                  >
-                    <span class="booking-card__plate">
-                      <span class="booking-card__plate-label">{{ 'Plate Number' | translate }}</span>
-                      <span class="booking-card__plate-value">{{ booking.vehiclePlateNumber || '—' }}</span>
-                    </span>
-                  </span>
-                </div>
+            <div class="booking-card__facts">
+              <div class="booking-card__fact">
+                <span class="booking-card__fact-label">{{ 'Customer' | translate }}</span>
+                <span class="booking-card__fact-value" [attr.title]="customerCardLabel(booking)">
+                  {{ customerCardLabel(booking) }}
+                </span>
+              </div>
+              <div class="booking-card__fact">
+                <span class="booking-card__fact-label">{{ 'Vehicle' | translate }}</span>
+                <span class="booking-card__fact-value" [attr.title]="vehicleCardLabel(booking)">
+                  {{ vehicleCardLabel(booking) }}
+                </span>
+              </div>
+            </div>
 
-                <div class="booking-card__facts">
-                  <div
-                    #customerMeta
-                    class="booking-fact booking-fact--tooltip"
-                    (mouseenter)="updateCustomerTooltip(customerMeta, booking)"
-                    (focusin)="updateCustomerTooltip(customerMeta, booking)"
-                  >
-                    <span class="booking-fact__icon" aria-hidden="true">
-                      <i class="fa-solid fa-user"></i>
-                    </span>
-                    <div class="booking-fact__content">
-                      <span class="booking-fact__label">{{ 'Customer' | translate }}</span>
-                      <span class="booking-fact__value">{{ customerCardLabel(booking) }}</span>
-                    </div>
-                  </div>
-                  <div
-                    #branchMeta
-                    class="booking-fact booking-fact--tooltip"
-                    (mouseenter)="updateBranchTooltip(branchMeta, booking)"
-                    (focusin)="updateBranchTooltip(branchMeta, booking)"
-                  >
-                    <span class="booking-fact__icon booking-fact__icon--branch" aria-hidden="true">
-                      <i class="fa-solid fa-code-branch"></i>
-                    </span>
-                    <div class="booking-fact__content">
-                      <span class="booking-fact__label">{{ 'Branch' | translate }}</span>
-                      <span class="booking-fact__value">{{ branchCardLabel(booking) }}</span>
-                    </div>
-                  </div>
-                </div>
+            <div class="booking-card__dates">
+              <div class="booking-card__date">
+                <span class="booking-card__date-label">{{ 'Start Date' | translate }}</span>
+                <span class="booking-card__date-value">{{ formatBookingDate(booking.startDate) }}</span>
+              </div>
+              <div class="booking-card__date" [ngClass]="endDateHighlightClass(booking)">
+                <span class="booking-card__date-label">{{ 'End Date' | translate }}</span>
+                <span class="booking-card__date-value">
+                  {{ formatBookingDate(booking.endDate) }}
+                  @if (endDateBadgeKey(booking); as badgeKey) {
+                    <span class="booking-card__date-badge">{{ badgeKey | translate }}</span>
+                  }
+                </span>
+              </div>
+            </div>
 
-                <div class="table-actions booking-card__actions">
-                  <div class="booking-card__actions-main">
-                    @if (cardActionInMain(booking, 'view')) {
+            <div class="table-actions booking-card__actions">
+              @if (cardActionInMain(booking, 'view')) {
+                <a
+                  class="table-action-icon table-action-icon--info booking-card__action"
+                  [routerLink]="['/booking', booking.id, 'details']"
+                  [attr.aria-label]="'Booking card view' | translate"
+                  [title]="'Booking card view' | translate"
+                >
+                  <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                </a>
+              }
+              @if (cardActionInMain(booking, 'edit')) {
+                <a
+                  class="table-action-icon table-action-icon--primary booking-card__action"
+                  [routerLink]="['/booking', booking.id, 'edit']"
+                  [attr.aria-label]="'Booking card menu edit' | translate"
+                  [title]="'Booking card menu edit' | translate"
+                >
+                  <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                </a>
+              }
+              @if (cardActionInMain(booking, 'finish')) {
+                <a
+                  class="table-action-icon booking-card__action"
+                  [ngClass]="cardFinishActionClass(booking)"
+                  [routerLink]="cardFinishRoute(booking)"
+                  [attr.aria-label]="cardFinishLabelKey(booking) | translate"
+                  [title]="cardFinishLabelKey(booking) | translate"
+                >
+                  <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i>
+                </a>
+              }
+              @if (cardMoreMenuVisible(booking)) {
+                <details class="booking-card__more" #bookingCardMore>
+                  <summary
+                    class="table-action-icon booking-card__action booking-card__action--more"
+                    [attr.aria-label]="'Booking card more' | translate"
+                    [title]="'Booking card more' | translate"
+                  >
+                    <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+                  </summary>
+                  <div class="booking-card__more-menu" role="menu" (click)="$event.stopPropagation()">
+                    @if (cardTrackInMenu(booking)) {
                       <a
-                        class="table-action-icon table-action-icon--info booking-card__action booking-card__action--labeled booking-card__action--tooltip"
-                        [routerLink]="['/booking', booking.id, 'details']"
-                        [attr.aria-label]="'Booking card view' | translate"
-                        [attr.data-action-tooltip]="'Booking card view' | translate"
-                      >
-                        <i class="fa-solid fa-eye" aria-hidden="true"></i>
-                        <span class="booking-card__action-label">{{ 'Booking card view' | translate }}</span>
-                      </a>
-                    }
-                    @if (cardActionInMain(booking, 'track')) {
-                      <a
-                        class="table-action-icon table-action-icon--secondary booking-card__action booking-card__action--labeled booking-card__action--track booking-card__action--tooltip"
+                        class="booking-card__menu-item"
+                        role="menuitem"
                         [routerLink]="['/booking', booking.id, 'track']"
                         [queryParams]="bookingTrackQueryParams(booking)"
-                        [attr.aria-label]="'Booking card track' | translate"
-                        [attr.data-action-tooltip]="'Booking card track' | translate"
+                        (click)="closeBookingCardMore(bookingCardMore)"
                       >
                         <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
-                        <span class="booking-card__action-label">{{ 'Booking card track' | translate }}</span>
+                        <span>{{ 'Booking card track' | translate }}</span>
                       </a>
                     }
-                    @if (cardActionInMain(booking, 'close')) {
+                    @if (cardEditInMenu(booking)) {
                       <a
-                        class="table-action-icon booking-card__action booking-card__action--labeled booking-card__action--close-contract booking-card__action--tooltip"
+                        class="booking-card__menu-item"
+                        role="menuitem"
+                        [routerLink]="['/booking', booking.id, 'edit']"
+                        (click)="closeBookingCardMore(bookingCardMore)"
+                      >
+                        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                        <span>{{ 'Booking card menu edit' | translate }}</span>
+                      </a>
+                    }
+                    @if (cardCloseInMenu(booking)) {
+                      <a
+                        class="booking-card__menu-item booking-card__menu-item--close-contract"
+                        role="menuitem"
                         [routerLink]="['/booking', booking.id, 'close']"
-                        [attr.aria-label]="'Booking card close contract' | translate"
-                        [attr.data-action-tooltip]="'Booking card close contract' | translate"
+                        (click)="closeBookingCardMore(bookingCardMore)"
                       >
                         <i class="fa-solid fa-lock" aria-hidden="true"></i>
-                        <span class="booking-card__action-label">{{ 'Booking card close contract' | translate }}</span>
+                        <span>{{ 'Booking card close contract' | translate }}</span>
                       </a>
                     }
-                    @if (cardActionInMain(booking, 'finish')) {
+                    @if (cardFinishInMenu(booking)) {
                       <a
-                        class="table-action-icon booking-card__action booking-card__action--labeled booking-card__action--finish booking-card__action--tooltip"
-                        [routerLink]="['/booking', booking.id, 'finish']"
-                        [attr.aria-label]="'Booking card finish' | translate"
-                        [attr.data-action-tooltip]="'Booking card finish' | translate"
+                        class="booking-card__menu-item"
+                        [ngClass]="['booking-card__menu-item--finish', cardFinishActionClass(booking)]"
+                        role="menuitem"
+                        [routerLink]="cardFinishRoute(booking)"
+                        (click)="closeBookingCardMore(bookingCardMore)"
                       >
                         <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i>
-                        <span class="booking-card__action-label">{{ 'Booking card finish' | translate }}</span>
+                        <span>{{ cardFinishLabelKey(booking) | translate }}</span>
                       </a>
                     }
-                    @if (cardActionInMain(booking, 'print')) {
+                    @if (canSuspendAction(booking)) {
                       <a
-                        class="table-action-icon booking-card__action booking-card__action--labeled booking-card__action--print booking-card__action--tooltip"
+                        class="booking-card__menu-item booking-card__menu-item--suspend"
+                        role="menuitem"
+                        [routerLink]="['/booking', booking.id, 'suspend']"
+                        (click)="closeBookingCardMore(bookingCardMore)"
+                      >
+                        <i class="fa-solid fa-comment-slash" aria-hidden="true"></i>
+                        <span>{{ 'Booking card menu suspend' | translate }}</span>
+                      </a>
+                    }
+                    @if (canExtendAction(booking)) {
+                      <a
+                        class="booking-card__menu-item booking-card__menu-item--extend"
+                        role="menuitem"
+                        [routerLink]="['/booking', booking.id, 'details']"
+                        [queryParams]="{ action: 'extend' }"
+                        (click)="closeBookingCardMore(bookingCardMore)"
+                      >
+                        <i class="fa-solid fa-up-right-and-down-left-from-center" aria-hidden="true"></i>
+                        <span>{{ 'Booking card menu extend' | translate }}</span>
+                      </a>
+                    }
+                    @if (cardPrintInMenu(booking)) {
+                      <a
+                        class="booking-card__menu-item booking-card__menu-item--print"
+                        role="menuitem"
                         [routerLink]="['/booking', booking.id, 'details']"
                         [queryParams]="{ action: 'print' }"
-                        [attr.aria-label]="'Booking card menu print' | translate"
-                        [attr.data-action-tooltip]="'Booking card menu print' | translate"
+                        (click)="closeBookingCardMore(bookingCardMore)"
                       >
                         <i class="fa-solid fa-print" aria-hidden="true"></i>
-                        <span class="booking-card__action-label">{{ 'Booking card menu print' | translate }}</span>
+                        <span>{{ 'Booking card menu print' | translate }}</span>
                       </a>
                     }
-                    @if (cardMoreMenuVisible(booking)) {
-                    <details class="booking-card__more" #bookingCardMore>
-                      <summary
-                        class="table-action-icon booking-card__action booking-card__action--more booking-card__action--tooltip"
-                        [attr.aria-label]="'Booking card more' | translate"
-                        [attr.data-action-tooltip]="'Booking card more' | translate"
-                      >
-                        <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
-                      </summary>
-                      <div class="booking-card__more-menu" role="menu" (click)="$event.stopPropagation()">
-                        @if (cardCloseInMenu(booking)) {
-                          <a
-                            class="booking-card__menu-item booking-card__menu-item--close-contract booking-card__action--tooltip"
-                            role="menuitem"
-                            [routerLink]="['/booking', booking.id, 'close']"
-                            [attr.data-action-tooltip]="'Booking card close contract' | translate"
-                            (click)="closeBookingCardMore(bookingCardMore)"
-                          >
-                            <i class="fa-solid fa-lock" aria-hidden="true"></i>
-                            <span>{{ 'Booking card close contract' | translate }}</span>
-                          </a>
-                        }
-                        @if (cardFinishInMenu(booking)) {
-                          <a
-                            class="booking-card__menu-item booking-card__menu-item--finish booking-card__action--tooltip"
-                            role="menuitem"
-                            [routerLink]="['/booking', booking.id, 'finish']"
-                            [attr.data-action-tooltip]="'Booking card finish' | translate"
-                            (click)="closeBookingCardMore(bookingCardMore)"
-                          >
-                            <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i>
-                            <span>{{ 'Booking card finish' | translate }}</span>
-                          </a>
-                        }
-                        @if (canSuspendAction(booking)) {
-                          <a
-                            class="booking-card__menu-item booking-card__menu-item--suspend booking-card__action--tooltip"
-                            role="menuitem"
-                            [routerLink]="['/booking', booking.id, 'suspend']"
-                            [attr.data-action-tooltip]="'Booking card menu suspend' | translate"
-                            (click)="closeBookingCardMore(bookingCardMore)"
-                          >
-                            <i class="fa-solid fa-comment-slash" aria-hidden="true"></i>
-                            <span>{{ 'Booking card menu suspend' | translate }}</span>
-                          </a>
-                        }
-                        @if (canEditAction(booking)) {
-                          <a
-                            class="booking-card__menu-item booking-card__menu-item--edit booking-card__action--tooltip"
-                            role="menuitem"
-                            [routerLink]="['/booking', booking.id, 'edit']"
-                            [attr.data-action-tooltip]="'Booking card menu edit' | translate"
-                            (click)="closeBookingCardMore(bookingCardMore)"
-                          >
-                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-                            <span>{{ 'Booking card menu edit' | translate }}</span>
-                          </a>
-                        }
-                        @if (canExtendAction(booking)) {
-                          <a
-                            class="booking-card__menu-item booking-card__menu-item--extend booking-card__action--tooltip"
-                            role="menuitem"
-                            [routerLink]="['/booking', booking.id, 'details']"
-                            [queryParams]="{ action: 'extend' }"
-                            [attr.data-action-tooltip]="'Booking card menu extend' | translate"
-                            (click)="closeBookingCardMore(bookingCardMore)"
-                          >
-                            <i class="fa-solid fa-up-right-and-down-left-from-center" aria-hidden="true"></i>
-                            <span>{{ 'Booking card menu extend' | translate }}</span>
-                          </a>
-                        }
-                        @if (cardPrintInMenu(booking)) {
-                          <a
-                            class="booking-card__menu-item booking-card__menu-item--print booking-card__action--tooltip"
-                            role="menuitem"
-                            [routerLink]="['/booking', booking.id, 'details']"
-                            [queryParams]="{ action: 'print' }"
-                            [attr.data-action-tooltip]="'Booking card menu print' | translate"
-                            (click)="closeBookingCardMore(bookingCardMore)"
-                          >
-                            <i class="fa-solid fa-print" aria-hidden="true"></i>
-                            <span>{{ 'Booking card menu print' | translate }}</span>
-                          </a>
-                        }
-                      </div>
-                    </details>
-                    }
                   </div>
-                </div>
-              </div>
-            </article>
-          }
-        </div>
-      }
+                </details>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    }
 
-      @if (!loading() && !loadFailed() && totalCount() > 0) {
-        <app-pagination-bar
-          [pageNumber]="pageNumber()"
-          [totalPages]="totalPages()"
-          [totalCount]="totalCount()"
-          [pageSize]="pageSize()"
-          [pageSizeOptions]="[10, 20, 50, 100]"
-          (pageChange)="goToPage($event)"
-          (pageSizeChange)="changePageSize($event)"
-        />
-      }
-    </div>
-  </div>
+    @if (!loading() && !loadFailed() && totalCount() > 0) {
+      <app-pagination-bar
+        [pageNumber]="pageNumber()"
+        [totalPages]="totalPages()"
+        [totalCount]="totalCount()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[10, 20, 50, 100]"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="changePageSize($event)"
+      />
+    }
+  </app-list-content-shell>
 </div>

@@ -6,8 +6,8 @@
 .contract-dash-hero {
   margin-bottom: 1rem;
   border-radius: 16px;
-  border: 1px solid var(--app-wizard-card-border, rgba(var(--c-94a3b8-rgb), 0.28));
-  background: var(--app-wizard-card-bg, linear-gradient(180deg, var(--c-f8fafc), var(--c-f1f5f9)));
+  border: 1px solid var(--app-contract-dash-hero-border, var(--app-wizard-card-border));
+  background: var(--app-contract-dash-hero-bg, var(--app-wizard-card-bg));
   box-shadow: var(--app-wizard-summary-shadow, 0 12px 28px -22px rgba(var(--rt-shadow-rgb), 0.12));
 }
 
@@ -46,7 +46,26 @@
 .contract-dash-hero__subtitle {
   margin: 0.2rem 0 0;
   font-size: 0.8rem;
-  color: var(--app-wizard-kv-label, var(--c-64748b));
+  color: var(--app-contract-dash-cell-label, var(--app-wizard-kv-label));
+}
+
+.contract-dash-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.5rem;
+  padding: 0.42rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--booking-badge-border-light, transparent);
+  background: var(--booking-badge-bg, transparent);
+  color: var(--booking-badge-color, inherit);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
+  box-shadow:
+    0 1px 3px rgba(var(--rt-shadow-rgb), 0.1),
+    inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.12);
 }
 
 .contract-dash-hero__grid {
@@ -56,25 +75,40 @@
   margin: 0 0 1rem;
 }
 
-.contract-dash-hero__grid div {
+.contract-dash-hero__cell {
   padding: 0.5rem 0.6rem;
   border-radius: 10px;
-  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.28);
-  background: rgba(var(--c-ffffff-rgb), 0.55);
+  border: 1px solid var(--app-contract-dash-cell-border, var(--rt-border));
+  background: var(--app-contract-dash-cell-bg, var(--rt-card-elevated-bg));
 }
 
-.contract-dash-hero__grid dt {
+.contract-dash-hero__cell--status {
+  border-color: color-mix(in srgb, var(--booking-status-accent) 42%, var(--app-contract-dash-cell-border) 58%);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--booking-status-accent) 14%, var(--app-contract-dash-cell-bg) 86%) 0%,
+    color-mix(in srgb, var(--booking-status-accent) 6%, var(--app-contract-dash-cell-bg) 94%) 100%
+  );
+  box-shadow: inset 3px 0 0 var(--booking-status-accent);
+}
+
+.contract-dash-hero__cell dt {
   margin: 0;
   font-size: 0.68rem;
   font-weight: 700;
-  color: var(--c-64748b);
+  color: var(--app-contract-dash-cell-label, var(--rt-text-muted));
 }
 
-.contract-dash-hero__grid dd {
+.contract-dash-hero__cell dd {
   margin: 0.15rem 0 0;
   font-size: 0.88rem;
   font-weight: 800;
-  color: var(--c-0f172a);
+  color: var(--app-contract-dash-cell-value, var(--rt-text));
+  word-break: break-word;
+}
+
+.contract-dash-hero__cell--status dd {
+  color: color-mix(in srgb, var(--booking-status-accent) 72%, var(--app-contract-dash-cell-value) 28%);
 }
 
 .contract-dash-hero__actions {
@@ -136,13 +170,13 @@
 .contract-dash-card {
   padding: 0.85rem 0.95rem;
   border-radius: 14px;
-  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.22);
-  background: var(--app-wizard-card-readonly-bg, rgba(var(--c-f8fafc-rgb), 0.9));
+  border: 1px solid var(--app-contract-dash-card-border);
+  background: var(--app-contract-dash-card-bg);
 }
 
 .contract-dash-card--totals {
-  border-color: rgba(var(--c-3b82f6-rgb), 0.35);
-  background: linear-gradient(165deg, rgba(var(--c-eff6ff-rgb), 0.5), rgba(var(--c-f8fafc-rgb), 0.95));
+  border-color: var(--app-contract-dash-card-totals-border);
+  background: var(--app-contract-dash-card-totals-bg);
 }
 
 .contract-dash-card__title {
@@ -151,7 +185,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  color: var(--app-wizard-kv-value, var(--c-1e293b));
+  color: var(--app-contract-dash-card-title);
 }
 
 .contract-dash-kv {
@@ -181,14 +215,14 @@
   margin: 0;
   font-size: 0.72rem;
   font-weight: 600;
-  color: var(--app-wizard-kv-label, var(--c-64748b));
+  color: var(--app-contract-dash-kv-label);
 }
 
 .contract-dash-kv dd {
   margin: 0;
   font-size: 0.86rem;
   font-weight: 700;
-  color: var(--app-wizard-kv-value, var(--c-0f172a));
+  color: var(--app-contract-dash-kv-value);
   word-break: break-word;
 }
 
@@ -205,14 +239,24 @@
 .contract-dash-kpi {
   padding: 0.65rem 0.75rem;
   border-radius: 12px;
-  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.3);
-  background: var(--c-ffffff);
+  border: 1px solid var(--app-contract-dash-cell-border, var(--rt-border));
+  background: var(--app-contract-dash-cell-bg, var(--rt-card-elevated-bg));
   text-align: center;
 }
 
-.contract-dash-kpi--warn {
-  border-color: rgba(var(--c-f59e0b-rgb), 0.45);
-  background: linear-gradient(180deg, rgba(var(--c-fffbeb-rgb), 0.95), rgba(var(--c-fef3c7-rgb), 0.4));
+.contract-dash-kpi--total {
+  border-color: var(--app-contract-dash-kpi-total-border);
+  background: var(--app-contract-dash-kpi-total-bg);
+}
+
+.contract-dash-kpi--paid {
+  border-color: var(--app-contract-dash-kpi-paid-border);
+  background: var(--app-contract-dash-kpi-paid-bg);
+}
+
+.contract-dash-kpi--remaining {
+  border-color: var(--app-contract-dash-kpi-remaining-border);
+  background: var(--app-contract-dash-kpi-remaining-bg);
 }
 
 .contract-dash-kpi__value {
@@ -220,7 +264,19 @@
   font-size: 1.05rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  color: var(--c-0f172a);
+  color: var(--app-contract-dash-cell-value, var(--rt-text));
+}
+
+.contract-dash-kpi--total .contract-dash-kpi__value {
+  color: var(--app-contract-dash-kpi-total-value);
+}
+
+.contract-dash-kpi--paid .contract-dash-kpi__value {
+  color: var(--app-contract-dash-kpi-paid-value);
+}
+
+.contract-dash-kpi--remaining .contract-dash-kpi__value {
+  color: var(--app-contract-dash-kpi-remaining-value);
 }
 
 .contract-dash-kpi__label {
@@ -228,7 +284,7 @@
   margin-top: 0.2rem;
   font-size: 0.68rem;
   font-weight: 700;
-  color: var(--c-64748b);
+  color: var(--app-contract-dash-cell-label, var(--rt-text-muted));
 }
 
 .contract-dash-breakdown {
@@ -244,28 +300,28 @@
   gap: 0.75rem;
   padding: 0.4rem 0.5rem;
   border-radius: 8px;
-  background: rgba(var(--c-ffffff-rgb), 0.65);
-  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.18);
+  background: var(--app-contract-dash-breakdown-row-bg);
+  border: 1px solid var(--app-contract-dash-breakdown-row-border);
 }
 
 .contract-dash-breakdown--totals div {
   font-size: 0.92rem;
   font-weight: 800;
-  border-color: rgba(var(--c-3b82f6-rgb), 0.28);
+  border-color: var(--app-contract-dash-breakdown-totals-border);
 }
 
 .contract-dash-breakdown dt {
   margin: 0;
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--c-64748b);
+  color: var(--app-contract-dash-breakdown-label);
 }
 
 .contract-dash-breakdown dd {
   margin: 0;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  color: var(--c-0f172a);
+  color: var(--app-contract-dash-breakdown-value);
 }
 
 .contract-dash-gallery {
@@ -279,9 +335,9 @@
   flex-direction: column;
   align-items: stretch;
   padding: 0;
-  border: 1px dashed rgba(var(--c-94a3b8-rgb), 0.5);
+  border: 1px dashed var(--app-contract-dash-gallery-item-border);
   border-radius: 12px;
-  background: rgba(var(--c-f8fafc-rgb), 0.9);
+  background: var(--app-contract-dash-gallery-item-bg);
   overflow: hidden;
   cursor: zoom-in;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -293,14 +349,15 @@
 }
 
 .contract-dash-gallery__item:not(:disabled):hover {
-  border-color: rgba(var(--c-3b82f6-rgb), 0.55);
-  box-shadow: 0 8px 20px -12px rgba(var(--c-3b82f6-rgb), 0.45);
+  border-color: var(--app-contract-dash-gallery-item-border-hover);
+  box-shadow: 0 8px 20px -12px rgba(var(--rt-shadow-rgb), 0.35);
 }
 
 .contract-dash-gallery__item img {
   width: 100%;
   height: 88px;
   object-fit: cover;
+  background: var(--app-contract-dash-gallery-media-bg);
 }
 
 .contract-dash-gallery__ph {
@@ -310,9 +367,10 @@
   justify-content: center;
   min-height: 88px;
   font-size: 0.72rem;
-  color: var(--c-94a3b8);
+  color: var(--app-contract-dash-gallery-ph-text);
   padding: 0.4rem;
   text-align: center;
+  background: var(--app-contract-dash-gallery-media-bg);
 }
 
 .contract-dash-gallery__cap {
@@ -320,46 +378,38 @@
   font-weight: 700;
   text-align: center;
   padding: 0.35rem;
-  background: rgba(var(--c-e2e8f0-rgb), 0.65);
-  color: var(--c-475569);
+  background: var(--app-contract-dash-gallery-cap-bg);
+  color: var(--app-contract-dash-gallery-cap-text);
 }
 
 .contract-dash-table-wrap {
   border-radius: 12px;
-  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.24);
+  border: 1px solid var(--app-contract-dash-table-border);
   overflow: hidden;
+  background: var(--app-contract-dash-table-row-bg);
 }
 
 .contract-dash-table th {
   font-size: 0.76rem;
   font-weight: 700;
-  background: rgba(var(--c-f1f5f9-rgb), 0.9);
+  background: var(--app-contract-dash-table-head-bg);
+  color: var(--app-contract-dash-table-head-color);
+  border-color: var(--app-contract-dash-table-border);
   white-space: nowrap;
 }
 
 .contract-dash-table td {
   font-size: 0.8rem;
   vertical-align: middle;
-}
-
-.contract-dash-audit {
-  border-radius: 12px;
-  padding: 0.65rem 0.85rem;
-  border: 1px solid rgba(var(--c-94a3b8-rgb), 0.28);
-  background: rgba(var(--c-f8fafc-rgb), 0.65);
-}
-
-.contract-dash-audit summary {
-  cursor: pointer;
-  font-weight: 800;
-  font-size: 0.88rem;
-  color: var(--c-334155);
+  color: var(--app-contract-dash-table-cell-color);
+  background: var(--app-contract-dash-table-row-bg);
+  border-color: var(--app-contract-dash-table-border);
 }
 
 .contract-dash-hint {
   font-size: 0.78rem;
   line-height: 1.45;
-  color: var(--c-64748b);
+  color: var(--app-contract-dash-hint);
 }
 
 .contract-dash-alert {
@@ -561,10 +611,6 @@
   border-radius: 14px;
   border: 1px solid rgba(var(--c-94a3b8-rgb), 0.22);
   background: rgba(var(--c-ffffff-rgb), 0.72);
-}
-
-.contract-panel--audit {
-  padding-top: 0.65rem;
 }
 
 .contract-panel--basics {
@@ -1299,6 +1345,33 @@
   color: var(--c-fdba74);
   background: rgba(var(--c-7c2d12-rgb), 0.42);
   border-color: rgba(var(--c-ea580c-rgb), 0.45);
+}
+
+:host-context([data-bs-theme='dark']) .contract-dash-status-badge,
+:host-context(body.dark-only) .contract-dash-status-badge {
+  border-color: var(--booking-badge-border-dark, var(--booking-status-border-dark));
+  box-shadow:
+    0 2px 8px rgba(var(--rt-shadow-rgb), 0.35),
+    0 0 0 1px color-mix(in srgb, var(--booking-status-accent) 28%, transparent),
+    inset 0 1px 0 rgba(var(--c-ffffff-rgb), 0.08);
+}
+
+:host-context([data-bs-theme='dark']) .contract-dash-hero__cell--status,
+:host-context(body.dark-only) .contract-dash-hero__cell--status {
+  border-color: color-mix(in srgb, var(--booking-status-accent) 48%, var(--app-contract-dash-cell-border) 52%);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--booking-status-accent) 18%, var(--app-contract-dash-cell-bg) 82%) 0%,
+    color-mix(in srgb, var(--booking-status-accent) 8%, var(--app-contract-dash-cell-bg) 92%) 100%
+  );
+  box-shadow:
+    inset 3px 0 0 var(--booking-status-accent),
+    0 4px 12px -8px color-mix(in srgb, var(--booking-status-accent) 35%, transparent);
+}
+
+:host-context([data-bs-theme='dark']) .contract-dash-hero__cell--status dd,
+:host-context(body.dark-only) .contract-dash-hero__cell--status dd {
+  color: color-mix(in srgb, var(--booking-status-accent) 58%, var(--app-contract-dash-cell-value) 42%);
 }
 
 /* ----- Light theme: extend panel (تمديد العقد) readable on pale surfaces ----- */

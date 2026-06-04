@@ -183,44 +183,49 @@
               </div>
             </div>
             <div class="contract-dash-hero__status">
-              <app-status-badge
-                [label]="statusBadgeLabelKey(item.status) | translate"
-                [tone]="statusBadgeTone(item.status)"
-              />
+              <span
+                class="contract-dash-status-badge"
+                [ngStyle]="statusBadgeStyle(item.status)"
+              >
+                {{ statusDisplayText(item) }}
+              </span>
             </div>
           </div>
 
           <dl class="contract-dash-hero__grid">
-            <div>
+            <div class="contract-dash-hero__cell">
               <dt>{{ 'Booking Number' | translate }}</dt>
               <dd>{{ contractNumber(item) }}</dd>
             </div>
-            <div>
+            <div class="contract-dash-hero__cell">
               <dt>{{ 'Arabic Name' | translate }}</dt>
               <dd>{{ valueOrDash(item.customerName) }}</dd>
             </div>
-            <div>
+            <div class="contract-dash-hero__cell">
               <dt>{{ 'Vehicle' | translate }}</dt>
               <dd>{{ vehicleHeadline(item) }}</dd>
             </div>
-            <div>
+            <div class="contract-dash-hero__cell">
               <dt>{{ 'Plate Number' | translate }}</dt>
               <dd>{{ valueOrDash(item.vehiclePlateNumber) }}</dd>
             </div>
-            <div>
+            <div
+              class="contract-dash-hero__cell contract-dash-hero__cell--status"
+              [ngStyle]="statusSurfaceStyle(item.status)"
+            >
               <dt>{{ 'Contract summary status label' | translate }}</dt>
               <dd>{{ statusDisplayText(item) }}</dd>
             </div>
-            <div>
+            <div class="contract-dash-hero__cell">
               <dt>{{ 'Count Of Days' | translate }}</dt>
               <dd>{{ numberOrDash(item.countOfDay) }}</dd>
             </div>
-            <div>
+            <div class="contract-dash-hero__cell">
               <dt>{{ 'Vehicle Return Date' | translate }}</dt>
               <dd>{{ dateOrDash(item.returnDate, 'date') }}</dd>
             </div>
             @if (item.paymentNumber) {
-              <div>
+              <div class="contract-dash-hero__cell">
                 <dt>{{ 'Contract main payment reference' | translate }}</dt>
                 <dd>{{ valueOrDash(item.paymentNumber) }}</dd>
               </div>
@@ -261,11 +266,12 @@
             @if (canFinishAction(item)) {
               <button
                 type="button"
-                class="btn btn-sm btn-outline-success"
+                class="btn btn-sm"
+                [ngClass]="finishActionClass(item)"
                 (click)="onDetailsToolbarAction('finish', item)"
               >
                 <i class="fa-solid fa-flag-checkered me-1" aria-hidden="true"></i>
-                {{ 'Booking card finish' | translate }}
+                {{ finishActionLabelKey(item) | translate }}
               </button>
             }
             @if (canCloseAction(item)) {
@@ -338,15 +344,15 @@
                 <article class="contract-dash-card">
                   <h2 class="contract-dash-card__title">{{ 'Contract details card financial' | translate }}</h2>
                   <div class="contract-dash-kpi-row">
-                    <div class="contract-dash-kpi">
+                    <div class="contract-dash-kpi contract-dash-kpi--total">
                       <span class="contract-dash-kpi__value">{{ moneyOrDash(item.totalAmount) }}</span>
                       <span class="contract-dash-kpi__label">{{ 'TOTAL' | translate }}</span>
                     </div>
-                    <div class="contract-dash-kpi">
+                    <div class="contract-dash-kpi contract-dash-kpi--paid">
                       <span class="contract-dash-kpi__value">{{ moneyOrDash(displayedPaidTotal(item)) }}</span>
                       <span class="contract-dash-kpi__label">{{ 'Paid total' | translate }}</span>
                     </div>
-                    <div class="contract-dash-kpi contract-dash-kpi--warn">
+                    <div class="contract-dash-kpi contract-dash-kpi--remaining">
                       <span class="contract-dash-kpi__value">{{ moneyOrDash(contractRemaining(item)) }}</span>
                       <span class="contract-dash-kpi__label">{{ 'Remaining on contract' | translate }}</span>
                     </div>
@@ -636,7 +642,7 @@
                   <span class="contract-dash-kpi__value">{{ percentOrDash(item) }}</span>
                   <span class="contract-dash-kpi__label">{{ 'Collection progress percent' | translate }}</span>
                 </div>
-                <div class="contract-dash-kpi contract-dash-kpi--warn">
+                <div class="contract-dash-kpi contract-dash-kpi--remaining">
                   <span class="contract-dash-kpi__value">{{ moneyOrDash(contractRemaining(item)) }}</span>
                   <span class="contract-dash-kpi__label">{{ 'Remaining on contract' | translate }}</span>
                 </div>
@@ -674,45 +680,6 @@
                 </table>
               </div>
               <p class="contract-dash-hint mt-3 mb-0">{{ decisionHintText(item) }}</p>
-            }
-            @case ('audit') {
-              <details class="contract-dash-audit">
-                <summary>{{ 'Contract section audit' | translate }}</summary>
-                <dl class="contract-dash-kv contract-dash-kv--2 mt-3">
-                  <div>
-                    <dt>{{ 'Created At' | translate }}</dt>
-                    <dd>{{ dateOrDash(item.createdAt) }}</dd>
-                  </div>
-                  <div>
-                    <dt>{{ 'Created By' | translate }}</dt>
-                    <dd>{{ valueOrDash(item.createdBy) }}</dd>
-                  </div>
-                  <div>
-                    <dt>{{ 'Updated At' | translate }}</dt>
-                    <dd>{{ dateOrDash(item.updatedAt) }}</dd>
-                  </div>
-                  <div>
-                    <dt>{{ 'Updated By' | translate }}</dt>
-                    <dd>{{ valueOrDash(item.updatedBy) }}</dd>
-                  </div>
-                  <div>
-                    <dt>{{ 'Deleted At' | translate }}</dt>
-                    <dd>{{ dateOrDash(item.deletedAt) }}</dd>
-                  </div>
-                  <div>
-                    <dt>{{ 'Deleted By' | translate }}</dt>
-                    <dd>{{ valueOrDash(item.deletedBy) }}</dd>
-                  </div>
-                  <div>
-                    <dt>{{ 'Is Preview' | translate }}</dt>
-                    <dd>{{ item.isprview ? ('Yes' | translate) : ('No' | translate) }}</dd>
-                  </div>
-                  <div>
-                    <dt>{{ 'Is Deleted' | translate }}</dt>
-                    <dd>{{ item.isDeleted ? ('Yes' | translate) : ('No' | translate) }}</dd>
-                  </div>
-                </dl>
-              </details>
             }
             @case ('extra') {
               <div class="contract-dash-stack">

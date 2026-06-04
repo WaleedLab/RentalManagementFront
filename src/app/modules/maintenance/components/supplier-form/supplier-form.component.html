@@ -19,7 +19,7 @@
 
         <div class="col-md-6">
           <label class="form-label">{{ 'maintenance.supplier.fieldPhone' | translate }}</label>
-          <input class="form-control" formControlName="phone" appFieldValueState />
+          <input class="form-control" formControlName="phone" appFieldValueState appMobileNumberInput />
           @if (form.controls.phone.touched && form.controls.phone.invalid) {
             <div class="text-danger small mt-1">{{ 'maintenance.supplier.invalidPhone' | translate }}</div>
           }
@@ -27,7 +27,7 @@
 
         <div class="col-md-6">
           <label class="form-label">{{ 'maintenance.supplier.fieldPhone2' | translate }}</label>
-          <input class="form-control" formControlName="phone2" appFieldValueState />
+          <input class="form-control" formControlName="phone2" appFieldValueState appMobileNumberInput />
         </div>
 
         <div class="col-md-6">

@@ -47,8 +47,10 @@ import {
 import {
   distributeSettlementByPaymentType,
   parseSettlementMoneyInput,
+  resolveSettlementPaidAmounts,
   roundSettlementMoney,
   settlementMoneyInputDisplay,
+  settlementTotalsMatch,
 } from '../booking-settlement-payment.util';
 
 @Component({
@@ -119,6 +121,10 @@ export class BookingSuspendComponent implements OnInit {
 
   /** Fleet settings: grace minutes, free late hours, late-hours-per-day threshold. */
   settings = signal<Setting | null>(null);
+
+  isMoneySuspend = computed(() => this.suspendStatus() === 'Suspended_due_to_sum_money');
+
+  isAccidentSuspend = computed(() => this.suspendStatus() === 'Suspended_due_to_accident');
 
   suspendStatusOptions = computed<SmoothSelectOption[]>(() => [
     {
@@ -447,6 +453,8 @@ export class BookingSuspendComponent implements OnInit {
     );
   });
 
+  hasSettlementPayment = computed(() => (Number(this.settlementPaidAmount()) || 0) > 0.009);
+
   constructor() {
     effect(() => {
       if (this.suspendLocked()) {
@@ -455,10 +463,11 @@ export class BookingSuspendComponent implements OnInit {
       this.balanceDisplay();
       this.computedGrandTotal();
       this.paymentsTotalDisplay();
+      this.suspendStatus();
       if (this.settlementUserEdited()) {
         return;
       }
-      const amount = this.balanceDisplay();
+      const amount = 0;
       const method = this.paymentMethod();
       if (this.settlementPaidAmount() !== amount) {
         this.settlementPaidAmount.set(amount);
@@ -620,6 +629,11 @@ export class BookingSuspendComponent implements OnInit {
     const v = String(value ?? '').trim() as BookingSuspendedStatus;
     if (v === 'Suspended_due_to_accident' || v === 'Suspended_due_to_sum_money') {
       this.suspendStatus.set(v);
+      this.settlementUserEdited.set(false);
+      this.settlementPaidAmount.set(0);
+      this.paidCash.set(0);
+      this.paidBank.set(0);
+      this.applySettlementDistribution(0, this.paymentMethod());
     }
   }
 
@@ -635,8 +649,8 @@ export class BookingSuspendComponent implements OnInit {
     if (this.suspendLocked()) {
       return;
     }
-    this.settlementUserEdited.set(false);
     const amount = this.balanceDisplay();
+    this.settlementUserEdited.set(true);
     this.settlementPaidAmount.set(amount);
     this.applySettlementDistribution(amount, this.paymentMethod());
   }
@@ -782,29 +796,42 @@ export class BookingSuspendComponent implements OnInit {
       return;
     }
 
-    if (paymentType === 1 && !cashId) {
-      this.toast.error(this.translate.instant('Contract finish cash required'));
-      return;
-    }
-    if ([2, 3, 4].includes(paymentType) && !bankId) {
-      this.toast.error(this.translate.instant('Contract finish bank required'));
-      return;
-    }
-    const paidCash = Math.max(0, Number(this.paidCash()) || 0);
-    const paidBank = Math.max(0, Number(this.paidBank()) || 0);
-    const paidTotal = roundSettlementMoney(paidCash + paidBank);
-    const settlementTotal = roundSettlementMoney(this.settlementPaidAmount());
+    const settlementTarget = roundSettlementMoney(this.settlementPaidAmount());
 
-    if (paymentType === 5) {
-      if (!bankId || !cashId) {
-        this.toast.error(this.translate.instant('Contract finish mixed required'));
+    const resolved = resolveSettlementPaidAmounts(
+      settlementTarget,
+      paymentType,
+      Number(this.paidCash()) || 0,
+      Number(this.paidBank()) || 0,
+    );
+    this.paidCash.set(resolved.paidCash);
+    this.paidBank.set(resolved.paidBank);
+
+    const paidCash = resolved.paidCash;
+    const paidBank = resolved.paidBank;
+    const paidTotal = resolved.paidTotal;
+    const settlementTotal = resolved.settlementTotal;
+
+    if (settlementTotal > 0.009) {
+      if (paymentType === 1 && !cashId) {
+        this.toast.error(this.translate.instant('Contract finish cash required'));
         return;
       }
-      if (paidCash <= 0 && paidBank <= 0) {
-        this.toast.error(this.translate.instant('Contract finish mixed amounts required'));
+      if ([2, 3, 4].includes(paymentType) && !bankId) {
+        this.toast.error(this.translate.instant('Contract finish bank required'));
         return;
       }
-      if (paidTotal !== settlementTotal) {
+      if (paymentType === 5) {
+        if (!bankId || !cashId) {
+          this.toast.error(this.translate.instant('Contract finish mixed required'));
+          return;
+        }
+        if (paidCash <= 0 && paidBank <= 0) {
+          this.toast.error(this.translate.instant('Contract finish mixed amounts required'));
+          return;
+        }
+      }
+      if (!settlementTotalsMatch(paidTotal, settlementTotal)) {
         this.toast.error(this.translate.instant('Paid cash and bank must equal paid amount'));
         return;
       }
@@ -1027,6 +1054,7 @@ export class BookingSuspendComponent implements OnInit {
         this.cashAccount.set(firstCashId);
       }
       this.paidBank.set(0);
+      this.applySettlementDistribution(this.settlementPaidAmount(), type);
       return;
     }
 
@@ -1036,6 +1064,7 @@ export class BookingSuspendComponent implements OnInit {
         this.bankAccount.set(firstBankId);
       }
       this.paidCash.set(0);
+      this.applySettlementDistribution(this.settlementPaidAmount(), type);
       return;
     }
 
@@ -1045,6 +1074,7 @@ export class BookingSuspendComponent implements OnInit {
     if (!this.cashAccount() && firstCashId) {
       this.cashAccount.set(firstCashId);
     }
+    this.applySettlementDistribution(this.settlementPaidAmount(), type);
   }
 
   private toBookingNumericId(rawId: string): number | null {

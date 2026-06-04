@@ -114,31 +114,33 @@
       <div class="vehicle-cards-grid">
         @for (vehicle of vehicles(); track vehicle.id; let cardIndex = $index) {
           <article class="vehicle-card" [ngClass]="getVehicleCardStatusClass(vehicle.status)">
+            <span
+              class="vehicle-card__status-pill"
+              [ngClass]="getVehicleStatusChipClass(vehicle.status)"
+              [attr.aria-label]="('Status' | translate) + ': ' + getStatusLabel(vehicle.status)"
+            >
+              <span class="vehicle-card__status-dot" aria-hidden="true"></span>
+              <span>{{ getStatusLabel(vehicle.status) }}</span>
+            </span>
             <div class="vehicle-card__media">
-              <div class="vehicle-card__media-overlay"></div>
               <img
                 [src]="getVehicleImage(vehicle)"
-                [alt]="vehicle.plateNumber || ('Vehicle' | translate)"
+                [alt]="getVehicleTitle(vehicle)"
                 [attr.loading]="cardIndex < 6 ? 'eager' : 'lazy'"
                 [attr.fetchpriority]="cardIndex < 3 ? 'high' : 'auto'"
                 decoding="async"
                 (error)="onVehicleImageError($event)"
               />
-              <div class="vehicle-card__status">
-                <app-status-badge [label]="getStatusLabel(vehicle.status)" [tone]="getStatusTone(vehicle.status)" />
-              </div>
-              <div class="vehicle-card__quick-meta">
-                <span class="vehicle-chip">{{ vehicle.year || vehicle.yearMake || '-' }}</span>
-                <span class="vehicle-chip vehicle-chip--ghost">{{ vehicle.engine || '-' }}</span>
-              </div>
+            </div>
+
+            <div class="vehicle-card__plate-zone">
+              <app-vehicle-saudi-plate [plateNumber]="vehicle.plateNumber || ''" [minimal]="true" />
+              @if (getVehicleSecondaryLine(vehicle)) {
+                <p class="vehicle-card__secondary">{{ getVehicleSecondaryLine(vehicle) }}</p>
+              }
             </div>
 
             <div class="vehicle-card__body">
-              <div class="vehicle-card__head">
-                <h6 class="vehicle-card__title">{{ getVehicleTitle(vehicle) }}</h6>
-                <span class="vehicle-card__plate">{{ vehicle.plateNumber || '-' }}</span>
-              </div>
-
               <div class="vehicle-card__meta">
                 <div class="vehicle-meta">
                   <span class="vehicle-meta__label">{{ 'Vehicle Category' | translate }}</span>
@@ -155,6 +157,30 @@
               </div>
 
               <div class="table-actions vehicle-card__actions">
+                <a
+                  class="table-action-icon table-action-icon--info vehicle-card__action"
+                  [routerLink]="['/vehicles', vehicle.id, 'details']"
+                  [attr.aria-label]="'Details' | translate"
+                  [title]="'Details' | translate"
+                >
+                  <i class="fa-solid fa-eye"></i>
+                </a>
+                <a
+                  class="table-action-icon table-action-icon--primary vehicle-card__action"
+                  [routerLink]="['/vehicles', vehicle.id, 'edit']"
+                  [attr.aria-label]="'Edit' | translate"
+                  [title]="'Edit' | translate"
+                >
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </a>
+                <a
+                  class="table-action-icon table-action-icon--secondary vehicle-card__action"
+                  [routerLink]="['/vehicles', vehicle.id, 'track']"
+                  [attr.aria-label]="'Vehicle card track' | translate"
+                  [title]="'Vehicle card track' | translate"
+                >
+                  <i class="fa-solid fa-location-dot"></i>
+                </a>
                 <button
                   class="table-action-icon table-action-icon--warning vehicle-card__action"
                   type="button"
@@ -183,30 +209,6 @@
                     <i class="fa-solid fa-trash-can"></i>
                   }
                 </button>
-                <a
-                  class="table-action-icon table-action-icon--info vehicle-card__action"
-                  [routerLink]="['/vehicles', vehicle.id, 'details']"
-                  [attr.aria-label]="'Details' | translate"
-                  [title]="'Details' | translate"
-                >
-                  <i class="fa-solid fa-eye"></i>
-                </a>
-                <a
-                  class="table-action-icon table-action-icon--secondary vehicle-card__action"
-                  [routerLink]="['/vehicles', vehicle.id, 'track']"
-                  [attr.aria-label]="'Vehicle card track' | translate"
-                  [title]="'Vehicle card track' | translate"
-                >
-                  <i class="fa-solid fa-location-dot"></i>
-                </a>
-                <a
-                  class="table-action-icon table-action-icon--primary vehicle-card__action"
-                  [routerLink]="['/vehicles', vehicle.id, 'edit']"
-                  [attr.aria-label]="'Edit' | translate"
-                  [title]="'Edit' | translate"
-                >
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </a>
               </div>
             </div>
           </article>

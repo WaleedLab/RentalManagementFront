@@ -14,6 +14,7 @@ import {
   BookingUpdateRequest,
   CloseBookingRequest,
   FinshBookingRequest,
+  FinshAfterSuspendedBookingRequest,
   SuspendedBookingRequest,
 } from '../../models';
 import { normalizeBooking } from '../../models/booking/booking.normalizer';
@@ -246,6 +247,17 @@ export class BookingService {
     const payload = this.toFinishBookingPayload(body);
     return this.api.postData(`${this.base}/finsh`, payload, { suppressErrorToast: true }).pipe(
       catchError(() => this.api.postData(`${this.base}/Finsh`, payload)),
+    );
+  }
+
+  /**
+   * `FinshAfterSuspendedBookingCommand` — POST `Booking/FinshAfterSuspended`.
+   * Closes suspended contracts after payment collection (maintenance must be completed for accident).
+   */
+  finishAfterSuspended(body: FinshAfterSuspendedBookingRequest): Observable<unknown> {
+    const payload = this.toFinishAfterSuspendedPayload(body);
+    return this.api.postData(`${this.base}/FinshAfterSuspended`, payload, { suppressErrorToast: true }).pipe(
+      catchError(() => this.api.postData(`${this.base}/finshAfterSuspended`, payload, { suppressErrorToast: true })),
     );
   }
 
@@ -503,6 +515,39 @@ export class BookingService {
       out['note'] = b.note;
       out['Note'] = b.note;
     }
+    if (b.idBank) {
+      out['idBank'] = b.idBank;
+      out['IdBank'] = b.idBank;
+    }
+    if (b.idCash) {
+      out['idCash'] = b.idCash;
+      out['IdCash'] = b.idCash;
+    }
+    if (b.paidCash !== undefined && b.paidCash !== null) {
+      out['paidCash'] = b.paidCash;
+      out['PaidCash'] = b.paidCash;
+    }
+    if (b.paidBank !== undefined && b.paidBank !== null) {
+      out['paidBank'] = b.paidBank;
+      out['PaidBank'] = b.paidBank;
+    }
+    return out;
+  }
+
+  /** `FinshAfterSuspendedBookingCommand` — receipt fields only. */
+  private toFinishAfterSuspendedPayload(b: FinshAfterSuspendedBookingRequest): Record<string, unknown> {
+    const out: Record<string, unknown> = {
+      id: b.id,
+      Id: b.id,
+      fleetId: b.fleetId,
+      FleetId: b.fleetId,
+      paid: b.paid,
+      Paid: b.paid,
+      paymentType: b.paymentType,
+      PaymentType: b.paymentType,
+      bondType: b.bondType,
+      BondType: b.bondType,
+    };
     if (b.idBank) {
       out['idBank'] = b.idBank;
       out['IdBank'] = b.idBank;

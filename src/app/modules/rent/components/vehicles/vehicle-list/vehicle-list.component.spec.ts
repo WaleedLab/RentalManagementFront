@@ -377,7 +377,7 @@ describe('VehicleListComponent', () => {
     it('should use fallback image for invalid URL', () => {
       const vehicle = { ...mockVehicle, imageUrl: 'http://files/invalid.jpg' };
       const imageUrl = component.getVehicleImage(vehicle);
-      expect(imageUrl).toContain('car_defulte.png');
+      expect(imageUrl).toContain('defult_car.png');
     });
 
     it('should handle image error', () => {
@@ -388,7 +388,7 @@ describe('VehicleListComponent', () => {
 
       component.onVehicleImageError(event);
 
-      expect(img.src).toContain('car_defulte.png');
+      expect(img.src).toContain('defult_car.png');
     });
   });
 

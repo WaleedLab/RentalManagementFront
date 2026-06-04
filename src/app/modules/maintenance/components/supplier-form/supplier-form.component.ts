@@ -8,6 +8,11 @@ import { AuthStateService } from '../../../../core/auth/auth-state.service';
 import { SHARED_FORM_FIELD_DIRECTIVES } from '../../../../shared/forms/shared-form-field.imports';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { focusFirstInvalidControl } from '../../../../shared/utils/focus-first-invalid-control.util';
+import {
+  mobileNumberValidators,
+  optionalMobileNumberValidators,
+  sanitizeMobileDigits,
+} from '../../../../shared/utils/mobile-number.util';
 import { PageHeaderComponent } from '../../../../shared/ui/page-header/page-header.component';
 import { SupplierUpsertRequest } from '../../models/supplier.model';
 import { SupplierService } from '../../services/supplier.service';
@@ -43,8 +48,8 @@ export class SupplierFormComponent implements OnInit {
 
   form = this.fb.group({
     supplierName: ['', [Validators.required, Validators.maxLength(200)]],
-    phone: ['', [Validators.required, Validators.maxLength(50)]],
-    phone2: ['', [Validators.maxLength(50)]],
+    phone: ['', mobileNumberValidators({ required: true })],
+    phone2: ['', optionalMobileNumberValidators()],
     address: ['', [Validators.maxLength(500)]],
     email: ['', [Validators.email, Validators.maxLength(200)]],
     taxRecord: ['', [Validators.maxLength(100)]],
@@ -64,8 +69,8 @@ export class SupplierFormComponent implements OnInit {
       next: row => {
         this.form.patchValue({
           supplierName: row.supplierName ?? '',
-          phone: row.phone ?? '',
-          phone2: row.phone2 ?? '',
+          phone: sanitizeMobileDigits(row.phone ?? ''),
+          phone2: sanitizeMobileDigits(row.phone2 ?? ''),
           address: row.address ?? '',
           email: row.email ?? '',
           taxRecord: row.taxRecord ?? '',
@@ -96,8 +101,8 @@ export class SupplierFormComponent implements OnInit {
       id: this.supplierId() ?? undefined,
       fleetId,
       supplierName: raw.supplierName.trim(),
-      phone: raw.phone.trim(),
-      phone2: raw.phone2.trim() || null,
+      phone: sanitizeMobileDigits(raw.phone.trim()),
+      phone2: sanitizeMobileDigits(raw.phone2.trim()) || null,
       address: raw.address.trim() || null,
       email: raw.email.trim() || null,
       taxRecord: raw.taxRecord.trim() || null,

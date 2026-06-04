@@ -49,6 +49,7 @@ import {
   roundSettlementMoney,
   settlementMoneyInputDisplay,
 } from '../booking-settlement-payment.util';
+import { isBookingSuspended } from '../booking-card-actions.util';
 
 @Component({
   selector: 'app-booking-finish',
@@ -794,6 +795,10 @@ export class BookingFinishComponent implements OnInit {
         this.toast.error(this.translate.instant('Failed to load booking'));
         this.settings.set(null);
         this.vehicleBranchId.set(null);
+        return;
+      }
+      if (isBookingSuspended(b)) {
+        this.router.navigate(['/booking', b.id, 'finish-suspended'], { replaceUrl: true });
         return;
       }
       this.booking.set(b);

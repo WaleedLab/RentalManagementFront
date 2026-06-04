@@ -248,6 +248,17 @@ const routes: Routes = [
         data: { title: 'Contract finish page title', breadcrumb: 'Contract finish page title' },
       },
       {
+        path: ':id/finish-suspended',
+        loadComponent: () =>
+          import('./components/booking/booking-finish-suspended/booking-finish-suspended.component').then(
+            m => m.BookingFinishSuspendedComponent,
+          ),
+        data: {
+          title: 'Contract finish suspended page title',
+          breadcrumb: 'Contract finish suspended page title',
+        },
+      },
+      {
         path: ':id/suspend',
         loadComponent: () =>
           import('./components/booking/booking-suspend/booking-suspend.component').then(m => m.BookingSuspendComponent),

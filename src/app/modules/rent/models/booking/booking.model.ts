@@ -324,6 +324,22 @@ export interface CloseBookingRequest {
   paidBank?: number;
 }
 
+/**
+ * POST `Booking/FinshAfterSuspended` — `FinshAfterSuspendedBookingCommand`.
+ * Used when closing a suspended contract (accident or amount due): records receipt and marks `finsh`.
+ */
+export interface FinshAfterSuspendedBookingRequest {
+  id: number;
+  fleetId: string;
+  paid: number;
+  paymentType: number;
+  bondType: number;
+  idBank?: string;
+  idCash?: string;
+  paidCash?: number | null;
+  paidBank?: number | null;
+}
+
 const BOOKING_MONEY_EPS = 1e-6;
 
 /**

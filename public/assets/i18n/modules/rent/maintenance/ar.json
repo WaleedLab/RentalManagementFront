@@ -183,7 +183,7 @@
   "maintenance.supplier.fieldTaxRecord": "السجل الضريبي",
   "maintenance.supplier.fieldAccountNumber": "رقم الحساب",
   "maintenance.supplier.invalidName": "اسم المورد مطلوب.",
-  "maintenance.supplier.invalidPhone": "رقم الهاتف مطلوب.",
+  "maintenance.supplier.invalidPhone": "رقم الهاتف مطلوب ويجب أن يكون 10 أرقام فقط.",
   "maintenance.supplier.invalidEmail": "أدخل بريداً إلكترونياً صالحاً.",
   "maintenance.supplier.created": "تم حفظ المورد.",
   "maintenance.supplier.updated": "تم تحديث المورد.",
