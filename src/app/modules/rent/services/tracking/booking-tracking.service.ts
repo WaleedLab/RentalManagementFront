@@ -38,7 +38,7 @@ export class BookingTrackingService {
       title: '',
       subtitle: '',
       backLink: ['/booking'],
-      detailsLink: ['/booking', bookingId, 'details'],
+      detailsLink: ['/booking', 'details', bookingId],
       trackingVehicleId: params.vehicleId,
       initialFilters,
       vehicleInfo,

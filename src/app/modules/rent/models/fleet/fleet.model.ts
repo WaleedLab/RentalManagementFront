@@ -27,6 +27,7 @@ export interface FleetUpsertRequest {
   location?: string;
   contactNumber?: string;
   email?: string;
+  isActive?: boolean;
   image?: File | null;
 }
 

@@ -21,10 +21,13 @@ function normalizeMediaPath(input: string): string | null {
   if (/^files\/vehicle\//i.test(cleaned)) {
     return `uploads/vehicle/${cleaned.slice('files/vehicle/'.length)}`;
   }
+  if (/^files\/fleet\//i.test(cleaned)) {
+    return `uploads/fleet/${cleaned.slice('files/fleet/'.length)}`;
+  }
   if (/^files\//i.test(cleaned)) {
     return cleaned.replace(/^files\//i, 'uploads/');
   }
-  if (/^(customer|vehicle|subscriptionsofcustomer)\//i.test(cleaned)) {
+  if (/^(customer|vehicle|fleet|subscriptionsofcustomer)\//i.test(cleaned)) {
     return `uploads/${cleaned}`;
   }
 
@@ -38,6 +41,15 @@ export function resolveMediaUrl(path?: string | null): string | null {
 
   const raw = String(path).trim();
   if (!raw) {
+    return null;
+  }
+
+  if (/^data:image\//i.test(raw)) {
+    return raw;
+  }
+
+  // Never treat API routes as media (bad legacy values in Url fields).
+  if (/\/Api\//i.test(raw)) {
     return null;
   }
 

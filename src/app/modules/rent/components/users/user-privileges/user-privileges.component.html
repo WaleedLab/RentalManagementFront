@@ -1,43 +1,217 @@
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header pb-0 d-flex justify-content-between align-items-center">
-          <div>
-            <h3>User Privileges</h3>
-            <span>{{ user()?.userName ?? 'Loading...' }}</span>
-          </div>
-          <div>
-            <button class="btn btn-primary me-2" (click)="save()" [disabled]="loading()">
-              Save
-            </button>
-            <a class="btn btn-cancel" routerLink="/users">Back to Users</a>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            @for (priv of privileges(); track priv.id) {
-              <div class="col-md-4 col-lg-3 mb-2">
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    [id]="'priv-' + priv.id"
-                    [checked]="isSelected(priv.id)"
-                    (change)="toggle(priv.id)"
-                  />
-                  <label class="form-check-label" [for]="'priv-' + priv.id">
-                    {{ priv.privilegeName || priv.displayName || priv.displayNameEn || priv.nameEn || priv.name || priv.id }}
+<div class="container-fluid contract-flow-page contract-flow-edit user-privileges-page">
+  <header class="contract-flow-header user-privileges-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">{{ 'users.privileges.pageTitle' | translate }}</h1>
+        <p class="contract-flow-header__meta mb-0">{{ 'users.privileges.pageSubtitle' | translate }}</p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/users">{{ 'users.backToList' | translate }}</a>
+    </div>
+  </header>
+
+  @if (initializing()) {
+    <div class="user-privileges-loading">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+  } @else {
+    <div class="contract-flow-layout user-privileges-layout">
+      <div class="contract-flow-main">
+        <form class="app-form-value-state user-privileges" (ngSubmit)="save()">
+          <ol class="user-privileges-workflow" [attr.aria-label]="'users.privileges.formWorkflowSteps' | translate">
+            <li>
+              <button
+                type="button"
+                class="user-privileges-workflow__step"
+                [class.user-privileges-workflow__step--done]="userSectionComplete()"
+                [class.user-privileges-workflow__step--current]="currentWorkflowStep() === 1"
+                [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+                [attr.aria-controls]="'user-privileges-section-user'"
+                (click)="focusWorkflowSection(1)"
+              >
+                <span class="user-privileges-workflow__num">1</span>
+                <span>{{ 'users.privileges.flowStepUser' | translate }}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="user-privileges-workflow__step"
+                [class.user-privileges-workflow__step--done]="permissionsSectionComplete()"
+                [class.user-privileges-workflow__step--current]="currentWorkflowStep() === 2"
+                [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+                [attr.aria-controls]="'user-privileges-section-permissions'"
+                (click)="focusWorkflowSection(2)"
+              >
+                <span class="user-privileges-workflow__num">2</span>
+                <span>{{ 'users.privileges.flowStepPermissions' | translate }}</span>
+              </button>
+            </li>
+          </ol>
+
+          <div class="user-privileges-fields-shell">
+            <details id="user-privileges-section-user" class="user-privileges-section user-privileges-fold" open>
+              <summary class="user-privileges-section__summary">
+                <span class="user-privileges-section__step">1</span>
+                {{ 'users.privileges.sectionUserTitle' | translate }}
+              </summary>
+              <div class="user-privileges-fold__body">
+                <header class="user-privileges-section-head">
+                  <span class="user-privileges-section-head__icon" aria-hidden="true">👤</span>
+                  <div>
+                    <h2 class="user-privileges-section-head__title">
+                      {{ 'users.privileges.sectionUserTitle' | translate }}
+                    </h2>
+                    <p class="user-privileges-section-head__hint">
+                      {{ 'users.privileges.sectionUserSubtitle' | translate }}
+                    </p>
+                  </div>
+                </header>
+
+                <div class="user-privileges-field user-privileges-field--wide">
+                  <label class="user-privileges-label">
+                    <span>{{ 'users.privileges.userNameLabel' | translate }}</span>
+                    <span class="user-privileges-badge user-privileges-badge--readonly">
+                      {{ 'users.privileges.readonlyBadge' | translate }}
+                    </span>
                   </label>
+                  <input
+                    class="form-control"
+                    type="text"
+                    readonly
+                    [value]="user()?.userName ?? '—'"
+                  />
+                  <p class="user-privileges-hint">{{ 'users.privileges.hintUser' | translate }}</p>
                 </div>
               </div>
-            }
+            </details>
+
+            <details id="user-privileges-section-permissions" class="user-privileges-section user-privileges-fold" open>
+              <summary class="user-privileges-section__summary">
+                <span class="user-privileges-section__step">2</span>
+                {{ 'users.privileges.sectionPermissionsTitle' | translate }}
+              </summary>
+              <div class="user-privileges-fold__body">
+                <header class="user-privileges-section-head">
+                  <span class="user-privileges-section-head__icon" aria-hidden="true">🛡️</span>
+                  <div>
+                    <h2 class="user-privileges-section-head__title">
+                      {{ 'users.privileges.sectionPermissionsTitle' | translate }}
+                    </h2>
+                    <p class="user-privileges-section-head__hint">
+                      {{ 'users.privileges.sectionPermissionsSubtitle' | translate }}
+                    </p>
+                  </div>
+                </header>
+
+                <div class="user-privileges-privileges-toolbar">
+                  <span class="user-privileges-badge user-privileges-badge--optional">
+                    {{ 'users.optionalFieldBadge' | translate }}
+                  </span>
+                  <span class="user-privileges-privileges-count">
+                    {{ selectedPrivilegesCount() }} {{ 'selected' | translate }}
+                  </span>
+                  <div class="user-privileges-privileges-actions">
+                    <button type="button" class="btn btn-sm btn-outline-primary" (click)="selectAllFiltered()">
+                      {{ 'users.privileges.selectVisible' | translate }}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearSelectedPrivileges()">
+                      {{ 'users.privileges.clear' | translate }}
+                    </button>
+                  </div>
+                </div>
+                <p class="user-privileges-hint">{{ 'users.privileges.hintPermissions' | translate }}</p>
+
+                <div class="user-privileges-privileges-search">
+                  <span class="user-privileges-privileges-search__icon" aria-hidden="true">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                  </span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [placeholder]="'Search privileges...' | translate"
+                    [ngModel]="privilegeSearch()"
+                    (ngModelChange)="privilegeSearch.set($event)"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
+                </div>
+
+                <div class="user-privileges-privileges-grid">
+                  @for (privilege of filteredPrivileges(); track privilege.id) {
+                    <label
+                      class="user-privileges-privilege-card"
+                      [class.user-privileges-privilege-card--selected]="isSelected(privilege.id)"
+                    >
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        [checked]="isSelected(privilege.id)"
+                        (change)="toggle(privilege.id)"
+                      />
+                      <span class="user-privileges-privilege-card__body">
+                        <span class="user-privileges-privilege-card__title">{{ privilegeLabel(privilege) }}</span>
+                        @if (privilegeMeta(privilege)) {
+                          <span class="user-privileges-privilege-card__meta">{{ privilegeMeta(privilege) }}</span>
+                        }
+                      </span>
+                    </label>
+                  } @empty {
+                    <p class="user-privileges-hint">
+                      @if (privileges().length === 0) {
+                        {{ 'users.privileges.noPrivilegesDefined' | translate }}
+                      } @else {
+                        {{ 'users.privileges.noMatchingPrivileges' | translate }}
+                      }
+                    </p>
+                  }
+                </div>
+              </div>
+            </details>
           </div>
-          @if (privileges().length === 0) {
-            <p class="text-muted">No privileges defined.</p>
-          }
-        </div>
+
+          <div class="app-form-actions">
+            <button class="btn btn-primary" type="submit" [disabled]="loading() || !user()">
+              @if (loading()) {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              }
+              {{ 'Save' | translate }}
+            </button>
+            <a class="btn btn-cancel" routerLink="/users">{{ 'Cancel' | translate }}</a>
+          </div>
+        </form>
       </div>
+
+      <aside class="contract-flow-aside user-privileges-aside" [attr.aria-label]="'users.privileges.formSummary' | translate">
+        <div class="user-privileges-aside-card">
+          <div class="user-privileges-progress">
+            <div class="user-privileges-progress__head">
+              <span>{{ 'users.privileges.flowProfileCompletion' | translate }}</span>
+              <strong>{{ profileCompletionPercent() }}%</strong>
+            </div>
+            <div
+              class="user-privileges-progress__track"
+              role="progressbar"
+              [attr.aria-valuenow]="profileCompletionPercent()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span class="user-privileges-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+            </div>
+          </div>
+
+          <ul class="user-privileges-status-list">
+            <li [class.user-privileges-status-list__item--done]="userSectionComplete()">
+              <span class="user-privileges-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'users.privileges.flowSummaryUser' | translate }}</span>
+            </li>
+            <li [class.user-privileges-status-list__item--done]="permissionsSectionComplete()">
+              <span class="user-privileges-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'users.privileges.flowSummaryPermissions' | translate }}</span>
+            </li>
+          </ul>
+
+          <p class="user-privileges-workflow-note">{{ 'users.privileges.formWorkflowNote' | translate }}</p>
+        </div>
+      </aside>
     </div>
-  </div>
+  }
 </div>

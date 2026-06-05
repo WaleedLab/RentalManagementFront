@@ -1,206 +1,433 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="'Create Payment Count' | translate"
-    [subtitle]="'Record a payment against booking, customer, branch, and selected collection channel.' | translate"
-  >
-    <a class="btn btn-outline-secondary" routerLink="/payment-counts">{{ 'Back to Payment Counts' | translate }}</a>
-  </app-page-header>
+<div class="container-fluid contract-flow-page contract-flow-edit voucher-form-page">
+  <header class="contract-flow-header voucher-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">{{ 'Create Payment Count' | translate }}</h1>
+        <p class="contract-flow-header__meta mb-0">{{ 'paymentCounts.formPageSubtitle' | translate }}</p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/payment-counts">{{ 'Back to Payment Counts' | translate }}</a>
+    </div>
+  </header>
 
-  <div class="row">
-    <div class="col-12">
-      <div class="card voucher-card">
-        <div class="card-body">
-          <form [formGroup]="form" (ngSubmit)="onSubmit()">
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Customer ID' | translate }}</label>
-                <app-smooth-select
-                  formControlName="idCustomer"
-                  [options]="customerOptions()"
-                  [placeholder]="'Select customer' | translate"
-                  [ariaLabel]="'Customer ID' | translate"
-                  [searchable]="true"
-                />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Vehicle ID' | translate }}</label>
-                <app-smooth-select
-                  formControlName="idVehicle"
-                  [options]="vehicleOptions()"
-                  [placeholder]="'Select vehicle' | translate"
-                  [ariaLabel]="'Vehicle ID' | translate"
-                  [searchable]="true"
-                />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Booking ID' | translate }}</label>
-                <app-smooth-select
-                  formControlName="idBooking"
-                  [options]="bookingOptions()"
-                  [placeholder]="'Select booking' | translate"
-                  [ariaLabel]="'Booking ID' | translate"
-                  [searchable]="true"
-                />
-              </div>
+  @if (initializing()) {
+    <div class="voucher-form-loading">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+  } @else {
+    <div class="contract-flow-layout voucher-form-layout">
+      <div class="contract-flow-main">
+        <form class="app-form-value-state voucher-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+          <ol class="voucher-form-workflow" [attr.aria-label]="'paymentCounts.formWorkflowSteps' | translate">
+            <li>
+              <button
+                type="button"
+                class="voucher-form-workflow__step"
+                [class.voucher-form-workflow__step--done]="linkSectionComplete()"
+                [class.voucher-form-workflow__step--current]="currentWorkflowStep() === 1"
+                [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+                [attr.aria-controls]="'voucher-form-section-link'"
+                (click)="focusWorkflowSection(1)"
+              >
+                <span class="voucher-form-workflow__num">1</span>
+                <span>{{ 'paymentCounts.flowStepLink' | translate }}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="voucher-form-workflow__step"
+                [class.voucher-form-workflow__step--done]="paymentSectionComplete()"
+                [class.voucher-form-workflow__step--current]="currentWorkflowStep() === 2"
+                [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+                [attr.aria-controls]="'voucher-form-section-payment'"
+                (click)="focusWorkflowSection(2)"
+              >
+                <span class="voucher-form-workflow__num">2</span>
+                <span>{{ 'paymentCounts.flowStepPayment' | translate }}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="voucher-form-workflow__step"
+                [class.voucher-form-workflow__step--done]="detailsSectionComplete()"
+                [class.voucher-form-workflow__step--current]="currentWorkflowStep() === 3"
+                [attr.aria-current]="currentWorkflowStep() === 3 ? 'step' : null"
+                [attr.aria-controls]="'voucher-form-section-details'"
+                (click)="focusWorkflowSection(3)"
+              >
+                <span class="voucher-form-workflow__num">3</span>
+                <span>{{ 'paymentCounts.flowStepDetails' | translate }}</span>
+              </button>
+            </li>
+          </ol>
 
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Branch ID' | translate }} <span class="text-danger">*</span></label>
-                <app-smooth-select
-                  formControlName="idBranch"
-                  [options]="branchOptions()"
-                  [placeholder]="'Select branch' | translate"
-                  [ariaLabel]="'Branch ID' | translate"
-                />
+          <div class="voucher-form-fields-shell">
+            <details id="voucher-form-section-link" class="voucher-form-section voucher-form-fold" open>
+              <summary class="voucher-form-section__summary">
+                <span class="voucher-form-section__step">1</span>
+                {{ 'paymentCounts.sectionLinkTitle' | translate }}
+              </summary>
+              <div class="voucher-form-fold__body">
+                <header class="voucher-form-section-head">
+                  <span class="voucher-form-section-head__icon" aria-hidden="true">🔗</span>
+                  <div>
+                    <h2 class="voucher-form-section-head__title">{{ 'paymentCounts.sectionLinkTitle' | translate }}</h2>
+                    <p class="voucher-form-section-head__hint">{{ 'paymentCounts.sectionLinkSubtitle' | translate }}</p>
+                  </div>
+                </header>
+
+                <div class="voucher-form-grid voucher-form-grid--2">
+                  <div class="voucher-form-field">
+                    <label class="voucher-form-label">
+                      <span>{{ 'Customer ID' | translate }}</span>
+                      <span class="voucher-form-badge voucher-form-badge--optional">
+                        {{ 'paymentCounts.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      formControlName="idCustomer"
+                      [options]="customerOptions()"
+                      [placeholder]="'Select customer' | translate"
+                      [ariaLabel]="'Customer ID' | translate"
+                      [searchable]="true"
+                    />
+                  </div>
+
+                  <div class="voucher-form-field">
+                    <label class="voucher-form-label">
+                      <span>{{ 'Vehicle ID' | translate }}</span>
+                      <span class="voucher-form-badge voucher-form-badge--optional">
+                        {{ 'paymentCounts.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      formControlName="idVehicle"
+                      [options]="vehicleOptions()"
+                      [placeholder]="'Select vehicle' | translate"
+                      [ariaLabel]="'Vehicle ID' | translate"
+                      [searchable]="true"
+                    />
+                  </div>
+
+                  <div class="voucher-form-field">
+                    <label class="voucher-form-label">
+                      <span>{{ 'Booking ID' | translate }}</span>
+                      <span class="voucher-form-badge voucher-form-badge--optional">
+                        {{ 'paymentCounts.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      formControlName="idBooking"
+                      [options]="bookingOptions()"
+                      [placeholder]="'Select booking' | translate"
+                      [ariaLabel]="'Booking ID' | translate"
+                      [searchable]="true"
+                    />
+                    <p class="voucher-form-hint">{{ 'paymentCounts.hintBooking' | translate }}</p>
+                  </div>
+
+                  <div class="voucher-form-field" [class.voucher-form-field--invalid]="hasFieldError('idBranch')">
+                    <label class="voucher-form-label">
+                      <span>{{ 'Branch ID' | translate }}</span>
+                      <span class="voucher-form-badge voucher-form-badge--required">
+                        {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      formControlName="idBranch"
+                      [options]="branchOptions()"
+                      [placeholder]="'Select branch' | translate"
+                      [ariaLabel]="'Branch ID' | translate"
+                    />
+                    @if (hasFieldError('idBranch')) {
+                      <div class="voucher-form-hint voucher-form-hint--danger">
+                        {{ 'Please choose valid branch' | translate }}
+                      </div>
+                    }
+                  </div>
+                </div>
               </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Amount' | translate }} <span class="text-danger">*</span></label>
-                <input
-                  type="number"
-                  step="0.01"
-                  class="form-control"
-                  formControlName="paid"
-                  numericPlaceholderKey="Enter amount"
-                />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Payment Type' | translate }} <span class="text-danger">*</span></label>
-                <app-smooth-select
-                  formControlName="paymentType"
-                  [options]="paymentTypeOptions()"
-                  [placeholder]="'Payment Type' | translate"
-                  [ariaLabel]="'Payment Type' | translate"
-                />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Bond Type' | translate }} <span class="text-danger">*</span></label>
-                <app-smooth-select
-                  formControlName="bondType"
-                  [options]="bondTypeOptions()"
-                  [placeholder]="'Bond Type' | translate"
-                  [ariaLabel]="'Bond Type' | translate"
-                />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Payment Status' | translate }} <span class="text-danger">*</span></label>
-                <app-smooth-select
-                  formControlName="status"
-                  [options]="statusOptions()"
-                  [placeholder]="'Payment Status' | translate"
-                  [ariaLabel]="'Payment Status' | translate"
-                />
-              </div>
-              @if (showExpenseCategoryField()) {
-                <div class="col-md-4">
-                  <label class="form-label"
-                    >{{ 'Expense Category' | translate }} <span class="text-danger">*</span></label
+            </details>
+
+            <details id="voucher-form-section-payment" class="voucher-form-section voucher-form-fold" open>
+              <summary class="voucher-form-section__summary">
+                <span class="voucher-form-section__step">2</span>
+                {{ 'paymentCounts.sectionPaymentTitle' | translate }}
+              </summary>
+              <div class="voucher-form-fold__body">
+                <header class="voucher-form-section-head">
+                  <span class="voucher-form-section-head__icon" aria-hidden="true">💳</span>
+                  <div>
+                    <h2 class="voucher-form-section-head__title">{{ 'paymentCounts.sectionPaymentTitle' | translate }}</h2>
+                    <p class="voucher-form-section-head__hint">{{ 'paymentCounts.sectionPaymentSubtitle' | translate }}</p>
+                  </div>
+                </header>
+
+                <div class="voucher-form-grid voucher-form-grid--3">
+                  <div class="voucher-form-field" [class.voucher-form-field--invalid]="hasFieldError('paid')">
+                    <label class="voucher-form-label">
+                      <span>{{ 'Amount' | translate }}</span>
+                      <span class="voucher-form-badge voucher-form-badge--required">
+                        {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      class="form-control text-end"
+                      formControlName="paid"
+                      numericPlaceholderKey="Enter amount"
+                    />
+                    @if (hasFieldError('paid')) {
+                      <div class="voucher-form-hint voucher-form-hint--danger">{{ 'Required field' | translate }}</div>
+                    }
+                  </div>
+
+                  <div class="voucher-form-field" [class.voucher-form-field--invalid]="hasFieldError('paymentType')">
+                    <label class="voucher-form-label">
+                      <span>{{ 'Payment Type' | translate }}</span>
+                      <span class="voucher-form-badge voucher-form-badge--required">
+                        {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      formControlName="paymentType"
+                      [options]="paymentTypeOptions()"
+                      [placeholder]="'Payment Type' | translate"
+                      [ariaLabel]="'Payment Type' | translate"
+                    />
+                  </div>
+
+                  <div class="voucher-form-field" [class.voucher-form-field--invalid]="hasFieldError('bondType')">
+                    <label class="voucher-form-label">
+                      <span>{{ 'Bond Type' | translate }}</span>
+                      <span class="voucher-form-badge voucher-form-badge--required">
+                        {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      formControlName="bondType"
+                      [options]="bondTypeOptions()"
+                      [placeholder]="'Bond Type' | translate"
+                      [ariaLabel]="'Bond Type' | translate"
+                    />
+                  </div>
+
+                  <div class="voucher-form-field" [class.voucher-form-field--invalid]="hasFieldError('status')">
+                    <label class="voucher-form-label">
+                      <span>{{ 'Payment Status' | translate }}</span>
+                      <span class="voucher-form-badge voucher-form-badge--required">
+                        {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      formControlName="status"
+                      [options]="statusOptions()"
+                      [placeholder]="'Payment Status' | translate"
+                      [ariaLabel]="'Payment Status' | translate"
+                    />
+                  </div>
+
+                  @if (showExpenseCategoryField()) {
+                    <div class="voucher-form-field" [class.voucher-form-field--invalid]="hasFieldError('expenseCategory')">
+                      <label class="voucher-form-label">
+                        <span>{{ 'Expense Category' | translate }}</span>
+                        <span class="voucher-form-badge voucher-form-badge--required">
+                          {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                        </span>
+                      </label>
+                      <app-smooth-select
+                        formControlName="expenseCategory"
+                        [options]="expenseCategoryOptions()"
+                        [placeholder]="'Select expense category' | translate"
+                        [ariaLabel]="'Expense Category' | translate"
+                      />
+                    </div>
+                  }
+
+                  <div class="voucher-form-field" [class.voucher-form-field--invalid]="hasFieldError('idFinancialYear')">
+                    <label class="voucher-form-label">
+                      <span>{{ 'Financial Year' | translate }}</span>
+                      <span class="voucher-form-badge voucher-form-badge--required">
+                        {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      formControlName="idFinancialYear"
+                      [options]="financialYearOptions()"
+                      [placeholder]="'Select financial year' | translate"
+                      [ariaLabel]="'Financial Year' | translate"
+                      [disabled]="loadingFinancialYears()"
+                    />
+                  </div>
+
+                  <div class="voucher-form-field" [class.voucher-form-field--invalid]="hasFieldError('paidCash')">
+                    <label class="voucher-form-label">
+                      <span>{{ 'Paid Cash' | translate }}</span>
+                      <span class="voucher-form-badge voucher-form-badge--required">
+                        {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      class="form-control text-end"
+                      formControlName="paidCash"
+                      numericPlaceholderKey="Enter amount"
+                    />
+                  </div>
+
+                  <div class="voucher-form-field" [class.voucher-form-field--invalid]="hasFieldError('paidBank')">
+                    <label class="voucher-form-label">
+                      <span>{{ 'Paid Bank' | translate }}</span>
+                      <span class="voucher-form-badge voucher-form-badge--required">
+                        {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      class="form-control text-end"
+                      formControlName="paidBank"
+                      numericPlaceholderKey="Enter amount"
+                    />
+                  </div>
+
+                  <div class="voucher-form-field" [class.voucher-form-field--invalid]="hasFieldError('stutusbooking')">
+                    <label class="voucher-form-label">
+                      <span>{{ 'Booking Status' | translate }}</span>
+                      @if (form.controls.stutusbooking.enabled) {
+                        <span class="voucher-form-badge voucher-form-badge--required">
+                          {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                        </span>
+                      } @else {
+                        <span class="voucher-form-badge voucher-form-badge--optional">
+                          {{ 'paymentCounts.optionalFieldBadge' | translate }}
+                        </span>
+                      }
+                    </label>
+                    <app-smooth-select
+                      formControlName="stutusbooking"
+                      [options]="bookingStatusOptions()"
+                      [placeholder]="'Select booking status' | translate"
+                      [ariaLabel]="'Booking Status' | translate"
+                      [disabled]="form.controls.stutusbooking.disabled"
+                    />
+                  </div>
+
+                  @if (showCashAccountField()) {
+                    <div class="voucher-form-field" [class.voucher-form-field--invalid]="hasFieldError('idCash')">
+                      <label class="voucher-form-label">
+                        <span>{{ 'Cash Box' | translate }}</span>
+                        @if (requiresCashAccount()) {
+                          <span class="voucher-form-badge voucher-form-badge--required">
+                            {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                          </span>
+                        }
+                      </label>
+                      <app-smooth-select
+                        formControlName="idCash"
+                        [options]="cashOptions()"
+                        [placeholder]="'Select cash box' | translate"
+                        [disabled]="isCashAccountDisabled()"
+                        [ariaLabel]="'Cash Box' | translate"
+                      />
+                    </div>
+                  }
+
+                  @if (showBankAccountField()) {
+                    <div class="voucher-form-field" [class.voucher-form-field--invalid]="hasFieldError('idBank')">
+                      <label class="voucher-form-label">
+                        <span>{{ 'Bank' | translate }}</span>
+                        @if (requiresBankAccount()) {
+                          <span class="voucher-form-badge voucher-form-badge--required">
+                            {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                          </span>
+                        }
+                      </label>
+                      <app-smooth-select
+                        formControlName="idBank"
+                        [options]="bankOptions()"
+                        [placeholder]="'Select bank' | translate"
+                        [disabled]="isBankAccountDisabled()"
+                        [ariaLabel]="'Bank' | translate"
+                      />
+                    </div>
+                  }
+
+                  <div
+                    class="voucher-form-field voucher-form-field--wide"
+                    [class.voucher-form-field--invalid]="hasFieldError('dscription')"
                   >
-                  <app-smooth-select
-                    formControlName="expenseCategory"
-                    [options]="expenseCategoryOptions()"
-                    [placeholder]="'Select expense category' | translate"
-                    [ariaLabel]="'Expense Category' | translate"
-                  />
+                    <label class="voucher-form-label">
+                      <span>{{ 'Description' | translate }}</span>
+                      <span class="voucher-form-badge voucher-form-badge--required">
+                        {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <textarea class="form-control" rows="3" formControlName="dscription"></textarea>
+                    <p class="voucher-form-hint">{{ 'paymentCounts.hintDescription' | translate }}</p>
+                    @if (hasFieldError('dscription')) {
+                      <div class="voucher-form-hint voucher-form-hint--danger">{{ 'Required field' | translate }}</div>
+                    }
+                  </div>
                 </div>
-              }
 
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Financial Year' | translate }} <span class="text-danger">*</span></label>
-                <app-smooth-select
-                  formControlName="idFinancialYear"
-                  [options]="financialYearOptions()"
-                  [placeholder]="'Select financial year' | translate"
-                  [ariaLabel]="'Financial Year' | translate"
-                  [disabled]="loadingFinancialYears()"
-                />
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Paid Cash' | translate }} <span class="text-danger">*</span></label>
-                <input
-                  type="number"
-                  step="0.01"
-                  class="form-control"
-                  formControlName="paidCash"
-                  numericPlaceholderKey="Enter amount"
-                />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Paid Bank' | translate }} <span class="text-danger">*</span></label>
-                <input
-                  type="number"
-                  step="0.01"
-                  class="form-control"
-                  formControlName="paidBank"
-                  numericPlaceholderKey="Enter amount"
-                />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ 'Booking Status' | translate }} <span class="text-danger">*</span></label>
-                <app-smooth-select
-                  formControlName="stutusbooking"
-                  [options]="bookingStatusOptions()"
-                  [placeholder]="'Select booking status' | translate"
-                  [ariaLabel]="'Booking Status' | translate"
-                  [disabled]="form.controls.stutusbooking.disabled"
-                />
-              </div>
-
-              @if (showCashAccountField()) {
-                <div class="col-md-6">
-                  <label class="form-label">{{ 'Cash Box' | translate }}</label>
-                  <app-smooth-select
-                    formControlName="idCash"
-                    [options]="cashOptions()"
-                    [placeholder]="'Select cash box' | translate"
-                    [disabled]="isCashAccountDisabled()"
-                    [ariaLabel]="'Cash Box' | translate"
-                  />
-                </div>
-              }
-              @if (showBankAccountField()) {
-                <div class="col-md-6">
-                  <label class="form-label">{{ 'Bank' | translate }}</label>
-                  <app-smooth-select
-                    formControlName="idBank"
-                    [options]="bankOptions()"
-                    [placeholder]="'Select bank' | translate"
-                    [disabled]="isBankAccountDisabled()"
-                    [ariaLabel]="'Bank' | translate"
-                  />
-                </div>
-              }
-
-              <div class="col-12">
-                <label class="form-label">{{ 'Description' | translate }} <span class="text-danger">*</span></label>
-                <textarea class="form-control" rows="3" formControlName="dscription"></textarea>
-              </div>
-
-              <div class="col-12">
-                <div class="alert alert-info mb-0">
-                  <h6 class="mb-2">{{ 'Suggested accounting entry' | translate }}</h6>
-                  <div class="small mb-1">
+                <div class="voucher-form-guidance">
+                  <h3 class="voucher-form-guidance__title">{{ 'Suggested accounting entry' | translate }}</h3>
+                  <div class="voucher-form-guidance__row">
                     <strong>{{ 'Debit' | translate }}:</strong>
-                    {{ formatFlowAccount(suggestedVoucherFlow().debit) }}
+                    <span>{{ formatFlowAccount(suggestedVoucherFlow().debit) }}</span>
                   </div>
-                  <div class="small mb-1">
+                  <div class="voucher-form-guidance__row">
                     <strong>{{ 'Credit' | translate }}:</strong>
-                    {{ formatFlowAccount(suggestedVoucherFlow().credit) }}
+                    <span>{{ formatFlowAccount(suggestedVoucherFlow().credit) }}</span>
                   </div>
-                  <div class="small opacity-75">
+                  <p class="voucher-form-guidance__note">
                     {{
                       'This guidance links vouchers with the core rental accounting flow and can be adjusted by policy.'
                         | translate
                     }}
-                  </div>
+                  </p>
                 </div>
               </div>
+            </details>
 
-              <div class="col-12">
-                <h6 class="voucher-section-title mb-0">{{ 'Payment Details Distribution' | translate }}</h6>
+            <details id="voucher-form-section-details" class="voucher-form-section voucher-form-fold" open>
+              <summary class="voucher-form-section__summary">
+                <span class="voucher-form-section__step">3</span>
+                {{ 'paymentCounts.sectionDetailsTitle' | translate }}
+              </summary>
+              <div class="voucher-form-fold__body">
+                <header class="voucher-form-section-head">
+                  <span class="voucher-form-section-head__icon" aria-hidden="true">📊</span>
+                  <div>
+                    <h2 class="voucher-form-section-head__title">{{ 'paymentCounts.sectionDetailsTitle' | translate }}</h2>
+                    <p class="voucher-form-section-head__hint">{{ 'paymentCounts.sectionDetailsSubtitle' | translate }}</p>
+                  </div>
+                </header>
 
-                <div class="voucher-add-row" [formGroup]="detailDraft">
-                  <div class="voucher-add-row__field">
-                    <label class="form-label">{{ 'Account' | translate }}</label>
+                <div class="voucher-form-lines-toolbar">
+                  <span class="voucher-form-badge voucher-form-badge--required">
+                    {{ 'paymentCounts.requiredFieldBadge' | translate }}
+                  </span>
+                  <span class="voucher-form-lines-count">
+                    {{ linesCount() }} {{ 'paymentCounts.linesCountLabel' | translate }}
+                  </span>
+                </div>
+                <p class="voucher-form-hint">{{ 'paymentCounts.hintDetails' | translate }}</p>
+
+                @if (loadingAccounts()) {
+                  <div class="voucher-form-lines-state">
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    {{ 'Loading...' | translate }}
+                  </div>
+                }
+
+                <div class="voucher-form-add-row" [formGroup]="detailDraft">
+                  <div class="voucher-form-add-row__field">
+                    <label class="voucher-form-label">{{ 'Account' | translate }}</label>
                     <app-smooth-select
                       formControlName="idCounting"
                       [options]="accountOptions()"
@@ -209,8 +436,8 @@
                       [searchable]="true"
                     />
                   </div>
-                  <div class="voucher-add-row__field">
-                    <label class="form-label">{{ 'Amount' | translate }}</label>
+                  <div class="voucher-form-add-row__field">
+                    <label class="voucher-form-label">{{ 'Amount' | translate }}</label>
                     <input
                       type="number"
                       min="0"
@@ -220,19 +447,19 @@
                       numericPlaceholderKey="Enter amount"
                     />
                   </div>
-                  <div class="voucher-add-row__field voucher-add-row__field--wide">
-                    <label class="form-label">{{ 'Note' | translate }}</label>
+                  <div class="voucher-form-add-row__field voucher-form-add-row__field--wide">
+                    <label class="voucher-form-label">{{ 'Note' | translate }}</label>
                     <input type="text" class="form-control" formControlName="node" />
                   </div>
-                  <div class="voucher-add-row__actions">
+                  <div class="voucher-form-add-row__actions">
                     <button class="btn btn-success" type="button" (click)="addLine()">
                       {{ 'Add Line' | translate }}
                     </button>
                   </div>
                 </div>
 
-                <div class="table-responsive mt-3" formArrayName="details">
-                  <table class="table align-middle voucher-details-table">
+                <div class="table-responsive voucher-form-table-wrap" formArrayName="details">
+                  <table class="table align-middle voucher-form-details-table">
                     <thead>
                       <tr>
                         <th>#</th>
@@ -247,7 +474,7 @@
                         <tr [formGroupName]="$index">
                           <td>{{ $index + 1 }}</td>
                           <td>{{ accountLabelById(detailLineValue($index, 'idCounting')) }}</td>
-                          <td class="text-end">{{ detailLineValue($index, 'price') || 0 }}</td>
+                          <td class="text-end">{{ formatAmount($any(detailLineValue($index, 'price')) || 0) }}</td>
                           <td>{{ detailLineValue($index, 'node') || '-' }}</td>
                           <td>
                             <button
@@ -263,54 +490,119 @@
                       }
                       @if (!detailsArray.length) {
                         <tr>
-                          <td colspan="5" class="text-center text-muted py-3">{{ 'No records found' | translate }}</td>
+                          <td colspan="5" class="text-center voucher-form-empty-row">
+                            {{ 'No records found' | translate }}
+                          </td>
                         </tr>
                       }
                     </tbody>
                   </table>
                 </div>
 
-                <div class="voucher-summary">
-                  <div class="voucher-summary__item">
+                <div class="voucher-form-summary">
+                  <div class="voucher-form-summary__item">
                     <span>{{ 'Paid' | translate }}</span>
-                    <strong>{{ form.controls.paid.value }}</strong>
+                    <strong>{{ formatAmount($any(form.controls.paid.value) || 0) }}</strong>
                   </div>
-                  <div class="voucher-summary__item">
+                  <div class="voucher-form-summary__item">
                     <span>{{ 'Distributed' | translate }}</span>
-                    <strong>{{ totalDetails() }}</strong>
+                    <strong>{{ formatAmount(totalDetails()) }}</strong>
                   </div>
                   <div
-                    class="voucher-summary__item"
-                    [class.is-balanced]="isDetailsBalanced()"
-                    [class.is-unbalanced]="!isDetailsBalanced()"
+                    class="voucher-form-summary__item"
+                    [class.voucher-form-summary__item--balanced]="isDetailsBalanced()"
+                    [class.voucher-form-summary__item--unbalanced]="!isDetailsBalanced()"
                   >
                     <span>{{ 'Difference' | translate }}</span>
-                    <strong>{{ detailsDifference() }}</strong>
+                    <strong>{{ formatAmount(detailsDifference()) }}</strong>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            @if (form.invalid && form.touched) {
-              <div class="text-danger small mt-3">{{ 'Required field' | translate }}</div>
-            }
-
-            <div class="app-form-actions">
-              <button
-                class="btn btn-primary"
-                type="submit"
-                [disabled]="loading() || form.invalid || !isDetailsBalanced()"
-              >
-                @if (loading()) {
-                  <span class="spinner-border spinner-border-sm me-2"></span>
+                @if (!detailsArray.length) {
+                  <div class="voucher-form-validation-hint">
+                    {{ 'At least one detail line is required' | translate }}
+                  </div>
                 }
-                {{ 'Create' | translate }}
-              </button>
-              <a class="btn btn-cancel" routerLink="/payment-counts">{{ 'Cancel' | translate }}</a>
-            </div>
-          </form>
-        </div>
+
+                @if (detailsArray.length && !isDetailsBalanced()) {
+                  <div class="voucher-form-validation-hint voucher-form-validation-hint--danger">
+                    {{ 'Details total must equal paid amount' | translate }}
+                  </div>
+                }
+              </div>
+            </details>
+          </div>
+
+          <div class="app-form-actions">
+            <button
+              class="btn btn-primary"
+              type="submit"
+              [disabled]="loading() || form.invalid || !isDetailsBalanced()"
+            >
+              @if (loading()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              {{ 'Create' | translate }}
+            </button>
+            <a class="btn btn-cancel" routerLink="/payment-counts">{{ 'Cancel' | translate }}</a>
+          </div>
+        </form>
       </div>
+
+      <aside class="contract-flow-aside voucher-form-aside" [attr.aria-label]="'paymentCounts.formSummary' | translate">
+        <div class="voucher-form-aside-card">
+          <div class="voucher-form-progress">
+            <div class="voucher-form-progress__head">
+              <span>{{ 'paymentCounts.flowProfileCompletion' | translate }}</span>
+              <strong>{{ profileCompletionPercent() }}%</strong>
+            </div>
+            <div
+              class="voucher-form-progress__track"
+              role="progressbar"
+              [attr.aria-valuenow]="profileCompletionPercent()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span class="voucher-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+            </div>
+          </div>
+
+          <ul class="voucher-form-status-list">
+            <li [class.voucher-form-status-list__item--done]="linkSectionComplete()">
+              <span class="voucher-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'paymentCounts.flowSummaryLink' | translate }}</span>
+            </li>
+            <li [class.voucher-form-status-list__item--done]="paymentSectionComplete()">
+              <span class="voucher-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'paymentCounts.flowSummaryPayment' | translate }}</span>
+            </li>
+            <li [class.voucher-form-status-list__item--done]="detailsSectionComplete()">
+              <span class="voucher-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'paymentCounts.flowSummaryDetails' | translate }}</span>
+            </li>
+          </ul>
+
+          <dl class="voucher-form-aside-totals">
+            <div>
+              <dt>{{ 'Paid' | translate }}</dt>
+              <dd>{{ formatAmount($any(form.controls.paid.value) || 0) }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'Distributed' | translate }}</dt>
+              <dd>{{ formatAmount(totalDetails()) }}</dd>
+            </div>
+            <div
+              [class.voucher-form-aside-totals__balanced]="isDetailsBalanced()"
+              [class.voucher-form-aside-totals__unbalanced]="!isDetailsBalanced()"
+            >
+              <dt>{{ 'Difference' | translate }}</dt>
+              <dd>{{ formatAmount(detailsDifference()) }}</dd>
+            </div>
+          </dl>
+
+          <p class="voucher-form-workflow-note">{{ 'paymentCounts.formWorkflowNote' | translate }}</p>
+        </div>
+      </aside>
     </div>
-  </div>
+  }
 </div>

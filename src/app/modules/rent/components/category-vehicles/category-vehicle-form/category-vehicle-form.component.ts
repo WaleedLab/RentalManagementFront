@@ -1,29 +1,23 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SHARED_FORM_FIELD_DIRECTIVES } from '../../../../../shared/forms/shared-form-field.imports';
-import { coerceFormNumber, requiredNumber } from '../../../../../shared/validators/required-number.validator';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { merge } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
+import { SHARED_FORM_FIELD_DIRECTIVES } from '../../../../../shared/forms/shared-form-field.imports';
+import { ToastService } from '../../../../../shared/services/toast.service';
+import { coerceFormNumber, requiredNumber } from '../../../../../shared/validators/required-number.validator';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 import { CategoryVehicleUpsertRequest } from '../../../models';
 import { CategoryVehicleService } from '../../../services/category-vehicles/category-vehicle.service';
-import { ToastService } from '../../../../../shared/services/toast.service';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
-import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
 @Component({
   selector: 'app-category-vehicle-form',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink,
-    TranslateModule,
-    ...SHARED_FORM_FIELD_DIRECTIVES,
-    PageHeaderComponent,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, ...SHARED_FORM_FIELD_DIRECTIVES],
   templateUrl: './category-vehicle-form.component.html',
   styleUrl: './category-vehicle-form.component.scss',
 })
@@ -31,6 +25,13 @@ export class CategoryVehicleFormComponent implements OnInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
   private static readonly ARABIC_NAME_REGEX = /^[\u0600-\u06FF0-9\s.'-]{2,255}$/;
   private static readonly ENGLISH_NAME_REGEX = /^[A-Za-z0-9\s.'-]{0,255}$/;
+
+  private static readonly WORKFLOW_SECTION_IDS = [
+    'category-form-section-identity',
+    'category-form-section-period-pricing',
+    'category-form-section-extra-pricing',
+    'category-form-section-limits',
+  ] as const;
 
   private fb = inject(NonNullableFormBuilder);
   private readonly nullableFb = inject(FormBuilder);
@@ -40,11 +41,13 @@ export class CategoryVehicleFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private translate = inject(TranslateService);
+  private destroyRef = inject(DestroyRef);
 
   isEdit = signal(false);
   categoryId = signal<string | null>(null);
   loading = signal(false);
   private categoryFleetId = signal<string>('');
+  private formProgressTick = signal(0);
 
   form = this.fb.group({
     nameAr: ['', [Validators.required, Validators.maxLength(255), Validators.pattern(CategoryVehicleFormComponent.ARABIC_NAME_REGEX)]],
@@ -61,11 +64,68 @@ export class CategoryVehicleFormComponent implements OnInit {
     allowToHigh: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
   });
 
+  identitySectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return f.nameAr.valid && f.nameEn.valid;
+  });
+
+  periodPricingSectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return (
+      f.price_day_low.valid &&
+      f.price_day_high.valid &&
+      f.price_month_low.valid &&
+      f.price_month_high.valid
+    );
+  });
+
+  extraPricingSectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return (
+      f.priceHoureExtraLow.valid &&
+      f.priceHoureExtraHigh.valid &&
+      f.countKMExtraLow.valid &&
+      f.countKMExtraHigh.valid
+    );
+  });
+
+  limitsSectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return f.allowToLow.valid && f.allowToHigh.valid;
+  });
+
+  profileCompletionPercent = computed(() => {
+    this.formProgressTick();
+    let done = 0;
+    if (this.identitySectionComplete()) done++;
+    if (this.periodPricingSectionComplete()) done++;
+    if (this.extraPricingSectionComplete()) done++;
+    if (this.limitsSectionComplete()) done++;
+    return Math.round((done / 4) * 100);
+  });
+
+  currentWorkflowStep = computed(() => {
+    this.formProgressTick();
+    if (!this.identitySectionComplete()) return 1;
+    if (!this.periodPricingSectionComplete()) return 2;
+    if (!this.extraPricingSectionComplete()) return 3;
+    if (!this.limitsSectionComplete()) return 4;
+    return 5;
+  });
+
   ngOnInit(): void {
     const fleetIdFromAuth = (this.authState.fleetId() ?? '').trim();
     if (fleetIdFromAuth) {
       this.categoryFleetId.set(fleetIdFromAuth);
     }
+
+    merge(this.form.valueChanges, this.form.statusChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formProgressTick.update(v => v + 1));
 
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
@@ -73,6 +133,21 @@ export class CategoryVehicleFormComponent implements OnInit {
     this.isEdit.set(true);
     this.categoryId.set(id);
     this.loadCategory(id);
+  }
+
+  focusWorkflowSection(step: 1 | 2 | 3 | 4): void {
+    const sectionId = CategoryVehicleFormComponent.WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('category-form-section--focus');
+    window.setTimeout(() => section.classList.remove('category-form-section--focus'), 1400);
   }
 
   private loadCategory(id: string): void {
@@ -98,6 +173,7 @@ export class CategoryVehicleFormComponent implements OnInit {
           allowToLow: category.allowToLow ?? 0,
           allowToHigh: category.allowToHigh ?? 0,
         });
+        this.formProgressTick.update(v => v + 1);
       },
       error: err => {
         this.toast.error(err?.message ?? this.translate.instant('Failed to load vehicle category'));
@@ -166,9 +242,3 @@ export class CategoryVehicleFormComponent implements OnInit {
     return fleetIdFromCategory || null;
   }
 }
-
-
-
-
-
-

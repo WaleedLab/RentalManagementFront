@@ -13,14 +13,13 @@ import { Router, RouterLink } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { forkJoin } from 'rxjs';
+import { forkJoin, merge } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { SHARED_FORM_FIELD_DIRECTIVES } from '../../../../../shared/forms/shared-form-field.imports';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import {
   SmoothSelectComponent,
   SmoothSelectOption,
@@ -49,7 +48,6 @@ import { BranchService } from '../../../../rent/services/branches/branch.service
     ReactiveFormsModule,
     RouterLink,
     TranslateModule,
-    PageHeaderComponent,
     SmoothSelectComponent,
     DatePickerComponent,
     ...SHARED_FORM_FIELD_DIRECTIVES,
@@ -59,6 +57,11 @@ import { BranchService } from '../../../../rent/services/branches/branch.service
 })
 export class JournalEntryFormComponent implements OnInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
+  private static readonly WORKFLOW_SECTION_IDS = [
+    'journal-form-section-header',
+    'journal-form-section-lines',
+  ] as const;
+
   private fb = inject(NonNullableFormBuilder);
   private readonly nullableFb = inject(FormBuilder);
   private authState = inject(AuthStateService);
@@ -76,6 +79,9 @@ export class JournalEntryFormComponent implements OnInit {
   private languageTick = signal(0);
   private readonly minimumRequiredLines = 2;
   isViewMode = signal(false);
+  initializing = signal(true);
+  submitAttempted = signal(false);
+  private formProgressTick = signal(0);
 
   loading = signal(false);
   loadingAccounts = signal(false);
@@ -196,7 +202,47 @@ export class JournalEntryFormComponent implements OnInit {
     return this.form.controls.details as any;
   }
 
+  headerSectionComplete = computed(() => {
+    this.formProgressTick();
+    const controls = this.form.controls;
+    return (
+      controls.date.valid &&
+      controls.node.valid &&
+      controls.journalType.valid &&
+      controls.operationType.valid &&
+      controls.status.valid &&
+      controls.idFinancialYear.valid &&
+      controls.idBranch.valid
+    );
+  });
+
+  linesSectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.headerSectionComplete() && this.hasMinimumLines() && this.isBalanced();
+  });
+
+  linesCount = computed(() => this.detailsArray.length);
+
+  profileCompletionPercent = computed(() => {
+    this.formProgressTick();
+    let done = 0;
+    if (this.headerSectionComplete()) done++;
+    if (this.linesSectionComplete()) done++;
+    return Math.round((done / 2) * 100);
+  });
+
+  currentWorkflowStep = computed(() => {
+    this.formProgressTick();
+    if (!this.headerSectionComplete()) return 1;
+    if (!this.linesSectionComplete()) return 2;
+    return 3;
+  });
+
   ngOnInit(): void {
+    merge(this.form.valueChanges, this.form.statusChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formProgressTick.update(value => value + 1));
+
     this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.languageTick.update(value => value + 1);
     });
@@ -333,10 +379,34 @@ export class JournalEntryFormComponent implements OnInit {
     );
   }
 
+  focusWorkflowSection(step: 1 | 2): void {
+    const sectionId = JournalEntryFormComponent.WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('journal-form-section--focus');
+    window.setTimeout(() => section.classList.remove('journal-form-section--focus'), 1400);
+  }
+
+  hasHeaderError(
+    controlName: 'date' | 'node' | 'journalType' | 'operationType' | 'status' | 'idFinancialYear' | 'idBranch',
+  ): boolean {
+    const control = this.form.controls[controlName];
+    return !!control && control.invalid && (control.touched || control.dirty || this.submitAttempted());
+  }
+
   onSubmit(): void {
     if (this.isViewMode()) {
       return;
     }
+
+    this.submitAttempted.set(true);
     if (!this.hasMinimumLines()) {
       this.toast.error(this.translate.instant('At least two lines are required'));
       return;
@@ -529,8 +599,12 @@ export class JournalEntryFormComponent implements OnInit {
         error: err => {
           this.toast.error(err?.message ?? this.translate.instant('Failed to load journals'));
           this.loading.set(false);
+          this.checkInitializingDone();
         },
-        complete: () => this.loading.set(false),
+        complete: () => {
+          this.loading.set(false);
+          this.checkInitializingDone();
+        },
       });
   }
 
@@ -657,7 +731,10 @@ export class JournalEntryFormComponent implements OnInit {
         this.toast.error(err?.message ?? this.translate.instant('Failed to load accounts'));
         this.loadingAccounts.set(false);
       },
-      complete: () => this.loadingAccounts.set(false),
+      complete: () => {
+        this.loadingAccounts.set(false);
+        this.checkInitializingDone();
+      },
     });
   }
 
@@ -727,7 +804,10 @@ export class JournalEntryFormComponent implements OnInit {
         this.toast.error(err?.message ?? this.translate.instant('Failed to load financial years'));
         this.loadingFinancialYears.set(false);
       },
-      complete: () => this.loadingFinancialYears.set(false),
+      complete: () => {
+        this.loadingFinancialYears.set(false);
+        this.checkInitializingDone();
+      },
     });
   }
 
@@ -752,7 +832,10 @@ export class JournalEntryFormComponent implements OnInit {
           this.toast.error(err?.message ?? this.translate.instant('Failed to load branches'));
           this.loadingBranches.set(false);
         },
-        complete: () => this.loadingBranches.set(false),
+        complete: () => {
+          this.loadingBranches.set(false);
+          this.checkInitializingDone();
+        },
       });
   }
 
@@ -890,6 +973,18 @@ export class JournalEntryFormComponent implements OnInit {
   private toRequiredPositiveInteger(value: unknown): number {
     const numeric = Number(value ?? 0);
     return Number.isFinite(numeric) && numeric > 0 ? Math.trunc(numeric) : 0;
+  }
+
+  private checkInitializingDone(): void {
+    if (this.loadingFinancialYears() || this.loadingBranches() || this.loadingAccounts()) {
+      return;
+    }
+
+    if (this.isViewMode() && this.loading()) {
+      return;
+    }
+
+    this.initializing.set(false);
   }
 
   private resolveSaveErrorMessage(error: unknown): string {

@@ -88,5 +88,22 @@
   "Search journals": "ابحث في القيود",
   "Name": "الاسم",
   "View": "عرض",
-  "Print": "طباعة"
+  "Print": "طباعة",
+  "journals.formPageSubtitle": "أنشئ قيدًا محاسبيًا متوازنًا من رأس القيد والتفاصيل المرتبطة بدليل الحسابات.",
+  "journals.formWorkflowSteps": "خطوات نموذج القيد اليومي",
+  "journals.flowStepHeader": "رأس القيد",
+  "journals.flowStepLines": "تفاصيل القيد",
+  "journals.sectionHeaderTitle": "رأس القيد",
+  "journals.sectionHeaderSubtitle": "التاريخ والفرع والسنة المالية ونوع العملية والحالة والبيان.",
+  "journals.sectionLinesTitle": "تفاصيل القيد",
+  "journals.sectionLinesSubtitle": "أضف سطرين على الأقل مع مدين أو دائن لكل سطر، ويجب أن يتوازن القيد.",
+  "journals.requiredFieldBadge": "مطلوب",
+  "journals.hintNote": "وصف مختصر يوضح سبب القيد أو العملية المرتبطة.",
+  "journals.hintLines": "اختر الحساب ثم أدخل المدين أو الدائن — لا يمكن إدخالهما معًا في نفس السطر.",
+  "journals.linesCountLabel": "سطر",
+  "journals.formSummary": "ملخص القيد",
+  "journals.flowProfileCompletion": "اكتمال النموذج",
+  "journals.flowSummaryHeader": "رأس القيد مكتمل",
+  "journals.flowSummaryLines": "التفاصيل متوازنة",
+  "journals.formWorkflowNote": "يجب توازن المدين والدائن قبل الحفظ. يمكنك التنقل بين الخطوات من الشريط أعلاه."
 }

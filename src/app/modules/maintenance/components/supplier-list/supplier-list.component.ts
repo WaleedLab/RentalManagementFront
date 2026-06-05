@@ -104,8 +104,7 @@ export class SupplierListComponent implements OnInit {
     }
 
     const label = row.supplierName || `#${row.id}`;
-    this.confirm
-      .confirm(
+    this.confirm.confirmDelete(
         this.translate.instant('maintenance.supplier.deleteTitle'),
         `${this.translate.instant('maintenance.supplier.deleteConfirm')} ${label}`,
       )

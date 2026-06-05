@@ -11,13 +11,12 @@ import {
 import { Router, RouterLink } from '@angular/router';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { catchError, forkJoin, of, startWith } from 'rxjs';
+import { catchError, forkJoin, merge, of, startWith } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { loginBranchId } from '../../../../../shared/utils/branch-id.util';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import {
   SmoothSelectComponent,
   SmoothSelectOption,
@@ -54,7 +53,6 @@ import { BookingService } from '../../../../rent/services/booking/booking.servic
     ReactiveFormsModule,
     RouterLink,
     TranslateModule,
-    PageHeaderComponent,
     SmoothSelectComponent,
     ...SHARED_FORM_FIELD_DIRECTIVES,
   ],
@@ -63,6 +61,12 @@ import { BookingService } from '../../../../rent/services/booking/booking.servic
 })
 export class PaymentCountFormComponent implements OnInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
+  private static readonly WORKFLOW_SECTION_IDS = [
+    'voucher-form-section-link',
+    'voucher-form-section-payment',
+    'voucher-form-section-details',
+  ] as const;
+
   private fb = inject(NonNullableFormBuilder);
   private readonly nullableFb = inject(FormBuilder);
   private authState = inject(AuthStateService);
@@ -98,7 +102,10 @@ export class PaymentCountFormComponent implements OnInit {
   bookings = signal<Booking[]>([]);
   paymentTypeValue = signal(1);
   statusValue = signal(1);
+  initializing = signal(true);
+  submitAttempted = signal(false);
   private readonly i18nTick = signal(0);
+  private formProgressTick = signal(0);
   private readonly minimumRequiredLines = 1;
   private syncingSplitAmounts = false;
 
@@ -251,7 +258,86 @@ export class PaymentCountFormComponent implements OnInit {
     return this.form.controls.details as any;
   }
 
+  linkSectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.form.controls.idBranch.valid;
+  });
+
+  paymentSectionComplete = computed(() => {
+    this.formProgressTick();
+    if (!this.linkSectionComplete()) {
+      return false;
+    }
+
+    const controls = this.form.controls;
+    const baseValid =
+      controls.paid.valid &&
+      controls.paymentType.valid &&
+      controls.bondType.valid &&
+      controls.status.valid &&
+      controls.idFinancialYear.valid &&
+      controls.dscription.valid &&
+      controls.paidCash.valid &&
+      controls.paidBank.valid;
+
+    if (!baseValid) {
+      return false;
+    }
+
+    if (this.showExpenseCategoryField() && controls.expenseCategory.invalid) {
+      return false;
+    }
+
+    if (controls.stutusbooking.enabled && controls.stutusbooking.invalid) {
+      return false;
+    }
+
+    if (Number(controls.status.value ?? 1) === 1) {
+      const paymentType = Number(controls.paymentType.value ?? 1);
+      if (paymentType === 1 && controls.idCash.invalid) {
+        return false;
+      }
+      if ([2, 3, 4].includes(paymentType) && controls.idBank.invalid) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  detailsSectionComplete = computed(() => {
+    this.formProgressTick();
+    return (
+      this.paymentSectionComplete() &&
+      this.detailsArray.length >= this.minimumRequiredLines &&
+      this.isDetailsBalanced()
+    );
+  });
+
+  linesCount = computed(() => this.detailsArray.length);
+
+  profileCompletionPercent = computed(() => {
+    this.formProgressTick();
+    let done = 0;
+    if (this.linkSectionComplete()) done++;
+    if (this.paymentSectionComplete()) done++;
+    if (this.detailsSectionComplete()) done++;
+    return Math.round((done / 3) * 100);
+  });
+
+  currentWorkflowStep = computed(() => {
+    this.formProgressTick();
+    if (!this.linkSectionComplete()) return 1;
+    if (!this.paymentSectionComplete()) return 2;
+    if (!this.detailsSectionComplete()) return 3;
+    return 4;
+  });
+
   ngOnInit(): void {
+    merge(this.form.valueChanges, this.form.statusChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formProgressTick.update(value => value + 1));
+
     this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.i18nTick.update(value => value + 1);
     });
@@ -361,7 +447,51 @@ export class PaymentCountFormComponent implements OnInit {
     return value[key];
   }
 
+  formatAmount(value: number): string {
+    const numeric = Number(value ?? 0);
+    if (!Number.isFinite(numeric)) {
+      return '0';
+    }
+    return numeric.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  focusWorkflowSection(step: 1 | 2 | 3): void {
+    const sectionId = PaymentCountFormComponent.WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('voucher-form-section--focus');
+    window.setTimeout(() => section.classList.remove('voucher-form-section--focus'), 1400);
+  }
+
+  hasFieldError(
+    controlName:
+      | 'idBranch'
+      | 'paid'
+      | 'paymentType'
+      | 'bondType'
+      | 'status'
+      | 'idFinancialYear'
+      | 'dscription'
+      | 'expenseCategory'
+      | 'stutusbooking'
+      | 'idCash'
+      | 'idBank'
+      | 'paidCash'
+      | 'paidBank',
+  ): boolean {
+    const control = this.form.controls[controlName];
+    return !!control && control.invalid && (control.touched || control.dirty || this.submitAttempted());
+  }
+
   onSubmit(): void {
+    this.submitAttempted.set(true);
     const paymentType = Number(this.form.controls.paymentType.value ?? 1);
     const status = Number(this.form.controls.status.value ?? 1);
     const isConfirmed = status === 1;
@@ -532,13 +662,17 @@ export class PaymentCountFormComponent implements OnInit {
             this.banks.set(fallback.banks);
             this.cashAccounts.set(fallback.cashAccounts);
           },
-          complete: () => this.loadingChannels.set(false),
+          complete: () => {
+            this.loadingChannels.set(false);
+            this.checkInitializingDone();
+          },
         });
       },
       complete: () => {
         if (this.loadingChannels()) {
           this.loadingChannels.set(false);
         }
+        this.checkInitializingDone();
       },
     });
   }
@@ -562,8 +696,12 @@ export class PaymentCountFormComponent implements OnInit {
       error: err => {
         this.toast.error(err?.message ?? this.translate.instant('Failed to load accounts'));
         this.loadingAccounts.set(false);
+        this.checkInitializingDone();
       },
-      complete: () => this.loadingAccounts.set(false),
+      complete: () => {
+        this.loadingAccounts.set(false);
+        this.checkInitializingDone();
+      },
     });
   }
 
@@ -581,8 +719,12 @@ export class PaymentCountFormComponent implements OnInit {
       error: err => {
         this.toast.error(err?.message ?? this.translate.instant('Failed to load financial years'));
         this.loadingFinancialYears.set(false);
+        this.checkInitializingDone();
       },
-      complete: () => this.loadingFinancialYears.set(false),
+      complete: () => {
+        this.loadingFinancialYears.set(false);
+        this.checkInitializingDone();
+      },
     });
   }
 
@@ -596,8 +738,12 @@ export class PaymentCountFormComponent implements OnInit {
         error: err => {
           this.toast.error(err?.message ?? this.translate.instant('Failed to load customers'));
           this.loadingCustomers.set(false);
+          this.checkInitializingDone();
         },
-        complete: () => this.loadingCustomers.set(false),
+        complete: () => {
+          this.loadingCustomers.set(false);
+          this.checkInitializingDone();
+        },
       });
   }
 
@@ -619,8 +765,12 @@ export class PaymentCountFormComponent implements OnInit {
         error: err => {
           this.toast.error(err?.message ?? this.translate.instant('Failed to load vehicles'));
           this.loadingVehicles.set(false);
+          this.checkInitializingDone();
         },
-        complete: () => this.loadingVehicles.set(false),
+        complete: () => {
+          this.loadingVehicles.set(false);
+          this.checkInitializingDone();
+        },
       });
   }
 
@@ -642,8 +792,12 @@ export class PaymentCountFormComponent implements OnInit {
         error: err => {
           this.toast.error(err?.message ?? this.translate.instant('Failed to load branches'));
           this.loadingBranches.set(false);
+          this.checkInitializingDone();
         },
-        complete: () => this.loadingBranches.set(false),
+        complete: () => {
+          this.loadingBranches.set(false);
+          this.checkInitializingDone();
+        },
       });
   }
 
@@ -658,8 +812,12 @@ export class PaymentCountFormComponent implements OnInit {
         error: err => {
           this.toast.error(err?.message ?? this.translate.instant('Failed to load bookings'));
           this.loadingBookings.set(false);
+          this.checkInitializingDone();
         },
-        complete: () => this.loadingBookings.set(false),
+        complete: () => {
+          this.loadingBookings.set(false);
+          this.checkInitializingDone();
+        },
       });
   }
 
@@ -767,6 +925,14 @@ export class PaymentCountFormComponent implements OnInit {
 
   showBankAccountField(): boolean {
     return !this.isBankAccountDisabled();
+  }
+
+  requiresCashAccount(): boolean {
+    return this.statusValue() === 1 && this.paymentTypeValue() === 1;
+  }
+
+  requiresBankAccount(): boolean {
+    return this.statusValue() === 1 && [2, 3, 4].includes(this.paymentTypeValue());
   }
 
   private applyBusinessRules(): void {
@@ -924,6 +1090,22 @@ export class PaymentCountFormComponent implements OnInit {
   private setControlRequired(control: (typeof this.form.controls)['idCash'], required: boolean): void {
     control.setValidators(required ? [Validators.required] : []);
     control.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private checkInitializingDone(): void {
+    if (
+      this.loadingFinancialYears() ||
+      this.loadingBranches() ||
+      this.loadingAccounts() ||
+      this.loadingChannels() ||
+      this.loadingCustomers() ||
+      this.loadingVehicles() ||
+      this.loadingBookings()
+    ) {
+      return;
+    }
+
+    this.initializing.set(false);
   }
 
 }

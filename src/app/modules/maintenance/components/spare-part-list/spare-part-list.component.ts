@@ -104,8 +104,7 @@ export class SparePartListComponent implements OnInit {
     }
 
     const label = row.name || `#${row.id}`;
-    this.confirm
-      .confirm(
+    this.confirm.confirmDelete(
         this.translate.instant('maintenance.sparePart.deleteTitle'),
         `${this.translate.instant('maintenance.sparePart.deleteConfirm')} ${label}`,
       )

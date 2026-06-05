@@ -327,7 +327,7 @@ describe('JournalEntryListComponent', () => {
     component.onRowAction({ actionKey: 'view', rowIndex: 0 });
 
     expect(journalServiceSpy.getByIdWithDetails).not.toHaveBeenCalled();
-    expect(component.rowActions[0].route?.(component.rows()[0])).toEqual(['/journals', 'journal-1', 'view']);
+    expect(component.rowActions[0].route?.(component.rows()[0])).toEqual(['/journals', 'view', 'journal-1']);
   });
 
   it('shows error state and toast when paginated load fails', () => {

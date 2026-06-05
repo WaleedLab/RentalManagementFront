@@ -1,106 +1,251 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="(isEdit() ? 'Edit Role' : 'Create Role') | translate"
-    [subtitle]="'Define a role and control which privileges it grants.' | translate"
-  >
-    <a class="btn btn-outline-secondary" routerLink="/roles">{{ 'Back to Roles' | translate }}</a>
-  </app-page-header>
+<div class="container-fluid contract-flow-page contract-flow-edit role-form-page">
+  <header class="contract-flow-header role-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          {{ (isEdit() ? 'Edit Role' : 'Create Role') | translate }}
+        </h1>
+        <p class="contract-flow-header__meta mb-0">{{ 'roles.formPageSubtitle' | translate }}</p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/roles">{{ 'Back to Roles' | translate }}</a>
+    </div>
+  </header>
 
-  <div class="card">
-    <div class="card-body">
-      <form [formGroup]="form" (ngSubmit)="save()">
-        <div class="row g-3">
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Role Name' | translate }} <span class="text-danger">*</span></label>
-            <input class="form-control" formControlName="name" maxlength="255" [placeholder]="'Example Role Name' | translate" />
-            <div class="form-text">{{ 'Hint Role Name' | translate }}</div>
-            @if (form.get('name')?.invalid && form.get('name')?.touched) {
-              <div class="text-danger small">{{ 'Role name is required and must be valid.' | translate }}</div>
-            }
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Display Name (AR)' | translate }} <span class="text-danger">*</span></label>
-            <input class="form-control" formControlName="displayName" maxlength="255" [placeholder]="'Example Role Arabic Name' | translate" />
-            <div class="form-text">{{ 'Hint Role Arabic Name' | translate }}</div>
-            @if (form.get('displayName')?.invalid && form.get('displayName')?.touched) {
-              <div class="text-danger small">{{ 'Role Arabic display name is required and must be valid.' | translate }}</div>
-            }
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Display Name (EN)' | translate }} <span class="text-danger">*</span></label>
-            <input class="form-control" formControlName="displayNameEn" maxlength="255" [placeholder]="'Example Role English Name' | translate" />
-            <div class="form-text">{{ 'Hint Role English Name' | translate }}</div>
-            @if (form.get('displayNameEn')?.invalid && form.get('displayNameEn')?.touched) {
-              <div class="text-danger small">{{ 'Role English display name is required and must be valid.' | translate }}</div>
-            }
-          </div>
-        </div>
-
-        <div class="mt-4">
-          <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-2">
-            <label class="form-label mb-0">{{ 'Privileges' | translate }} <span class="text-danger">*</span></label>
-            <div class="d-flex align-items-center gap-2">
-              <span class="badge bg-primary-subtle text-primary-emphasis">
-                {{ selectedPrivilegesCount() }} {{ 'selected' | translate }}
-              </span>
-              <button type="button" class="btn btn-sm btn-outline-primary" (click)="selectAllFiltered()">
-                {{ 'Select Visible' | translate }}
+  @if (initializing()) {
+    <div class="role-form-loading">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+  } @else {
+    <div class="contract-flow-layout role-form-layout">
+      <div class="contract-flow-main">
+        <form class="app-form-value-state role-form" [formGroup]="form" (ngSubmit)="save()">
+          <ol class="role-form-workflow" [attr.aria-label]="'roles.formWorkflowSteps' | translate">
+            <li>
+              <button
+                type="button"
+                class="role-form-workflow__step"
+                [class.role-form-workflow__step--done]="identitySectionComplete()"
+                [class.role-form-workflow__step--current]="currentWorkflowStep() === 1"
+                [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+                [attr.aria-controls]="'role-form-section-identity'"
+                (click)="focusWorkflowSection(1)"
+              >
+                <span class="role-form-workflow__num">1</span>
+                <span>{{ 'roles.flowStepIdentity' | translate }}</span>
               </button>
-              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearSelectedPrivileges()">
-                {{ 'Clear' | translate }}
+            </li>
+            <li>
+              <button
+                type="button"
+                class="role-form-workflow__step"
+                [class.role-form-workflow__step--done]="permissionsSectionComplete()"
+                [class.role-form-workflow__step--current]="currentWorkflowStep() === 2"
+                [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+                [attr.aria-controls]="'role-form-section-permissions'"
+                (click)="focusWorkflowSection(2)"
+              >
+                <span class="role-form-workflow__num">2</span>
+                <span>{{ 'roles.flowStepPermissions' | translate }}</span>
               </button>
+            </li>
+          </ol>
+
+          <div class="role-form-fields-shell">
+            <details id="role-form-section-identity" class="role-form-section role-form-fold" open>
+              <summary class="role-form-section__summary">
+                <span class="role-form-section__step">1</span>
+                {{ 'roles.sectionIdentityTitle' | translate }}
+              </summary>
+              <div class="role-form-fold__body">
+                <header class="role-form-section-head">
+                  <span class="role-form-section-head__icon" aria-hidden="true">🏷️</span>
+                  <div>
+                    <h2 class="role-form-section-head__title">{{ 'roles.sectionIdentityTitle' | translate }}</h2>
+                    <p class="role-form-section-head__hint">{{ 'roles.sectionIdentitySubtitle' | translate }}</p>
+                  </div>
+                </header>
+                <div class="role-form-grid role-form-grid--3">
+                  <div class="role-form-field" [class.role-form-field--invalid]="hasError('name')">
+                    <label class="role-form-label">
+                      <span>{{ 'Role Name' | translate }}</span>
+                      <span class="role-form-badge role-form-badge--required">{{ 'roles.requiredFieldBadge' | translate }}</span>
+                    </label>
+                    <input
+                      class="form-control"
+                      formControlName="name"
+                      maxlength="255"
+                      [placeholder]="'Example Role Name' | translate"
+                    />
+                    <p class="role-form-hint">{{ 'Hint Role Name' | translate }}</p>
+                    @if (hasError('name')) {
+                      <div class="role-form-hint role-form-hint--danger">
+                        {{ 'Role name is required and must be valid.' | translate }}
+                      </div>
+                    }
+                  </div>
+
+                  <div class="role-form-field" [class.role-form-field--invalid]="hasError('displayName')">
+                    <label class="role-form-label">
+                      <span>{{ 'Display Name (AR)' | translate }}</span>
+                      <span class="role-form-badge role-form-badge--required">{{ 'roles.requiredFieldBadge' | translate }}</span>
+                    </label>
+                    <input
+                      class="form-control"
+                      formControlName="displayName"
+                      maxlength="255"
+                      [placeholder]="'Example Role Arabic Name' | translate"
+                    />
+                    <p class="role-form-hint">{{ 'Hint Role Arabic Name' | translate }}</p>
+                    @if (hasError('displayName')) {
+                      <div class="role-form-hint role-form-hint--danger">
+                        {{ 'Role Arabic display name is required and must be valid.' | translate }}
+                      </div>
+                    }
+                  </div>
+
+                  <div class="role-form-field" [class.role-form-field--invalid]="hasError('displayNameEn')">
+                    <label class="role-form-label">
+                      <span>{{ 'Display Name (EN)' | translate }}</span>
+                      <span class="role-form-badge role-form-badge--required">{{ 'roles.requiredFieldBadge' | translate }}</span>
+                    </label>
+                    <input
+                      class="form-control"
+                      formControlName="displayNameEn"
+                      maxlength="255"
+                      [placeholder]="'Example Role English Name' | translate"
+                    />
+                    <p class="role-form-hint">{{ 'Hint Role English Name' | translate }}</p>
+                    @if (hasError('displayNameEn')) {
+                      <div class="role-form-hint role-form-hint--danger">
+                        {{ 'Role English display name is required and must be valid.' | translate }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <details id="role-form-section-permissions" class="role-form-section role-form-fold" open>
+              <summary class="role-form-section__summary">
+                <span class="role-form-section__step">2</span>
+                {{ 'roles.sectionPermissionsTitle' | translate }}
+              </summary>
+              <div class="role-form-fold__body">
+                <header class="role-form-section-head">
+                  <span class="role-form-section-head__icon" aria-hidden="true">🛡️</span>
+                  <div>
+                    <h2 class="role-form-section-head__title">{{ 'roles.sectionPermissionsTitle' | translate }}</h2>
+                    <p class="role-form-section-head__hint">{{ 'roles.sectionPermissionsSubtitle' | translate }}</p>
+                  </div>
+                </header>
+
+                <div class="role-form-privileges-toolbar">
+                  <span class="role-form-badge role-form-badge--required">{{ 'roles.requiredFieldBadge' | translate }}</span>
+                  <span class="role-form-privileges-count">
+                    {{ selectedPrivilegesCount() }} {{ 'selected' | translate }}
+                  </span>
+                  <div class="role-form-privileges-actions">
+                    <button type="button" class="btn btn-sm btn-outline-primary" (click)="selectAllFiltered()">
+                      {{ 'Select Visible' | translate }}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearSelectedPrivileges()">
+                      {{ 'Clear' | translate }}
+                    </button>
+                  </div>
+                </div>
+                <p class="role-form-hint">{{ 'Hint Role Privileges' | translate }}</p>
+
+                <div class="role-form-privileges-search">
+                  <span class="role-form-privileges-search__icon" aria-hidden="true">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                  </span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [placeholder]="'Search privileges...' | translate"
+                    [ngModel]="privilegeSearch()"
+                    (ngModelChange)="privilegeSearch.set($event)"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
+                </div>
+
+                <div class="role-form-privileges-grid">
+                  @for (privilege of filteredPrivileges(); track privilege.id) {
+                    <label
+                      class="role-form-privilege-card"
+                      [class.role-form-privilege-card--selected]="isPrivilegeSelected(privilege.id)"
+                    >
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        [checked]="isPrivilegeSelected(privilege.id)"
+                        (change)="togglePrivilege(privilege.id)"
+                      />
+                      <span class="role-form-privilege-card__body">
+                        <span class="role-form-privilege-card__title">{{ privilege.name || '-' }}</span>
+                        <span class="role-form-privilege-card__meta">
+                          {{ privilege.privilegeName || privilege.nameEn || '' }}
+                        </span>
+                      </span>
+                    </label>
+                  } @empty {
+                    <p class="role-form-hint">{{ 'No matching privileges.' | translate }}</p>
+                  }
+                </div>
+
+                @if (hasPrivilegesError()) {
+                  <div class="role-form-hint role-form-hint--danger">
+                    {{ 'At least one privilege is required.' | translate }}
+                  </div>
+                }
+              </div>
+            </details>
+          </div>
+
+          <div class="app-form-actions">
+            <button class="btn btn-primary" type="submit" [disabled]="loading()">
+              @if (loading()) {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              }
+              {{ (isEdit() ? 'Update Role' : 'Create Role') | translate }}
+            </button>
+            <a class="btn btn-cancel" routerLink="/roles">{{ 'Cancel' | translate }}</a>
+          </div>
+        </form>
+      </div>
+
+      <aside class="contract-flow-aside role-form-aside" [attr.aria-label]="'roles.formSummary' | translate">
+        <div class="role-form-aside-card">
+          <div class="role-form-progress">
+            <div class="role-form-progress__head">
+              <span>{{ 'roles.flowProfileCompletion' | translate }}</span>
+              <strong>{{ profileCompletionPercent() }}%</strong>
+            </div>
+            <div
+              class="role-form-progress__track"
+              role="progressbar"
+              [attr.aria-valuenow]="profileCompletionPercent()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span class="role-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
             </div>
           </div>
-          <div class="form-text mb-3">{{ 'Hint Role Privileges' | translate }}</div>
-          <div class="input-group input-group-sm mb-3">
-            <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
-            <input
-              type="text"
-              class="form-control"
-              [placeholder]="'Search privileges...' | translate"
-              [ngModel]="privilegeSearch()"
-              (ngModelChange)="privilegeSearch.set($event)"
-              [ngModelOptions]="{ standalone: true }"
-            />
-          </div>
-          <div class="row g-3">
-            @for (privilege of filteredPrivileges(); track privilege.id) {
-              <div class="col-md-4">
-                <label class="card h-100 border">
-                  <div class="card-body d-flex align-items-start gap-2">
-                    <input
-                      class="form-check-input mt-1"
-                      type="checkbox"
-                      [checked]="isPrivilegeSelected(privilege.id)"
-                      (change)="togglePrivilege(privilege.id)"
-                    />
-                    <div>
-                      <div class="fw-semibold">{{ privilege.name || '-' }}</div>
-                      <div class="text-muted small">{{ privilege.privilegeName || privilege.nameEn || '' }}</div>
-                    </div>
-                  </div>
-                </label>
-              </div>
-            } @empty {
-              <div class="col-12">
-                <div class="text-muted small">{{ 'No matching privileges.' | translate }}</div>
-              </div>
-            }
-          </div>
-          @if (form.get('privilegeTypeIds')?.invalid && form.get('privilegeTypeIds')?.touched) {
-            <div class="text-danger small mt-2">{{ 'At least one privilege is required.' | translate }}</div>
-          }
-        </div>
 
-        <div class="app-form-actions">
-          <button class="btn btn-primary" type="submit" [disabled]="loading()">
-            {{ (isEdit() ? 'Update Role' : 'Create Role') | translate }}
-          </button>
-          <a class="btn btn-cancel" routerLink="/roles">{{ 'Cancel' | translate }}</a>
+          <ul class="role-form-status-list">
+            <li [class.role-form-status-list__item--done]="identitySectionComplete()">
+              <span class="role-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'roles.flowSummaryIdentity' | translate }}</span>
+            </li>
+            <li [class.role-form-status-list__item--done]="permissionsSectionComplete()">
+              <span class="role-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'roles.flowSummaryPermissions' | translate }}</span>
+            </li>
+          </ul>
+
+          <p class="role-form-workflow-note">{{ 'roles.formWorkflowNote' | translate }}</p>
         </div>
-      </form>
+      </aside>
     </div>
-  </div>
+  }
 </div>

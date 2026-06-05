@@ -52,3 +52,13 @@
   --fin-btn-action-shadow: var(--app-btn-outline-shadow);
   --fin-btn-action-shadow-hover: var(--app-btn-outline-shadow-hover);
 }
+
+@mixin fin-command-btn-action-layout-tokens() {
+  --fin-btn-action-min-height: 44px;
+  --fin-btn-action-min-width: 15rem;
+  --fin-btn-action-add-min-width: 15rem;
+  --fin-btn-action-padding-inline: 1.625rem;
+  --fin-btn-action-padding-block: 0.6875rem;
+  --fin-btn-action-font-size: 0.92rem;
+  --fin-btn-action-font-weight: 700;
+}

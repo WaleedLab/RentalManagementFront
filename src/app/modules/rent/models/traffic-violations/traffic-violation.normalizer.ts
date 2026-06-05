@@ -51,6 +51,21 @@ function vehiclePlateFromNested(vehicle: Record<string, unknown> | undefined): s
   return String(plate).trim() || undefined;
 }
 
+function vehiclePlateFromRoot(r: Record<string, unknown>): string | undefined {
+  const direct = pickLoose(
+    r,
+    'vehiclePlate',
+    'VehiclePlate',
+    'vehiclePlateNumber',
+    'VehiclePlateNumber',
+    'plateNumber',
+    'PlateNumber',
+    'plantnumber',
+    'Plantnumber',
+  );
+  return direct !== undefined && direct !== null ? String(direct).trim() || undefined : undefined;
+}
+
 export function normalizeTrafficViolation(raw: unknown): TrafficViolation {
   const r = (raw ?? {}) as Record<string, unknown>;
   const id = toNumber(pickLoose(r, 'id', 'Id')) ?? 0;
@@ -72,7 +87,7 @@ export function normalizeTrafficViolation(raw: unknown): TrafficViolation {
     idBooking,
     idVehicle: toNumber(pickLoose(r, 'idVehicle', 'IdVehicle')) ?? 0,
     bookingLabel: bookingLabelFromNested(booking),
-    vehiclePlate: vehiclePlateFromNested(vehicle),
+    vehiclePlate: vehiclePlateFromRoot(r) ?? vehiclePlateFromNested(vehicle),
     dateViolation: String(pickLoose(r, 'dateViolation', 'DateViolation') ?? ''),
     violationFine: toNumber(pickLoose(r, 'violationFine', 'ViolationFine')) ?? 0,
     description: String(pickLoose(r, 'description', 'Description') ?? '').trim() || undefined,

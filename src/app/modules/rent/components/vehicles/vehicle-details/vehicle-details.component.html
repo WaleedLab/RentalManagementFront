@@ -3,7 +3,7 @@
     <div class="d-flex gap-2">
       <a class="btn btn-outline-secondary" routerLink="/vehicles">Back</a>
       @if (vehicle(); as item) {
-        <a class="btn btn-primary" [routerLink]="['/vehicles', item.id, 'edit']">Edit Vehicle</a>
+        <a class="btn btn-primary" [routerLink]="['/vehicles', 'edit', item.id]">Edit Vehicle</a>
       }
     </div>
   </app-page-header>

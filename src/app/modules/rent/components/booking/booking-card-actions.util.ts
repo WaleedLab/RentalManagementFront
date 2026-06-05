@@ -52,9 +52,9 @@ export function isBookingSuspendedDueToSumMoney(
 /** مسار إنهاء العقد حسب الحالة. */
 export function bookingFinishRoute(booking: Pick<Booking, 'id' | 'status'>): (string | number)[] {
   if (isBookingSuspended(booking)) {
-    return ['/booking', booking.id, 'finish-suspended'];
+    return ['/booking', 'finish-suspended', booking.id];
   }
-  return ['/booking', booking.id, 'finish'];
+  return ['/booking', 'finish', booking.id];
 }
 
 /** مفتاح ترجمة زر الإنهاء. */

@@ -16,6 +16,7 @@
   @include fin-command-button-tokens.fin-command-btn-primary-light;
   @include fin-command-button-tokens.fin-command-btn-search-light;
   @include fin-command-button-tokens.fin-command-btn-action-light;
+  @include fin-command-button-tokens.fin-command-btn-action-layout-tokens;
 }
 
 @mixin list-command-tokens-dark() {
@@ -33,4 +34,5 @@
   @include fin-command-button-tokens.fin-command-btn-primary-dark;
   @include fin-command-button-tokens.fin-command-btn-search-dark;
   @include fin-command-button-tokens.fin-command-btn-action-dark;
+  @include fin-command-button-tokens.fin-command-btn-action-layout-tokens;
 }

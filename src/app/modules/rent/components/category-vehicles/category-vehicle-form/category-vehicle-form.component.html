@@ -1,92 +1,271 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="(isEdit() ? 'Edit Vehicle Category' : 'Create Vehicle Category') | translate"
-    [subtitle]="'Define reusable vehicle pricing records for bookings and fleet operations.' | translate"
-  >
-    <a class="btn btn-outline-secondary" routerLink="/category-vehicles">{{ 'Back' | translate }}</a>
-  </app-page-header>
+<div class="container-fluid contract-flow-page contract-flow-edit category-form-page">
+  <header class="contract-flow-header category-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          {{ (isEdit() ? 'Edit Vehicle Category' : 'Create Vehicle Category') | translate }}
+        </h1>
+        <p class="contract-flow-header__meta mb-0">
+          {{ 'Category form page subtitle' | translate }}
+        </p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/category-vehicles">{{ 'Back' | translate }}</a>
+    </div>
+  </header>
 
-  <div class="card">
-    <div class="card-body">
-      <form class="app-form-value-state" [formGroup]="form" (ngSubmit)="save()">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Name (AR)' | translate }} <span class="text-danger">*</span></label>
-            <input class="form-control" formControlName="nameAr" maxlength="255" [placeholder]="'Example Category Arabic Name' | translate" />
-            <div class="form-text">{{ 'Hint Category Arabic Name' | translate }}</div>
-            @if (form.get('nameAr')?.invalid && form.get('nameAr')?.touched) {
-              <div class="text-danger small">{{ 'Category Arabic name is required and must be valid.' | translate }}</div>
-            }
-          </div>
+  <div class="contract-flow-layout category-form-layout">
+    <div class="contract-flow-main">
+      <form class="app-form-value-state category-form" [formGroup]="form" (ngSubmit)="save()">
+        <ol class="category-form-workflow" [attr.aria-label]="'Category form workflow steps' | translate">
+          <li>
+            <button
+              type="button"
+              class="category-form-workflow__step"
+              [class.category-form-workflow__step--done]="identitySectionComplete()"
+              [class.category-form-workflow__step--current]="currentWorkflowStep() === 1"
+              [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+              [attr.aria-controls]="'category-form-section-identity'"
+              (click)="focusWorkflowSection(1)"
+            >
+              <span class="category-form-workflow__num">1</span>
+              <span>{{ 'Category flow step identity' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="category-form-workflow__step"
+              [class.category-form-workflow__step--done]="periodPricingSectionComplete()"
+              [class.category-form-workflow__step--current]="currentWorkflowStep() === 2"
+              [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+              [attr.aria-controls]="'category-form-section-period-pricing'"
+              (click)="focusWorkflowSection(2)"
+            >
+              <span class="category-form-workflow__num">2</span>
+              <span>{{ 'Category flow step period pricing' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="category-form-workflow__step"
+              [class.category-form-workflow__step--done]="extraPricingSectionComplete()"
+              [class.category-form-workflow__step--current]="currentWorkflowStep() === 3"
+              [attr.aria-current]="currentWorkflowStep() === 3 ? 'step' : null"
+              [attr.aria-controls]="'category-form-section-extra-pricing'"
+              (click)="focusWorkflowSection(3)"
+            >
+              <span class="category-form-workflow__num">3</span>
+              <span>{{ 'Category flow step extra pricing' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="category-form-workflow__step"
+              [class.category-form-workflow__step--done]="limitsSectionComplete()"
+              [class.category-form-workflow__step--current]="currentWorkflowStep() === 4"
+              [attr.aria-current]="currentWorkflowStep() === 4 ? 'step' : null"
+              [attr.aria-controls]="'category-form-section-limits'"
+              (click)="focusWorkflowSection(4)"
+            >
+              <span class="category-form-workflow__num">4</span>
+              <span>{{ 'Category flow step limits' | translate }}</span>
+            </button>
+          </li>
+        </ol>
 
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Name (EN)' | translate }}</label>
-            <input class="form-control" formControlName="nameEn" maxlength="255" [placeholder]="'Example Category English Name' | translate" />
-            <div class="form-text">{{ 'Hint Category English Name' | translate }}</div>
-            @if (form.get('nameEn')?.invalid && form.get('nameEn')?.touched) {
-              <div class="text-danger small">{{ 'Category English name must be valid.' | translate }}</div>
-            }
-          </div>
+        <div class="category-form-fields-shell">
+          <details id="category-form-section-identity" class="category-form-section category-form-fold" open>
+            <summary class="category-form-section__summary">
+              <span class="category-form-section__step">1</span>
+              {{ 'Category Section Identity Title' | translate }}
+            </summary>
+            <div class="category-form-fold__body">
+              <header class="category-form-section-head">
+                <span class="category-form-section-head__icon" aria-hidden="true">🏷️</span>
+                <div>
+                  <h2 class="category-form-section-head__title">{{ 'Category Section Identity Title' | translate }}</h2>
+                  <p class="category-form-section-head__hint">{{ 'Category Section Identity Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="category-form-grid category-form-grid--2">
+                <div class="category-form-field">
+                  <label class="category-form-label">
+                    <span>{{ 'Name (AR)' | translate }}</span>
+                    <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="nameAr"
+                    maxlength="255"
+                    autocomplete="off"
+                    [placeholder]="'Example Category Arabic Name' | translate"
+                  />
+                  <p class="category-form-hint">{{ 'Hint Category Arabic Name' | translate }}</p>
+                  @if (form.controls.nameAr.invalid && form.controls.nameAr.touched) {
+                    <div class="category-form-hint category-form-hint--danger">
+                      {{ 'Category Arabic name is required and must be valid.' | translate }}
+                    </div>
+                  }
+                </div>
 
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Daily Price (Low)' | translate }} <span class="text-danger">*</span></label>
-            <input type="number" min="0" step="0.01" class="form-control" formControlName="price_day_low" [placeholder]="'Example Daily Price Low' | translate" />
-            <div class="form-text">{{ 'Hint Daily Price Low' | translate }}</div>
-          </div>
+                <div class="category-form-field">
+                  <label class="category-form-label">
+                    <span>{{ 'Name (EN)' | translate }}</span>
+                    <span class="category-form-badge category-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="nameEn"
+                    maxlength="255"
+                    autocomplete="off"
+                    [placeholder]="'Example Category English Name' | translate"
+                  />
+                  <p class="category-form-hint">{{ 'Hint Category English Name' | translate }}</p>
+                  @if (form.controls.nameEn.invalid && form.controls.nameEn.touched) {
+                    <div class="category-form-hint category-form-hint--danger">
+                      {{ 'Category English name must be valid.' | translate }}
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </details>
 
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Daily Price (High)' | translate }} <span class="text-danger">*</span></label>
-            <input type="number" min="0" step="0.01" class="form-control" formControlName="price_day_high" [placeholder]="'Example Daily Price High' | translate" />
-            <div class="form-text">{{ 'Hint Daily Price High' | translate }}</div>
-          </div>
+          <details id="category-form-section-period-pricing" class="category-form-section category-form-fold" open>
+            <summary class="category-form-section__summary">
+              <span class="category-form-section__step">2</span>
+              {{ 'Category Section Period Pricing Title' | translate }}
+            </summary>
+            <div class="category-form-fold__body">
+              <header class="category-form-section-head">
+                <span class="category-form-section-head__icon" aria-hidden="true">📅</span>
+                <div>
+                  <h2 class="category-form-section-head__title">{{ 'Category Section Period Pricing Title' | translate }}</h2>
+                  <p class="category-form-section-head__hint">{{ 'Category Section Period Pricing Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="category-form-grid category-form-grid--2">
+                <div class="category-form-field">
+                  <label class="category-form-label">
+                    <span>{{ 'Daily Price (Low)' | translate }}</span>
+                    <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input type="number" min="0" step="0.01" class="form-control" formControlName="price_day_low" [placeholder]="'Example Daily Price Low' | translate" />
+                  <p class="category-form-hint">{{ 'Hint Daily Price Low' | translate }}</p>
+                </div>
+                <div class="category-form-field">
+                  <label class="category-form-label">
+                    <span>{{ 'Daily Price (High)' | translate }}</span>
+                    <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input type="number" min="0" step="0.01" class="form-control" formControlName="price_day_high" [placeholder]="'Example Daily Price High' | translate" />
+                  <p class="category-form-hint">{{ 'Hint Daily Price High' | translate }}</p>
+                </div>
+                <div class="category-form-field">
+                  <label class="category-form-label">
+                    <span>{{ 'Monthly Price (Low)' | translate }}</span>
+                    <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input type="number" min="0" step="0.01" class="form-control" formControlName="price_month_low" [placeholder]="'Example Monthly Price Low' | translate" />
+                  <p class="category-form-hint">{{ 'Hint Monthly Price Low' | translate }}</p>
+                </div>
+                <div class="category-form-field">
+                  <label class="category-form-label">
+                    <span>{{ 'Monthly Price (High)' | translate }}</span>
+                    <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input type="number" min="0" step="0.01" class="form-control" formControlName="price_month_high" [placeholder]="'Example Monthly Price High' | translate" />
+                  <p class="category-form-hint">{{ 'Hint Monthly Price High' | translate }}</p>
+                </div>
+              </div>
+            </div>
+          </details>
 
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Monthly Price (Low)' | translate }} <span class="text-danger">*</span></label>
-            <input type="number" min="0" step="0.01" class="form-control" formControlName="price_month_low" [placeholder]="'Example Monthly Price Low' | translate" />
-            <div class="form-text">{{ 'Hint Monthly Price Low' | translate }}</div>
-          </div>
+          <details id="category-form-section-extra-pricing" class="category-form-section category-form-fold" open>
+            <summary class="category-form-section__summary">
+              <span class="category-form-section__step">3</span>
+              {{ 'Category Section Extra Pricing Title' | translate }}
+            </summary>
+            <div class="category-form-fold__body">
+              <header class="category-form-section-head">
+                <span class="category-form-section-head__icon" aria-hidden="true">⏱️</span>
+                <div>
+                  <h2 class="category-form-section-head__title">{{ 'Category Section Extra Pricing Title' | translate }}</h2>
+                  <p class="category-form-section-head__hint">{{ 'Category Section Extra Pricing Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="category-form-grid category-form-grid--2">
+                <div class="category-form-field">
+                  <label class="category-form-label">
+                    <span>{{ 'Extra Hour Price (Low)' | translate }}</span>
+                    <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input type="number" min="0" step="0.01" class="form-control" formControlName="priceHoureExtraLow" [placeholder]="'Example Extra Hour Price Low' | translate" />
+                  <p class="category-form-hint">{{ 'Hint Extra Hour Price Low' | translate }}</p>
+                </div>
+                <div class="category-form-field">
+                  <label class="category-form-label">
+                    <span>{{ 'Extra Hour Price (High)' | translate }}</span>
+                    <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input type="number" min="0" step="0.01" class="form-control" formControlName="priceHoureExtraHigh" [placeholder]="'Example Extra Hour Price High' | translate" />
+                  <p class="category-form-hint">{{ 'Hint Extra Hour Price High' | translate }}</p>
+                </div>
+                <div class="category-form-field">
+                  <label class="category-form-label">
+                    <span>{{ 'Extra KM Price (Low)' | translate }}</span>
+                    <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input type="number" min="0" step="0.01" class="form-control" formControlName="countKMExtraLow" [placeholder]="'Example Extra KM Price Low' | translate" />
+                  <p class="category-form-hint">{{ 'Hint Extra KM Price Low' | translate }}</p>
+                </div>
+                <div class="category-form-field">
+                  <label class="category-form-label">
+                    <span>{{ 'Extra KM Price (High)' | translate }}</span>
+                    <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input type="number" min="0" step="0.01" class="form-control" formControlName="countKMExtraHigh" [placeholder]="'Example Extra KM Price High' | translate" />
+                  <p class="category-form-hint">{{ 'Hint Extra KM Price High' | translate }}</p>
+                </div>
+              </div>
+            </div>
+          </details>
 
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Monthly Price (High)' | translate }} <span class="text-danger">*</span></label>
-            <input type="number" min="0" step="0.01" class="form-control" formControlName="price_month_high" [placeholder]="'Example Monthly Price High' | translate" />
-            <div class="form-text">{{ 'Hint Monthly Price High' | translate }}</div>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Extra Hour Price (Low)' | translate }} <span class="text-danger">*</span></label>
-            <input type="number" min="0" step="0.01" class="form-control" formControlName="priceHoureExtraLow" [placeholder]="'Example Extra Hour Price Low' | translate" />
-            <div class="form-text">{{ 'Hint Extra Hour Price Low' | translate }}</div>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Extra Hour Price (High)' | translate }} <span class="text-danger">*</span></label>
-            <input type="number" min="0" step="0.01" class="form-control" formControlName="priceHoureExtraHigh" [placeholder]="'Example Extra Hour Price High' | translate" />
-            <div class="form-text">{{ 'Hint Extra Hour Price High' | translate }}</div>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Extra KM Price (Low)' | translate }} <span class="text-danger">*</span></label>
-            <input type="number" min="0" step="0.01" class="form-control" formControlName="countKMExtraLow" [placeholder]="'Example Extra KM Price Low' | translate" />
-            <div class="form-text">{{ 'Hint Extra KM Price Low' | translate }}</div>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Extra KM Price (High)' | translate }} <span class="text-danger">*</span></label>
-            <input type="number" min="0" step="0.01" class="form-control" formControlName="countKMExtraHigh" [placeholder]="'Example Extra KM Price High' | translate" />
-            <div class="form-text">{{ 'Hint Extra KM Price High' | translate }}</div>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Allowed Limit (Low)' | translate }} <span class="text-danger">*</span></label>
-            <input type="number" min="0" step="0.01" class="form-control" formControlName="allowToLow" [placeholder]="'Example Allowed Limit Low' | translate" />
-            <div class="form-text">{{ 'Hint Allowed Limit Low' | translate }}</div>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Allowed Limit (High)' | translate }} <span class="text-danger">*</span></label>
-            <input type="number" min="0" step="0.01" class="form-control" formControlName="allowToHigh" [placeholder]="'Example Allowed Limit High' | translate" />
-            <div class="form-text">{{ 'Hint Allowed Limit High' | translate }}</div>
-          </div>
+          <details id="category-form-section-limits" class="category-form-section category-form-fold" open>
+            <summary class="category-form-section__summary">
+              <span class="category-form-section__step">4</span>
+              {{ 'Category Section Limits Title' | translate }}
+            </summary>
+            <div class="category-form-fold__body">
+              <header class="category-form-section-head">
+                <span class="category-form-section-head__icon" aria-hidden="true">📏</span>
+                <div>
+                  <h2 class="category-form-section-head__title">{{ 'Category Section Limits Title' | translate }}</h2>
+                  <p class="category-form-section-head__hint">{{ 'Category Section Limits Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="category-form-grid category-form-grid--2">
+                <div class="category-form-field">
+                  <label class="category-form-label">
+                    <span>{{ 'Allowed Limit (Low)' | translate }}</span>
+                    <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input type="number" min="0" step="0.01" class="form-control" formControlName="allowToLow" [placeholder]="'Example Allowed Limit Low' | translate" />
+                  <p class="category-form-hint">{{ 'Hint Allowed Limit Low' | translate }}</p>
+                </div>
+                <div class="category-form-field">
+                  <label class="category-form-label">
+                    <span>{{ 'Allowed Limit (High)' | translate }}</span>
+                    <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input type="number" min="0" step="0.01" class="form-control" formControlName="allowToHigh" [placeholder]="'Example Allowed Limit High' | translate" />
+                  <p class="category-form-hint">{{ 'Hint Allowed Limit High' | translate }}</p>
+                </div>
+              </div>
+            </div>
+          </details>
         </div>
 
         <div class="app-form-actions">
@@ -100,5 +279,44 @@
         </div>
       </form>
     </div>
+
+    <aside class="contract-flow-aside category-form-aside" [attr.aria-label]="'Category form summary' | translate">
+      <div class="category-form-aside-card">
+        <div class="category-form-progress">
+          <div class="category-form-progress__head">
+            <span>{{ 'Category flow profile completion' | translate }}</span>
+            <strong>{{ profileCompletionPercent() }}%</strong>
+          </div>
+          <div
+            class="category-form-progress__track"
+            role="progressbar"
+            [attr.aria-valuenow]="profileCompletionPercent()"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <span class="category-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+          </div>
+        </div>
+
+        <ul class="category-form-status-list">
+          <li [class.category-form-status-list__item--done]="identitySectionComplete()">
+            <span class="category-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Category flow summary identity' | translate }}</span>
+          </li>
+          <li [class.category-form-status-list__item--done]="periodPricingSectionComplete()">
+            <span class="category-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Category flow summary period pricing' | translate }}</span>
+          </li>
+          <li [class.category-form-status-list__item--done]="extraPricingSectionComplete()">
+            <span class="category-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Category flow summary extra pricing' | translate }}</span>
+          </li>
+          <li [class.category-form-status-list__item--done]="limitsSectionComplete()">
+            <span class="category-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Category flow summary limits' | translate }}</span>
+          </li>
+        </ul>
+      </div>
+    </aside>
   </div>
 </div>

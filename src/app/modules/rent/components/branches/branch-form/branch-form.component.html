@@ -1,90 +1,304 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="isEdit() ? ('Edit Branch' | translate) : ('Create Branch' | translate)"
-    [subtitle]="'Maintain branch identity, code, and operational activation status.' | translate"
-  >
-    <a class="btn btn-outline-secondary" routerLink="/branches">{{ 'Back' | translate }}</a>
-  </app-page-header>
-
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-body">
-          <form [formGroup]="form" (ngSubmit)="onSubmit()">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">{{ 'Name (AR)' | translate }} <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" formControlName="nameAr" maxlength="255" [placeholder]="'Example Branch Arabic Name' | translate" />
-                <div class="form-text">{{ 'Hint Branch Arabic Name' | translate }}</div>
-                @if (form.get('nameAr')?.invalid && form.get('nameAr')?.touched) {
-                  <div class="text-danger small">{{ 'Arabic branch name is required and must be valid.' | translate }}</div>
-                }
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">{{ 'Name (EN)' | translate }}</label>
-                <input type="text" class="form-control" formControlName="nameEn" maxlength="255" [placeholder]="'Example Branch English Name' | translate" />
-                <div class="form-text">{{ 'Hint Branch English Name' | translate }}</div>
-                @if (form.get('nameEn')?.invalid && form.get('nameEn')?.touched) {
-                  <div class="text-danger small">{{ 'English branch name must be valid.' | translate }}</div>
-                }
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">{{ 'Code' | translate }}</label>
-                <input type="text" class="form-control" formControlName="code" maxlength="100" [placeholder]="'Example Branch Code' | translate" />
-                <div class="form-text">{{ 'Hint Branch Code' | translate }}</div>
-                @if (form.get('code')?.invalid && form.get('code')?.touched) {
-                  <div class="text-danger small">{{ 'Branch code must be valid.' | translate }}</div>
-                }
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">{{ 'City' | translate }}</label>
-                <input type="text" class="form-control" formControlName="city" maxlength="150" [placeholder]="'Example Branch City' | translate" />
-                <div class="form-text">{{ 'Hint Branch City' | translate }}</div>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">{{ 'Neighborhood' | translate }}</label>
-                <input type="text" class="form-control" formControlName="neighborHood" maxlength="150" [placeholder]="'Example Branch Neighborhood' | translate" />
-                <div class="form-text">{{ 'Hint Branch Neighborhood' | translate }}</div>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">{{ 'Street' | translate }}</label>
-                <input type="text" class="form-control" formControlName="street" maxlength="250" [placeholder]="'Example Branch Street' | translate" />
-                <div class="form-text">{{ 'Hint Branch Street' | translate }}</div>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">{{ 'Building Number' | translate }}</label>
-                <input type="text" class="form-control" formControlName="buldingNumber" maxlength="100" [placeholder]="'Example Branch Building Number' | translate" />
-                <div class="form-text">{{ 'Hint Branch Building Number' | translate }}</div>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">{{ 'Contact Number' | translate }}</label>
-                <input type="text" class="form-control" formControlName="contactNumber" maxlength="50" [placeholder]="'Example Branch Contact Number' | translate" />
-                <div class="form-text">{{ 'Hint Branch Contact Number' | translate }}</div>
-                @if (form.get('contactNumber')?.invalid && form.get('contactNumber')?.touched) {
-                  <div class="text-danger small">{{ 'Branch contact number must be valid.' | translate }}</div>
-                }
-              </div>
-            </div>
-
-            <div class="app-form-actions">
-              <button class="btn btn-primary" type="submit" [disabled]="form.invalid || loading()">
-                @if (loading()) {
-                  <span class="spinner-border spinner-border-sm me-2"></span>
-                }
-                {{ isEdit() ? ('Update' | translate) : ('Create' | translate) }}
-              </button>
-              <a class="btn btn-cancel" routerLink="/branches">{{ 'Cancel' | translate }}</a>
-            </div>
-          </form>
-        </div>
+<div class="container-fluid contract-flow-page contract-flow-edit branch-form-page">
+  <header class="contract-flow-header branch-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          {{ (isEdit() ? 'Edit Branch' : 'Create Branch') | translate }}
+        </h1>
+        <p class="contract-flow-header__meta mb-0">
+          {{ 'Branch form page subtitle' | translate }}
+        </p>
       </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/branches">{{ 'Back' | translate }}</a>
     </div>
+  </header>
+
+  <div class="contract-flow-layout branch-form-layout">
+    <div class="contract-flow-main">
+      <form class="app-form-value-state branch-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+        <ol class="branch-form-workflow" [attr.aria-label]="'Branch form workflow steps' | translate">
+          <li>
+            <button
+              type="button"
+              class="branch-form-workflow__step"
+              [class.branch-form-workflow__step--done]="identitySectionComplete()"
+              [class.branch-form-workflow__step--current]="currentWorkflowStep() === 1"
+              [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+              [attr.aria-controls]="'branch-form-section-identity'"
+              (click)="focusWorkflowSection(1)"
+            >
+              <span class="branch-form-workflow__num">1</span>
+              <span>{{ 'Branch flow step identity' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="branch-form-workflow__step"
+              [class.branch-form-workflow__step--done]="locationSectionComplete()"
+              [class.branch-form-workflow__step--current]="currentWorkflowStep() === 2"
+              [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+              [attr.aria-controls]="'branch-form-section-location'"
+              (click)="focusWorkflowSection(2)"
+            >
+              <span class="branch-form-workflow__num">2</span>
+              <span>{{ 'Branch flow step location' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="branch-form-workflow__step"
+              [class.branch-form-workflow__step--done]="contactSectionComplete()"
+              [class.branch-form-workflow__step--current]="currentWorkflowStep() === 3"
+              [attr.aria-current]="currentWorkflowStep() === 3 ? 'step' : null"
+              [attr.aria-controls]="'branch-form-section-contact'"
+              (click)="focusWorkflowSection(3)"
+            >
+              <span class="branch-form-workflow__num">3</span>
+              <span>{{ 'Branch flow step contact' | translate }}</span>
+            </button>
+          </li>
+        </ol>
+
+        <div class="branch-form-fields-shell">
+          <details id="branch-form-section-identity" class="branch-form-section branch-form-fold" open>
+            <summary class="branch-form-section__summary">
+              <span class="branch-form-section__step">1</span>
+              {{ 'Branch Section Identity Title' | translate }}
+            </summary>
+            <div class="branch-form-fold__body">
+              <header class="branch-form-section-head">
+                <span class="branch-form-section-head__icon" aria-hidden="true">🏢</span>
+                <div>
+                  <h2 class="branch-form-section-head__title">{{ 'Branch Section Identity Title' | translate }}</h2>
+                  <p class="branch-form-section-head__hint">{{ 'Branch Section Identity Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="branch-form-grid branch-form-grid--2">
+                <div class="branch-form-field">
+                  <label class="branch-form-label">
+                    <span>{{ 'Name (AR)' | translate }}</span>
+                    <span class="branch-form-badge branch-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="nameAr"
+                    maxlength="255"
+                    autocomplete="organization"
+                    [placeholder]="'Example Branch Arabic Name' | translate"
+                  />
+                  <p class="branch-form-hint">{{ 'Hint Branch Arabic Name' | translate }}</p>
+                  @if (form.controls.nameAr.invalid && form.controls.nameAr.touched) {
+                    <div class="branch-form-hint branch-form-hint--danger">
+                      {{ 'Arabic branch name is required and must be valid.' | translate }}
+                    </div>
+                  }
+                </div>
+
+                <div class="branch-form-field">
+                  <label class="branch-form-label">
+                    <span>{{ 'Name (EN)' | translate }}</span>
+                    <span class="branch-form-badge branch-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="nameEn"
+                    maxlength="255"
+                    autocomplete="off"
+                    [placeholder]="'Example Branch English Name' | translate"
+                  />
+                  <p class="branch-form-hint">{{ 'Hint Branch English Name' | translate }}</p>
+                  @if (form.controls.nameEn.invalid && form.controls.nameEn.touched) {
+                    <div class="branch-form-hint branch-form-hint--danger">
+                      {{ 'English branch name must be valid.' | translate }}
+                    </div>
+                  }
+                </div>
+
+                <div class="branch-form-field">
+                  <label class="branch-form-label">
+                    <span>{{ 'Code' | translate }}</span>
+                    <span class="branch-form-badge branch-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="code"
+                    maxlength="100"
+                    autocomplete="off"
+                    [placeholder]="'Example Branch Code' | translate"
+                  />
+                  <p class="branch-form-hint">{{ 'Hint Branch Code' | translate }}</p>
+                  @if (form.controls.code.invalid && form.controls.code.touched) {
+                    <div class="branch-form-hint branch-form-hint--danger">{{ 'Branch code must be valid.' | translate }}</div>
+                  }
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details id="branch-form-section-location" class="branch-form-section branch-form-fold" open>
+            <summary class="branch-form-section__summary">
+              <span class="branch-form-section__step">2</span>
+              {{ 'Branch Section Location Title' | translate }}
+            </summary>
+            <div class="branch-form-fold__body">
+              <header class="branch-form-section-head">
+                <span class="branch-form-section-head__icon" aria-hidden="true">📍</span>
+                <div>
+                  <h2 class="branch-form-section-head__title">{{ 'Branch Section Location Title' | translate }}</h2>
+                  <p class="branch-form-section-head__hint">{{ 'Branch Section Location Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="branch-form-grid branch-form-grid--2">
+                <div class="branch-form-field">
+                  <label class="branch-form-label">
+                    <span>{{ 'City' | translate }}</span>
+                    <span class="branch-form-badge branch-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="city"
+                    maxlength="150"
+                    autocomplete="address-level2"
+                    [placeholder]="'Example Branch City' | translate"
+                  />
+                  <p class="branch-form-hint">{{ 'Hint Branch City' | translate }}</p>
+                </div>
+
+                <div class="branch-form-field">
+                  <label class="branch-form-label">
+                    <span>{{ 'Neighborhood' | translate }}</span>
+                    <span class="branch-form-badge branch-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="neighborHood"
+                    maxlength="150"
+                    autocomplete="off"
+                    [placeholder]="'Example Branch Neighborhood' | translate"
+                  />
+                  <p class="branch-form-hint">{{ 'Hint Branch Neighborhood' | translate }}</p>
+                </div>
+
+                <div class="branch-form-field">
+                  <label class="branch-form-label">
+                    <span>{{ 'Street' | translate }}</span>
+                    <span class="branch-form-badge branch-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="street"
+                    maxlength="250"
+                    autocomplete="street-address"
+                    [placeholder]="'Example Branch Street' | translate"
+                  />
+                  <p class="branch-form-hint">{{ 'Hint Branch Street' | translate }}</p>
+                </div>
+
+                <div class="branch-form-field">
+                  <label class="branch-form-label">
+                    <span>{{ 'Building Number' | translate }}</span>
+                    <span class="branch-form-badge branch-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="buldingNumber"
+                    maxlength="100"
+                    autocomplete="off"
+                    [placeholder]="'Example Branch Building Number' | translate"
+                  />
+                  <p class="branch-form-hint">{{ 'Hint Branch Building Number' | translate }}</p>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details id="branch-form-section-contact" class="branch-form-section branch-form-fold" open>
+            <summary class="branch-form-section__summary">
+              <span class="branch-form-section__step">3</span>
+              {{ 'Branch Section Contact Title' | translate }}
+            </summary>
+            <div class="branch-form-fold__body">
+              <header class="branch-form-section-head">
+                <span class="branch-form-section-head__icon" aria-hidden="true">📞</span>
+                <div>
+                  <h2 class="branch-form-section-head__title">{{ 'Branch Section Contact Title' | translate }}</h2>
+                  <p class="branch-form-section-head__hint">{{ 'Branch Section Contact Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="branch-form-grid">
+                <div class="branch-form-field">
+                  <label class="branch-form-label">
+                    <span>{{ 'Contact Number' | translate }}</span>
+                    <span class="branch-form-badge branch-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="contactNumber"
+                    maxlength="50"
+                    inputmode="tel"
+                    autocomplete="tel"
+                    appMobileNumberInput
+                    [placeholder]="'Example Branch Contact Number' | translate"
+                  />
+                  <p class="branch-form-hint">{{ 'Hint Branch Contact Number' | translate }}</p>
+                  @if (form.controls.contactNumber.invalid && form.controls.contactNumber.touched) {
+                    <div class="branch-form-hint branch-form-hint--danger">
+                      {{ 'Branch contact number must be valid.' | translate }}
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="app-form-actions">
+          <button class="btn btn-primary" type="submit" [disabled]="form.invalid || loading()">
+            @if (loading()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            {{ isEdit() ? ('Update' | translate) : ('Create' | translate) }}
+          </button>
+          <a class="btn btn-cancel" routerLink="/branches">{{ 'Cancel' | translate }}</a>
+        </div>
+      </form>
+    </div>
+
+    <aside class="contract-flow-aside branch-form-aside" [attr.aria-label]="'Branch form summary' | translate">
+      <div class="branch-form-aside-card">
+        <div class="branch-form-progress">
+          <div class="branch-form-progress__head">
+            <span>{{ 'Branch flow profile completion' | translate }}</span>
+            <strong>{{ profileCompletionPercent() }}%</strong>
+          </div>
+          <div
+            class="branch-form-progress__track"
+            role="progressbar"
+            [attr.aria-valuenow]="profileCompletionPercent()"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <span class="branch-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+          </div>
+        </div>
+
+        <ul class="branch-form-status-list">
+          <li [class.branch-form-status-list__item--done]="identitySectionComplete()">
+            <span class="branch-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Branch flow summary identity' | translate }}</span>
+          </li>
+          <li [class.branch-form-status-list__item--done]="locationSectionComplete()">
+            <span class="branch-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Branch flow summary location' | translate }}</span>
+          </li>
+          <li [class.branch-form-status-list__item--done]="contactSectionComplete()">
+            <span class="branch-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Branch flow summary contact' | translate }}</span>
+          </li>
+        </ul>
+      </div>
+    </aside>
   </div>
 </div>

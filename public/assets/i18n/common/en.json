@@ -60,6 +60,8 @@
   "Failed to load branches": "Failed to load branches",
   "Failed to load privileges": "Failed to load privileges",
   "Failed to load accounts": "Failed to load accounts",
+  "Loading accounts hint": "Loading chart of accounts… you can open the list while accounts load.",
+  "Search accounts...": "Search accounts...",
   "Finance": "Finance",
   "Financial Years": "Financial Years",
   "Fleet created": "Fleet created",

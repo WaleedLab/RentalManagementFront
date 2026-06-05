@@ -1,42 +1,216 @@
-<div class="container-fluid insurance-company-form-page">
-  <app-page-header
-    [title]="(isEdit() ? 'maintenance.insurance.editTitle' : 'maintenance.insurance.createTitle') | translate"
-    [subtitle]="'maintenance.insurance.formSubtitle' | translate"
-  />
+<div class="container-fluid contract-flow-page contract-flow-edit insurance-company-form-page">
+  <header class="contract-flow-header insurance-company-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          {{ (isEdit() ? 'maintenance.insurance.editTitle' : 'maintenance.insurance.createTitle') | translate }}
+        </h1>
+        <p class="contract-flow-header__meta mb-0">{{ 'maintenance.insurance.formPageSubtitle' | translate }}</p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/maintenance/insurance-companies">
+        {{ 'maintenance.insurance.backToList' | translate }}
+      </a>
+    </div>
+  </header>
 
   @if (initializing()) {
-    <div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>
+    <div class="insurance-company-form-loading">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
   } @else {
-    <form class="card insurance-company-form__card" [formGroup]="form" (ngSubmit)="save()">
-      <div class="card-body row g-3">
-        <div class="col-md-6">
-          <label class="form-label">{{ 'maintenance.insurance.fieldName' | translate }}</label>
-          <input class="form-control" formControlName="name" appFieldValueState />
-          @if (form.controls.name.touched && form.controls.name.invalid) {
-            <div class="text-danger small mt-1">{{ 'maintenance.insurance.invalidName' | translate }}</div>
-          }
-        </div>
+    <div class="contract-flow-layout insurance-company-form-layout">
+      <div class="contract-flow-main">
+        <form class="app-form-value-state insurance-company-form" [formGroup]="form" (ngSubmit)="save()">
+          <ol class="insurance-company-form-workflow" [attr.aria-label]="'maintenance.insurance.formWorkflowSteps' | translate">
+            <li>
+              <button
+                type="button"
+                class="insurance-company-form-workflow__step"
+                [class.insurance-company-form-workflow__step--done]="identitySectionComplete()"
+                [class.insurance-company-form-workflow__step--current]="currentWorkflowStep() === 1"
+                [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+                [attr.aria-controls]="'insurance-company-form-section-identity'"
+                (click)="focusWorkflowSection(1)"
+              >
+                <span class="insurance-company-form-workflow__num">1</span>
+                <span>{{ 'maintenance.insurance.flowStepIdentity' | translate }}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="insurance-company-form-workflow__step"
+                [class.insurance-company-form-workflow__step--done]="contactSectionComplete()"
+                [class.insurance-company-form-workflow__step--current]="currentWorkflowStep() === 2"
+                [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+                [attr.aria-controls]="'insurance-company-form-section-contact'"
+                (click)="focusWorkflowSection(2)"
+              >
+                <span class="insurance-company-form-workflow__num">2</span>
+                <span>{{ 'maintenance.insurance.flowStepContact' | translate }}</span>
+              </button>
+            </li>
+          </ol>
 
-        <div class="col-md-6">
-          <label class="form-label">{{ 'maintenance.insurance.fieldPhone' | translate }}</label>
-          <input class="form-control" formControlName="phoneNumber" appFieldValueState appMobileNumberInput />
-        </div>
+          <div class="insurance-company-form-fields-shell">
+            <details id="insurance-company-form-section-identity" class="insurance-company-form-section insurance-company-form-fold" open>
+              <summary class="insurance-company-form-section__summary">
+                <span class="insurance-company-form-section__step">1</span>
+                {{ 'maintenance.insurance.sectionIdentityTitle' | translate }}
+              </summary>
+              <div class="insurance-company-form-fold__body">
+                <header class="insurance-company-form-section-head">
+                  <span class="insurance-company-form-section-head__icon" aria-hidden="true">🛡️</span>
+                  <div>
+                    <h2 class="insurance-company-form-section-head__title">
+                      {{ 'maintenance.insurance.sectionIdentityTitle' | translate }}
+                    </h2>
+                    <p class="insurance-company-form-section-head__hint">
+                      {{ 'maintenance.insurance.sectionIdentitySubtitle' | translate }}
+                    </p>
+                  </div>
+                </header>
+                <div class="insurance-company-form-grid">
+                  <div
+                    class="insurance-company-form-field"
+                    [class.insurance-company-form-field--invalid]="hasError('name')"
+                  >
+                    <label class="insurance-company-form-label">
+                      <span>{{ 'maintenance.insurance.fieldName' | translate }}</span>
+                      <span class="insurance-company-form-badge insurance-company-form-badge--required">
+                        {{ 'maintenance.insurance.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="text"
+                      formControlName="name"
+                      maxlength="200"
+                      autocomplete="organization"
+                      appFieldValueState
+                      [placeholder]="'maintenance.insurance.exampleName' | translate"
+                    />
+                    <p class="insurance-company-form-hint">{{ 'maintenance.insurance.hintName' | translate }}</p>
+                    @if (hasError('name')) {
+                      <div class="insurance-company-form-hint insurance-company-form-hint--danger">
+                        {{ 'maintenance.insurance.invalidName' | translate }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </details>
 
-        <div class="col-12">
-          <label class="form-label">{{ 'maintenance.insurance.fieldAddress' | translate }}</label>
-          <textarea class="form-control" rows="3" formControlName="address" appFieldValueState></textarea>
-        </div>
+            <details id="insurance-company-form-section-contact" class="insurance-company-form-section insurance-company-form-fold" open>
+              <summary class="insurance-company-form-section__summary">
+                <span class="insurance-company-form-section__step">2</span>
+                {{ 'maintenance.insurance.sectionContactTitle' | translate }}
+              </summary>
+              <div class="insurance-company-form-fold__body">
+                <header class="insurance-company-form-section-head">
+                  <span class="insurance-company-form-section-head__icon" aria-hidden="true">📞</span>
+                  <div>
+                    <h2 class="insurance-company-form-section-head__title">
+                      {{ 'maintenance.insurance.sectionContactTitle' | translate }}
+                    </h2>
+                    <p class="insurance-company-form-section-head__hint">
+                      {{ 'maintenance.insurance.sectionContactSubtitle' | translate }}
+                    </p>
+                  </div>
+                </header>
+                <div class="insurance-company-form-grid insurance-company-form-grid--2">
+                  <div
+                    class="insurance-company-form-field"
+                    [class.insurance-company-form-field--invalid]="hasError('phoneNumber')"
+                  >
+                    <label class="insurance-company-form-label">
+                      <span>{{ 'maintenance.insurance.fieldPhone' | translate }}</span>
+                      <span class="insurance-company-form-badge insurance-company-form-badge--optional">
+                        {{ 'maintenance.insurance.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="tel"
+                      formControlName="phoneNumber"
+                      appFieldValueState
+                      appMobileNumberInput
+                      [placeholder]="'maintenance.insurance.examplePhone' | translate"
+                    />
+                    <p class="insurance-company-form-hint">{{ 'maintenance.insurance.hintPhone' | translate }}</p>
+                    @if (hasError('phoneNumber')) {
+                      <div class="insurance-company-form-hint insurance-company-form-hint--danger">
+                        {{ 'maintenance.insurance.invalidPhone' | translate }}
+                      </div>
+                    }
+                  </div>
+
+                  <div class="insurance-company-form-field insurance-company-form-field--wide">
+                    <label class="insurance-company-form-label">
+                      <span>{{ 'maintenance.insurance.fieldAddress' | translate }}</span>
+                      <span class="insurance-company-form-badge insurance-company-form-badge--optional">
+                        {{ 'maintenance.insurance.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <textarea
+                      class="form-control"
+                      rows="4"
+                      formControlName="address"
+                      appFieldValueState
+                      maxlength="500"
+                      [placeholder]="'maintenance.insurance.exampleAddress' | translate"
+                    ></textarea>
+                    <p class="insurance-company-form-hint">{{ 'maintenance.insurance.hintAddress' | translate }}</p>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <div class="app-form-actions">
+            <button class="btn btn-primary" type="submit" [disabled]="saving()">
+              @if (saving()) {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              }
+              {{ 'Save' | translate }}
+            </button>
+            <a class="btn btn-cancel" routerLink="/maintenance/insurance-companies">{{ 'Cancel' | translate }}</a>
+          </div>
+        </form>
       </div>
 
-      <div class="card-footer d-flex flex-wrap gap-2 justify-content-end">
-        <a class="btn btn-light" routerLink="/maintenance/insurance-companies">{{ 'Cancel' | translate }}</a>
-        <button class="btn btn-primary" type="submit" [disabled]="saving()">
-          @if (saving()) {
-            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-          }
-          {{ 'Save' | translate }}
-        </button>
-      </div>
-    </form>
+      <aside class="contract-flow-aside insurance-company-form-aside" [attr.aria-label]="'maintenance.insurance.formSummary' | translate">
+        <div class="insurance-company-form-aside-card">
+          <div class="insurance-company-form-progress">
+            <div class="insurance-company-form-progress__head">
+              <span>{{ 'maintenance.insurance.flowProfileCompletion' | translate }}</span>
+              <strong>{{ profileCompletionPercent() }}%</strong>
+            </div>
+            <div
+              class="insurance-company-form-progress__track"
+              role="progressbar"
+              [attr.aria-valuenow]="profileCompletionPercent()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span class="insurance-company-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+            </div>
+          </div>
+
+          <ul class="insurance-company-form-status-list">
+            <li [class.insurance-company-form-status-list__item--done]="identitySectionComplete()">
+              <span class="insurance-company-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'maintenance.insurance.flowSummaryIdentity' | translate }}</span>
+            </li>
+            <li [class.insurance-company-form-status-list__item--done]="contactSectionComplete()">
+              <span class="insurance-company-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'maintenance.insurance.flowSummaryContact' | translate }}</span>
+            </li>
+          </ul>
+
+          <p class="insurance-company-form-workflow-note">{{ 'maintenance.insurance.formWorkflowNote' | translate }}</p>
+        </div>
+      </aside>
+    </div>
   }
 </div>

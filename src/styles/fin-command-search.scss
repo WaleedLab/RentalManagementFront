@@ -106,38 +106,6 @@ body.light-only .app-soft-select__search {
   overflow: visible;
 }
 
-.fin-command .fin-btn--primary {
-  font-weight: 700;
-  transition:
-    filter 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease,
-    background 0.2s ease,
-    color 0.2s ease;
-}
-
-/* Add / Create — pill; colors from --fin-btn-action-* per theme (search keeps --fin-btn-primary-*). */
-.fin-command .fin-command__actions .fin-btn--primary,
-.fin-command .fin-command__actions a.fin-btn--primary {
-  border-radius: 999px;
-  padding-inline: 16px;
-  text-decoration: none;
-  background: var(--fin-btn-action-bg, var(--c-ffffff)) !important;
-  color: var(--fin-btn-action-fg, var(--c-0d9488)) !important;
-  border: 1px solid var(--fin-btn-action-border, rgba(var(--c-2dd4bf-rgb), 0.55)) !important;
-  box-shadow: var(--fin-btn-action-shadow) !important;
-  filter: none !important;
-}
-
-.fin-command .fin-command__actions .fin-btn--primary:hover:not(:disabled),
-.fin-command .fin-command__actions a.fin-btn--primary:hover {
-  background: var(--fin-btn-action-bg-hover, var(--fin-btn-action-bg, var(--c-f0fdfa))) !important;
-  color: var(--fin-btn-action-fg-hover, var(--fin-btn-action-fg, var(--c-0f766e))) !important;
-  border-color: var(--fin-btn-action-border-hover, var(--fin-btn-action-border)) !important;
-  box-shadow: var(--fin-btn-action-shadow-hover, var(--fin-btn-action-shadow)) !important;
-  filter: none !important;
-}
-
 /* Search bar inside fin-command toolbars. */
 .fin-command .fin-search-group,
 .fin-command .list-search,

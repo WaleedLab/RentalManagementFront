@@ -79,7 +79,7 @@
                   <div class="table-actions">
                     <a
                       class="table-action-icon table-action-icon--primary"
-                      [routerLink]="['/customers', customer.id, 'edit']"
+                      [routerLink]="['/customers', 'edit', customer.id]"
                       [attr.aria-label]="'Edit' | translate"
                       [title]="'Edit' | translate"
                     >
@@ -96,7 +96,7 @@
                     </button>
                     <a
                       class="table-action-icon table-action-icon--info"
-                      [routerLink]="['/customers', customer.id, 'details']"
+                      [routerLink]="['/customers', 'details', customer.id]"
                       [attr.aria-label]="'Details' | translate"
                       [title]="'Details' | translate"
                     >

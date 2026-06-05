@@ -76,10 +76,21 @@
 
 .contract-flow-aside {
   position: sticky;
-  top: 0.75rem;
+  top: var(--app-sticky-below-header, calc(var(--app-compact-header-offset, 68px) + 0.75rem));
+  max-height: var(
+    --app-sticky-panel-max-height,
+    calc(100vh - var(--app-sticky-below-header, calc(var(--app-compact-header-offset, 68px) + 0.75rem)) - 0.35rem)
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+}
+
+/* Edit-form summary cards: slightly taller minimum for clearer progress/checklist */
+.contract-flow-edit .contract-flow-aside [class$='-aside-card'] {
+  min-height: min(22rem, var(--app-sticky-panel-max-height));
 }
 
 @media (max-width: 1199px) {

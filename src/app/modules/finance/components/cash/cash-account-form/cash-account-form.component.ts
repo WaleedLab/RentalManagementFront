@@ -5,11 +5,11 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { merge } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { loginBranchId } from '../../../../../shared/utils/branch-id.util';
 import { ToastService } from '../../../../../shared/services/toast.service';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import {
   SmoothSelectComponent,
   SmoothSelectOption,
@@ -24,18 +24,18 @@ import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-firs
 @Component({
   selector: 'app-cash-account-form',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink,
-    TranslateModule,
-    PageHeaderComponent,
-    SmoothSelectComponent,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, SmoothSelectComponent],
   templateUrl: './cash-account-form.component.html',
+  styleUrl: './cash-account-form.component.scss',
 })
 export class CashAccountFormComponent implements OnInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
+  private static readonly WORKFLOW_SECTION_IDS = [
+    'cash-form-section-identity',
+    'cash-form-section-accounting',
+    'cash-form-section-description',
+  ] as const;
+
   private fb = inject(NonNullableFormBuilder);
   private authState = inject(AuthStateService);
   private cashService = inject(CashAccountService);
@@ -47,7 +47,9 @@ export class CashAccountFormComponent implements OnInit {
 
   loading = signal(false);
   private readonly i18nTick = signal(0);
+  private formProgressTick = signal(0);
   loadingAccounts = signal(false);
+  submitAttempted = signal(false);
   countingEntries = signal<CountingEntry[]>([]);
 
   readonly countingOptions = computed<SmoothSelectOption[]>(() => {
@@ -68,7 +70,43 @@ export class CashAccountFormComponent implements OnInit {
     fleetId: ['', [Validators.required]],
   });
 
+  identitySectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.form.controls.name.valid;
+  });
+
+  accountingSectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.form.controls.countingId.valid;
+  });
+
+  descriptionSectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.form.controls.description.valid;
+  });
+
+  profileCompletionPercent = computed(() => {
+    this.formProgressTick();
+    let done = 0;
+    if (this.identitySectionComplete()) done++;
+    if (this.accountingSectionComplete()) done++;
+    if (this.descriptionSectionComplete()) done++;
+    return Math.round((done / 3) * 100);
+  });
+
+  currentWorkflowStep = computed(() => {
+    this.formProgressTick();
+    if (!this.identitySectionComplete()) return 1;
+    if (!this.accountingSectionComplete()) return 2;
+    if (!this.descriptionSectionComplete()) return 3;
+    return 4;
+  });
+
   ngOnInit(): void {
+    merge(this.form.valueChanges, this.form.statusChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formProgressTick.update(v => v + 1));
+
     this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.i18nTick.update(value => value + 1);
     });
@@ -76,9 +114,31 @@ export class CashAccountFormComponent implements OnInit {
     this.loadCountingEntries();
   }
 
+  focusWorkflowSection(step: 1 | 2 | 3): void {
+    const sectionId = CashAccountFormComponent.WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('cash-form-section--focus');
+    window.setTimeout(() => section.classList.remove('cash-form-section--focus'), 1400);
+  }
+
+  hasError(controlName: 'name' | 'countingId'): boolean {
+    const control = this.form.controls[controlName];
+    return !!control && control.invalid && (control.touched || control.dirty || this.submitAttempted());
+  }
+
   onSubmit(): void {
+    this.submitAttempted.set(true);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.toast.warning(this.translate.instant('Please complete the required fields'));
       focusFirstInvalidControl(this.hostEl.nativeElement);
       return;
     }
@@ -141,7 +201,7 @@ export class CashAccountFormComponent implements OnInit {
               );
               this.loadingAccounts.set(false);
             },
-            complete: () => {},
+            complete: () => this.loadingAccounts.set(false),
           });
           return;
         }
@@ -149,7 +209,7 @@ export class CashAccountFormComponent implements OnInit {
         this.toast.error(err?.message ?? this.translate.instant('Failed to load accounts'));
         this.loadingAccounts.set(false);
       },
-      complete: () => {},
+      complete: () => this.loadingAccounts.set(false),
     });
   }
 
@@ -201,11 +261,12 @@ export class CashAccountFormComponent implements OnInit {
           if (this.countingEntries().length === 0) {
             this.toast.warning(this.translate.instant('No accounts found in chart of accounts'));
           }
+          this.loadingAccounts.set(false);
         },
         error: () => {
           this.toast.warning(this.translate.instant('No accounts found in chart of accounts'));
+          this.loadingAccounts.set(false);
         },
-        complete: () => this.loadingAccounts.set(false),
       });
       return;
     }

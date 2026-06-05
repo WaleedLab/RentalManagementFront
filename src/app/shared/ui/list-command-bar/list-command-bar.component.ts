@@ -16,4 +16,6 @@ export class ListCommandBarComponent {
   readonly iconSrc = input('');
   readonly commandClass = input('');
   readonly toolbarClass = input('');
+  /** CSS min column width for the filter toolbar grid (e.g. `118px`, `150px`). */
+  readonly toolbarMinColumn = input('118px');
 }

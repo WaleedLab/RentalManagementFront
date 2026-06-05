@@ -88,5 +88,22 @@
   "Search journals": "Search journals",
   "Name": "Name",
   "View": "View",
-  "Print": "Print"
+  "Print": "Print",
+  "journals.formPageSubtitle": "Create balanced journal entries with header and line details linked to chart of accounts.",
+  "journals.formWorkflowSteps": "Journal entry form workflow steps",
+  "journals.flowStepHeader": "Header",
+  "journals.flowStepLines": "Lines",
+  "journals.sectionHeaderTitle": "Journal header",
+  "journals.sectionHeaderSubtitle": "Date, branch, financial year, operation type, status, and note.",
+  "journals.sectionLinesTitle": "Journal lines",
+  "journals.sectionLinesSubtitle": "Add at least two lines with debit or credit per line; the entry must balance.",
+  "journals.requiredFieldBadge": "Required",
+  "journals.hintNote": "Brief description explaining the reason for this entry or linked operation.",
+  "journals.hintLines": "Select an account then enter debit or credit — not both on the same line.",
+  "journals.linesCountLabel": "lines",
+  "journals.formSummary": "Entry summary",
+  "journals.flowProfileCompletion": "Form completion",
+  "journals.flowSummaryHeader": "Header complete",
+  "journals.flowSummaryLines": "Lines balanced",
+  "journals.formWorkflowNote": "Debit and credit must balance before save. Use the steps above to navigate sections."
 }

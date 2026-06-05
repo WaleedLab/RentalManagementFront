@@ -109,7 +109,7 @@ export class VehicleTrackingService {
           title: '',
           subtitle: '',
           backLink: ['/vehicles'],
-          detailsLink: ['/vehicles', vehicle.id, 'details'],
+          detailsLink: ['/vehicles', 'details', vehicle.id],
           vehicleInfo: {
             plateNumber: vehicle.plateNumber || '—',
             vehicleLabel,

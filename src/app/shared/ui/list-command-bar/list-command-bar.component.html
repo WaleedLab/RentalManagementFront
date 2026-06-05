@@ -1,4 +1,8 @@
-<section class="fin-command list-command" [class]="commandClass()">
+<section
+  class="fin-command list-command"
+  [class]="commandClass()"
+  [style.--fin-command-toolbar-min]="toolbarMinColumn()"
+>
   <div class="fin-command__row">
     <ng-content select="[commandLeading]" />
     <div class="fin-command__brand">

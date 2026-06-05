@@ -1,16 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SHARED_FORM_FIELD_DIRECTIVES } from '../../../../../shared/forms/shared-form-field.imports';
 import { coerceFormNumber, requiredNumber } from '../../../../../shared/validators/required-number.validator';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { catchError, finalize, forkJoin, merge, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { ToastService } from '../../../../../shared/services/toast.service';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import {
   SmoothSelectComponent,
   SmoothSelectOption,
@@ -33,7 +33,6 @@ import { VehicleService } from '../../../services/vehicles/vehicle.service';
     RouterLink,
     TranslateModule,
     ...SHARED_FORM_FIELD_DIRECTIVES,
-    PageHeaderComponent,
     SmoothSelectComponent,
     DatePickerComponent,
   ],
@@ -42,6 +41,12 @@ import { VehicleService } from '../../../services/vehicles/vehicle.service';
 })
 export class TrafficViolationFormComponent implements OnInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
+  private static readonly WORKFLOW_SECTION_IDS = [
+    'traffic-violation-form-section-identity',
+    'traffic-violation-form-section-linking',
+    'traffic-violation-form-section-details',
+  ] as const;
+
   private fb = inject(NonNullableFormBuilder);
   private readonly nullableFb = inject(FormBuilder);
   private authState = inject(AuthStateService);
@@ -52,12 +57,15 @@ export class TrafficViolationFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private translate = inject(TranslateService);
+  private destroyRef = inject(DestroyRef);
 
   isEdit = signal(false);
   violationId = signal<string | null>(null);
   /** Reference data (bookings / vehicles) or loading one violation for edit */
   initializing = signal(true);
   saving = signal(false);
+  submitAttempted = signal(false);
+  private formProgressTick = signal(0);
   bookingOptions = signal<SmoothSelectOption[]>([]);
   vehicleOptions = signal<SmoothSelectOption[]>([]);
   /** Raw rows from `GetTrafficBookingsQuery` for resolving `idVehicle` after pick */
@@ -74,6 +82,39 @@ export class TrafficViolationFormComponent implements OnInit {
     violationFine: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
     description: [''],
     numberViolation: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 1 })]),
+  });
+
+  identitySectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.form.controls.numberViolation.valid;
+  });
+
+  linkingSectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.form.controls.idVehicle.valid;
+  });
+
+  detailsSectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return f.dateViolation.valid && f.violationFine.valid && f.description.valid;
+  });
+
+  profileCompletionPercent = computed(() => {
+    this.formProgressTick();
+    let done = 0;
+    if (this.identitySectionComplete()) done++;
+    if (this.linkingSectionComplete()) done++;
+    if (this.detailsSectionComplete()) done++;
+    return Math.round((done / 3) * 100);
+  });
+
+  currentWorkflowStep = computed(() => {
+    this.formProgressTick();
+    if (!this.identitySectionComplete()) return 1;
+    if (!this.linkingSectionComplete()) return 2;
+    if (!this.detailsSectionComplete()) return 3;
+    return 4;
   });
 
   get idBookingCtrl() {
@@ -126,6 +167,10 @@ export class TrafficViolationFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    merge(this.form.valueChanges, this.form.statusChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formProgressTick.update(v => v + 1));
+
     const id = this.route.snapshot.paramMap.get('id');
     const fleetId = this.authState.fleetId() ?? undefined;
     const branchId = Number(this.authState.branchId() || 0) || 0;
@@ -161,7 +206,28 @@ export class TrafficViolationFormComponent implements OnInit {
     });
   }
 
+  focusWorkflowSection(step: 1 | 2 | 3): void {
+    const sectionId = TrafficViolationFormComponent.WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('traffic-violation-form-section--focus');
+    window.setTimeout(() => section.classList.remove('traffic-violation-form-section--focus'), 1400);
+  }
+
+  hasError(controlName: 'numberViolation' | 'idVehicle' | 'dateViolation' | 'violationFine'): boolean {
+    const control = this.form.controls[controlName];
+    return !!control && control.invalid && (control.touched || control.dirty || this.submitAttempted());
+  }
+
   save(): void {
+    this.submitAttempted.set(true);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       focusFirstInvalidControl(this.hostEl.nativeElement);
@@ -233,7 +299,10 @@ export class TrafficViolationFormComponent implements OnInit {
         });
         this.applyVehicleFromFleetOrFetch(v.idVehicle, {
           silent: true,
-          after: () => this.initializing.set(false),
+          after: () => {
+            this.formProgressTick.update(v => v + 1);
+            this.initializing.set(false);
+          },
         });
       },
       error: err => {

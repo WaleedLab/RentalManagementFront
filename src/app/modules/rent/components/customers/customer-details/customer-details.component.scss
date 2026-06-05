@@ -12,7 +12,7 @@
 
 .customer-details-card--side {
   position: sticky;
-  top: 88px;
+  top: var(--app-sticky-below-header, calc(var(--app-compact-header-offset, 68px) + 0.75rem));
 }
 
 .customer-details-section {

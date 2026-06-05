@@ -1,59 +1,338 @@
-<div class="container-fluid security-overview-page">
-  <app-list-command-bar
-    [title]="'Security Overview'"
-    iconSrc="assets/images/rent_icon/My_Access.png"
-  >
-    <ng-container commandActions>
-      <div class="security-command__actions">
-        <a class="fin-btn fin-btn--ghost" routerLink="/roles">{{ 'Roles' | translate }}</a>
-        <a class="fin-btn fin-btn--ghost" routerLink="/privileges">{{ 'Privileges' | translate }}</a>
+<div class="container-fluid contract-flow-page security-overview-page">
+  <header class="contract-flow-header security-overview-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          <span class="security-overview-header__icon" aria-hidden="true">🔐</span>
+          {{ 'security.pageTitle' | translate }}
+        </h1>
+        <p class="contract-flow-header__meta mb-0">{{ 'security.pageSubtitle' | translate }}</p>
       </div>
-    </ng-container>
-  </app-list-command-bar>
-
-  <app-list-content-shell>
-    <div class="mb-3">
-      <h5 class="mb-1 security-overview__section-title">{{ 'User' | translate }}</h5>
-      <p class="mb-0">
-        <strong>{{ 'Username:' | translate }}</strong>
-        {{ userName() || ('Unknown' | translate) }}
-      </p>
-      <p class="mb-0">
-        <strong>{{ 'Email:' | translate }}</strong>
-        {{ email() || ('Unknown' | translate) }}
-      </p>
-    </div>
-
-    <div class="row">
-      <div class="col-md-6 mb-3">
-        <h5 class="security-overview__section-title">{{ 'Roles' | translate }}</h5>
-        @if (roles().length === 0) {
-          <p class="text-muted mb-0">{{ 'No roles found for the current session.' | translate }}</p>
-        } @else {
-          <ul class="list-group security-overview__list">
-            @for (role of roles(); track role) {
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>{{ role }}</span>
-              </li>
-            }
-          </ul>
+      <div class="security-overview-header__actions">
+        @if (canManageRoles()) {
+          <a class="btn btn-outline-secondary btn-sm" routerLink="/roles">{{ 'Roles' | translate }}</a>
         }
-      </div>
-
-      <div class="col-md-6 mb-3">
-        <h5 class="security-overview__section-title">{{ 'Privileges' | translate }}</h5>
-        @if (privileges().length === 0) {
-          <p class="text-muted mb-0">{{ 'No privileges found for the current session.' | translate }}</p>
-        } @else {
-          <ul class="list-group security-overview__list">
-            @for (p of privileges(); track p) {
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>{{ p }}</span>
-              </li>
-            }
-          </ul>
+        @if (canManagePrivileges()) {
+          <a class="btn btn-outline-secondary btn-sm" routerLink="/privileges">{{ 'Privileges' | translate }}</a>
         }
       </div>
     </div>
-  </app-list-content-shell>
+  </header>
+
+  <div class="contract-flow-layout security-overview-layout">
+    <div class="contract-flow-main">
+      <ol class="security-overview-workflow" [attr.aria-label]="'security.formWorkflowSteps' | translate">
+        <li>
+          <button
+            type="button"
+            class="security-overview-workflow__step"
+            [class.security-overview-workflow__step--done]="privilegesSectionReady()"
+            [class.security-overview-workflow__step--current]="currentWorkflowStep() === 1"
+            [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+            [attr.aria-controls]="'security-overview-section-privileges'"
+            (click)="focusWorkflowSection(1)"
+          >
+            <span class="security-overview-workflow__num">1</span>
+            <span>{{ 'security.flowStepPrivileges' | translate }}</span>
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            class="security-overview-workflow__step"
+            [class.security-overview-workflow__step--done]="rolesSectionReady()"
+            [class.security-overview-workflow__step--current]="currentWorkflowStep() === 2"
+            [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+            [attr.aria-controls]="'security-overview-section-roles'"
+            (click)="focusWorkflowSection(2)"
+          >
+            <span class="security-overview-workflow__num">2</span>
+            <span>{{ 'security.flowStepRoles' | translate }}</span>
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            class="security-overview-workflow__step"
+            [class.security-overview-workflow__step--done]="accessSectionReady()"
+            [class.security-overview-workflow__step--current]="currentWorkflowStep() === 3"
+            [attr.aria-current]="currentWorkflowStep() === 3 ? 'step' : null"
+            [attr.aria-controls]="'security-overview-section-access'"
+            (click)="focusWorkflowSection(3)"
+          >
+            <span class="security-overview-workflow__num">3</span>
+            <span>{{ 'security.flowStepAccess' | translate }}</span>
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            class="security-overview-workflow__step"
+            [class.security-overview-workflow__step--current]="currentWorkflowStep() === 4"
+            [attr.aria-current]="currentWorkflowStep() === 4 ? 'step' : null"
+            [attr.aria-controls]="'security-overview-section-account'"
+            (click)="focusWorkflowSection(4)"
+          >
+            <span class="security-overview-workflow__num">4</span>
+            <span>{{ 'security.flowStepAccount' | translate }}</span>
+          </button>
+        </li>
+      </ol>
+
+      <div class="security-overview-fields-shell">
+        <details id="security-overview-section-privileges" class="security-overview-section security-overview-fold" open>
+          <summary class="security-overview-section__summary">
+            <span class="security-overview-section__step">1</span>
+            {{ 'security.sectionActivePrivilegesTitle' | translate }}
+          </summary>
+          <div class="security-overview-fold__body">
+            <header class="security-overview-section-head">
+              <span class="security-overview-section-head__icon" aria-hidden="true">✓</span>
+              <div>
+                <h2 class="security-overview-section-head__title">
+                  {{ 'security.sectionActivePrivilegesTitle' | translate }}
+                </h2>
+                <p class="security-overview-section-head__hint">
+                  {{ 'security.sectionActivePrivilegesSubtitle' | translate }}
+                </p>
+              </div>
+            </header>
+
+            <div class="security-overview-toolbar">
+              <span class="security-overview-count">
+                {{ privilegesCount() }} {{ 'Privileges' | translate }}
+              </span>
+            </div>
+
+            @if (showPrivilegeSearch()) {
+              <div class="security-overview-search">
+                <span class="security-overview-search__icon" aria-hidden="true">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control"
+                  [placeholder]="'Search privileges...' | translate"
+                  [ngModel]="privilegeSearch()"
+                  (ngModelChange)="privilegeSearch.set($event)"
+                />
+              </div>
+            }
+
+            @if (privilegesCount() === 0) {
+              <p class="security-overview-hint">{{ 'No privileges found for the current session.' | translate }}</p>
+            } @else {
+              <div class="security-overview-domain-list">
+                @for (group of filteredPrivilegeGroups(); track group.domainId) {
+                  <section class="security-overview-domain">
+                    <h3 class="security-overview-domain__title">
+                      {{ domainLabel(group.domainKey, group.domainFallback) }}
+                    </h3>
+                    <ul class="security-overview-privilege-list">
+                      @for (item of group.items; track item.code) {
+                        <li class="security-overview-privilege-item">
+                          <span class="security-overview-privilege-item__check" aria-hidden="true">✓</span>
+                          <span class="security-overview-privilege-item__body">
+                            <span class="security-overview-privilege-item__label">{{ privilegeLabel(item) }}</span>
+                            <span class="security-overview-privilege-item__code">{{ item.code }}</span>
+                          </span>
+                        </li>
+                      }
+                    </ul>
+                  </section>
+                } @empty {
+                  <p class="security-overview-hint">{{ 'security.noMatchingPrivileges' | translate }}</p>
+                }
+              </div>
+            }
+          </div>
+        </details>
+
+        <details id="security-overview-section-roles" class="security-overview-section security-overview-fold" open>
+          <summary class="security-overview-section__summary">
+            <span class="security-overview-section__step">2</span>
+            {{ 'security.sectionMyRolesTitle' | translate }}
+          </summary>
+          <div class="security-overview-fold__body">
+            <header class="security-overview-section-head">
+              <span class="security-overview-section-head__icon" aria-hidden="true">🛡️</span>
+              <div>
+                <h2 class="security-overview-section-head__title">{{ 'security.sectionMyRolesTitle' | translate }}</h2>
+                <p class="security-overview-section-head__hint">{{ 'security.sectionMyRolesSubtitle' | translate }}</p>
+              </div>
+            </header>
+
+            <div class="security-overview-toolbar">
+              <span class="security-overview-count">
+                {{ rolesCount() }} {{ 'role(s)' | translate }}
+              </span>
+            </div>
+
+            @if (showRoleSearch()) {
+              <div class="security-overview-search">
+                <span class="security-overview-search__icon" aria-hidden="true">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control"
+                  [placeholder]="'security.searchRoles' | translate"
+                  [ngModel]="roleSearch()"
+                  (ngModelChange)="roleSearch.set($event)"
+                />
+              </div>
+            }
+
+            @if (rolesCount() === 0) {
+              <p class="security-overview-hint">{{ 'No roles found for the current session.' | translate }}</p>
+            } @else {
+              <div class="security-overview-role-list">
+                @for (role of filteredRoleItems(); track role.name) {
+                  <article class="security-overview-role-card">
+                    <h3 class="security-overview-role-card__title">{{ role.name }}</h3>
+                    <p class="security-overview-role-card__desc">{{ roleDescription(role) }}</p>
+                  </article>
+                } @empty {
+                  <p class="security-overview-hint">{{ 'security.noMatchingRoles' | translate }}</p>
+                }
+              </div>
+            }
+          </div>
+        </details>
+
+        <details id="security-overview-section-access" class="security-overview-section security-overview-fold" open>
+          <summary class="security-overview-section__summary">
+            <span class="security-overview-section__step">3</span>
+            {{ 'security.sectionAccessTitle' | translate }}
+          </summary>
+          <div class="security-overview-fold__body">
+            <header class="security-overview-section-head">
+              <span class="security-overview-section-head__icon" aria-hidden="true">🚪</span>
+              <div>
+                <h2 class="security-overview-section-head__title">{{ 'security.sectionAccessTitle' | translate }}</h2>
+                <p class="security-overview-section-head__hint">{{ 'security.sectionAccessSubtitle' | translate }}</p>
+              </div>
+            </header>
+
+            <div class="security-overview-access-grid">
+              <section class="security-overview-access-panel security-overview-access-panel--allowed">
+                <h3 class="security-overview-access-panel__title">{{ 'security.accessAllowedTitle' | translate }}</h3>
+                @if (accessibleAreas().length === 0) {
+                  <p class="security-overview-hint">{{ 'security.accessAllowedEmpty' | translate }}</p>
+                } @else {
+                  <ul class="security-overview-access-list">
+                    @for (area of accessibleAreas(); track area.id) {
+                      <li class="security-overview-access-list__item security-overview-access-list__item--allowed">
+                        <span aria-hidden="true">✓</span>
+                        <span>{{ areaLabel(area.labelKey, area.labelFallback) }}</span>
+                      </li>
+                    }
+                  </ul>
+                }
+              </section>
+
+              <section class="security-overview-access-panel security-overview-access-panel--denied">
+                <h3 class="security-overview-access-panel__title">{{ 'security.accessDeniedTitle' | translate }}</h3>
+                @if (deniedAreas().length === 0) {
+                  <p class="security-overview-hint">{{ 'security.accessDeniedEmpty' | translate }}</p>
+                } @else {
+                  <ul class="security-overview-access-list">
+                    @for (area of deniedAreas(); track area.id) {
+                      <li class="security-overview-access-list__item security-overview-access-list__item--denied">
+                        <span aria-hidden="true">✗</span>
+                        <span>{{ areaLabel(area.labelKey, area.labelFallback) }}</span>
+                      </li>
+                    }
+                  </ul>
+                }
+              </section>
+            </div>
+          </div>
+        </details>
+
+        <details id="security-overview-section-account" class="security-overview-section security-overview-fold">
+          <summary class="security-overview-section__summary">
+            <span class="security-overview-section__step">4</span>
+            {{ 'security.sectionAccountTitle' | translate }}
+          </summary>
+          <div class="security-overview-fold__body">
+            <header class="security-overview-section-head">
+              <span class="security-overview-section-head__icon" aria-hidden="true">👤</span>
+              <div>
+                <h2 class="security-overview-section-head__title">{{ 'security.sectionAccountTitle' | translate }}</h2>
+                <p class="security-overview-section-head__hint">{{ 'security.sectionAccountSubtitle' | translate }}</p>
+              </div>
+            </header>
+
+            <dl class="contract-flow-kv contract-flow-kv--2 security-overview-kv">
+              <div>
+                <dt>{{ 'Username:' | translate }}</dt>
+                <dd>{{ userName() || ('Unknown' | translate) }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'Email:' | translate }}</dt>
+                <dd>{{ email() || ('Unknown' | translate) }}</dd>
+              </div>
+              @if (displayName()) {
+                <div>
+                  <dt>{{ 'Name (Ar)' | translate }}</dt>
+                  <dd>{{ displayName() }}</dd>
+                </div>
+              }
+              @if (displayNameEn()) {
+                <div>
+                  <dt>{{ 'Name (En)' | translate }}</dt>
+                  <dd>{{ displayNameEn() }}</dd>
+                </div>
+              }
+            </dl>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <aside class="contract-flow-aside security-overview-aside" [attr.aria-label]="'security.formSummary' | translate">
+      <div class="security-overview-aside-card">
+        <h2 class="security-overview-aside-card__title">{{ 'security.accessSummaryTitle' | translate }}</h2>
+
+        <dl class="security-overview-aside-stats">
+          <div>
+            <dt>{{ 'Roles' | translate }}</dt>
+            <dd>{{ rolesCount() }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'Privileges' | translate }}</dt>
+            <dd>{{ privilegesCount() }}</dd>
+          </div>
+        </dl>
+
+        <div class="security-overview-access-level">
+          <span class="security-overview-access-level__label">{{ 'security.accessLevelLabel' | translate }}</span>
+          <span
+            class="security-overview-access-level__badge"
+            [class.security-overview-access-level__badge--full]="accessLevel() === 'full'"
+            [class.security-overview-access-level__badge--medium]="accessLevel() === 'medium'"
+            [class.security-overview-access-level__badge--limited]="accessLevel() === 'limited'"
+          >
+            {{ accessLevelLabel(accessLevel()) }}
+          </span>
+        </div>
+
+        @if (canManageRoles() || canManagePrivileges()) {
+          <div class="security-overview-aside-links">
+            @if (canManageRoles()) {
+              <a class="btn btn-sm btn-outline-primary w-100" routerLink="/roles">{{ 'security.manageRoles' | translate }}</a>
+            }
+            @if (canManagePrivileges()) {
+              <a class="btn btn-sm btn-outline-primary w-100" routerLink="/privileges">
+                {{ 'security.managePrivileges' | translate }}
+              </a>
+            }
+          </div>
+        }
+
+        <p class="security-overview-workflow-note">{{ 'security.formWorkflowNote' | translate }}</p>
+      </div>
+    </aside>
+  </div>
 </div>

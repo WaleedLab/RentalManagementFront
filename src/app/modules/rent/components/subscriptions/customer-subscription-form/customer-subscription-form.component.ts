@@ -1,38 +1,39 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SHARED_FORM_FIELD_DIRECTIVES } from '../../../../../shared/forms/shared-form-field.imports';
-import { coerceFormNumber, requiredNumber } from '../../../../../shared/validators/required-number.validator';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { merge } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
+import { SHARED_FORM_FIELD_DIRECTIVES } from '../../../../../shared/forms/shared-form-field.imports';
 import { ToastService } from '../../../../../shared/services/toast.service';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
+import { coerceFormNumber, requiredNumber } from '../../../../../shared/validators/required-number.validator';
 import {
   CustomerSubscription,
   CustomerSubscriptionUpsertRequest,
 } from '../../../models/subscriptions/customer-subscription.model';
 import { CustomerSubscriptionService } from '../../../services/subscriptions/customer-subscription.service';
-import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
 @Component({
   selector: 'app-customer-subscription-form',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink,
-    TranslateModule,
-    ...SHARED_FORM_FIELD_DIRECTIVES,
-    PageHeaderComponent,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, ...SHARED_FORM_FIELD_DIRECTIVES],
   templateUrl: './customer-subscription-form.component.html',
+  styleUrl: './customer-subscription-form.component.scss',
 })
 export class CustomerSubscriptionFormComponent implements OnInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
   private static readonly ARABIC_NAME_REGEX = /^[\u0600-\u06FF\s.'-]{2,255}$/;
   private static readonly ENGLISH_NAME_REGEX = /^[A-Za-z\s.'-]{2,255}$/;
+
+  private static readonly WORKFLOW_SECTION_IDS = [
+    'subscription-offer-form-section-identity',
+    'subscription-offer-form-section-terms',
+    'subscription-offer-form-section-description',
+  ] as const;
 
   private fb = inject(NonNullableFormBuilder);
   private readonly nullableFb = inject(FormBuilder);
@@ -42,6 +43,7 @@ export class CustomerSubscriptionFormComponent implements OnInit {
   private subscriptionService = inject(CustomerSubscriptionService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
+  private destroyRef = inject(DestroyRef);
 
   isEdit = signal(false);
   loading = signal(false);
@@ -49,6 +51,7 @@ export class CustomerSubscriptionFormComponent implements OnInit {
   subscriptions = signal<CustomerSubscription[]>([]);
   /** Preserved on edit; not editable in the form UI. */
   private readonly preservedIsOld = signal(false);
+  private formProgressTick = signal(0);
 
   form = this.fb.group({
     nameAr: [
@@ -72,7 +75,45 @@ export class CustomerSubscriptionFormComponent implements OnInit {
     subscriptionApprovedAfter: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
   });
 
+  identitySectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return f.nameAr.valid && f.nameEn.valid;
+  });
+
+  termsSectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return f.discount.valid && f.subscriptionApprovedAfter.valid;
+  });
+
+  descriptionSectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.form.controls.description.valid;
+  });
+
+  profileCompletionPercent = computed(() => {
+    this.formProgressTick();
+    let done = 0;
+    if (this.identitySectionComplete()) done++;
+    if (this.termsSectionComplete()) done++;
+    if (this.descriptionSectionComplete()) done++;
+    return Math.round((done / 3) * 100);
+  });
+
+  currentWorkflowStep = computed(() => {
+    this.formProgressTick();
+    if (!this.identitySectionComplete()) return 1;
+    if (!this.termsSectionComplete()) return 2;
+    if (!this.descriptionSectionComplete()) return 3;
+    return 4;
+  });
+
   ngOnInit(): void {
+    merge(this.form.valueChanges, this.form.statusChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formProgressTick.update(v => v + 1));
+
     const fleetId = this.authState.fleetId();
     if (!fleetId) {
       this.toast.error(this.translate.instant('FleetId is required'));
@@ -99,6 +140,7 @@ export class CustomerSubscriptionFormComponent implements OnInit {
           discount: subscription.discount ?? 0,
           subscriptionApprovedAfter: subscription.subscriptionApprovedAfter ?? 0,
         });
+        this.formProgressTick.update(v => v + 1);
       },
       error: err =>
         this.toast.error(
@@ -106,6 +148,21 @@ export class CustomerSubscriptionFormComponent implements OnInit {
         ),
       complete: () => this.loading.set(false),
     });
+  }
+
+  focusWorkflowSection(step: 1 | 2 | 3): void {
+    const sectionId = CustomerSubscriptionFormComponent.WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('subscription-offer-form-section--focus');
+    window.setTimeout(() => section.classList.remove('subscription-offer-form-section--focus'), 1400);
   }
 
   save(): void {

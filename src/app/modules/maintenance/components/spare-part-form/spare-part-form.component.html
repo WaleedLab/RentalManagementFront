@@ -1,45 +1,215 @@
-<div class="container-fluid spare-part-form-page">
-  <app-page-header
-    [title]="(isEdit() ? 'maintenance.sparePart.editTitle' : 'maintenance.sparePart.createTitle') | translate"
-    [subtitle]="'maintenance.sparePart.formSubtitle' | translate"
-  />
+<div class="container-fluid contract-flow-page contract-flow-edit spare-part-form-page">
+  <header class="contract-flow-header spare-part-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          {{ (isEdit() ? 'maintenance.sparePart.editTitle' : 'maintenance.sparePart.createTitle') | translate }}
+        </h1>
+        <p class="contract-flow-header__meta mb-0">{{ 'maintenance.sparePart.formPageSubtitle' | translate }}</p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/maintenance/spare-parts">
+        {{ 'maintenance.sparePart.backToList' | translate }}
+      </a>
+    </div>
+  </header>
 
   @if (initializing()) {
-    <div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>
+    <div class="spare-part-form-loading">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
   } @else {
-    <form class="card spare-part-form__card" [formGroup]="form" (ngSubmit)="save()">
-      <div class="card-body row g-3">
-        <div class="col-md-6">
-          <label class="form-label">{{ 'maintenance.sparePart.fieldName' | translate }}</label>
-          <input class="form-control" formControlName="name" appFieldValueState />
-          @if (form.controls.name.touched && form.controls.name.invalid) {
-            <div class="text-danger small mt-1">{{ 'maintenance.sparePart.invalidName' | translate }}</div>
-          }
-        </div>
+    <div class="contract-flow-layout spare-part-form-layout">
+      <div class="contract-flow-main">
+        <form class="app-form-value-state spare-part-form" [formGroup]="form" (ngSubmit)="save()">
+          <ol class="spare-part-form-workflow" [attr.aria-label]="'maintenance.sparePart.formWorkflowSteps' | translate">
+            <li>
+              <button
+                type="button"
+                class="spare-part-form-workflow__step"
+                [class.spare-part-form-workflow__step--done]="identitySectionComplete()"
+                [class.spare-part-form-workflow__step--current]="currentWorkflowStep() === 1"
+                [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+                [attr.aria-controls]="'spare-part-form-section-identity'"
+                (click)="focusWorkflowSection(1)"
+              >
+                <span class="spare-part-form-workflow__num">1</span>
+                <span>{{ 'maintenance.sparePart.flowStepIdentity' | translate }}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="spare-part-form-workflow__step"
+                [class.spare-part-form-workflow__step--done]="descriptionSectionComplete()"
+                [class.spare-part-form-workflow__step--current]="currentWorkflowStep() === 2"
+                [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+                [attr.aria-controls]="'spare-part-form-section-description'"
+                (click)="focusWorkflowSection(2)"
+              >
+                <span class="spare-part-form-workflow__num">2</span>
+                <span>{{ 'maintenance.sparePart.flowStepDescription' | translate }}</span>
+              </button>
+            </li>
+          </ol>
 
-        <div class="col-md-6">
-          <label class="form-label">{{ 'maintenance.sparePart.fieldNumber' | translate }}</label>
-          <input class="form-control" type="number" min="0" formControlName="number" appFieldValueState />
-          @if (form.controls.number.touched && form.controls.number.invalid) {
-            <div class="text-danger small mt-1">{{ 'maintenance.sparePart.invalidNumber' | translate }}</div>
-          }
-        </div>
+          <div class="spare-part-form-fields-shell">
+            <details id="spare-part-form-section-identity" class="spare-part-form-section spare-part-form-fold" open>
+              <summary class="spare-part-form-section__summary">
+                <span class="spare-part-form-section__step">1</span>
+                {{ 'maintenance.sparePart.sectionIdentityTitle' | translate }}
+              </summary>
+              <div class="spare-part-form-fold__body">
+                <header class="spare-part-form-section-head">
+                  <span class="spare-part-form-section-head__icon" aria-hidden="true">🔧</span>
+                  <div>
+                    <h2 class="spare-part-form-section-head__title">
+                      {{ 'maintenance.sparePart.sectionIdentityTitle' | translate }}
+                    </h2>
+                    <p class="spare-part-form-section-head__hint">
+                      {{ 'maintenance.sparePart.sectionIdentitySubtitle' | translate }}
+                    </p>
+                  </div>
+                </header>
+                <div class="spare-part-form-grid spare-part-form-grid--2">
+                  <div
+                    class="spare-part-form-field"
+                    [class.spare-part-form-field--invalid]="hasError('name')"
+                  >
+                    <label class="spare-part-form-label">
+                      <span>{{ 'maintenance.sparePart.fieldName' | translate }}</span>
+                      <span class="spare-part-form-badge spare-part-form-badge--required">
+                        {{ 'maintenance.sparePart.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="text"
+                      formControlName="name"
+                      maxlength="200"
+                      appFieldValueState
+                      [placeholder]="'maintenance.sparePart.exampleName' | translate"
+                    />
+                    <p class="spare-part-form-hint">{{ 'maintenance.sparePart.hintName' | translate }}</p>
+                    @if (hasError('name')) {
+                      <div class="spare-part-form-hint spare-part-form-hint--danger">
+                        {{ 'maintenance.sparePart.invalidName' | translate }}
+                      </div>
+                    }
+                  </div>
 
-        <div class="col-12">
-          <label class="form-label">{{ 'maintenance.sparePart.fieldDescription' | translate }}</label>
-          <textarea class="form-control" rows="3" formControlName="description" appFieldValueState></textarea>
-        </div>
+                  <div
+                    class="spare-part-form-field"
+                    [class.spare-part-form-field--invalid]="hasError('number')"
+                  >
+                    <label class="spare-part-form-label">
+                      <span>{{ 'maintenance.sparePart.fieldNumber' | translate }}</span>
+                      <span class="spare-part-form-badge spare-part-form-badge--required">
+                        {{ 'maintenance.sparePart.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      min="0"
+                      formControlName="number"
+                      appFieldValueState
+                      [placeholder]="'maintenance.sparePart.exampleNumber' | translate"
+                    />
+                    <p class="spare-part-form-hint">{{ 'maintenance.sparePart.hintNumber' | translate }}</p>
+                    @if (hasError('number')) {
+                      <div class="spare-part-form-hint spare-part-form-hint--danger">
+                        {{ 'maintenance.sparePart.invalidNumber' | translate }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <details id="spare-part-form-section-description" class="spare-part-form-section spare-part-form-fold" open>
+              <summary class="spare-part-form-section__summary">
+                <span class="spare-part-form-section__step">2</span>
+                {{ 'maintenance.sparePart.sectionDescriptionTitle' | translate }}
+              </summary>
+              <div class="spare-part-form-fold__body">
+                <header class="spare-part-form-section-head">
+                  <span class="spare-part-form-section-head__icon" aria-hidden="true">📝</span>
+                  <div>
+                    <h2 class="spare-part-form-section-head__title">
+                      {{ 'maintenance.sparePart.sectionDescriptionTitle' | translate }}
+                    </h2>
+                    <p class="spare-part-form-section-head__hint">
+                      {{ 'maintenance.sparePart.sectionDescriptionSubtitle' | translate }}
+                    </p>
+                  </div>
+                </header>
+                <div class="spare-part-form-grid">
+                  <div class="spare-part-form-field">
+                    <label class="spare-part-form-label">
+                      <span>{{ 'maintenance.sparePart.fieldDescription' | translate }}</span>
+                      <span class="spare-part-form-badge spare-part-form-badge--optional">
+                        {{ 'maintenance.sparePart.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <textarea
+                      class="form-control"
+                      rows="4"
+                      formControlName="description"
+                      maxlength="1000"
+                      appFieldValueState
+                      [placeholder]="'maintenance.sparePart.exampleDescription' | translate"
+                    ></textarea>
+                    <p class="spare-part-form-hint">{{ 'maintenance.sparePart.hintDescription' | translate }}</p>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <div class="app-form-actions">
+            <button class="btn btn-primary" type="submit" [disabled]="saving()">
+              @if (saving()) {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              }
+              {{ 'Save' | translate }}
+            </button>
+            <a class="btn btn-cancel" routerLink="/maintenance/spare-parts">{{ 'Cancel' | translate }}</a>
+          </div>
+        </form>
       </div>
 
-      <div class="card-footer d-flex flex-wrap gap-2 justify-content-end">
-        <a class="btn btn-light" routerLink="/maintenance/spare-parts">{{ 'Cancel' | translate }}</a>
-        <button class="btn btn-primary" type="submit" [disabled]="saving()">
-          @if (saving()) {
-            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-          }
-          {{ 'Save' | translate }}
-        </button>
-      </div>
-    </form>
+      <aside class="contract-flow-aside spare-part-form-aside" [attr.aria-label]="'maintenance.sparePart.formSummary' | translate">
+        <div class="spare-part-form-aside-card">
+          <div class="spare-part-form-progress">
+            <div class="spare-part-form-progress__head">
+              <span>{{ 'maintenance.sparePart.flowProfileCompletion' | translate }}</span>
+              <strong>{{ profileCompletionPercent() }}%</strong>
+            </div>
+            <div
+              class="spare-part-form-progress__track"
+              role="progressbar"
+              [attr.aria-valuenow]="profileCompletionPercent()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span class="spare-part-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+            </div>
+          </div>
+
+          <ul class="spare-part-form-status-list">
+            <li [class.spare-part-form-status-list__item--done]="identitySectionComplete()">
+              <span class="spare-part-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'maintenance.sparePart.flowSummaryIdentity' | translate }}</span>
+            </li>
+            <li [class.spare-part-form-status-list__item--done]="descriptionSectionComplete()">
+              <span class="spare-part-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'maintenance.sparePart.flowSummaryDescription' | translate }}</span>
+            </li>
+          </ul>
+
+          <p class="spare-part-form-workflow-note">{{ 'maintenance.sparePart.formWorkflowNote' | translate }}</p>
+        </div>
+      </aside>
+    </div>
   }
 </div>

@@ -1,55 +1,224 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="'Create Cash Account' | translate"
-    [subtitle]="'Create a cash box or collection point linked to the selected fleet.' | translate"
-  >
-    <a class="btn btn-outline-secondary" routerLink="/cash">{{ 'Back to Cash Accounts' | translate }}</a>
-  </app-page-header>
-
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-body">
-          <form [formGroup]="form" (ngSubmit)="onSubmit()">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">{{ 'Counting ID' | translate }} <span class="text-danger">*</span></label>
-                <app-smooth-select
-                  formControlName="countingId"
-                  [options]="countingOptions()"
-                  [placeholder]="'Select account from chart' | translate"
-                  [disabled]="false"
-                  [ariaLabel]="'Counting ID' | translate"
-                />
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">{{ 'Name' | translate }} <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" formControlName="name" />
-              </div>
-
-              <div class="col-12">
-                <label class="form-label">{{ 'Description' | translate }}</label>
-                <textarea class="form-control" rows="4" formControlName="description"></textarea>
-              </div>
-            </div>
-
-            @if (form.invalid && form.touched) {
-              <div class="text-danger small mt-3">{{ 'Required field' | translate }}</div>
-            }
-
-            <div class="app-form-actions">
-              <button class="btn btn-primary" type="submit" [disabled]="loading() || form.invalid">
-                @if (loading()) {
-                  <span class="spinner-border spinner-border-sm me-2"></span>
-                }
-                {{ 'Create' | translate }}
-              </button>
-              <a class="btn btn-cancel" routerLink="/cash">{{ 'Cancel' | translate }}</a>
-            </div>
-          </form>
-        </div>
+<div class="container-fluid contract-flow-page contract-flow-edit cash-form-page">
+  <header class="contract-flow-header cash-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">{{ 'Create Cash Account' | translate }}</h1>
+        <p class="contract-flow-header__meta mb-0">{{ 'Cash form page subtitle' | translate }}</p>
       </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/cash">{{ 'Back to Cash Accounts' | translate }}</a>
     </div>
+  </header>
+
+  <div class="contract-flow-layout cash-form-layout">
+    <div class="contract-flow-main">
+      <form class="app-form-value-state cash-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+        <ol class="cash-form-workflow" [attr.aria-label]="'Cash form workflow steps' | translate">
+          <li>
+            <button
+              type="button"
+              class="cash-form-workflow__step"
+              [class.cash-form-workflow__step--done]="identitySectionComplete()"
+              [class.cash-form-workflow__step--current]="currentWorkflowStep() === 1"
+              [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+              [attr.aria-controls]="'cash-form-section-identity'"
+              (click)="focusWorkflowSection(1)"
+            >
+              <span class="cash-form-workflow__num">1</span>
+              <span>{{ 'Cash flow step identity' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="cash-form-workflow__step"
+              [class.cash-form-workflow__step--done]="accountingSectionComplete()"
+              [class.cash-form-workflow__step--current]="currentWorkflowStep() === 2"
+              [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+              [attr.aria-controls]="'cash-form-section-accounting'"
+              (click)="focusWorkflowSection(2)"
+            >
+              <span class="cash-form-workflow__num">2</span>
+              <span>{{ 'Cash flow step accounting' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="cash-form-workflow__step"
+              [class.cash-form-workflow__step--done]="descriptionSectionComplete()"
+              [class.cash-form-workflow__step--current]="currentWorkflowStep() === 3"
+              [attr.aria-current]="currentWorkflowStep() === 3 ? 'step' : null"
+              [attr.aria-controls]="'cash-form-section-description'"
+              (click)="focusWorkflowSection(3)"
+            >
+              <span class="cash-form-workflow__num">3</span>
+              <span>{{ 'Cash flow step description' | translate }}</span>
+            </button>
+          </li>
+        </ol>
+
+        <div class="cash-form-fields-shell">
+          <details id="cash-form-section-identity" class="cash-form-section cash-form-fold" open>
+            <summary class="cash-form-section__summary">
+              <span class="cash-form-section__step">1</span>
+              {{ 'Cash section identity title' | translate }}
+            </summary>
+            <div class="cash-form-fold__body">
+              <header class="cash-form-section-head">
+                <span class="cash-form-section-head__icon" aria-hidden="true">💵</span>
+                <div>
+                  <h2 class="cash-form-section-head__title">{{ 'Cash section identity title' | translate }}</h2>
+                  <p class="cash-form-section-head__hint">{{ 'Cash section identity subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="cash-form-grid">
+                <div class="cash-form-field">
+                  <label class="cash-form-label">
+                    <span>{{ 'Name' | translate }}</span>
+                    <span class="cash-form-badge cash-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="name"
+                    maxlength="255"
+                    autocomplete="organization"
+                    [class.is-invalid]="hasError('name')"
+                    [placeholder]="'Example Cash Name' | translate"
+                  />
+                  <p class="cash-form-hint">{{ 'Hint Cash Name' | translate }}</p>
+                  @if (hasError('name')) {
+                    <div class="cash-form-hint cash-form-hint--danger">{{ 'This field is required' | translate }}</div>
+                  }
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details id="cash-form-section-accounting" class="cash-form-section cash-form-fold" open>
+            <summary class="cash-form-section__summary">
+              <span class="cash-form-section__step">2</span>
+              {{ 'Cash section accounting title' | translate }}
+            </summary>
+            <div class="cash-form-fold__body">
+              <header class="cash-form-section-head">
+                <span class="cash-form-section-head__icon" aria-hidden="true">📊</span>
+                <div>
+                  <h2 class="cash-form-section-head__title">{{ 'Cash section accounting title' | translate }}</h2>
+                  <p class="cash-form-section-head__hint">{{ 'Cash section accounting subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="cash-form-grid">
+                <div class="cash-form-field" [class.cash-form-field--invalid]="hasError('countingId')">
+                  <label class="cash-form-label">
+                    <span>{{ 'Counting ID' | translate }}</span>
+                    <span class="cash-form-badge cash-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <app-smooth-select
+                    formControlName="countingId"
+                    [options]="countingOptions()"
+                    [placeholder]="'Select account from chart' | translate"
+                    [searchable]="true"
+                    [searchPlaceholder]="'Search accounts...'"
+                    [ariaLabel]="'Counting ID' | translate"
+                  />
+                  @if (loadingAccounts()) {
+                    <p class="cash-form-hint">{{ 'Loading accounts hint' | translate }}</p>
+                  } @else {
+                    <p class="cash-form-hint">{{ 'Hint Cash Counting ID' | translate }}</p>
+                  }
+                  @if (hasError('countingId')) {
+                    <div class="cash-form-hint cash-form-hint--danger">{{ 'This field is required' | translate }}</div>
+                  }
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details id="cash-form-section-description" class="cash-form-section cash-form-fold" open>
+            <summary class="cash-form-section__summary">
+              <span class="cash-form-section__step">3</span>
+              {{ 'Cash section description title' | translate }}
+            </summary>
+            <div class="cash-form-fold__body">
+              <header class="cash-form-section-head">
+                <span class="cash-form-section-head__icon" aria-hidden="true">📝</span>
+                <div>
+                  <h2 class="cash-form-section-head__title">{{ 'Cash section description title' | translate }}</h2>
+                  <p class="cash-form-section-head__hint">{{ 'Cash section description subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="cash-form-grid">
+                <div class="cash-form-field">
+                  <label class="cash-form-label">
+                    <span>{{ 'Description' | translate }}</span>
+                    <span class="cash-form-badge cash-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <textarea
+                    class="form-control"
+                    rows="4"
+                    formControlName="description"
+                    maxlength="500"
+                    [placeholder]="'Example Cash Description' | translate"
+                  ></textarea>
+                  <p class="cash-form-hint">{{ 'Hint Cash Description' | translate }}</p>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        @if (form.invalid && submitAttempted()) {
+          <div class="cash-form-submit-alert">{{ 'Please complete the required fields' | translate }}</div>
+        }
+
+        <div class="app-form-actions">
+          <button class="btn btn-primary" type="submit" [disabled]="loading() || form.invalid">
+            @if (loading()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            {{ 'Create Cash Account' | translate }}
+          </button>
+          <a class="btn btn-cancel" routerLink="/cash">{{ 'Cancel' | translate }}</a>
+        </div>
+      </form>
+    </div>
+
+    <aside class="contract-flow-aside cash-form-aside" [attr.aria-label]="'Cash form summary' | translate">
+      <div class="cash-form-aside-card">
+        <div class="cash-form-progress">
+          <div class="cash-form-progress__head">
+            <span>{{ 'Cash flow profile completion' | translate }}</span>
+            <strong>{{ profileCompletionPercent() }}%</strong>
+          </div>
+          <div
+            class="cash-form-progress__track"
+            role="progressbar"
+            [attr.aria-valuenow]="profileCompletionPercent()"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <span class="cash-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+          </div>
+        </div>
+
+        <ul class="cash-form-status-list">
+          <li [class.cash-form-status-list__item--done]="identitySectionComplete()">
+            <span class="cash-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Cash flow summary identity' | translate }}</span>
+          </li>
+          <li [class.cash-form-status-list__item--done]="accountingSectionComplete()">
+            <span class="cash-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Cash flow summary accounting' | translate }}</span>
+          </li>
+          <li [class.cash-form-status-list__item--done]="descriptionSectionComplete()">
+            <span class="cash-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Cash flow summary description' | translate }}</span>
+          </li>
+        </ul>
+
+        <p class="cash-form-accounting-note">{{ 'Cash accounting link guidance' | translate }}</p>
+      </div>
+    </aside>
   </div>
 </div>
