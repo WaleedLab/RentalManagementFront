@@ -1,0 +1,498 @@
+:host {
+  display: block;
+}
+
+.role-form-page {
+  --app-contract-flow-aside-width: 14.5rem;
+
+  .form-control::placeholder {
+    color: var(--app-form-placeholder-color);
+    opacity: 1;
+  }
+
+  .form-control {
+    border-color: var(--app-contract-flow-card-border);
+    box-shadow: none;
+    min-height: 38px;
+  }
+
+  .form-control:focus {
+    border-color: rgba(var(--rt-brand-primary-rgb), 0.55);
+    box-shadow: 0 0 0 0.15rem rgba(var(--rt-brand-primary-rgb), 0.12);
+  }
+}
+
+.role-form-loading {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.role-form {
+  width: 100%;
+}
+
+.role-form-layout {
+  align-items: start;
+  min-width: 0;
+  width: 100%;
+}
+
+.role-form-header .contract-flow-header__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.role-form-fields-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.role-form-workflow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  list-style: none;
+  margin: 0 0 0.85rem;
+  padding: 0;
+
+  li {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.role-form-workflow__step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--app-contract-flow-card-border);
+  background: var(--app-contract-flow-readonly-bg);
+  font-size: 0.74rem;
+  color: var(--app-contract-flow-kv-label);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.3;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: rgba(var(--rt-brand-primary-rgb), 0.35);
+    background: rgba(var(--rt-brand-primary-rgb), 0.06);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: rgba(var(--rt-brand-primary-rgb), 0.55);
+    box-shadow: 0 0 0 0.15rem rgba(var(--rt-brand-primary-rgb), 0.18);
+  }
+}
+
+.role-form-workflow__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: var(--app-contract-flow-card-border);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.role-form-workflow__step--current {
+  border-color: rgba(var(--rt-brand-primary-rgb), 0.45);
+  background: rgba(var(--rt-brand-primary-rgb), 0.08);
+  color: var(--app-contract-flow-segment-active-text);
+  font-weight: 600;
+
+  .role-form-workflow__num {
+    background: var(--rt-brand-primary);
+    color: #fff;
+  }
+}
+
+.role-form-workflow__step--done {
+  border-color: rgba(var(--rt-success-rgb), 0.35);
+  color: var(--app-contract-flow-kv-value);
+
+  .role-form-workflow__num {
+    background: var(--bs-success);
+    color: #fff;
+  }
+}
+
+.role-form-section {
+  border-radius: 12px;
+  border: 1px solid var(--app-contract-flow-card-border);
+  background: var(--app-contract-flow-card-bg);
+  padding: 0;
+  overflow: visible;
+  scroll-margin-top: calc(var(--app-compact-header-offset, 68px) + 0.75rem);
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.role-form-section--focus {
+  border-color: rgba(var(--rt-brand-primary-rgb), 0.55);
+  box-shadow: 0 0 0 0.15rem rgba(var(--rt-brand-primary-rgb), 0.14);
+}
+
+.role-form-section__summary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.85rem;
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--app-contract-flow-section-title);
+}
+
+.role-form-section__summary::-webkit-details-marker {
+  display: none;
+}
+
+.role-form-section__summary::after {
+  content: '▼';
+  margin-inline-start: auto;
+  font-size: 0.65rem;
+  opacity: 0.55;
+  transition: transform 0.15s ease;
+}
+
+.role-form-section[open] > .role-form-section__summary::after {
+  transform: rotate(-180deg);
+}
+
+.role-form-section__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  background: rgba(var(--rt-brand-primary-rgb), 0.12);
+  color: var(--app-contract-flow-segment-active-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.role-form-fold__body {
+  padding: 0 1rem 1.15rem;
+  box-sizing: border-box;
+}
+
+.role-form-section-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--app-contract-flow-card-border);
+}
+
+.role-form-section-head__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 8px;
+  background: rgba(var(--rt-brand-primary-rgb), 0.1);
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.role-form-section-head__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--app-contract-flow-section-title);
+}
+
+.role-form-section-head__hint {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: var(--app-contract-flow-kv-label);
+  line-height: 1.4;
+}
+
+.role-form-grid {
+  display: grid;
+  gap: 0.65rem 0.75rem;
+}
+
+.role-form-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.role-form-field {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.role-form-field--wide {
+  grid-column: 1 / -1;
+}
+
+.role-form-field--invalid .form-control {
+  border-color: var(--rt-error);
+  box-shadow: 0 0 0 0.14rem rgba(var(--rt-error-rgb, 220, 53, 69), 0.15);
+}
+
+.role-form-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.45rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--app-wizard-field-label);
+}
+
+.role-form-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.08rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.role-form-badge--required {
+  color: var(--rt-brand-primary-strong);
+  background: rgba(var(--rt-brand-primary-rgb), 0.1);
+  border: 1px solid rgba(var(--rt-brand-primary-rgb), 0.22);
+}
+
+.role-form-badge--optional {
+  color: var(--app-contract-flow-kv-label);
+  background: var(--app-contract-flow-readonly-bg);
+  border: 1px solid var(--app-contract-flow-card-border);
+}
+
+.role-form-hint {
+  margin-top: 0.3rem;
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: var(--app-form-hint-color);
+}
+
+.role-form-hint--danger {
+  color: var(--rt-error);
+}
+
+.role-form-aside-card {
+  padding: 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--app-contract-flow-card-border);
+  background: var(--app-contract-flow-card-bg);
+}
+
+.role-form-progress {
+  margin-bottom: 0.75rem;
+}
+
+.role-form-progress__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--app-contract-flow-kv-label);
+}
+
+.role-form-progress__head strong {
+  font-size: 0.92rem;
+  color: var(--app-contract-flow-kv-value);
+}
+
+.role-form-progress__track {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: var(--app-contract-flow-readonly-bg);
+  overflow: hidden;
+}
+
+.role-form-progress__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--rt-brand-primary-rgb), 0.85),
+    var(--rt-brand-primary)
+  );
+  transition: width 0.2s ease;
+}
+
+.role-form-status-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.role-form-status-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--app-contract-flow-kv-label);
+}
+
+.role-form-status-list__mark {
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--app-contract-flow-card-border);
+  flex-shrink: 0;
+}
+
+.role-form-status-list__item--done {
+  color: var(--app-contract-flow-kv-value);
+  font-weight: 600;
+}
+
+.role-form-status-list__item--done .role-form-status-list__mark {
+  border-color: var(--bs-success);
+  background: var(--bs-success);
+}
+
+.role-form-workflow-note {
+  margin: 0.85rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--app-contract-flow-card-border);
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: var(--app-contract-flow-kv-label);
+}
+
+.role-form-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 767.98px) {
+  .role-form-grid--2,
+  .role-form-grid--3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.role-form-privileges-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  margin-bottom: 0.35rem;
+}
+
+.role-form-privileges-count {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--app-contract-flow-kv-value);
+}
+
+.role-form-privileges-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-inline-start: auto;
+}
+
+.role-form-privileges-search {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.role-form-privileges-search__icon {
+  color: var(--app-contract-flow-kv-label);
+  font-size: 0.85rem;
+}
+
+.role-form-privileges-search .form-control {
+  min-height: 34px;
+}
+
+.role-form-privileges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+@media (max-width: 991.98px) {
+  .role-form-privileges-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575.98px) {
+  .role-form-privileges-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.role-form-privilege-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--app-contract-flow-card-border);
+  border-radius: 12px;
+  background: var(--app-contract-flow-readonly-bg);
+  cursor: pointer;
+  min-height: 100%;
+}
+
+.role-form-privilege-card--selected {
+  border-color: rgba(var(--rt-brand-primary-rgb), 0.45);
+  background: rgba(var(--rt-brand-primary-rgb), 0.08);
+}
+
+.role-form-privilege-card .form-check-input {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.role-form-privilege-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.role-form-privilege-card__title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--app-contract-flow-kv-value);
+}
+
+.role-form-privilege-card__meta {
+  font-size: 0.72rem;
+  color: var(--app-contract-flow-kv-label);
+  line-height: 1.35;
+  word-break: break-word;
+}

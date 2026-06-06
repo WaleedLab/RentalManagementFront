@@ -296,7 +296,7 @@
               </button>
             }
             @if (canEditAction(item)) {
-              <a class="btn btn-sm btn-outline-primary" [routerLink]="['/booking', item.id, 'edit']">
+              <a class="btn btn-sm btn-outline-primary" [routerLink]="['/booking', 'edit', item.id]">
                 <i class="fa-solid fa-pen-to-square me-1" aria-hidden="true"></i>
                 {{ 'Booking card menu edit' | translate }}
               </a>

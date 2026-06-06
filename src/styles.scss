@@ -6,6 +6,7 @@
 @import './styles/sidebar-ltr-overrides';
 @import './styles/light-theme-gradients';
 @import './styles/form-actions';
+@import './styles/fin-command-shell';
 @import './styles/fin-command-search';
 // Single source of truth for ALL colors (Light + Dark). Edit colors only there.
 // Imported last so its tokens override any legacy color declarations below.

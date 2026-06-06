@@ -32,7 +32,7 @@ const routes: Routes = [
           ),
       },
       {
-        path: ':id/edit',
+        path: 'edit/:id',
         data: { title: 'maintenance.editTitle', breadcrumb: 'maintenance.editTitle' },
         loadComponent: () =>
           import('./components/maintenance-form/maintenance-form.component').then(
@@ -62,7 +62,7 @@ const routes: Routes = [
           ),
       },
       {
-        path: 'insurance-companies/:id/edit',
+        path: 'insurance-companies/edit/:id',
         data: {
           title: 'maintenance.insurance.editTitle',
           breadcrumb: 'maintenance.insurance.editTitle',
@@ -95,7 +95,7 @@ const routes: Routes = [
           ),
       },
       {
-        path: 'spare-parts/:id/edit',
+        path: 'spare-parts/edit/:id',
         data: {
           title: 'maintenance.sparePart.editTitle',
           breadcrumb: 'maintenance.sparePart.editTitle',
@@ -128,7 +128,7 @@ const routes: Routes = [
           ),
       },
       {
-        path: 'suppliers/:id/edit',
+        path: 'suppliers/edit/:id',
         data: {
           title: 'maintenance.supplier.editTitle',
           breadcrumb: 'maintenance.supplier.editTitle',

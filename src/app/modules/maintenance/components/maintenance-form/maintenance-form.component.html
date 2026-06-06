@@ -1,69 +1,257 @@
-<div class="container-fluid maintenance-form-page">
-  <app-page-header
-    [title]="(isEdit() ? 'maintenance.editTitle' : 'maintenance.createTitle') | translate"
-    [subtitle]="'maintenance.formSubtitle' | translate"
-  />
+<div class="container-fluid contract-flow-page contract-flow-edit maintenance-form-page">
+  <header class="contract-flow-header maintenance-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          {{ (isEdit() ? 'maintenance.editTitle' : 'maintenance.createTitle') | translate }}
+        </h1>
+        <p class="contract-flow-header__meta mb-0">{{ 'maintenance.formPageSubtitle' | translate }}</p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/maintenance">{{ 'maintenance.backToList' | translate }}</a>
+    </div>
+  </header>
 
   @if (initializing()) {
-    <div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>
+    <div class="maintenance-form-loading">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
   } @else {
-    <form class="card fin-card" [formGroup]="form" (ngSubmit)="save()">
-      <div class="card-body">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label">{{ 'maintenance.fieldVehicle' | translate }}</label>
-            <app-smooth-select
-              [options]="vehicleOptions()"
-              [value]="form.controls.idVehicle.value ?? ''"
-              (valueChange)="onVehicleChange($event)"
-              [ariaLabel]="'maintenance.fieldVehicle' | translate"
-              [placeholder]="'maintenance.vehiclePlaceholder' | translate"
-              [searchPlaceholder]="'maintenance.searchVehicle'"
-            />
-            @if (loadingVehicle()) {
-              <div class="form-text">{{ 'maintenance.loadingVehicles' | translate }}</div>
-            }
-            @if (form.controls.idVehicle.touched && form.controls.idVehicle.invalid) {
-              <div class="text-danger small mt-1">{{ 'maintenance.invalidVehicle' | translate }}</div>
-            }
+    <div class="contract-flow-layout maintenance-form-layout">
+      <div class="contract-flow-main">
+        <form class="app-form-value-state maintenance-form" [formGroup]="form" (ngSubmit)="save()">
+          <ol class="maintenance-form-workflow" [attr.aria-label]="'maintenance.formWorkflowSteps' | translate">
+            <li>
+              <button
+                type="button"
+                class="maintenance-form-workflow__step"
+                [class.maintenance-form-workflow__step--done]="vehicleSectionComplete()"
+                [class.maintenance-form-workflow__step--current]="currentWorkflowStep() === 1"
+                [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+                [attr.aria-controls]="'maintenance-form-section-vehicle'"
+                (click)="focusWorkflowSection(1)"
+              >
+                <span class="maintenance-form-workflow__num">1</span>
+                <span>{{ 'maintenance.flowStepVehicle' | translate }}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="maintenance-form-workflow__step"
+                [class.maintenance-form-workflow__step--done]="linkingSectionComplete()"
+                [class.maintenance-form-workflow__step--current]="currentWorkflowStep() === 2"
+                [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+                [attr.aria-controls]="'maintenance-form-section-linking'"
+                (click)="focusWorkflowSection(2)"
+              >
+                <span class="maintenance-form-workflow__num">2</span>
+                <span>{{ 'maintenance.flowStepLinking' | translate }}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="maintenance-form-workflow__step"
+                [class.maintenance-form-workflow__step--done]="extraSectionComplete()"
+                [class.maintenance-form-workflow__step--current]="currentWorkflowStep() === 3"
+                [attr.aria-current]="currentWorkflowStep() === 3 ? 'step' : null"
+                [attr.aria-controls]="'maintenance-form-section-extra'"
+                (click)="focusWorkflowSection(3)"
+              >
+                <span class="maintenance-form-workflow__num">3</span>
+                <span>{{ 'maintenance.flowStepExtra' | translate }}</span>
+              </button>
+            </li>
+          </ol>
+
+          <div class="maintenance-form-fields-shell">
+            <details id="maintenance-form-section-vehicle" class="maintenance-form-section maintenance-form-fold" open>
+              <summary class="maintenance-form-section__summary">
+                <span class="maintenance-form-section__step">1</span>
+                {{ 'maintenance.sectionVehicleTitle' | translate }}
+              </summary>
+              <div class="maintenance-form-fold__body">
+                <header class="maintenance-form-section-head">
+                  <span class="maintenance-form-section-head__icon" aria-hidden="true">🚗</span>
+                  <div>
+                    <h2 class="maintenance-form-section-head__title">{{ 'maintenance.sectionVehicleTitle' | translate }}</h2>
+                    <p class="maintenance-form-section-head__hint">{{ 'maintenance.sectionVehicleSubtitle' | translate }}</p>
+                  </div>
+                </header>
+                <div class="maintenance-form-grid">
+                  <div
+                    class="maintenance-form-field"
+                    [class.maintenance-form-field--invalid]="hasError('idVehicle')"
+                  >
+                    <label class="maintenance-form-label">
+                      <span>{{ 'maintenance.fieldVehicle' | translate }}</span>
+                      <span class="maintenance-form-badge maintenance-form-badge--required">
+                        {{ 'maintenance.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      [options]="vehicleOptions()"
+                      [value]="form.controls.idVehicle.value ?? ''"
+                      (valueChange)="onVehicleChange($event)"
+                      [ariaLabel]="'maintenance.fieldVehicle' | translate"
+                      [placeholder]="'maintenance.vehiclePlaceholder' | translate"
+                      [searchable]="true"
+                      [searchPlaceholder]="'maintenance.searchVehicle'"
+                    />
+                    @if (loadingVehicle()) {
+                      <p class="maintenance-form-hint">{{ 'maintenance.loadingVehicles' | translate }}</p>
+                    } @else {
+                      <p class="maintenance-form-hint">{{ 'maintenance.hintVehicle' | translate }}</p>
+                    }
+                    @if (hasError('idVehicle')) {
+                      <div class="maintenance-form-hint maintenance-form-hint--danger">
+                        {{ 'maintenance.invalidVehicle' | translate }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <details id="maintenance-form-section-linking" class="maintenance-form-section maintenance-form-fold" open>
+              <summary class="maintenance-form-section__summary">
+                <span class="maintenance-form-section__step">2</span>
+                {{ 'maintenance.sectionLinkingTitle' | translate }}
+              </summary>
+              <div class="maintenance-form-fold__body">
+                <header class="maintenance-form-section-head">
+                  <span class="maintenance-form-section-head__icon" aria-hidden="true">🔗</span>
+                  <div>
+                    <h2 class="maintenance-form-section-head__title">{{ 'maintenance.sectionLinkingTitle' | translate }}</h2>
+                    <p class="maintenance-form-section-head__hint">{{ 'maintenance.sectionLinkingSubtitle' | translate }}</p>
+                  </div>
+                </header>
+                <div class="maintenance-form-grid">
+                  <div class="maintenance-form-field">
+                    <label class="maintenance-form-label">
+                      <span>{{ 'maintenance.fieldBooking' | translate }}</span>
+                      <span class="maintenance-form-badge maintenance-form-badge--optional">
+                        {{ 'maintenance.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      min="0"
+                      formControlName="idBooking"
+                      [placeholder]="'maintenance.exampleBookingId' | translate"
+                    />
+                    <p class="maintenance-form-hint">{{ 'maintenance.bookingHint' | translate }}</p>
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <details id="maintenance-form-section-extra" class="maintenance-form-section maintenance-form-fold" open>
+              <summary class="maintenance-form-section__summary">
+                <span class="maintenance-form-section__step">3</span>
+                {{ 'maintenance.sectionExtraTitle' | translate }}
+              </summary>
+              <div class="maintenance-form-fold__body">
+                <header class="maintenance-form-section-head">
+                  <span class="maintenance-form-section-head__icon" aria-hidden="true">🛡️</span>
+                  <div>
+                    <h2 class="maintenance-form-section-head__title">{{ 'maintenance.sectionExtraTitle' | translate }}</h2>
+                    <p class="maintenance-form-section-head__hint">{{ 'maintenance.sectionExtraSubtitle' | translate }}</p>
+                  </div>
+                </header>
+                <div class="maintenance-form-grid maintenance-form-grid--2">
+                  <div class="maintenance-form-field">
+                    <label class="maintenance-form-label">
+                      <span>{{ 'maintenance.fieldInsurance' | translate }}</span>
+                      <span class="maintenance-form-badge maintenance-form-badge--optional">
+                        {{ 'maintenance.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      [options]="insuranceOptions()"
+                      [value]="form.controls.idInsurancecompanies.value ?? ''"
+                      (valueChange)="onInsuranceChange($event)"
+                      [ariaLabel]="'maintenance.fieldInsurance' | translate"
+                      [placeholder]="'maintenance.insurancePlaceholder' | translate"
+                      [searchable]="true"
+                      [searchPlaceholder]="'maintenance.searchInsurance'"
+                    />
+                    @if (loadingInsurance()) {
+                      <p class="maintenance-form-hint">{{ 'maintenance.loadingInsurance' | translate }}</p>
+                    } @else {
+                      <p class="maintenance-form-hint">{{ 'maintenance.hintInsurance' | translate }}</p>
+                    }
+                  </div>
+
+                  <div class="maintenance-form-field maintenance-form-field--wide">
+                    <label class="maintenance-form-label">
+                      <span>{{ 'maintenance.fieldNote' | translate }}</span>
+                      <span class="maintenance-form-badge maintenance-form-badge--optional">
+                        {{ 'maintenance.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <textarea
+                      class="form-control"
+                      rows="4"
+                      formControlName="note"
+                      [placeholder]="'maintenance.exampleNote' | translate"
+                    ></textarea>
+                    <p class="maintenance-form-hint">{{ 'maintenance.hintNote' | translate }}</p>
+                  </div>
+                </div>
+              </div>
+            </details>
           </div>
 
-          <div class="col-md-6">
-            <label class="form-label">{{ 'maintenance.fieldBooking' | translate }}</label>
-            <input class="form-control" type="number" min="0" formControlName="idBooking" />
-            <div class="form-text">{{ 'maintenance.bookingHint' | translate }}</div>
+          <div class="app-form-actions">
+            <button class="btn btn-primary" type="submit" [disabled]="saving()">
+              @if (saving()) {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              }
+              {{ 'Save' | translate }}
+            </button>
+            <a class="btn btn-cancel" routerLink="/maintenance">{{ 'Cancel' | translate }}</a>
+          </div>
+        </form>
+      </div>
+
+      <aside class="contract-flow-aside maintenance-form-aside" [attr.aria-label]="'maintenance.formSummary' | translate">
+        <div class="maintenance-form-aside-card">
+          <div class="maintenance-form-progress">
+            <div class="maintenance-form-progress__head">
+              <span>{{ 'maintenance.flowProfileCompletion' | translate }}</span>
+              <strong>{{ profileCompletionPercent() }}%</strong>
+            </div>
+            <div
+              class="maintenance-form-progress__track"
+              role="progressbar"
+              [attr.aria-valuenow]="profileCompletionPercent()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span class="maintenance-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+            </div>
           </div>
 
-          <div class="col-md-6">
-            <label class="form-label">{{ 'maintenance.fieldInsurance' | translate }}</label>
-            <app-smooth-select
-              [options]="insuranceOptions()"
-              [value]="form.controls.idInsurancecompanies.value ?? ''"
-              (valueChange)="onInsuranceChange($event)"
-              [ariaLabel]="'maintenance.fieldInsurance' | translate"
-              [placeholder]="'maintenance.insurancePlaceholder' | translate"
-            />
-            @if (loadingInsurance()) {
-              <div class="form-text">{{ 'maintenance.loadingInsurance' | translate }}</div>
-            }
-          </div>
+          <ul class="maintenance-form-status-list">
+            <li [class.maintenance-form-status-list__item--done]="vehicleSectionComplete()">
+              <span class="maintenance-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'maintenance.flowSummaryVehicle' | translate }}</span>
+            </li>
+            <li [class.maintenance-form-status-list__item--done]="linkingSectionComplete()">
+              <span class="maintenance-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'maintenance.flowSummaryLinking' | translate }}</span>
+            </li>
+            <li [class.maintenance-form-status-list__item--done]="extraSectionComplete()">
+              <span class="maintenance-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'maintenance.flowSummaryExtra' | translate }}</span>
+            </li>
+          </ul>
 
-          <div class="col-12">
-            <label class="form-label">{{ 'maintenance.fieldNote' | translate }}</label>
-            <textarea class="form-control" rows="3" formControlName="note"></textarea>
-          </div>
+          <p class="maintenance-form-workflow-note">{{ 'maintenance.formWorkflowNote' | translate }}</p>
         </div>
-      </div>
-
-      <div class="card-footer d-flex flex-wrap gap-2 justify-content-end">
-        <a class="btn btn-light" routerLink="/maintenance">{{ 'Cancel' | translate }}</a>
-        <button class="btn btn-primary" type="submit" [disabled]="saving()">
-          @if (saving()) {
-            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-          }
-          {{ 'Save' | translate }}
-        </button>
-      </div>
-    </form>
+      </aside>
+    </div>
   }
 </div>

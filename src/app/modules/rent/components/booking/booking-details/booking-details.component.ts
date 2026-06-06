@@ -1033,14 +1033,14 @@ export class BookingDetailsComponent implements OnInit {
       return;
     }
     if (action === 'closeContract') {
-      this.router.navigate(['/booking', item.id, 'close']);
+      this.router.navigate(['/booking', 'close', item.id]);
       return;
     }
     if (action === 'suspend' && !this.canSuspendAction(item)) {
       return;
     }
     if (action === 'suspend') {
-      this.router.navigate(['/booking', item.id, 'suspend']);
+      this.router.navigate(['/booking', 'suspend', item.id]);
       return;
     }
     if (action === 'extend' && !this.canExtendAction(item)) {
@@ -1081,7 +1081,7 @@ export class BookingDetailsComponent implements OnInit {
       translateToDebt: 'تحويل إلى ذمم',
     };
     this.toast.info(`${labels[action]}: ${this.translate.instant('Details')}`);
-    this.router.navigate(['/booking', item.id, 'details'], { queryParams: { action } });
+    this.router.navigate(['/booking', 'details', item.id], { queryParams: { action } });
   }
 
   private enterExtendModeFromToolbar(item: Booking): void {

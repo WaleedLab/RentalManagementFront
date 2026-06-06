@@ -60,10 +60,10 @@
     </ng-container>
 
     <ng-container commandPresets>
-      <div class="booking-command__legend" aria-label="Booking color guide">
+      <div class="fin-command__legend" [attr.aria-label]="'Booking color guide' | translate">
         @for (guide of colorGuide(); track guide.key) {
-          <span class="booking-legend-pill">
-            <span class="booking-legend-dot" [style.background]="guide.color"></span>
+          <span class="fin-legend-item">
+            <span class="fin-legend-dot" [style.background]="guide.color"></span>
             <span>{{ guide.label }}</span>
           </span>
         }
@@ -151,7 +151,7 @@
               @if (cardActionInMain(booking, 'view')) {
                 <a
                   class="table-action-icon table-action-icon--info booking-card__action"
-                  [routerLink]="['/booking', booking.id, 'details']"
+                  [routerLink]="['/booking', 'details', booking.id]"
                   [attr.aria-label]="'Booking card view' | translate"
                   [title]="'Booking card view' | translate"
                 >
@@ -161,7 +161,7 @@
               @if (cardActionInMain(booking, 'edit')) {
                 <a
                   class="table-action-icon table-action-icon--primary booking-card__action"
-                  [routerLink]="['/booking', booking.id, 'edit']"
+                  [routerLink]="['/booking', 'edit', booking.id]"
                   [attr.aria-label]="'Booking card menu edit' | translate"
                   [title]="'Booking card menu edit' | translate"
                 >
@@ -193,7 +193,7 @@
                       <a
                         class="booking-card__menu-item"
                         role="menuitem"
-                        [routerLink]="['/booking', booking.id, 'track']"
+                        [routerLink]="['/booking', 'track', booking.id]"
                         [queryParams]="bookingTrackQueryParams(booking)"
                         (click)="closeBookingCardMore(bookingCardMore)"
                       >
@@ -205,7 +205,7 @@
                       <a
                         class="booking-card__menu-item"
                         role="menuitem"
-                        [routerLink]="['/booking', booking.id, 'edit']"
+                        [routerLink]="['/booking', 'edit', booking.id]"
                         (click)="closeBookingCardMore(bookingCardMore)"
                       >
                         <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
@@ -216,7 +216,7 @@
                       <a
                         class="booking-card__menu-item booking-card__menu-item--close-contract"
                         role="menuitem"
-                        [routerLink]="['/booking', booking.id, 'close']"
+                        [routerLink]="['/booking', 'close', booking.id]"
                         (click)="closeBookingCardMore(bookingCardMore)"
                       >
                         <i class="fa-solid fa-lock" aria-hidden="true"></i>
@@ -250,7 +250,7 @@
                       <a
                         class="booking-card__menu-item booking-card__menu-item--suspend"
                         role="menuitem"
-                        [routerLink]="['/booking', booking.id, 'suspend']"
+                        [routerLink]="['/booking', 'suspend', booking.id]"
                         (click)="closeBookingCardMore(bookingCardMore)"
                       >
                         <i class="fa-solid fa-comment-slash" aria-hidden="true"></i>
@@ -261,7 +261,7 @@
                       <a
                         class="booking-card__menu-item booking-card__menu-item--extend"
                         role="menuitem"
-                        [routerLink]="['/booking', booking.id, 'details']"
+                        [routerLink]="['/booking', 'details', booking.id]"
                         [queryParams]="{ action: 'extend' }"
                         (click)="closeBookingCardMore(bookingCardMore)"
                       >
@@ -273,7 +273,7 @@
                       <a
                         class="booking-card__menu-item booking-card__menu-item--print"
                         role="menuitem"
-                        [routerLink]="['/booking', booking.id, 'details']"
+                        [routerLink]="['/booking', 'details', booking.id]"
                         [queryParams]="{ action: 'print' }"
                         (click)="closeBookingCardMore(bookingCardMore)"
                       >

@@ -217,7 +217,7 @@
         <div class="app-form-actions app-form-actions--split">
           <a class="btn btn-cancel" routerLink="/booking">{{ 'Back to Bookings' | translate }}</a>
           <div class="app-form-actions__group">
-            <a class="btn btn-outline-secondary" [routerLink]="['/booking', item.id, 'details']">
+            <a class="btn btn-outline-secondary" [routerLink]="['/booking', 'details', item.id]">
               {{ 'Contract close go back' | translate }}
             </a>
             <button

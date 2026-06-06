@@ -1,270 +1,444 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="(isViewMode() ? 'View Journal Entry' : 'Create Journal Entry') | translate"
-    [subtitle]="'Create balanced journal entries with header and line details linked to chart of accounts.' | translate"
-  >
-    <a class="btn btn-outline-secondary" routerLink="/journals">{{ 'Back to Journals' | translate }}</a>
-  </app-page-header>
-
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="card journal-card">
-      <div class="card-body">
-        <h6 class="journal-section-title">{{ 'Journal Header' | translate }}</h6>
-        <div class="row g-3">
-          <div class="col-lg-4">
-            <app-date-picker mode="datetime" formControlName="date" label="Date" [disabled]="isViewMode()" />
-          </div>
-
-          <div class="col-lg-4">
-            <label class="form-label">{{ 'Branch' | translate }} <span class="text-danger">*</span></label>
-            @if (isViewMode()) {
-              <input
-                type="text"
-                class="form-control"
-                [value]="viewBranchName() || '-'"
-                readonly
-              />
-            } @else {
-              <app-smooth-select
-                formControlName="idBranch"
-                [options]="branchOptions()"
-                [placeholder]="'Select branch' | translate"
-                [ariaLabel]="'Branch' | translate"
-                [disabled]="false"
-              />
-            }
-          </div>
-
-          <div class="col-lg-4">
-            <label class="form-label">{{ 'Financial Year' | translate }} <span class="text-danger">*</span></label>
-            @if (isViewMode()) {
-              <input type="text" class="form-control" [value]="viewFinancialYearDisplay() || '-'" readonly />
-            } @else {
-              <app-smooth-select
-                formControlName="idFinancialYear"
-                [options]="financialYearOptions()"
-                [placeholder]="'Select financial year' | translate"
-                [ariaLabel]="'Financial Year' | translate"
-                [disabled]="loadingFinancialYears()"
-              />
-            }
-          </div>
-
-          <div class="col-lg-3">
-            <label class="form-label">{{ 'Operation Type' | translate }} <span class="text-danger">*</span></label>
-            <app-smooth-select
-              formControlName="operationType"
-              [options]="operationTypeOptions()"
-              [placeholder]="'Select operation type' | translate"
-              [ariaLabel]="'Operation Type' | translate"
-              [disabled]="isViewMode()"
-            />
-          </div>
-
-          <div class="col-lg-3">
-            <label class="form-label">{{ 'Status' | translate }} <span class="text-danger">*</span></label>
-            <app-smooth-select
-              formControlName="status"
-              [options]="statusOptions()"
-              [placeholder]="'Select status' | translate"
-              [ariaLabel]="'Status' | translate"
-              [disabled]="isViewMode()"
-            />
-          </div>
-
-          <div class="col-12">
-            <label class="form-label">{{ 'Note' | translate }} <span class="text-danger">*</span></label>
-            <textarea class="form-control" rows="3" formControlName="node" [readonly]="isViewMode()"></textarea>
-          </div>
-
-          <div class="col-md-3 col-sm-6">
-            <label class="form-label">{{ 'Journal Type' | translate }} <span class="text-danger">*</span></label>
-            <app-smooth-select
-              formControlName="journalType"
-              [options]="journalTypeOptions()"
-              [placeholder]="'Select journal type' | translate"
-              [ariaLabel]="'Journal Type' | translate"
-              [disabled]="isViewMode()"
-            />
-          </div>
-
-          <input type="hidden" formControlName="isManual" />
-          <input type="hidden" formControlName="isSystemOperation" />
-        </div>
+<div class="container-fluid contract-flow-page contract-flow-edit journal-form-page">
+  <header class="contract-flow-header journal-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          {{ (isViewMode() ? 'View Journal Entry' : 'Create Journal Entry') | translate }}
+        </h1>
+        <p class="contract-flow-header__meta mb-0">{{ 'journals.formPageSubtitle' | translate }}</p>
       </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/journals">{{ 'Back to Journals' | translate }}</a>
     </div>
+  </header>
 
-    <div class="card journal-card mt-3">
-      <div class="card-body">
-        <h6 class="journal-section-title mb-0">{{ 'Journal Lines' | translate }}</h6>
-
-        @if (loadingAccounts()) {
-          <div class="journal-lines-state">
-            <span class="spinner-border spinner-border-sm me-2"></span>
-            {{ 'Loading...' | translate }}
-          </div>
-        } @else if (!accounts().length) {
-          <div class="alert alert-warning mb-0 mt-3">{{ 'No active accounts available' | translate }}</div>
-        }
-
-        @if (!isViewMode()) {
-          <div class="journal-add-row" [formGroup]="detailDraft">
-            <div class="journal-add-row__field">
-              <label class="form-label">{{ 'Account' | translate }}</label>
-              <app-smooth-select
-                formControlName="countingId"
-                [options]="accountOptions()"
-                [placeholder]="'Select account' | translate"
-                [ariaLabel]="'Account' | translate"
-                [searchable]="true"
-              />
-            </div>
-            <div class="journal-add-row__field">
-              <label class="form-label">{{ 'Vehicle' | translate }}</label>
-              <app-smooth-select
-                formControlName="idVehicle"
-                [options]="vehicleOptions()"
-                [placeholder]="'Select vehicle (optional)' | translate"
-                [ariaLabel]="'Vehicle' | translate"
-                [searchable]="true"
-              />
-            </div>
-            <div class="journal-add-row__field">
-              <label class="form-label">{{ 'Customer' | translate }}</label>
-              <app-smooth-select
-                formControlName="idCustomer"
-                [options]="customerOptions()"
-                [placeholder]="'Select customer (optional)' | translate"
-                [ariaLabel]="'Customer' | translate"
-                [searchable]="true"
-              />
-            </div>
-            <div class="journal-add-row__field">
-              <label class="form-label">{{ 'Debit' | translate }}</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                class="form-control text-end"
-                formControlName="debtir"
-                (input)="onDraftDebitInput()"
-              />
-            </div>
-            <div class="journal-add-row__field">
-              <label class="form-label">{{ 'Credit' | translate }}</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                class="form-control text-end"
-                formControlName="credit"
-                (input)="onDraftCreditInput()"
-              />
-            </div>
-            <div class="journal-add-row__field journal-add-row__field--wide">
-              <label class="form-label">{{ 'Line Note' | translate }}</label>
-              <input type="text" class="form-control" formControlName="node" />
-            </div>
-            <div class="journal-add-row__actions">
-              <button class="btn btn-success" type="button" (click)="addLine()">
-                {{ 'Add Line' | translate }}
+  @if (initializing()) {
+    <div class="journal-form-loading">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+  } @else {
+    <div class="contract-flow-layout journal-form-layout">
+      <div class="contract-flow-main">
+        <form class="app-form-value-state journal-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+          <ol class="journal-form-workflow" [attr.aria-label]="'journals.formWorkflowSteps' | translate">
+            <li>
+              <button
+                type="button"
+                class="journal-form-workflow__step"
+                [class.journal-form-workflow__step--done]="headerSectionComplete()"
+                [class.journal-form-workflow__step--current]="currentWorkflowStep() === 1"
+                [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+                [attr.aria-controls]="'journal-form-section-header'"
+                (click)="focusWorkflowSection(1)"
+              >
+                <span class="journal-form-workflow__num">1</span>
+                <span>{{ 'journals.flowStepHeader' | translate }}</span>
               </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="journal-form-workflow__step"
+                [class.journal-form-workflow__step--done]="linesSectionComplete()"
+                [class.journal-form-workflow__step--current]="currentWorkflowStep() === 2"
+                [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+                [attr.aria-controls]="'journal-form-section-lines'"
+                (click)="focusWorkflowSection(2)"
+              >
+                <span class="journal-form-workflow__num">2</span>
+                <span>{{ 'journals.flowStepLines' | translate }}</span>
+              </button>
+            </li>
+          </ol>
+
+          <div class="journal-form-fields-shell">
+            <details id="journal-form-section-header" class="journal-form-section journal-form-fold" open>
+              <summary class="journal-form-section__summary">
+                <span class="journal-form-section__step">1</span>
+                {{ 'journals.sectionHeaderTitle' | translate }}
+              </summary>
+              <div class="journal-form-fold__body">
+                <header class="journal-form-section-head">
+                  <span class="journal-form-section-head__icon" aria-hidden="true">📋</span>
+                  <div>
+                    <h2 class="journal-form-section-head__title">{{ 'journals.sectionHeaderTitle' | translate }}</h2>
+                    <p class="journal-form-section-head__hint">{{ 'journals.sectionHeaderSubtitle' | translate }}</p>
+                  </div>
+                </header>
+
+                <div class="journal-form-grid journal-form-grid--3">
+                  <div class="journal-form-field" [class.journal-form-field--invalid]="hasHeaderError('date')">
+                    <app-date-picker
+                      mode="datetime"
+                      formControlName="date"
+                      [label]="'Date' | translate"
+                      [disabled]="isViewMode()"
+                    />
+                    @if (hasHeaderError('date')) {
+                      <div class="journal-form-hint journal-form-hint--danger">{{ 'Required field' | translate }}</div>
+                    }
+                  </div>
+
+                  <div class="journal-form-field" [class.journal-form-field--invalid]="hasHeaderError('idBranch')">
+                    <label class="journal-form-label">
+                      <span>{{ 'Branch' | translate }}</span>
+                      <span class="journal-form-badge journal-form-badge--required">
+                        {{ 'journals.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    @if (isViewMode()) {
+                      <input type="text" class="form-control" [value]="viewBranchName() || '-'" readonly />
+                    } @else {
+                      <app-smooth-select
+                        formControlName="idBranch"
+                        [options]="branchOptions()"
+                        [placeholder]="'Select branch' | translate"
+                        [ariaLabel]="'Branch' | translate"
+                      />
+                    }
+                    @if (hasHeaderError('idBranch')) {
+                      <div class="journal-form-hint journal-form-hint--danger">
+                        {{ 'Please select a valid branch' | translate }}
+                      </div>
+                    }
+                  </div>
+
+                  <div class="journal-form-field" [class.journal-form-field--invalid]="hasHeaderError('idFinancialYear')">
+                    <label class="journal-form-label">
+                      <span>{{ 'Financial Year' | translate }}</span>
+                      <span class="journal-form-badge journal-form-badge--required">
+                        {{ 'journals.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    @if (isViewMode()) {
+                      <input type="text" class="form-control" [value]="viewFinancialYearDisplay() || '-'" readonly />
+                    } @else {
+                      <app-smooth-select
+                        formControlName="idFinancialYear"
+                        [options]="financialYearOptions()"
+                        [placeholder]="'Select financial year' | translate"
+                        [ariaLabel]="'Financial Year' | translate"
+                        [disabled]="loadingFinancialYears()"
+                      />
+                    }
+                    @if (hasHeaderError('idFinancialYear')) {
+                      <div class="journal-form-hint journal-form-hint--danger">{{ 'Required field' | translate }}</div>
+                    }
+                  </div>
+
+                  <div class="journal-form-field" [class.journal-form-field--invalid]="hasHeaderError('operationType')">
+                    <label class="journal-form-label">
+                      <span>{{ 'Operation Type' | translate }}</span>
+                      <span class="journal-form-badge journal-form-badge--required">
+                        {{ 'journals.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      formControlName="operationType"
+                      [options]="operationTypeOptions()"
+                      [placeholder]="'Select operation type' | translate"
+                      [ariaLabel]="'Operation Type' | translate"
+                      [disabled]="isViewMode()"
+                    />
+                  </div>
+
+                  <div class="journal-form-field" [class.journal-form-field--invalid]="hasHeaderError('status')">
+                    <label class="journal-form-label">
+                      <span>{{ 'Status' | translate }}</span>
+                      <span class="journal-form-badge journal-form-badge--required">
+                        {{ 'journals.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      formControlName="status"
+                      [options]="statusOptions()"
+                      [placeholder]="'Select status' | translate"
+                      [ariaLabel]="'Status' | translate"
+                      [disabled]="isViewMode()"
+                    />
+                  </div>
+
+                  <div class="journal-form-field" [class.journal-form-field--invalid]="hasHeaderError('journalType')">
+                    <label class="journal-form-label">
+                      <span>{{ 'Journal Type' | translate }}</span>
+                      <span class="journal-form-badge journal-form-badge--required">
+                        {{ 'journals.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      formControlName="journalType"
+                      [options]="journalTypeOptions()"
+                      [placeholder]="'Select journal type' | translate"
+                      [ariaLabel]="'Journal Type' | translate"
+                      [disabled]="isViewMode()"
+                    />
+                  </div>
+
+                  <div
+                    class="journal-form-field journal-form-field--wide"
+                    [class.journal-form-field--invalid]="hasHeaderError('node')"
+                  >
+                    <label class="journal-form-label">
+                      <span>{{ 'Note' | translate }}</span>
+                      <span class="journal-form-badge journal-form-badge--required">
+                        {{ 'journals.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <textarea class="form-control" rows="3" formControlName="node" [readonly]="isViewMode()"></textarea>
+                    <p class="journal-form-hint">{{ 'journals.hintNote' | translate }}</p>
+                    @if (hasHeaderError('node')) {
+                      <div class="journal-form-hint journal-form-hint--danger">{{ 'Required field' | translate }}</div>
+                    }
+                  </div>
+                </div>
+
+                <input type="hidden" formControlName="isManual" />
+                <input type="hidden" formControlName="isSystemOperation" />
+              </div>
+            </details>
+
+            <details id="journal-form-section-lines" class="journal-form-section journal-form-fold" open>
+              <summary class="journal-form-section__summary">
+                <span class="journal-form-section__step">2</span>
+                {{ 'journals.sectionLinesTitle' | translate }}
+              </summary>
+              <div class="journal-form-fold__body">
+                <header class="journal-form-section-head">
+                  <span class="journal-form-section-head__icon" aria-hidden="true">📊</span>
+                  <div>
+                    <h2 class="journal-form-section-head__title">{{ 'journals.sectionLinesTitle' | translate }}</h2>
+                    <p class="journal-form-section-head__hint">{{ 'journals.sectionLinesSubtitle' | translate }}</p>
+                  </div>
+                </header>
+
+                <div class="journal-form-lines-toolbar">
+                  <span class="journal-form-badge journal-form-badge--required">
+                    {{ 'journals.requiredFieldBadge' | translate }}
+                  </span>
+                  <span class="journal-form-lines-count">
+                    {{ linesCount() }} {{ 'journals.linesCountLabel' | translate }}
+                  </span>
+                </div>
+                <p class="journal-form-hint">{{ 'journals.hintLines' | translate }}</p>
+
+                @if (loadingAccounts()) {
+                  <div class="journal-form-lines-state">
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    {{ 'Loading...' | translate }}
+                  </div>
+                } @else if (!accounts().length) {
+                  <div class="journal-form-alert">{{ 'No active accounts available' | translate }}</div>
+                }
+
+                @if (!isViewMode()) {
+                  <div class="journal-form-add-row" [formGroup]="detailDraft">
+                    <div class="journal-form-add-row__field">
+                      <label class="journal-form-label">{{ 'Account' | translate }}</label>
+                      <app-smooth-select
+                        formControlName="countingId"
+                        [options]="accountOptions()"
+                        [placeholder]="'Select account' | translate"
+                        [ariaLabel]="'Account' | translate"
+                        [searchable]="true"
+                      />
+                    </div>
+                    <div class="journal-form-add-row__field">
+                      <label class="journal-form-label">{{ 'Vehicle' | translate }}</label>
+                      <app-smooth-select
+                        formControlName="idVehicle"
+                        [options]="vehicleOptions()"
+                        [placeholder]="'Select vehicle (optional)' | translate"
+                        [ariaLabel]="'Vehicle' | translate"
+                        [searchable]="true"
+                      />
+                    </div>
+                    <div class="journal-form-add-row__field">
+                      <label class="journal-form-label">{{ 'Customer' | translate }}</label>
+                      <app-smooth-select
+                        formControlName="idCustomer"
+                        [options]="customerOptions()"
+                        [placeholder]="'Select customer (optional)' | translate"
+                        [ariaLabel]="'Customer' | translate"
+                        [searchable]="true"
+                      />
+                    </div>
+                    <div class="journal-form-add-row__field">
+                      <label class="journal-form-label">{{ 'Debit' | translate }}</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        class="form-control text-end"
+                        formControlName="debtir"
+                        (input)="onDraftDebitInput()"
+                      />
+                    </div>
+                    <div class="journal-form-add-row__field">
+                      <label class="journal-form-label">{{ 'Credit' | translate }}</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        class="form-control text-end"
+                        formControlName="credit"
+                        (input)="onDraftCreditInput()"
+                      />
+                    </div>
+                    <div class="journal-form-add-row__field journal-form-add-row__field--wide">
+                      <label class="journal-form-label">{{ 'Line Note' | translate }}</label>
+                      <input type="text" class="form-control" formControlName="node" />
+                    </div>
+                    <div class="journal-form-add-row__actions">
+                      <button class="btn btn-success" type="button" (click)="addLine()">
+                        {{ 'Add Line' | translate }}
+                      </button>
+                    </div>
+                  </div>
+                }
+
+                <div class="table-responsive journal-form-table-wrap" formArrayName="details">
+                  <table class="table align-middle journal-form-details-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>{{ 'Account' | translate }}</th>
+                        <th>{{ 'Vehicle' | translate }}</th>
+                        <th>{{ 'Customer' | translate }}</th>
+                        <th class="text-end">{{ 'Debit' | translate }}</th>
+                        <th class="text-end">{{ 'Credit' | translate }}</th>
+                        <th>{{ 'Line Note' | translate }}</th>
+                        @if (!isViewMode()) {
+                          <th>{{ 'Actions' | translate }}</th>
+                        }
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (line of detailsArray.controls; track trackByIndex($index)) {
+                        <tr [formGroupName]="$index">
+                          <td>{{ $index + 1 }}</td>
+                          <td>{{ detailAccountLabel($index) }}</td>
+                          <td>{{ detailVehicleLabel($index) }}</td>
+                          <td>{{ detailCustomerLabel($index) }}</td>
+                          <td class="text-end">{{ formatAmount($any(detailLineValue($index, 'debtir')) || 0) }}</td>
+                          <td class="text-end">{{ formatAmount($any(detailLineValue($index, 'credit')) || 0) }}</td>
+                          <td>{{ detailLineValue($index, 'node') || '-' }}</td>
+                          @if (!isViewMode()) {
+                            <td>
+                              <button
+                                class="btn btn-cancel btn-sm"
+                                type="button"
+                                (click)="removeLine($index)"
+                                [disabled]="detailsArray.length <= 2"
+                              >
+                                {{ 'Delete' | translate }}
+                              </button>
+                            </td>
+                          }
+                        </tr>
+                      }
+                      @if (!detailsArray.length) {
+                        <tr>
+                          <td [attr.colspan]="isViewMode() ? 7 : 8" class="text-center journal-form-empty-row">
+                            {{ 'No records found' | translate }}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="journal-form-summary">
+                  <div class="journal-form-summary__item">
+                    <span>{{ 'Total Debit' | translate }}</span>
+                    <strong>{{ formatAmount(totalDebit()) }}</strong>
+                  </div>
+                  <div class="journal-form-summary__item">
+                    <span>{{ 'Total Credit' | translate }}</span>
+                    <strong>{{ formatAmount(totalCredit()) }}</strong>
+                  </div>
+                  <div
+                    class="journal-form-summary__item"
+                    [class.journal-form-summary__item--balanced]="isBalanced()"
+                    [class.journal-form-summary__item--unbalanced]="!isBalanced()"
+                  >
+                    <span>{{ 'Difference' | translate }}</span>
+                    <strong>{{ formatAmount(difference()) }}</strong>
+                  </div>
+                </div>
+
+                @if (!hasMinimumLines()) {
+                  <div class="journal-form-validation-hint">{{ 'At least two lines are required' | translate }}</div>
+                }
+
+                @if (!isBalanced()) {
+                  <div class="journal-form-validation-hint journal-form-validation-hint--danger">
+                    {{ 'Entry must be balanced before save' | translate }}
+                  </div>
+                }
+              </div>
+            </details>
+          </div>
+
+          <div class="app-form-actions">
+            @if (!isViewMode()) {
+              <button class="btn btn-primary" type="submit" [disabled]="!canSave()">
+                @if (loading()) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                {{ 'Create' | translate }}
+              </button>
+            }
+            <a class="btn btn-cancel" routerLink="/journals">{{ 'Back' | translate }}</a>
+          </div>
+        </form>
+      </div>
+
+      <aside class="contract-flow-aside journal-form-aside" [attr.aria-label]="'journals.formSummary' | translate">
+        <div class="journal-form-aside-card">
+          <div class="journal-form-progress">
+            <div class="journal-form-progress__head">
+              <span>{{ 'journals.flowProfileCompletion' | translate }}</span>
+              <strong>{{ profileCompletionPercent() }}%</strong>
+            </div>
+            <div
+              class="journal-form-progress__track"
+              role="progressbar"
+              [attr.aria-valuenow]="profileCompletionPercent()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span class="journal-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
             </div>
           </div>
-        }
 
-        <div class="table-responsive mt-3" formArrayName="details">
-          <table class="table align-middle journal-details-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>{{ 'Account' | translate }}</th>
-                <th>{{ 'Vehicle' | translate }}</th>
-                <th>{{ 'Customer' | translate }}</th>
-                <th class="text-end">{{ 'Debit' | translate }}</th>
-                <th class="text-end">{{ 'Credit' | translate }}</th>
-                <th>{{ 'Line Note' | translate }}</th>
-                @if (!isViewMode()) {
-                  <th>{{ 'Actions' | translate }}</th>
-                }
-              </tr>
-            </thead>
-            <tbody>
-              @for (line of detailsArray.controls; track trackByIndex($index)) {
-                <tr [formGroupName]="$index">
-                  <td>{{ $index + 1 }}</td>
-                  <td>{{ detailAccountLabel($index) }}</td>
-                  <td>{{ detailVehicleLabel($index) }}</td>
-                  <td>{{ detailCustomerLabel($index) }}</td>
-                  <td class="text-end">{{ formatAmount($any(detailLineValue($index, 'debtir')) || 0) }}</td>
-                  <td class="text-end">{{ formatAmount($any(detailLineValue($index, 'credit')) || 0) }}</td>
-                  <td>{{ detailLineValue($index, 'node') || '-' }}</td>
-                  @if (!isViewMode()) {
-                    <td>
-                      <button
-                        class="btn btn-cancel btn-sm"
-                        type="button"
-                        (click)="removeLine($index)"
-                        [disabled]="detailsArray.length <= 2"
-                      >
-                        {{ 'Delete' | translate }}
-                      </button>
-                    </td>
-                  }
-                </tr>
-              }
-              @if (!detailsArray.length) {
-                <tr>
-                  <td [attr.colspan]="isViewMode() ? 7 : 8" class="text-center text-muted py-3">
-                    {{ 'No records found' | translate }}
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
+          <ul class="journal-form-status-list">
+            <li [class.journal-form-status-list__item--done]="headerSectionComplete()">
+              <span class="journal-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'journals.flowSummaryHeader' | translate }}</span>
+            </li>
+            <li [class.journal-form-status-list__item--done]="linesSectionComplete()">
+              <span class="journal-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'journals.flowSummaryLines' | translate }}</span>
+            </li>
+          </ul>
+
+          <dl class="journal-form-aside-totals">
+            <div>
+              <dt>{{ 'Total Debit' | translate }}</dt>
+              <dd>{{ formatAmount(totalDebit()) }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'Total Credit' | translate }}</dt>
+              <dd>{{ formatAmount(totalCredit()) }}</dd>
+            </div>
+            <div [class.journal-form-aside-totals__balanced]="isBalanced()" [class.journal-form-aside-totals__unbalanced]="!isBalanced()">
+              <dt>{{ 'Difference' | translate }}</dt>
+              <dd>{{ formatAmount(difference()) }}</dd>
+            </div>
+          </dl>
+
+          <p class="journal-form-workflow-note">{{ 'journals.formWorkflowNote' | translate }}</p>
         </div>
-
-        <div class="journal-summary">
-          <div class="journal-summary__item">
-            <span>{{ 'Total Debit' | translate }}</span>
-            <strong>{{ formatAmount(totalDebit()) }}</strong>
-          </div>
-          <div class="journal-summary__item">
-            <span>{{ 'Total Credit' | translate }}</span>
-            <strong>{{ formatAmount(totalCredit()) }}</strong>
-          </div>
-          <div class="journal-summary__item" [class.is-balanced]="isBalanced()" [class.is-unbalanced]="!isBalanced()">
-            <span>{{ 'Difference' | translate }}</span>
-            <strong>{{ formatAmount(difference()) }}</strong>
-          </div>
-        </div>
-
-        @if (!hasMinimumLines()) {
-          <div class="journal-validation-hint">{{ 'At least two lines are required' | translate }}</div>
-        }
-
-        @if (!isBalanced()) {
-          <div class="journal-validation-hint journal-validation-hint--danger">
-            {{ 'Entry must be balanced before save' | translate }}
-          </div>
-        }
-      </div>
+      </aside>
     </div>
-
-    @if (form.invalid && form.touched) {
-      <div class="text-danger small mt-3">{{ 'Required field' | translate }}</div>
-    }
-
-    <div class="app-form-actions">
-      @if (!isViewMode()) {
-        <button class="btn btn-primary" type="submit" [disabled]="!canSave()">
-          @if (loading()) {
-            <span class="spinner-border spinner-border-sm me-2"></span>
-          }
-          {{ 'Create' | translate }}
-        </button>
-      }
-      <a class="btn btn-cancel" routerLink="/journals">{{ 'Back' | translate }}</a>
-    </div>
-  </form>
+  }
 </div>

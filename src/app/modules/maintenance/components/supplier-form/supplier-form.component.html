@@ -1,68 +1,344 @@
-<div class="container-fluid supplier-form-page">
-  <app-page-header
-    [title]="(isEdit() ? 'maintenance.supplier.editTitle' : 'maintenance.supplier.createTitle') | translate"
-    [subtitle]="'maintenance.supplier.formSubtitle' | translate"
-  />
+<div class="container-fluid contract-flow-page contract-flow-edit supplier-form-page">
+  <header class="contract-flow-header supplier-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          {{ (isEdit() ? 'maintenance.supplier.editTitle' : 'maintenance.supplier.createTitle') | translate }}
+        </h1>
+        <p class="contract-flow-header__meta mb-0">{{ 'maintenance.supplier.formPageSubtitle' | translate }}</p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/maintenance/suppliers">
+        {{ 'maintenance.supplier.backToList' | translate }}
+      </a>
+    </div>
+  </header>
 
   @if (initializing()) {
-    <div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>
+    <div class="supplier-form-loading">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
   } @else {
-    <form class="card supplier-form__card" [formGroup]="form" (ngSubmit)="save()">
-      <div class="card-body row g-3">
-        <div class="col-md-6">
-          <label class="form-label">{{ 'maintenance.supplier.fieldName' | translate }}</label>
-          <input class="form-control" formControlName="supplierName" appFieldValueState />
-          @if (form.controls.supplierName.touched && form.controls.supplierName.invalid) {
-            <div class="text-danger small mt-1">{{ 'maintenance.supplier.invalidName' | translate }}</div>
-          }
-        </div>
+    <div class="contract-flow-layout supplier-form-layout">
+      <div class="contract-flow-main">
+        <form class="app-form-value-state supplier-form" [formGroup]="form" (ngSubmit)="save()">
+          <ol class="supplier-form-workflow" [attr.aria-label]="'maintenance.supplier.formWorkflowSteps' | translate">
+            <li>
+              <button
+                type="button"
+                class="supplier-form-workflow__step"
+                [class.supplier-form-workflow__step--done]="identitySectionComplete()"
+                [class.supplier-form-workflow__step--current]="currentWorkflowStep() === 1"
+                [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+                [attr.aria-controls]="'supplier-form-section-identity'"
+                (click)="focusWorkflowSection(1)"
+              >
+                <span class="supplier-form-workflow__num">1</span>
+                <span>{{ 'maintenance.supplier.flowStepIdentity' | translate }}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="supplier-form-workflow__step"
+                [class.supplier-form-workflow__step--done]="contactSectionComplete()"
+                [class.supplier-form-workflow__step--current]="currentWorkflowStep() === 2"
+                [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+                [attr.aria-controls]="'supplier-form-section-contact'"
+                (click)="focusWorkflowSection(2)"
+              >
+                <span class="supplier-form-workflow__num">2</span>
+                <span>{{ 'maintenance.supplier.flowStepContact' | translate }}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="supplier-form-workflow__step"
+                [class.supplier-form-workflow__step--done]="accountingSectionComplete()"
+                [class.supplier-form-workflow__step--current]="currentWorkflowStep() === 3"
+                [attr.aria-current]="currentWorkflowStep() === 3 ? 'step' : null"
+                [attr.aria-controls]="'supplier-form-section-accounting'"
+                (click)="focusWorkflowSection(3)"
+              >
+                <span class="supplier-form-workflow__num">3</span>
+                <span>{{ 'maintenance.supplier.flowStepAccounting' | translate }}</span>
+              </button>
+            </li>
+          </ol>
 
-        <div class="col-md-6">
-          <label class="form-label">{{ 'maintenance.supplier.fieldPhone' | translate }}</label>
-          <input class="form-control" formControlName="phone" appFieldValueState appMobileNumberInput />
-          @if (form.controls.phone.touched && form.controls.phone.invalid) {
-            <div class="text-danger small mt-1">{{ 'maintenance.supplier.invalidPhone' | translate }}</div>
-          }
-        </div>
+          <div class="supplier-form-fields-shell">
+            <details id="supplier-form-section-identity" class="supplier-form-section supplier-form-fold" open>
+              <summary class="supplier-form-section__summary">
+                <span class="supplier-form-section__step">1</span>
+                {{ 'maintenance.supplier.sectionIdentityTitle' | translate }}
+              </summary>
+              <div class="supplier-form-fold__body">
+                <header class="supplier-form-section-head">
+                  <span class="supplier-form-section-head__icon" aria-hidden="true">🏢</span>
+                  <div>
+                    <h2 class="supplier-form-section-head__title">
+                      {{ 'maintenance.supplier.sectionIdentityTitle' | translate }}
+                    </h2>
+                    <p class="supplier-form-section-head__hint">
+                      {{ 'maintenance.supplier.sectionIdentitySubtitle' | translate }}
+                    </p>
+                  </div>
+                </header>
+                <div class="supplier-form-grid">
+                  <div
+                    class="supplier-form-field"
+                    [class.supplier-form-field--invalid]="hasError('supplierName')"
+                  >
+                    <label class="supplier-form-label">
+                      <span>{{ 'maintenance.supplier.fieldName' | translate }}</span>
+                      <span class="supplier-form-badge supplier-form-badge--required">
+                        {{ 'maintenance.supplier.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="text"
+                      formControlName="supplierName"
+                      maxlength="200"
+                      autocomplete="organization"
+                      appFieldValueState
+                      [placeholder]="'maintenance.supplier.exampleName' | translate"
+                    />
+                    <p class="supplier-form-hint">{{ 'maintenance.supplier.hintName' | translate }}</p>
+                    @if (hasError('supplierName')) {
+                      <div class="supplier-form-hint supplier-form-hint--danger">
+                        {{ 'maintenance.supplier.invalidName' | translate }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </details>
 
-        <div class="col-md-6">
-          <label class="form-label">{{ 'maintenance.supplier.fieldPhone2' | translate }}</label>
-          <input class="form-control" formControlName="phone2" appFieldValueState appMobileNumberInput />
-        </div>
+            <details id="supplier-form-section-contact" class="supplier-form-section supplier-form-fold" open>
+              <summary class="supplier-form-section__summary">
+                <span class="supplier-form-section__step">2</span>
+                {{ 'maintenance.supplier.sectionContactTitle' | translate }}
+              </summary>
+              <div class="supplier-form-fold__body">
+                <header class="supplier-form-section-head">
+                  <span class="supplier-form-section-head__icon" aria-hidden="true">📞</span>
+                  <div>
+                    <h2 class="supplier-form-section-head__title">
+                      {{ 'maintenance.supplier.sectionContactTitle' | translate }}
+                    </h2>
+                    <p class="supplier-form-section-head__hint">
+                      {{ 'maintenance.supplier.sectionContactSubtitle' | translate }}
+                    </p>
+                  </div>
+                </header>
+                <div class="supplier-form-grid supplier-form-grid--2">
+                  <div
+                    class="supplier-form-field"
+                    [class.supplier-form-field--invalid]="hasError('phone')"
+                  >
+                    <label class="supplier-form-label">
+                      <span>{{ 'maintenance.supplier.fieldPhone' | translate }}</span>
+                      <span class="supplier-form-badge supplier-form-badge--required">
+                        {{ 'maintenance.supplier.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="tel"
+                      formControlName="phone"
+                      appFieldValueState
+                      appMobileNumberInput
+                      [placeholder]="'maintenance.supplier.examplePhone' | translate"
+                    />
+                    <p class="supplier-form-hint">{{ 'maintenance.supplier.hintPhone' | translate }}</p>
+                    @if (hasError('phone')) {
+                      <div class="supplier-form-hint supplier-form-hint--danger">
+                        {{ 'maintenance.supplier.invalidPhone' | translate }}
+                      </div>
+                    }
+                  </div>
 
-        <div class="col-md-6">
-          <label class="form-label">{{ 'maintenance.supplier.fieldEmail' | translate }}</label>
-          <input class="form-control" type="email" formControlName="email" appFieldValueState />
-          @if (form.controls.email.touched && form.controls.email.invalid) {
-            <div class="text-danger small mt-1">{{ 'maintenance.supplier.invalidEmail' | translate }}</div>
-          }
-        </div>
+                  <div
+                    class="supplier-form-field"
+                    [class.supplier-form-field--invalid]="hasError('phone2')"
+                  >
+                    <label class="supplier-form-label">
+                      <span>{{ 'maintenance.supplier.fieldPhone2' | translate }}</span>
+                      <span class="supplier-form-badge supplier-form-badge--optional">
+                        {{ 'maintenance.supplier.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="tel"
+                      formControlName="phone2"
+                      appFieldValueState
+                      appMobileNumberInput
+                      [placeholder]="'maintenance.supplier.examplePhone' | translate"
+                    />
+                    <p class="supplier-form-hint">{{ 'maintenance.supplier.hintPhone2' | translate }}</p>
+                    @if (hasError('phone2')) {
+                      <div class="supplier-form-hint supplier-form-hint--danger">
+                        {{ 'maintenance.supplier.invalidPhone2' | translate }}
+                      </div>
+                    }
+                  </div>
 
-        <div class="col-md-6">
-          <label class="form-label">{{ 'maintenance.supplier.fieldTaxRecord' | translate }}</label>
-          <input class="form-control" formControlName="taxRecord" appFieldValueState />
-        </div>
+                  <div
+                    class="supplier-form-field"
+                    [class.supplier-form-field--invalid]="hasError('email')"
+                  >
+                    <label class="supplier-form-label">
+                      <span>{{ 'maintenance.supplier.fieldEmail' | translate }}</span>
+                      <span class="supplier-form-badge supplier-form-badge--optional">
+                        {{ 'maintenance.supplier.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="email"
+                      formControlName="email"
+                      maxlength="200"
+                      autocomplete="email"
+                      appFieldValueState
+                      [placeholder]="'maintenance.supplier.exampleEmail' | translate"
+                    />
+                    <p class="supplier-form-hint">{{ 'maintenance.supplier.hintEmail' | translate }}</p>
+                    @if (hasError('email')) {
+                      <div class="supplier-form-hint supplier-form-hint--danger">
+                        {{ 'maintenance.supplier.invalidEmail' | translate }}
+                      </div>
+                    }
+                  </div>
 
-        <div class="col-md-6">
-          <label class="form-label">{{ 'maintenance.supplier.fieldAccountNumber' | translate }}</label>
-          <input class="form-control" formControlName="accountNumber" appFieldValueState />
-        </div>
+                  <div class="supplier-form-field supplier-form-field--wide">
+                    <label class="supplier-form-label">
+                      <span>{{ 'maintenance.supplier.fieldAddress' | translate }}</span>
+                      <span class="supplier-form-badge supplier-form-badge--optional">
+                        {{ 'maintenance.supplier.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <textarea
+                      class="form-control"
+                      rows="4"
+                      formControlName="address"
+                      maxlength="500"
+                      appFieldValueState
+                      [placeholder]="'maintenance.supplier.exampleAddress' | translate"
+                    ></textarea>
+                    <p class="supplier-form-hint">{{ 'maintenance.supplier.hintAddress' | translate }}</p>
+                  </div>
+                </div>
+              </div>
+            </details>
 
-        <div class="col-12">
-          <label class="form-label">{{ 'maintenance.supplier.fieldAddress' | translate }}</label>
-          <textarea class="form-control" rows="3" formControlName="address" appFieldValueState></textarea>
-        </div>
+            <details id="supplier-form-section-accounting" class="supplier-form-section supplier-form-fold" open>
+              <summary class="supplier-form-section__summary">
+                <span class="supplier-form-section__step">3</span>
+                {{ 'maintenance.supplier.sectionAccountingTitle' | translate }}
+              </summary>
+              <div class="supplier-form-fold__body">
+                <header class="supplier-form-section-head">
+                  <span class="supplier-form-section-head__icon" aria-hidden="true">📋</span>
+                  <div>
+                    <h2 class="supplier-form-section-head__title">
+                      {{ 'maintenance.supplier.sectionAccountingTitle' | translate }}
+                    </h2>
+                    <p class="supplier-form-section-head__hint">
+                      {{ 'maintenance.supplier.sectionAccountingSubtitle' | translate }}
+                    </p>
+                  </div>
+                </header>
+                <div class="supplier-form-grid supplier-form-grid--2">
+                  <div class="supplier-form-field">
+                    <label class="supplier-form-label">
+                      <span>{{ 'maintenance.supplier.fieldTaxRecord' | translate }}</span>
+                      <span class="supplier-form-badge supplier-form-badge--optional">
+                        {{ 'maintenance.supplier.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="text"
+                      formControlName="taxRecord"
+                      maxlength="100"
+                      appFieldValueState
+                      [placeholder]="'maintenance.supplier.exampleTaxRecord' | translate"
+                    />
+                    <p class="supplier-form-hint">{{ 'maintenance.supplier.hintTaxRecord' | translate }}</p>
+                  </div>
+
+                  <div class="supplier-form-field">
+                    <label class="supplier-form-label">
+                      <span>{{ 'maintenance.supplier.fieldAccountNumber' | translate }}</span>
+                      <span class="supplier-form-badge supplier-form-badge--optional">
+                        {{ 'maintenance.supplier.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="text"
+                      formControlName="accountNumber"
+                      maxlength="100"
+                      appFieldValueState
+                      [placeholder]="'maintenance.supplier.exampleAccountNumber' | translate"
+                    />
+                    <p class="supplier-form-hint">{{ 'maintenance.supplier.hintAccountNumber' | translate }}</p>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <div class="app-form-actions">
+            <button class="btn btn-primary" type="submit" [disabled]="saving()">
+              @if (saving()) {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              }
+              {{ 'Save' | translate }}
+            </button>
+            <a class="btn btn-cancel" routerLink="/maintenance/suppliers">{{ 'Cancel' | translate }}</a>
+          </div>
+        </form>
       </div>
 
-      <div class="card-footer d-flex flex-wrap gap-2 justify-content-end">
-        <a class="btn btn-light" routerLink="/maintenance/suppliers">{{ 'Cancel' | translate }}</a>
-        <button class="btn btn-primary" type="submit" [disabled]="saving()">
-          @if (saving()) {
-            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-          }
-          {{ 'Save' | translate }}
-        </button>
-      </div>
-    </form>
+      <aside class="contract-flow-aside supplier-form-aside" [attr.aria-label]="'maintenance.supplier.formSummary' | translate">
+        <div class="supplier-form-aside-card">
+          <div class="supplier-form-progress">
+            <div class="supplier-form-progress__head">
+              <span>{{ 'maintenance.supplier.flowProfileCompletion' | translate }}</span>
+              <strong>{{ profileCompletionPercent() }}%</strong>
+            </div>
+            <div
+              class="supplier-form-progress__track"
+              role="progressbar"
+              [attr.aria-valuenow]="profileCompletionPercent()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span class="supplier-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+            </div>
+          </div>
+
+          <ul class="supplier-form-status-list">
+            <li [class.supplier-form-status-list__item--done]="identitySectionComplete()">
+              <span class="supplier-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'maintenance.supplier.flowSummaryIdentity' | translate }}</span>
+            </li>
+            <li [class.supplier-form-status-list__item--done]="contactSectionComplete()">
+              <span class="supplier-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'maintenance.supplier.flowSummaryContact' | translate }}</span>
+            </li>
+            <li [class.supplier-form-status-list__item--done]="accountingSectionComplete()">
+              <span class="supplier-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'maintenance.supplier.flowSummaryAccounting' | translate }}</span>
+            </li>
+          </ul>
+
+          <p class="supplier-form-workflow-note">{{ 'maintenance.supplier.formWorkflowNote' | translate }}</p>
+        </div>
+      </aside>
+    </div>
   }
 </div>

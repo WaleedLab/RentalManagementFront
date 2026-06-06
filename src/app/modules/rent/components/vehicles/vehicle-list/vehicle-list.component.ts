@@ -591,7 +591,7 @@ export class VehicleListComponent implements OnInit {
 
               const maintenanceId = row.id;
               if (maintenanceId && maintenanceId !== '0') {
-                this.router.navigate(['/maintenance', maintenanceId, 'edit'], {
+                this.router.navigate(['/maintenance', 'edit', maintenanceId], {
                   queryParams: { fleetId },
                 });
               } else {

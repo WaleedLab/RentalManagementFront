@@ -1,37 +1,43 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, inject, signal } from '@angular/core';
-import { FormArray, FormBuilder, FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SHARED_FORM_FIELD_DIRECTIVES } from '../../../../../shared/forms/shared-form-field.imports';
-import { coerceFormNumber, requiredNumber } from '../../../../../shared/validators/required-number.validator';
+import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { forkJoin } from 'rxjs';
+import { forkJoin, merge } from 'rxjs';
 
 import { PrivilegeTypeCreateRequest } from '../../../models';
 import { PrivilegeService } from '../../../services/privileges/privilege.service';
+import { SHARED_FORM_FIELD_DIRECTIVES } from '../../../../../shared/forms/shared-form-field.imports';
 import { ToastService } from '../../../../../shared/services/toast.service';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { coerceFormNumber, requiredNumber } from '../../../../../shared/validators/required-number.validator';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
 @Component({
   selector: 'app-privilege-form',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    RouterLink,
-    TranslateModule,
-    PageHeaderComponent,
-    ...SHARED_FORM_FIELD_DIRECTIVES,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, TranslateModule, ...SHARED_FORM_FIELD_DIRECTIVES],
   templateUrl: './privilege-form.component.html',
+  styleUrl: './privilege-form.component.scss',
 })
 export class PrivilegeFormComponent implements OnInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
   private static readonly ARABIC_NAME_REGEX = /^[\u0600-\u06FF\s.'-]{2,255}$/;
   private static readonly ENGLISH_NAME_REGEX = /^[A-Za-z\s.'-]{2,255}$/;
   private static readonly PRIVILEGE_CODE_REGEX = /^[A-Z0-9_]{3,500}$/;
+  private static readonly SINGLE_WORKFLOW_SECTION_IDS = [
+    'privilege-form-section-identity',
+    'privilege-form-section-security',
+  ] as const;
+  private static readonly BULK_WORKFLOW_SECTION_IDS = ['privilege-form-section-batch'] as const;
 
   private fb = inject(NonNullableFormBuilder);
   private readonly nullableFb = inject(FormBuilder);
@@ -40,11 +46,15 @@ export class PrivilegeFormComponent implements OnInit {
   private privilegeService = inject(PrivilegeService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
+  private destroyRef = inject(DestroyRef);
 
   isEdit = signal(false);
   isBulkMode = signal(false);
   privilegeId = signal<string | null>(null);
+  initializing = signal(false);
   loading = signal(false);
+  submitAttempted = signal(false);
+  private formProgressTick = signal(0);
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(255), Validators.pattern(PrivilegeFormComponent.ARABIC_NAME_REGEX)]],
@@ -52,11 +62,66 @@ export class PrivilegeFormComponent implements OnInit {
     privilegeName: ['', [Validators.required, Validators.maxLength(500), Validators.pattern(PrivilegeFormComponent.PRIVILEGE_CODE_REGEX)]],
     order: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
   });
+
   bulkForm = this.fb.group({
     items: this.fb.array([this.createBulkRow(1)]),
   });
 
+  identitySectionComplete = computed(() => {
+    this.formProgressTick();
+    const controls = this.form.controls;
+    return controls.name.valid && controls.nameEn.valid;
+  });
+
+  securitySectionComplete = computed(() => {
+    this.formProgressTick();
+    const controls = this.form.controls;
+    return (
+      this.identitySectionComplete() &&
+      controls.privilegeName.valid &&
+      controls.order.valid
+    );
+  });
+
+  bulkSectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.bulkItems.length > 0 && this.bulkForm.valid;
+  });
+
+  bulkRowCount = computed(() => this.bulkItems.length);
+
+  profileCompletionPercent = computed(() => {
+    this.formProgressTick();
+    if (this.isBulkMode() && !this.isEdit()) {
+      return this.bulkSectionComplete() ? 100 : 0;
+    }
+
+    let done = 0;
+    if (this.identitySectionComplete()) done++;
+    if (this.securitySectionComplete()) done++;
+    return Math.round((done / 2) * 100);
+  });
+
+  currentWorkflowStep = computed(() => {
+    this.formProgressTick();
+    if (this.isBulkMode() && !this.isEdit()) {
+      return this.bulkSectionComplete() ? 2 : 1;
+    }
+
+    if (!this.identitySectionComplete()) return 1;
+    if (!this.securitySectionComplete()) return 2;
+    return 3;
+  });
+
   ngOnInit(): void {
+    merge(this.form.valueChanges, this.form.statusChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formProgressTick.update(v => v + 1));
+
+    merge(this.bulkForm.valueChanges, this.bulkForm.statusChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formProgressTick.update(v => v + 1));
+
     const id = this.route.snapshot.paramMap.get('id');
     const mode = (this.route.snapshot.queryParamMap.get('mode') || '').toLowerCase();
     if (!id) {
@@ -67,7 +132,7 @@ export class PrivilegeFormComponent implements OnInit {
     this.isEdit.set(true);
     this.isBulkMode.set(false);
     this.privilegeId.set(id);
-    this.loading.set(true);
+    this.initializing.set(true);
     this.privilegeService.getById(id).subscribe({
       next: privilege => {
         this.form.patchValue({
@@ -78,7 +143,7 @@ export class PrivilegeFormComponent implements OnInit {
         });
       },
       error: () => this.toast.error(this.translate.instant('Failed to load privilege')),
-      complete: () => this.loading.set(false),
+      complete: () => this.initializing.set(false),
     });
   }
 
@@ -92,6 +157,45 @@ export class PrivilegeFormComponent implements OnInit {
     }
 
     this.isBulkMode.set(mode === 'bulk');
+    this.submitAttempted.set(false);
+  }
+
+  focusWorkflowSection(step: 1 | 2): void {
+    const sectionIds =
+      this.isBulkMode() && !this.isEdit()
+        ? PrivilegeFormComponent.BULK_WORKFLOW_SECTION_IDS
+        : PrivilegeFormComponent.SINGLE_WORKFLOW_SECTION_IDS;
+    const sectionId = sectionIds[step - 1];
+    if (!sectionId) {
+      return;
+    }
+
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('privilege-form-section--focus');
+    window.setTimeout(() => section.classList.remove('privilege-form-section--focus'), 1400);
+  }
+
+  hasError(controlName: 'name' | 'nameEn' | 'privilegeName' | 'order'): boolean {
+    const control = this.form.controls[controlName];
+    return !!control && control.invalid && (control.touched || control.dirty || this.submitAttempted());
+  }
+
+  hasBulkRowError(index: number, controlName: 'name' | 'nameEn' | 'privilegeName' | 'order'): boolean {
+    const row = this.bulkItems.at(index);
+    if (!row) {
+      return false;
+    }
+
+    const control = row.get(controlName);
+    return !!control && control.invalid && (control.touched || control.dirty || this.submitAttempted());
   }
 
   addBulkRow(): void {
@@ -105,7 +209,9 @@ export class PrivilegeFormComponent implements OnInit {
     }
 
     const raw = row.getRawValue();
-    this.bulkItems.push(this.createBulkRow(this.nextBulkOrder(), raw.name, raw.nameEn, raw.privilegeName));
+    this.bulkItems.push(
+      this.createBulkRow(this.nextBulkOrder(), raw.name, raw.nameEn, raw.privilegeName),
+    );
   }
 
   removeBulkRow(index: number): void {
@@ -122,25 +228,31 @@ export class PrivilegeFormComponent implements OnInit {
     this.bulkItems.removeAt(index);
   }
 
-  autoFillCode(index: number): void {
+  autoFillCode(index?: number): void {
+    if (index === undefined) {
+      const sourceName = String(this.form.controls.nameEn.value ?? '');
+      const suggestedCode = this.suggestPrivilegeCode(sourceName);
+      if (suggestedCode) {
+        this.form.controls.privilegeName.setValue(suggestedCode);
+        this.form.controls.privilegeName.markAsDirty();
+      }
+      return;
+    }
+
     const row = this.bulkItems.at(index);
     if (!row) {
       return;
     }
 
     const sourceName = String(row.get('nameEn')?.value ?? '');
-    const suggestedCode = sourceName
-      .trim()
-      .toUpperCase()
-      .replace(/[^A-Z0-9]+/g, '_')
-      .replace(/^_+|_+$/g, '');
-
+    const suggestedCode = this.suggestPrivilegeCode(sourceName);
     if (suggestedCode) {
       row.get('privilegeName')?.setValue(suggestedCode);
     }
   }
 
   save(): void {
+    this.submitAttempted.set(true);
     if (this.isBulkMode() && !this.isEdit()) {
       this.saveBulk();
       return;
@@ -203,9 +315,7 @@ export class PrivilegeFormComponent implements OnInit {
     this.loading.set(true);
     forkJoin(payload.map(item => this.privilegeService.create(item))).subscribe({
       next: () => {
-        this.toast.success(
-          this.translate.instant('Privileges created') + ` (${payload.length})`,
-        );
+        this.toast.success(this.translate.instant('Privileges created') + ` (${payload.length})`);
         this.router.navigate(['/privileges']);
       },
       error: () => {
@@ -216,7 +326,12 @@ export class PrivilegeFormComponent implements OnInit {
     });
   }
 
-  private createBulkRow(order: number, name: string = '', nameEn: string = '', privilegeName: string = '') {
+  private createBulkRow(
+    order: number,
+    name: string = '',
+    nameEn: string = '',
+    privilegeName: string = '',
+  ): FormGroup {
     return this.fb.group({
       name: [
         name,
@@ -242,7 +357,7 @@ export class PrivilegeFormComponent implements OnInit {
           Validators.pattern(PrivilegeFormComponent.PRIVILEGE_CODE_REGEX),
         ],
       ],
-      order: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
+      order: this.nullableFb.control<number | null>(order, [requiredNumber({ min: 0 })]),
     });
   }
 
@@ -265,9 +380,12 @@ export class PrivilegeFormComponent implements OnInit {
       .filter(([, count]) => count > 1)
       .map(([code]) => code);
   }
+
+  private suggestPrivilegeCode(sourceName: string): string {
+    return sourceName
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+  }
 }
-
-
-
-
-

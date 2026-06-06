@@ -132,7 +132,7 @@ export class JournalEntryListComponent implements OnInit {
         if (!journalId || journalId === 'undefined' || journalId === 'null') {
           return null;
         }
-        return ['/journals', journalId, 'view'];
+        return ['/journals', 'view', journalId];
       },
     },
     { key: 'print', label: 'Print', icon: 'fa-solid fa-print', variant: 'secondary', iconOnly: true },

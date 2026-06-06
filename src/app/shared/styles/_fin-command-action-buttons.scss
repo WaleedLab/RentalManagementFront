@@ -1,0 +1,13 @@
+/// Add / Create action links inside `.fin-command__actions`.
+
+@mixin fin-command-action-buttons() {
+  .fin-command .fin-command__actions a.fin-btn--primary {
+    min-width: var(--fin-btn-action-add-min-width, var(--fin-btn-action-min-width, 15rem));
+    min-height: var(--fin-btn-action-min-height, 44px);
+    padding-block: var(--fin-btn-action-padding-block, 0.6875rem);
+    padding-inline: var(--fin-btn-action-padding-inline, 1.625rem);
+    font-size: var(--fin-btn-action-font-size, 0.92rem);
+    font-weight: var(--fin-btn-action-font-weight, 700);
+    line-height: 1.25;
+  }
+}

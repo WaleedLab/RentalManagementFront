@@ -606,7 +606,7 @@ export class BookingCloseComponent implements OnInit {
     this.bookingService.close(payload).subscribe({
       next: () => {
         this.toast.success(this.translate.instant('Contract close success'));
-        this.router.navigate(['/booking', item.id, 'details']);
+        this.router.navigate(['/booking', 'details', item.id]);
       },
       error: (err: unknown) => {
         this.saving.set(false);

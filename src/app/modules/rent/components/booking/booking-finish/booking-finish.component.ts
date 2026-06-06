@@ -756,7 +756,7 @@ export class BookingFinishComponent implements OnInit {
     this.bookingService.finish(finishPayload).subscribe({
       next: () => {
         this.toast.success(this.translate.instant('Contract finish success'));
-        this.router.navigate(['/booking', item.id, 'details']);
+        this.router.navigate(['/booking', 'details', item.id]);
       },
       error: (err: unknown) => {
         this.saving.set(false);
@@ -798,7 +798,7 @@ export class BookingFinishComponent implements OnInit {
         return;
       }
       if (isBookingSuspended(b)) {
-        this.router.navigate(['/booking', b.id, 'finish-suspended'], { replaceUrl: true });
+        this.router.navigate(['/booking', 'finish-suspended', b.id], { replaceUrl: true });
         return;
       }
       this.booking.set(b);

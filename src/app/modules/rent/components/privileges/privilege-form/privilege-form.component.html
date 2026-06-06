@@ -1,177 +1,427 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="
-      isEdit()
-        ? ('Edit Privilege' | translate)
-        : (isBulkMode() ? ('Create Privileges (Batch)' | translate) : ('Create Privilege' | translate)
-      )
-    "
-    [subtitle]="'Define the security privilege used in guards, buttons, and navigation.' | translate"
-  >
-    <a class="btn btn-outline-secondary" routerLink="/privileges">{{ 'Back to Privileges' | translate }}</a>
-  </app-page-header>
-
-  @if (!isEdit()) {
-    <div class="card mb-3">
-      <div class="card-body d-flex flex-wrap gap-2 align-items-center justify-content-between">
-        <div class="small text-muted">{{ 'Creation Mode' | translate }}</div>
-        <div class="btn-group">
-          <button
-            type="button"
-            class="btn"
-            [class.btn-primary]="!isBulkMode()"
-            [class.btn-outline-primary]="isBulkMode()"
-            (click)="setMode('single')"
-          >
-            {{ 'Single' | translate }}
-          </button>
-          <button
-            type="button"
-            class="btn"
-            [class.btn-primary]="isBulkMode()"
-            [class.btn-outline-primary]="!isBulkMode()"
-            (click)="setMode('bulk')"
-          >
-            {{ 'Batch' | translate }}
-          </button>
-        </div>
+<div class="container-fluid contract-flow-page contract-flow-edit privilege-form-page">
+  <header class="contract-flow-header privilege-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          @if (isEdit()) {
+            {{ 'Edit Privilege' | translate }}
+          } @else if (isBulkMode()) {
+            {{ 'Create Privileges (Batch)' | translate }}
+          } @else {
+            {{ 'Create Privilege' | translate }}
+          }
+        </h1>
+        <p class="contract-flow-header__meta mb-0">{{ 'privileges.formPageSubtitle' | translate }}</p>
       </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/privileges">{{ 'Back to Privileges' | translate }}</a>
     </div>
-  }
+  </header>
 
-  @if (!isBulkMode() || isEdit()) {
-    <div class="card">
-      <div class="card-body">
-        <form [formGroup]="form" (ngSubmit)="save()">
-          <div class="row g-3">
-            <div class="col-md-4">
-              <label class="form-label">{{ 'Privilege Name' | translate }} <span class="text-danger">*</span></label>
-              <input
-                class="form-control"
-                formControlName="name"
-                maxlength="255"
-                [placeholder]="'Example Privilege Arabic Name' | translate"
-              />
-              <div class="form-text">{{ 'Hint Privilege Arabic Name' | translate }}</div>
-              @if (form.get('name')?.invalid && form.get('name')?.touched) {
-                <div class="text-danger small">{{ 'Privilege Arabic name is required and must be valid.' | translate }}</div>
-              }
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ 'Name (EN)' | translate }} <span class="text-danger">*</span></label>
-              <input
-                class="form-control"
-                formControlName="nameEn"
-                maxlength="255"
-                [placeholder]="'Example Privilege English Name' | translate"
-              />
-              <div class="form-text">{{ 'Hint Privilege English Name' | translate }}</div>
-              @if (form.get('nameEn')?.invalid && form.get('nameEn')?.touched) {
-                <div class="text-danger small">{{ 'Privilege English name is required and must be valid.' | translate }}</div>
-              }
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ 'Privilege Code' | translate }} <span class="text-danger">*</span></label>
-              <input
-                class="form-control"
-                formControlName="privilegeName"
-                maxlength="500"
-                [placeholder]="'Example Privilege Code' | translate"
-              />
-              <div class="form-text">{{ 'Hint Privilege Code' | translate }}</div>
-              @if (form.get('privilegeName')?.invalid && form.get('privilegeName')?.touched) {
-                <div class="text-danger small">{{ 'Privilege code is required and must be valid.' | translate }}</div>
-              }
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ 'Order' | translate }} <span class="text-danger">*</span></label>
-              <input class="form-control" type="number" min="0" formControlName="order" />
-              <div class="form-text">{{ 'Hint Privilege Order' | translate }}</div>
-              @if (form.get('order')?.invalid && form.get('order')?.touched) {
-                <div class="text-danger small">{{ 'Privilege order is required and must be zero or greater.' | translate }}</div>
-              }
-            </div>
-          </div>
-
-          <div class="app-form-actions">
-            <button class="btn btn-primary" type="submit" [disabled]="loading()">
-              {{ (isEdit() ? 'Update Privilege' : 'Create Privilege') | translate }}
-            </button>
-            <a class="btn btn-cancel" routerLink="/privileges">{{ 'Cancel' | translate }}</a>
-          </div>
-        </form>
-      </div>
+  @if (initializing()) {
+    <div class="privilege-form-loading">
+      <div class="spinner-border text-primary" role="status"></div>
     </div>
   } @else {
-    <div class="card">
-      <div class="card-body">
-        <form [formGroup]="bulkForm" (ngSubmit)="save()">
-          <div formArrayName="items" class="d-grid gap-3">
-            @for (row of bulkItems.controls; track $index) {
-              <div class="border rounded p-3" [formGroupName]="$index">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                  <strong>{{ 'Privilege' | translate }} #{{ $index + 1 }}</strong>
-                  <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary" (click)="autoFillCode($index)">
-                      {{ 'Generate Code' | translate }}
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-info" (click)="cloneBulkRow($index)">
-                      {{ 'Duplicate' | translate }}
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeBulkRow($index)">
-                      {{ 'Remove' | translate }}
-                    </button>
+    <div class="contract-flow-layout privilege-form-layout">
+      <div class="contract-flow-main">
+        @if (!isEdit()) {
+          <div class="privilege-form-mode-bar">
+            <span class="privilege-form-mode-bar__label">{{ 'Creation Mode' | translate }}</span>
+            <div class="privilege-form-mode-bar__switch" role="group" [attr.aria-label]="'Creation Mode' | translate">
+              <button
+                type="button"
+                class="privilege-form-mode-bar__btn"
+                [class.privilege-form-mode-bar__btn--active]="!isBulkMode()"
+                (click)="setMode('single')"
+              >
+                {{ 'Single' | translate }}
+              </button>
+              <button
+                type="button"
+                class="privilege-form-mode-bar__btn"
+                [class.privilege-form-mode-bar__btn--active]="isBulkMode()"
+                (click)="setMode('bulk')"
+              >
+                {{ 'Batch' | translate }}
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (!isBulkMode() || isEdit()) {
+          <form class="app-form-value-state privilege-form" [formGroup]="form" (ngSubmit)="save()">
+            <ol class="privilege-form-workflow" [attr.aria-label]="'privileges.formWorkflowSteps' | translate">
+              <li>
+                <button
+                  type="button"
+                  class="privilege-form-workflow__step"
+                  [class.privilege-form-workflow__step--done]="identitySectionComplete()"
+                  [class.privilege-form-workflow__step--current]="currentWorkflowStep() === 1"
+                  [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+                  [attr.aria-controls]="'privilege-form-section-identity'"
+                  (click)="focusWorkflowSection(1)"
+                >
+                  <span class="privilege-form-workflow__num">1</span>
+                  <span>{{ 'privileges.flowStepIdentity' | translate }}</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  class="privilege-form-workflow__step"
+                  [class.privilege-form-workflow__step--done]="securitySectionComplete()"
+                  [class.privilege-form-workflow__step--current]="currentWorkflowStep() === 2"
+                  [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+                  [attr.aria-controls]="'privilege-form-section-security'"
+                  (click)="focusWorkflowSection(2)"
+                >
+                  <span class="privilege-form-workflow__num">2</span>
+                  <span>{{ 'privileges.flowStepSecurity' | translate }}</span>
+                </button>
+              </li>
+            </ol>
+
+            <div class="privilege-form-fields-shell">
+              <details id="privilege-form-section-identity" class="privilege-form-section privilege-form-fold" open>
+                <summary class="privilege-form-section__summary">
+                  <span class="privilege-form-section__step">1</span>
+                  {{ 'privileges.sectionIdentityTitle' | translate }}
+                </summary>
+                <div class="privilege-form-fold__body">
+                  <header class="privilege-form-section-head">
+                    <span class="privilege-form-section-head__icon" aria-hidden="true">🏷️</span>
+                    <div>
+                      <h2 class="privilege-form-section-head__title">
+                        {{ 'privileges.sectionIdentityTitle' | translate }}
+                      </h2>
+                      <p class="privilege-form-section-head__hint">
+                        {{ 'privileges.sectionIdentitySubtitle' | translate }}
+                      </p>
+                    </div>
+                  </header>
+
+                  <div class="privilege-form-grid privilege-form-grid--2">
+                    <div class="privilege-form-field" [class.privilege-form-field--invalid]="hasError('name')">
+                      <label class="privilege-form-label">
+                        <span>{{ 'Privilege Name' | translate }}</span>
+                        <span class="privilege-form-badge privilege-form-badge--required">
+                          {{ 'privileges.requiredFieldBadge' | translate }}
+                        </span>
+                      </label>
+                      <input
+                        class="form-control"
+                        formControlName="name"
+                        maxlength="255"
+                        [placeholder]="'Example Privilege Arabic Name' | translate"
+                      />
+                      <p class="privilege-form-hint">{{ 'Hint Privilege Arabic Name' | translate }}</p>
+                      @if (hasError('name')) {
+                        <div class="privilege-form-hint privilege-form-hint--danger">
+                          {{ 'Privilege Arabic name is required and must be valid.' | translate }}
+                        </div>
+                      }
+                    </div>
+
+                    <div class="privilege-form-field" [class.privilege-form-field--invalid]="hasError('nameEn')">
+                      <label class="privilege-form-label">
+                        <span>{{ 'Name (EN)' | translate }}</span>
+                        <span class="privilege-form-badge privilege-form-badge--required">
+                          {{ 'privileges.requiredFieldBadge' | translate }}
+                        </span>
+                      </label>
+                      <input
+                        class="form-control"
+                        formControlName="nameEn"
+                        maxlength="255"
+                        [placeholder]="'Example Privilege English Name' | translate"
+                      />
+                      <p class="privilege-form-hint">{{ 'Hint Privilege English Name' | translate }}</p>
+                      @if (hasError('nameEn')) {
+                        <div class="privilege-form-hint privilege-form-hint--danger">
+                          {{ 'Privilege English name is required and must be valid.' | translate }}
+                        </div>
+                      }
+                    </div>
                   </div>
                 </div>
+              </details>
 
-                <div class="row g-3">
-                  <div class="col-md-3">
-                    <label class="form-label">{{ 'Privilege Name (AR)' | translate }}</label>
-                    <input class="form-control" formControlName="name" maxlength="255" />
-                    @if (row.get('name')?.invalid && row.get('name')?.touched) {
-                      <div class="text-danger small mt-1">{{ 'Required' | translate }}</div>
-                    }
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">{{ 'Name (EN)' | translate }}</label>
-                    <input class="form-control" formControlName="nameEn" maxlength="255" />
-                    @if (row.get('nameEn')?.invalid && row.get('nameEn')?.touched) {
-                      <div class="text-danger small mt-1">{{ 'Required' | translate }}</div>
-                    }
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">{{ 'Privilege Code' | translate }}</label>
-                    <input class="form-control text-uppercase" formControlName="privilegeName" maxlength="500" />
-                    @if (row.get('privilegeName')?.invalid && row.get('privilegeName')?.touched) {
-                      <div class="text-danger small mt-1">{{ 'Use uppercase letters, numbers, and underscore only.' | translate }}</div>
-                    }
-                  </div>
-                  <div class="col-md-2">
-                    <label class="form-label">{{ 'Order' | translate }}</label>
-                    <input class="form-control" type="number" min="0" formControlName="order" />
-                    @if (row.get('order')?.invalid && row.get('order')?.touched) {
-                      <div class="text-danger small mt-1">{{ 'Invalid order' | translate }}</div>
-                    }
+              <details id="privilege-form-section-security" class="privilege-form-section privilege-form-fold" open>
+                <summary class="privilege-form-section__summary">
+                  <span class="privilege-form-section__step">2</span>
+                  {{ 'privileges.sectionSecurityTitle' | translate }}
+                </summary>
+                <div class="privilege-form-fold__body">
+                  <header class="privilege-form-section-head">
+                    <span class="privilege-form-section-head__icon" aria-hidden="true">🔐</span>
+                    <div>
+                      <h2 class="privilege-form-section-head__title">
+                        {{ 'privileges.sectionSecurityTitle' | translate }}
+                      </h2>
+                      <p class="privilege-form-section-head__hint">
+                        {{ 'privileges.sectionSecuritySubtitle' | translate }}
+                      </p>
+                    </div>
+                  </header>
+
+                  <div class="privilege-form-grid privilege-form-grid--2">
+                    <div
+                      class="privilege-form-field privilege-form-field--wide"
+                      [class.privilege-form-field--invalid]="hasError('privilegeName')"
+                    >
+                      <label class="privilege-form-label">
+                        <span>{{ 'Privilege Code' | translate }}</span>
+                        <span class="privilege-form-badge privilege-form-badge--required">
+                          {{ 'privileges.requiredFieldBadge' | translate }}
+                        </span>
+                      </label>
+                      <div class="privilege-form-code-row">
+                        <input
+                          class="form-control text-uppercase"
+                          formControlName="privilegeName"
+                          maxlength="500"
+                          [placeholder]="'Example Privilege Code' | translate"
+                        />
+                        <button type="button" class="btn btn-sm btn-outline-primary" (click)="autoFillCode()">
+                          {{ 'Generate Code' | translate }}
+                        </button>
+                      </div>
+                      <p class="privilege-form-hint">{{ 'Hint Privilege Code' | translate }}</p>
+                      @if (hasError('privilegeName')) {
+                        <div class="privilege-form-hint privilege-form-hint--danger">
+                          {{ 'Privilege code is required and must be valid.' | translate }}
+                        </div>
+                      }
+                    </div>
+
+                    <div class="privilege-form-field" [class.privilege-form-field--invalid]="hasError('order')">
+                      <label class="privilege-form-label">
+                        <span>{{ 'Order' | translate }}</span>
+                        <span class="privilege-form-badge privilege-form-badge--required">
+                          {{ 'privileges.requiredFieldBadge' | translate }}
+                        </span>
+                      </label>
+                      <input class="form-control" type="number" min="0" formControlName="order" />
+                      <p class="privilege-form-hint">{{ 'Hint Privilege Order' | translate }}</p>
+                      @if (hasError('order')) {
+                        <div class="privilege-form-hint privilege-form-hint--danger">
+                          {{ 'Privilege order is required and must be zero or greater.' | translate }}
+                        </div>
+                      }
+                    </div>
                   </div>
                 </div>
-              </div>
-            }
-          </div>
+              </details>
+            </div>
 
-          <div class="mt-3">
-            <button type="button" class="btn btn-outline-primary" (click)="addBulkRow()">
-              <i class="fa-solid fa-plus me-1"></i>{{ 'Add another privilege' | translate }}
-            </button>
-          </div>
+            <div class="app-form-actions">
+              <button class="btn btn-primary" type="submit" [disabled]="loading()">
+                @if (loading()) {
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                }
+                {{ (isEdit() ? 'Update Privilege' : 'Create Privilege') | translate }}
+              </button>
+              <a class="btn btn-cancel" routerLink="/privileges">{{ 'Cancel' | translate }}</a>
+            </div>
+          </form>
+        } @else {
+          <form class="app-form-value-state privilege-form" [formGroup]="bulkForm" (ngSubmit)="save()">
+            <ol class="privilege-form-workflow" [attr.aria-label]="'privileges.formWorkflowSteps' | translate">
+              <li>
+                <button
+                  type="button"
+                  class="privilege-form-workflow__step"
+                  [class.privilege-form-workflow__step--done]="bulkSectionComplete()"
+                  [class.privilege-form-workflow__step--current]="currentWorkflowStep() === 1"
+                  [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+                  [attr.aria-controls]="'privilege-form-section-batch'"
+                  (click)="focusWorkflowSection(1)"
+                >
+                  <span class="privilege-form-workflow__num">1</span>
+                  <span>{{ 'privileges.flowStepBatch' | translate }}</span>
+                </button>
+              </li>
+            </ol>
 
-          <div class="app-form-actions">
-            <button class="btn btn-primary" type="submit" [disabled]="loading()">
-              {{ 'Create Privileges Batch' | translate }}
-            </button>
-            <a class="btn btn-cancel" routerLink="/privileges">{{ 'Cancel' | translate }}</a>
-          </div>
-        </form>
+            <div class="privilege-form-fields-shell">
+              <details id="privilege-form-section-batch" class="privilege-form-section privilege-form-fold" open>
+                <summary class="privilege-form-section__summary">
+                  <span class="privilege-form-section__step">1</span>
+                  {{ 'privileges.sectionBatchTitle' | translate }}
+                </summary>
+                <div class="privilege-form-fold__body">
+                  <header class="privilege-form-section-head">
+                    <span class="privilege-form-section-head__icon" aria-hidden="true">📦</span>
+                    <div>
+                      <h2 class="privilege-form-section-head__title">
+                        {{ 'privileges.sectionBatchTitle' | translate }}
+                      </h2>
+                      <p class="privilege-form-section-head__hint">
+                        {{ 'privileges.sectionBatchSubtitle' | translate }}
+                      </p>
+                    </div>
+                  </header>
+
+                  <div class="privilege-form-batch-toolbar">
+                    <span class="privilege-form-badge privilege-form-badge--required">
+                      {{ 'privileges.requiredFieldBadge' | translate }}
+                    </span>
+                    <span class="privilege-form-batch-count">
+                      {{ bulkRowCount() }} {{ 'privileges.batchRowsLabel' | translate }}
+                    </span>
+                  </div>
+                  <p class="privilege-form-hint">{{ 'privileges.hintBatch' | translate }}</p>
+
+                  <div formArrayName="items" class="privilege-form-batch-list">
+                    @for (row of bulkItems.controls; track $index) {
+                      <article class="privilege-form-batch-row" [formGroupName]="$index">
+                        <header class="privilege-form-batch-row__head">
+                          <strong>{{ 'Privilege' | translate }} #{{ $index + 1 }}</strong>
+                          <div class="privilege-form-batch-row__actions">
+                            <button type="button" class="btn btn-sm btn-outline-primary" (click)="autoFillCode($index)">
+                              {{ 'Generate Code' | translate }}
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="cloneBulkRow($index)">
+                              {{ 'Duplicate' | translate }}
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeBulkRow($index)">
+                              {{ 'Remove' | translate }}
+                            </button>
+                          </div>
+                        </header>
+
+                        <div class="privilege-form-grid privilege-form-grid--4">
+                          <div
+                            class="privilege-form-field"
+                            [class.privilege-form-field--invalid]="hasBulkRowError($index, 'name')"
+                          >
+                            <label class="privilege-form-label">
+                              <span>{{ 'Privilege Name (AR)' | translate }}</span>
+                            </label>
+                            <input class="form-control" formControlName="name" maxlength="255" />
+                            @if (hasBulkRowError($index, 'name')) {
+                              <div class="privilege-form-hint privilege-form-hint--danger">
+                                {{ 'Privilege Arabic name is required and must be valid.' | translate }}
+                              </div>
+                            }
+                          </div>
+
+                          <div
+                            class="privilege-form-field"
+                            [class.privilege-form-field--invalid]="hasBulkRowError($index, 'nameEn')"
+                          >
+                            <label class="privilege-form-label">
+                              <span>{{ 'Name (EN)' | translate }}</span>
+                            </label>
+                            <input class="form-control" formControlName="nameEn" maxlength="255" />
+                            @if (hasBulkRowError($index, 'nameEn')) {
+                              <div class="privilege-form-hint privilege-form-hint--danger">
+                                {{ 'Privilege English name is required and must be valid.' | translate }}
+                              </div>
+                            }
+                          </div>
+
+                          <div
+                            class="privilege-form-field"
+                            [class.privilege-form-field--invalid]="hasBulkRowError($index, 'privilegeName')"
+                          >
+                            <label class="privilege-form-label">
+                              <span>{{ 'Privilege Code' | translate }}</span>
+                            </label>
+                            <input class="form-control text-uppercase" formControlName="privilegeName" maxlength="500" />
+                            @if (hasBulkRowError($index, 'privilegeName')) {
+                              <div class="privilege-form-hint privilege-form-hint--danger">
+                                {{ 'Use uppercase letters, numbers, and underscore only.' | translate }}
+                              </div>
+                            }
+                          </div>
+
+                          <div
+                            class="privilege-form-field"
+                            [class.privilege-form-field--invalid]="hasBulkRowError($index, 'order')"
+                          >
+                            <label class="privilege-form-label">
+                              <span>{{ 'Order' | translate }}</span>
+                            </label>
+                            <input class="form-control" type="number" min="0" formControlName="order" />
+                            @if (hasBulkRowError($index, 'order')) {
+                              <div class="privilege-form-hint privilege-form-hint--danger">
+                                {{ 'Invalid order' | translate }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      </article>
+                    }
+                  </div>
+
+                  <button type="button" class="btn btn-outline-primary privilege-form-add-row" (click)="addBulkRow()">
+                    <i class="fa-solid fa-plus me-1"></i>{{ 'Add another privilege' | translate }}
+                  </button>
+                </div>
+              </details>
+            </div>
+
+            <div class="app-form-actions">
+              <button class="btn btn-primary" type="submit" [disabled]="loading()">
+                @if (loading()) {
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                }
+                {{ 'Create Privileges Batch' | translate }}
+              </button>
+              <a class="btn btn-cancel" routerLink="/privileges">{{ 'Cancel' | translate }}</a>
+            </div>
+          </form>
+        }
       </div>
+
+      <aside class="contract-flow-aside privilege-form-aside" [attr.aria-label]="'privileges.formSummary' | translate">
+        <div class="privilege-form-aside-card">
+          <div class="privilege-form-progress">
+            <div class="privilege-form-progress__head">
+              <span>{{ 'privileges.flowProfileCompletion' | translate }}</span>
+              <strong>{{ profileCompletionPercent() }}%</strong>
+            </div>
+            <div
+              class="privilege-form-progress__track"
+              role="progressbar"
+              [attr.aria-valuenow]="profileCompletionPercent()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span class="privilege-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+            </div>
+          </div>
+
+          @if (!isBulkMode() || isEdit()) {
+            <ul class="privilege-form-status-list">
+              <li [class.privilege-form-status-list__item--done]="identitySectionComplete()">
+                <span class="privilege-form-status-list__mark" aria-hidden="true"></span>
+                <span>{{ 'privileges.flowSummaryIdentity' | translate }}</span>
+              </li>
+              <li [class.privilege-form-status-list__item--done]="securitySectionComplete()">
+                <span class="privilege-form-status-list__mark" aria-hidden="true"></span>
+                <span>{{ 'privileges.flowSummarySecurity' | translate }}</span>
+              </li>
+            </ul>
+          } @else {
+            <ul class="privilege-form-status-list">
+              <li [class.privilege-form-status-list__item--done]="bulkSectionComplete()">
+                <span class="privilege-form-status-list__mark" aria-hidden="true"></span>
+                <span>{{ 'privileges.flowSummaryBatch' | translate }}</span>
+              </li>
+            </ul>
+          }
+
+          <p class="privilege-form-workflow-note">
+            @if (isBulkMode() && !isEdit()) {
+              {{ 'privileges.formWorkflowNoteBulk' | translate }}
+            } @else {
+              {{ 'privileges.formWorkflowNote' | translate }}
+            }
+          </p>
+        </div>
+      </aside>
     </div>
   }
 </div>

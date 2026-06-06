@@ -1,81 +1,343 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="isEdit() ? ('Edit Fleet' | translate) : ('Create Fleet' | translate)"
-    [subtitle]="'Manage fleet master data without changing the current design system.' | translate"
-  >
-    <a class="btn btn-outline-secondary" routerLink="/fleet">{{ 'Back to Fleets' | translate }}</a>
-  </app-page-header>
+<div class="container-fluid contract-flow-page contract-flow-edit fleet-form-page">
+  <header class="contract-flow-header fleet-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          {{ (isEdit() ? 'Edit Fleet' : 'Create Fleet') | translate }}
+        </h1>
+        <p class="contract-flow-header__meta mb-0">
+          {{ 'Fleet form page subtitle' | translate }}
+        </p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/fleet">{{ 'Back to Fleets' | translate }}</a>
+    </div>
+  </header>
 
-  <div class="card">
-    <div class="card-body">
-      <form [formGroup]="form" (ngSubmit)="save()">
-        
-        <div class="row g-3">
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Fleet Name' | translate }}</label>
-            <input class="form-control" formControlName="name" maxlength="255" [placeholder]="'Example Fleet Name' | translate" />
-            <div class="form-text">{{ 'Hint Fleet Name' | translate }}</div>
-            @if (form.controls.name.invalid && form.controls.name.touched) {
-              <div class="text-danger small mt-1">{{ 'Fleet name is required and must be valid.' | translate }}</div>
-            }
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Fleet Code' | translate }}</label>
-            <input class="form-control" formControlName="fleetCode" maxlength="100" [placeholder]="'Example Fleet Code' | translate" />
-            <div class="form-text">{{ 'Hint Fleet Code' | translate }}</div>
-            @if (form.controls.fleetCode.invalid && form.controls.fleetCode.touched) {
-              <div class="text-danger small mt-1">{{ 'Fleet code must be valid.' | translate }}</div>
-            }
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Tax Number' | translate }}</label>
-            <input class="form-control" formControlName="taxNumber" maxlength="100" [placeholder]="'Example Fleet Tax Number' | translate" />
-            <div class="form-text">{{ 'Hint Fleet Tax Number' | translate }}</div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Location' | translate }}</label>
-            <input class="form-control" formControlName="location" maxlength="255" [placeholder]="'Example Fleet Location' | translate" />
-            <div class="form-text">{{ 'Hint Fleet Location' | translate }}</div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Contact Number' | translate }}</label>
-            <input class="form-control" formControlName="contactNumber" maxlength="50" inputmode="tel" [placeholder]="'Example Fleet Contact Number' | translate" />
-            <div class="form-text">{{ 'Hint Fleet Contact Number' | translate }}</div>
-            @if (form.controls.contactNumber.invalid && form.controls.contactNumber.touched) {
-              <div class="text-danger small mt-1">{{ 'Fleet contact number must be valid.' | translate }}</div>
-            }
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">{{ 'Email' | translate }}</label>
-            <input class="form-control" type="email" formControlName="email" maxlength="255" [placeholder]="'Example Fleet Email' | translate" />
-            <div class="form-text">{{ 'Hint Fleet Email' | translate }}</div>
-            @if (form.controls.email.invalid && form.controls.email.touched) {
-              <div class="text-danger small mt-1">{{ 'Fleet email must be valid.' | translate }}</div>
-            }
-          </div>
-          <div class="col-12">
-            <label class="form-label">{{ 'Description' | translate }}</label>
-            <textarea class="form-control" rows="4" formControlName="description" maxlength="1000" [placeholder]="'Example Fleet Description' | translate"></textarea>
-            <div class="form-text">{{ 'Hint Fleet Description' | translate }}</div>
-          </div>
-          <div class="col-12">
-            <app-file-upload
-              [label]="'Fleet Image' | translate"
-              [previewUrl]="previewUrl()"
-              (fileSelected)="onImageSelected($event)"
-            />
-            <div class="form-text mt-2">{{ 'Hint Fleet Image' | translate }}</div>
-          </div>
+  <div class="contract-flow-layout fleet-form-layout">
+    <div class="contract-flow-main">
+      <form class="app-form-value-state fleet-form" [formGroup]="form" (ngSubmit)="save()">
+        <ol class="fleet-form-workflow" [attr.aria-label]="'Fleet form workflow steps' | translate">
+          <li>
+            <button
+              type="button"
+              class="fleet-form-workflow__step"
+              [class.fleet-form-workflow__step--done]="identitySectionComplete()"
+              [class.fleet-form-workflow__step--current]="currentWorkflowStep() === 1"
+              [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+              [attr.aria-controls]="'fleet-form-section-identity'"
+              (click)="focusWorkflowSection(1)"
+            >
+              <span class="fleet-form-workflow__num">1</span>
+              <span>{{ 'Fleet flow step identity' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="fleet-form-workflow__step"
+              [class.fleet-form-workflow__step--done]="contactSectionComplete()"
+              [class.fleet-form-workflow__step--current]="currentWorkflowStep() === 2"
+              [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+              [attr.aria-controls]="'fleet-form-section-contact'"
+              (click)="focusWorkflowSection(2)"
+            >
+              <span class="fleet-form-workflow__num">2</span>
+              <span>{{ 'Fleet flow step contact' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="fleet-form-workflow__step"
+              [class.fleet-form-workflow__step--done]="detailsSectionComplete()"
+              [class.fleet-form-workflow__step--current]="currentWorkflowStep() === 3"
+              [attr.aria-current]="currentWorkflowStep() === 3 ? 'step' : null"
+              [attr.aria-controls]="'fleet-form-section-details'"
+              (click)="focusWorkflowSection(3)"
+            >
+              <span class="fleet-form-workflow__num">3</span>
+              <span>{{ 'Fleet flow step details' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="fleet-form-workflow__step"
+              [class.fleet-form-workflow__step--done]="brandingSectionComplete()"
+              [class.fleet-form-workflow__step--current]="currentWorkflowStep() === 4"
+              [attr.aria-current]="currentWorkflowStep() === 4 ? 'step' : null"
+              [attr.aria-controls]="'fleet-form-section-branding'"
+              (click)="focusWorkflowSection(4)"
+            >
+              <span class="fleet-form-workflow__num">4</span>
+              <span>{{ 'Fleet flow step branding' | translate }}</span>
+            </button>
+          </li>
+        </ol>
+
+        <div class="fleet-form-fields-shell">
+          <details id="fleet-form-section-identity" class="fleet-form-section fleet-form-fold" open>
+            <summary class="fleet-form-section__summary">
+              <span class="fleet-form-section__step">1</span>
+              {{ 'Fleet Section Identity Title' | translate }}
+            </summary>
+            <div class="fleet-form-fold__body">
+              <header class="fleet-form-section-head">
+                <span class="fleet-form-section-head__icon" aria-hidden="true">🚛</span>
+                <div>
+                  <h2 class="fleet-form-section-head__title">{{ 'Fleet Section Identity Title' | translate }}</h2>
+                  <p class="fleet-form-section-head__hint">{{ 'Fleet Section Identity Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="fleet-form-grid fleet-form-grid--2">
+                <div class="fleet-form-field">
+                  <label class="fleet-form-label">
+                    <span>{{ 'Fleet Name' | translate }}</span>
+                    <span class="fleet-form-badge fleet-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="name"
+                    maxlength="255"
+                    autocomplete="organization"
+                    [placeholder]="'Example Fleet Name' | translate"
+                  />
+                  <p class="fleet-form-hint">{{ 'Hint Fleet Name' | translate }}</p>
+                  @if (form.controls.name.invalid && form.controls.name.touched) {
+                    <div class="fleet-form-hint fleet-form-hint--danger">
+                      {{ 'Fleet name is required and must be valid.' | translate }}
+                    </div>
+                  }
+                </div>
+
+                <div class="fleet-form-field">
+                  <label class="fleet-form-label">
+                    <span>{{ 'Fleet Code' | translate }}</span>
+                    <span class="fleet-form-badge fleet-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="fleetCode"
+                    maxlength="100"
+                    autocomplete="off"
+                    [placeholder]="'Example Fleet Code' | translate"
+                  />
+                  <p class="fleet-form-hint">{{ 'Hint Fleet Code' | translate }}</p>
+                  @if (form.controls.fleetCode.invalid && form.controls.fleetCode.touched) {
+                    <div class="fleet-form-hint fleet-form-hint--danger">{{ 'Fleet code must be valid.' | translate }}</div>
+                  }
+                </div>
+
+                <div class="fleet-form-field">
+                  <label class="fleet-form-label">
+                    <span>{{ 'Tax Number' | translate }}</span>
+                    <span class="fleet-form-badge fleet-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="taxNumber"
+                    maxlength="100"
+                    autocomplete="off"
+                    [placeholder]="'Example Fleet Tax Number' | translate"
+                  />
+                  <p class="fleet-form-hint">{{ 'Hint Fleet Tax Number' | translate }}</p>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details id="fleet-form-section-contact" class="fleet-form-section fleet-form-fold" open>
+            <summary class="fleet-form-section__summary">
+              <span class="fleet-form-section__step">2</span>
+              {{ 'Fleet Section Contact Title' | translate }}
+            </summary>
+            <div class="fleet-form-fold__body">
+              <header class="fleet-form-section-head">
+                <span class="fleet-form-section-head__icon" aria-hidden="true">📞</span>
+                <div>
+                  <h2 class="fleet-form-section-head__title">{{ 'Fleet Section Contact Title' | translate }}</h2>
+                  <p class="fleet-form-section-head__hint">{{ 'Fleet Section Contact Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="fleet-form-grid fleet-form-grid--2">
+                <div class="fleet-form-field">
+                  <label class="fleet-form-label">
+                    <span>{{ 'Location' | translate }}</span>
+                    <span class="fleet-form-badge fleet-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="location"
+                    maxlength="255"
+                    autocomplete="off"
+                    [placeholder]="'Example Fleet Location' | translate"
+                  />
+                  <p class="fleet-form-hint">{{ 'Hint Fleet Location' | translate }}</p>
+                </div>
+
+                <div class="fleet-form-field">
+                  <label class="fleet-form-label">
+                    <span>{{ 'Contact Number' | translate }}</span>
+                    <span class="fleet-form-badge fleet-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="contactNumber"
+                    maxlength="50"
+                    inputmode="tel"
+                    autocomplete="tel"
+                    appMobileNumberInput
+                    [placeholder]="'Example Fleet Contact Number' | translate"
+                  />
+                  <p class="fleet-form-hint">{{ 'Hint Fleet Contact Number' | translate }}</p>
+                  @if (form.controls.contactNumber.invalid && form.controls.contactNumber.touched) {
+                    <div class="fleet-form-hint fleet-form-hint--danger">
+                      {{ 'Fleet contact number must be valid.' | translate }}
+                    </div>
+                  }
+                </div>
+
+                <div class="fleet-form-field">
+                  <label class="fleet-form-label">
+                    <span>{{ 'Email' | translate }}</span>
+                    <span class="fleet-form-badge fleet-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    type="email"
+                    formControlName="email"
+                    maxlength="255"
+                    autocomplete="email"
+                    [placeholder]="'Example Fleet Email' | translate"
+                  />
+                  <p class="fleet-form-hint">{{ 'Hint Fleet Email' | translate }}</p>
+                  @if (form.controls.email.invalid && form.controls.email.touched) {
+                    <div class="fleet-form-hint fleet-form-hint--danger">{{ 'Fleet email must be valid.' | translate }}</div>
+                  }
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details id="fleet-form-section-details" class="fleet-form-section fleet-form-fold" open>
+            <summary class="fleet-form-section__summary">
+              <span class="fleet-form-section__step">3</span>
+              {{ 'Fleet Section Details Title' | translate }}
+            </summary>
+            <div class="fleet-form-fold__body">
+              <header class="fleet-form-section-head">
+                <span class="fleet-form-section-head__icon" aria-hidden="true">📋</span>
+                <div>
+                  <h2 class="fleet-form-section-head__title">{{ 'Fleet Section Details Title' | translate }}</h2>
+                  <p class="fleet-form-section-head__hint">{{ 'Fleet Section Details Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="fleet-form-grid">
+                <div class="fleet-form-field">
+                  <label class="fleet-form-label">
+                    <span>{{ 'Description' | translate }}</span>
+                    <span class="fleet-form-badge fleet-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                  </label>
+                  <textarea
+                    class="form-control"
+                    rows="4"
+                    formControlName="description"
+                    maxlength="1000"
+                    [placeholder]="'Example Fleet Description' | translate"
+                  ></textarea>
+                  <p class="fleet-form-hint">{{ 'Hint Fleet Description' | translate }}</p>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details id="fleet-form-section-branding" class="fleet-form-section fleet-form-fold" open>
+            <summary class="fleet-form-section__summary">
+              <span class="fleet-form-section__step">4</span>
+              {{ 'Fleet Section Branding Title' | translate }}
+            </summary>
+            <div class="fleet-form-fold__body">
+              <header class="fleet-form-section-head">
+                <span class="fleet-form-section-head__icon" aria-hidden="true">🖼️</span>
+                <div>
+                  <h2 class="fleet-form-section-head__title">{{ 'Fleet Section Branding Title' | translate }}</h2>
+                  <p class="fleet-form-section-head__hint">{{ 'Fleet Section Branding Subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="fleet-form-field fleet-form-field--wide">
+                <app-file-upload
+                  [label]="'Fleet Image' | translate"
+                  [previewUrl]="previewUrl()"
+                  [fallbackPreviewUrl]="fleetImageFallback"
+                  (fileSelected)="onImageSelected($event)"
+                />
+                <p class="fleet-form-hint">{{ 'Hint Fleet Image' | translate }}</p>
+              </div>
+            </div>
+          </details>
         </div>
 
         <div class="app-form-actions">
-          <button class="btn btn-primary" type="submit" [disabled]="loading()">
+          <button class="btn btn-primary" type="submit" [disabled]="form.invalid || loading()">
+            @if (loading()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
             {{ isEdit() ? ('Update Fleet' | translate) : ('Create Fleet' | translate) }}
           </button>
           <a class="btn btn-cancel" routerLink="/fleet">{{ 'Cancel' | translate }}</a>
         </div>
       </form>
     </div>
+
+    <aside class="contract-flow-aside fleet-form-aside" [attr.aria-label]="'Fleet form summary' | translate">
+      <div class="fleet-form-aside-card">
+        <div class="fleet-form-progress">
+          <div class="fleet-form-progress__head">
+            <span>{{ 'Fleet flow profile completion' | translate }}</span>
+            <strong>{{ profileCompletionPercent() }}%</strong>
+          </div>
+          <div
+            class="fleet-form-progress__track"
+            role="progressbar"
+            [attr.aria-valuenow]="profileCompletionPercent()"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <span class="fleet-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+          </div>
+        </div>
+
+        <ul class="fleet-form-status-list">
+          <li [class.fleet-form-status-list__item--done]="identitySectionComplete()">
+            <span class="fleet-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Fleet flow summary identity' | translate }}</span>
+          </li>
+          <li [class.fleet-form-status-list__item--done]="contactSectionComplete()">
+            <span class="fleet-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Fleet flow summary contact' | translate }}</span>
+          </li>
+          <li [class.fleet-form-status-list__item--done]="detailsSectionComplete()">
+            <span class="fleet-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Fleet flow summary details' | translate }}</span>
+          </li>
+          <li [class.fleet-form-status-list__item--done]="brandingSectionComplete()">
+            <span class="fleet-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Fleet flow summary branding' | translate }}</span>
+          </li>
+        </ul>
+
+        <div class="fleet-form-aside-photo">
+          <span class="fleet-form-aside-photo__label">{{ 'Fleet Image' | translate }}</span>
+          @if (previewUrl()) {
+            <img [src]="previewUrl()" alt="" class="fleet-form-aside-photo__img" />
+          } @else {
+            <div class="fleet-form-aside-photo__empty">
+              <i class="fa-regular fa-image" aria-hidden="true"></i>
+              <span>{{ 'Fleet image placeholder' | translate }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </aside>
   </div>
 </div>
-

@@ -159,7 +159,7 @@
               <div class="table-actions vehicle-card__actions">
                 <a
                   class="table-action-icon table-action-icon--info vehicle-card__action"
-                  [routerLink]="['/vehicles', vehicle.id, 'details']"
+                  [routerLink]="['/vehicles', 'details', vehicle.id]"
                   [attr.aria-label]="'Details' | translate"
                   [title]="'Details' | translate"
                 >
@@ -167,7 +167,7 @@
                 </a>
                 <a
                   class="table-action-icon table-action-icon--primary vehicle-card__action"
-                  [routerLink]="['/vehicles', vehicle.id, 'edit']"
+                  [routerLink]="['/vehicles', 'edit', vehicle.id]"
                   [attr.aria-label]="'Edit' | translate"
                   [title]="'Edit' | translate"
                 >
@@ -175,7 +175,7 @@
                 </a>
                 <a
                   class="table-action-icon table-action-icon--secondary vehicle-card__action"
-                  [routerLink]="['/vehicles', vehicle.id, 'track']"
+                  [routerLink]="['/vehicles', 'track', vehicle.id]"
                   [attr.aria-label]="'Vehicle card track' | translate"
                   [title]="'Vehicle card track' | translate"
                 >

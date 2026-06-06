@@ -3,6 +3,11 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
+import { ListCommandBarComponent } from '../../../../../../shared/ui/list-command-bar/list-command-bar.component';
+import {
+  DateRangeFilterComponent,
+  DateRangeValue,
+} from '../../../../../../shared/ui/date-range-filter/date-range-filter.component';
 import { AccountingFilterOption } from '../../../../models/dashboard/accounting-summary.model';
 
 export type DatePresetKey = '7d' | 'month' | 'quarter';
@@ -10,7 +15,7 @@ export type DatePresetKey = '7d' | 'month' | 'quarter';
 @Component({
   selector: 'accounting-command-bar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule, ListCommandBarComponent, DateRangeFilterComponent],
   templateUrl: './accounting-command-bar.component.html',
   styleUrl: './accounting-command-bar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,4 +36,19 @@ export class AccountingCommandBarComponent {
     { key: 'month', label: 'This month' },
     { key: 'quarter', label: 'This quarter' },
   ];
+
+  onDateRangeChange(range: DateRangeValue): void {
+    this.form.patchValue({
+      startDate: range.from ?? '',
+      endDate: range.to ?? '',
+    });
+  }
+
+  startDateValue(): string {
+    return String(this.form.controls['startDate'].value ?? '');
+  }
+
+  endDateValue(): string {
+    return String(this.form.controls['endDate'].value ?? '');
+  }
 }

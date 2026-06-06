@@ -1,16 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { merge } from 'rxjs';
 
-import { FleetUpsertRequest } from '../../../models';
-import { FleetService } from '../../../services/fleet/fleet.service';
+import { SHARED_FORM_FIELD_DIRECTIVES } from '../../../../../shared/forms/shared-form-field.imports';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-upload.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
+import type { FleetUpsertRequest } from '../../../models';
+import { FleetService } from '../../../services/fleet/fleet.service';
 
 @Component({
   selector: 'app-fleet-form',
@@ -20,8 +22,8 @@ import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
     ReactiveFormsModule,
     RouterLink,
     TranslateModule,
-    PageHeaderComponent,
     FileUploadComponent,
+    ...SHARED_FORM_FIELD_DIRECTIVES,
   ],
   templateUrl: './fleet-form.component.html',
   styleUrl: './fleet-form.component.scss',
@@ -32,18 +34,28 @@ export class FleetFormComponent implements OnInit {
   private static readonly FLEET_CODE_REGEX = /^[A-Za-z0-9-_]{0,100}$/;
   private static readonly CONTACT_NUMBER_REGEX = /^(?:(?:\+966|00966)(?:5\d{8}|1\d{8})|0(?:5\d{8}|1\d{8}))$/;
 
+  private static readonly WORKFLOW_SECTION_IDS = [
+    'fleet-form-section-identity',
+    'fleet-form-section-contact',
+    'fleet-form-section-details',
+    'fleet-form-section-branding',
+  ] as const;
+
   private fb = inject(NonNullableFormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fleetService = inject(FleetService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
+  private destroyRef = inject(DestroyRef);
 
   isEdit = signal(false);
   fleetId = signal<string | null>(null);
   loading = signal(false);
   selectedImage = signal<File | null>(null);
   previewUrl = signal<string | null>(null);
+  readonly fleetImageFallback = 'assets/images/logo/logo-icon.png';
+  private formProgressTick = signal(0);
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(255), Validators.pattern(FleetFormComponent.FLEET_NAME_REGEX)]],
@@ -55,7 +67,52 @@ export class FleetFormComponent implements OnInit {
     description: ['', [Validators.maxLength(1000)]],
   });
 
+  identitySectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return f.name.valid && f.fleetCode.valid && f.taxNumber.valid;
+  });
+
+  contactSectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return f.location.valid && f.contactNumber.valid && f.email.valid;
+  });
+
+  detailsSectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.form.controls.description.valid;
+  });
+
+  brandingSectionComplete = computed(() => {
+    this.formProgressTick();
+    return !!(String(this.previewUrl() ?? '').trim() || this.selectedImage());
+  });
+
+  profileCompletionPercent = computed(() => {
+    this.formProgressTick();
+    let done = 0;
+    if (this.identitySectionComplete()) done++;
+    if (this.contactSectionComplete()) done++;
+    if (this.detailsSectionComplete()) done++;
+    if (this.brandingSectionComplete()) done++;
+    return Math.round((done / 4) * 100);
+  });
+
+  currentWorkflowStep = computed(() => {
+    this.formProgressTick();
+    if (!this.identitySectionComplete()) return 1;
+    if (!this.contactSectionComplete()) return 2;
+    if (!this.detailsSectionComplete()) return 3;
+    if (!this.brandingSectionComplete()) return 4;
+    return 5;
+  });
+
   ngOnInit(): void {
+    merge(this.form.valueChanges, this.form.statusChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formProgressTick.update(v => v + 1));
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
 
@@ -73,11 +130,27 @@ export class FleetFormComponent implements OnInit {
           email: fleet.email || '',
           description: fleet.description || '',
         });
-        this.previewUrl.set(resolveMediaUrl(fleet.url));
+        this.previewUrl.set(resolveMediaUrl(fleet.url) ?? this.fleetImageFallback);
+        this.formProgressTick.update(v => v + 1);
       },
       error: () => this.toast.error(this.translate.instant('Failed to load fleet')),
       complete: () => this.loading.set(false),
     });
+  }
+
+  focusWorkflowSection(step: 1 | 2 | 3 | 4): void {
+    const sectionId = FleetFormComponent.WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('fleet-form-section--focus');
+    window.setTimeout(() => section.classList.remove('fleet-form-section--focus'), 1400);
   }
 
   save(): void {
@@ -89,13 +162,14 @@ export class FleetFormComponent implements OnInit {
 
     const raw = this.form.getRawValue();
     const body: FleetUpsertRequest = {
-      name: raw.name,
-      fleetCode: raw.fleetCode || undefined,
-      taxNumber: raw.taxNumber || undefined,
-      location: raw.location || undefined,
-      contactNumber: raw.contactNumber || undefined,
-      email: raw.email || undefined,
-      description: raw.description || undefined,
+      name: raw.name.trim(),
+      fleetCode: raw.fleetCode.trim() || undefined,
+      taxNumber: raw.taxNumber.trim() || undefined,
+      location: raw.location.trim() || undefined,
+      contactNumber: raw.contactNumber.trim() || undefined,
+      email: raw.email.trim() || undefined,
+      description: raw.description.trim() || undefined,
+      isActive: true,
       image: this.selectedImage(),
     };
 
@@ -119,11 +193,9 @@ export class FleetFormComponent implements OnInit {
 
   onImageSelected(file: File | null): void {
     this.selectedImage.set(file);
+    if (file) {
+      this.previewUrl.set(URL.createObjectURL(file));
+    }
+    this.formProgressTick.update(v => v + 1);
   }
 }
-
-
-
-
-
-

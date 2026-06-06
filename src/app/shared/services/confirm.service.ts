@@ -16,4 +16,8 @@ export class ConfirmService {
     ref.componentInstance.message = message;
     return ref.componentInstance.result;
   }
+
+  confirmDelete(title: string, message: string): Observable<boolean> {
+    return this.confirm(title, message);
+  }
 }

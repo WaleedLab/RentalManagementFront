@@ -1,5 +1,4 @@
 @use '../../styles/list-command-tokens';
-@use '../../../modules/rent/styles/rent-command-bar';
 
 :host {
   display: block;
@@ -18,10 +17,6 @@
 
 .list-command {
   margin-bottom: 16px;
-}
-
-.list-command__toolbar {
-  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
 }
 
 :host ::ng-deep .list-command__toolbar > .fin-field,

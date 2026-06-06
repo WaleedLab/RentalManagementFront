@@ -1,78 +1,296 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="(isEdit() ? 'Edit Subscription Offer' : 'Create Subscription Offer') | translate"
-    [subtitle]="'Define customer discount offers and booking-threshold eligibility.' | translate"
-  >
-    <a class="btn btn-outline-secondary" routerLink="/customer-subscriptions">
-      {{ 'Back to Subscription Offers' | translate }}
-    </a>
-  </app-page-header>
+<div class="container-fluid contract-flow-page contract-flow-edit subscription-offer-form-page">
+  <header class="contract-flow-header subscription-offer-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          {{ (isEdit() ? 'Edit Subscription Offer' : 'Create Subscription Offer') | translate }}
+        </h1>
+        <p class="contract-flow-header__meta mb-0">
+          {{ 'Subscription offer form page subtitle' | translate }}
+        </p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/customer-subscriptions">
+        {{ 'Back to Subscription Offers' | translate }}
+      </a>
+    </div>
+  </header>
 
-  <div class="card">
-    <div class="card-body">
-      <form class="app-form-value-state" [formGroup]="form" (ngSubmit)="save()">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Name (Ar)' | translate }}</label>
-            <input class="form-control" formControlName="nameAr" maxlength="255" />
-            @if (form.controls.nameAr.invalid && form.controls.nameAr.touched) {
-              <div class="text-danger small mt-1">
-                {{ 'Arabic subscription name is required and must be valid.' | translate }}
+  <div class="contract-flow-layout subscription-offer-form-layout">
+    <div class="contract-flow-main">
+      <form class="app-form-value-state subscription-offer-form" [formGroup]="form" (ngSubmit)="save()">
+        <ol
+          class="subscription-offer-form-workflow"
+          [attr.aria-label]="'Subscription offer form workflow steps' | translate"
+        >
+          <li>
+            <button
+              type="button"
+              class="subscription-offer-form-workflow__step"
+              [class.subscription-offer-form-workflow__step--done]="identitySectionComplete()"
+              [class.subscription-offer-form-workflow__step--current]="currentWorkflowStep() === 1"
+              [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+              [attr.aria-controls]="'subscription-offer-form-section-identity'"
+              (click)="focusWorkflowSection(1)"
+            >
+              <span class="subscription-offer-form-workflow__num">1</span>
+              <span>{{ 'Subscription offer flow step identity' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="subscription-offer-form-workflow__step"
+              [class.subscription-offer-form-workflow__step--done]="termsSectionComplete()"
+              [class.subscription-offer-form-workflow__step--current]="currentWorkflowStep() === 2"
+              [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+              [attr.aria-controls]="'subscription-offer-form-section-terms'"
+              (click)="focusWorkflowSection(2)"
+            >
+              <span class="subscription-offer-form-workflow__num">2</span>
+              <span>{{ 'Subscription offer flow step terms' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="subscription-offer-form-workflow__step"
+              [class.subscription-offer-form-workflow__step--done]="descriptionSectionComplete()"
+              [class.subscription-offer-form-workflow__step--current]="currentWorkflowStep() === 3"
+              [attr.aria-current]="currentWorkflowStep() === 3 ? 'step' : null"
+              [attr.aria-controls]="'subscription-offer-form-section-description'"
+              (click)="focusWorkflowSection(3)"
+            >
+              <span class="subscription-offer-form-workflow__num">3</span>
+              <span>{{ 'Subscription offer flow step description' | translate }}</span>
+            </button>
+          </li>
+        </ol>
+
+        <div class="subscription-offer-form-fields-shell">
+          <details id="subscription-offer-form-section-identity" class="subscription-offer-form-section subscription-offer-form-fold" open>
+            <summary class="subscription-offer-form-section__summary">
+              <span class="subscription-offer-form-section__step">1</span>
+              {{ 'Subscription offer section identity title' | translate }}
+            </summary>
+            <div class="subscription-offer-form-fold__body">
+              <header class="subscription-offer-form-section-head">
+                <span class="subscription-offer-form-section-head__icon" aria-hidden="true">🏷️</span>
+                <div>
+                  <h2 class="subscription-offer-form-section-head__title">
+                    {{ 'Subscription offer section identity title' | translate }}
+                  </h2>
+                  <p class="subscription-offer-form-section-head__hint">
+                    {{ 'Subscription offer section identity subtitle' | translate }}
+                  </p>
+                </div>
+              </header>
+              <div class="subscription-offer-form-grid subscription-offer-form-grid--2">
+                <div class="subscription-offer-form-field">
+                  <label class="subscription-offer-form-label">
+                    <span>{{ 'Name (Ar)' | translate }}</span>
+                    <span class="subscription-offer-form-badge subscription-offer-form-badge--required">
+                      {{ 'Required field badge' | translate }}
+                    </span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="nameAr"
+                    maxlength="255"
+                    autocomplete="off"
+                    [placeholder]="'Example Subscription Offer Arabic Name' | translate"
+                  />
+                  <p class="subscription-offer-form-hint">{{ 'Hint Subscription Offer Arabic Name' | translate }}</p>
+                  @if (form.controls.nameAr.invalid && form.controls.nameAr.touched) {
+                    <div class="subscription-offer-form-hint subscription-offer-form-hint--danger">
+                      {{ 'Arabic subscription name is required and must be valid.' | translate }}
+                    </div>
+                  }
+                </div>
+
+                <div class="subscription-offer-form-field">
+                  <label class="subscription-offer-form-label">
+                    <span>{{ 'Name (En)' | translate }}</span>
+                    <span class="subscription-offer-form-badge subscription-offer-form-badge--required">
+                      {{ 'Required field badge' | translate }}
+                    </span>
+                  </label>
+                  <input
+                    class="form-control"
+                    formControlName="nameEn"
+                    maxlength="255"
+                    autocomplete="off"
+                    [placeholder]="'Example Subscription Offer English Name' | translate"
+                  />
+                  <p class="subscription-offer-form-hint">{{ 'Hint Subscription Offer English Name' | translate }}</p>
+                  @if (form.controls.nameEn.invalid && form.controls.nameEn.touched) {
+                    <div class="subscription-offer-form-hint subscription-offer-form-hint--danger">
+                      {{ 'English subscription name is required and must be valid.' | translate }}
+                    </div>
+                  }
+                </div>
               </div>
-            }
-          </div>
+            </div>
+          </details>
 
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Name (En)' | translate }}</label>
-            <input class="form-control" formControlName="nameEn" maxlength="255" />
-            @if (form.controls.nameEn.invalid && form.controls.nameEn.touched) {
-              <div class="text-danger small mt-1">
-                {{ 'English subscription name is required and must be valid.' | translate }}
+          <details id="subscription-offer-form-section-terms" class="subscription-offer-form-section subscription-offer-form-fold" open>
+            <summary class="subscription-offer-form-section__summary">
+              <span class="subscription-offer-form-section__step">2</span>
+              {{ 'Subscription offer section terms title' | translate }}
+            </summary>
+            <div class="subscription-offer-form-fold__body">
+              <header class="subscription-offer-form-section-head">
+                <span class="subscription-offer-form-section-head__icon" aria-hidden="true">💰</span>
+                <div>
+                  <h2 class="subscription-offer-form-section-head__title">
+                    {{ 'Subscription offer section terms title' | translate }}
+                  </h2>
+                  <p class="subscription-offer-form-section-head__hint">
+                    {{ 'Subscription offer section terms subtitle' | translate }}
+                  </p>
+                </div>
+              </header>
+              <div class="subscription-offer-form-grid subscription-offer-form-grid--2">
+                <div class="subscription-offer-form-field">
+                  <label class="subscription-offer-form-label">
+                    <span>{{ 'Discount (%)' | translate }}</span>
+                    <span class="subscription-offer-form-badge subscription-offer-form-badge--required">
+                      {{ 'Required field badge' | translate }}
+                    </span>
+                  </label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="1"
+                    formControlName="discount"
+                    [placeholder]="'Example Subscription Offer Discount' | translate"
+                  />
+                  <p class="subscription-offer-form-hint">{{ discountHint() }}</p>
+                  @if (form.controls.discount.invalid && form.controls.discount.touched) {
+                    <div class="subscription-offer-form-hint subscription-offer-form-hint--danger">
+                      {{ 'Discount must be between 0 and 100.' | translate }}
+                    </div>
+                  }
+                </div>
+
+                <div class="subscription-offer-form-field">
+                  <label class="subscription-offer-form-label">
+                    <span>{{ 'Approved After Bookings' | translate }}</span>
+                    <span class="subscription-offer-form-badge subscription-offer-form-badge--required">
+                      {{ 'Required field badge' | translate }}
+                    </span>
+                  </label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="1"
+                    formControlName="subscriptionApprovedAfter"
+                    [placeholder]="'Example Subscription Offer Approved After' | translate"
+                  />
+                  <p class="subscription-offer-form-hint">{{ subscriptionApprovedAfterHint() }}</p>
+                  @if (form.controls.subscriptionApprovedAfter.invalid && form.controls.subscriptionApprovedAfter.touched) {
+                    <div class="subscription-offer-form-hint subscription-offer-form-hint--danger">
+                      {{ 'Approved-after value must be zero or greater.' | translate }}
+                    </div>
+                  }
+                </div>
               </div>
-            }
-          </div>
+            </div>
+          </details>
 
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Discount (%)' | translate }}</label>
-            <input class="form-control" type="number" min="0" max="100" formControlName="discount" />
-            <div class="form-text">{{ discountHint() }}</div>
-            @if (form.controls.discount.invalid && form.controls.discount.touched) {
-              <div class="text-danger small mt-1">
-                {{ 'Discount must be between 0 and 100.' | translate }}
+          <details id="subscription-offer-form-section-description" class="subscription-offer-form-section subscription-offer-form-fold" open>
+            <summary class="subscription-offer-form-section__summary">
+              <span class="subscription-offer-form-section__step">3</span>
+              {{ 'Subscription offer section description title' | translate }}
+            </summary>
+            <div class="subscription-offer-form-fold__body">
+              <header class="subscription-offer-form-section-head">
+                <span class="subscription-offer-form-section-head__icon" aria-hidden="true">📝</span>
+                <div>
+                  <h2 class="subscription-offer-form-section-head__title">
+                    {{ 'Subscription offer section description title' | translate }}
+                  </h2>
+                  <p class="subscription-offer-form-section-head__hint">
+                    {{ 'Subscription offer section description subtitle' | translate }}
+                  </p>
+                </div>
+              </header>
+              <div class="subscription-offer-form-grid">
+                <div class="subscription-offer-form-field">
+                  <label class="subscription-offer-form-label">
+                    <span>{{ 'Description' | translate }}</span>
+                    <span class="subscription-offer-form-badge subscription-offer-form-badge--optional">
+                      {{ 'Optional field badge' | translate }}
+                    </span>
+                  </label>
+                  <textarea
+                    class="form-control"
+                    rows="4"
+                    formControlName="description"
+                    maxlength="500"
+                    [placeholder]="'Example Subscription Offer Description' | translate"
+                  ></textarea>
+                  <p class="subscription-offer-form-hint">{{ 'Hint Subscription Offer Description' | translate }}</p>
+                </div>
               </div>
-            }
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">{{ 'Approved After Bookings' | translate }}</label>
-            <input
-              class="form-control"
-              type="number"
-              min="0"
-              formControlName="subscriptionApprovedAfter"
-            />
-            <div class="form-text">{{ subscriptionApprovedAfterHint() }}</div>
-            @if (form.controls.subscriptionApprovedAfter.invalid && form.controls.subscriptionApprovedAfter.touched) {
-              <div class="text-danger small mt-1">
-                {{ 'Approved-after value must be zero or greater.' | translate }}
-              </div>
-            }
-          </div>
-
-          <div class="col-12">
-            <label class="form-label">{{ 'Description' | translate }}</label>
-            <textarea class="form-control" rows="3" formControlName="description"></textarea>
-          </div>
-
+            </div>
+          </details>
         </div>
 
         <div class="app-form-actions">
-          <button class="btn btn-primary" type="submit" [disabled]="loading()">
+          <button class="btn btn-primary" type="submit" [disabled]="form.invalid || loading()">
+            @if (loading()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
             {{ (isEdit() ? 'Update Subscription Offer' : 'Create Subscription Offer') | translate }}
           </button>
           <a class="btn btn-cancel" routerLink="/customer-subscriptions">{{ 'Cancel' | translate }}</a>
         </div>
       </form>
     </div>
+
+    <aside
+      class="contract-flow-aside subscription-offer-form-aside"
+      [attr.aria-label]="'Subscription offer form summary' | translate"
+    >
+      <div class="subscription-offer-form-aside-card">
+        <div class="subscription-offer-form-progress">
+          <div class="subscription-offer-form-progress__head">
+            <span>{{ 'Subscription offer flow profile completion' | translate }}</span>
+            <strong>{{ profileCompletionPercent() }}%</strong>
+          </div>
+          <div
+            class="subscription-offer-form-progress__track"
+            role="progressbar"
+            [attr.aria-valuenow]="profileCompletionPercent()"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <span class="subscription-offer-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+          </div>
+        </div>
+
+        <ul class="subscription-offer-form-status-list">
+          <li [class.subscription-offer-form-status-list__item--done]="identitySectionComplete()">
+            <span class="subscription-offer-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Subscription offer flow summary identity' | translate }}</span>
+          </li>
+          <li [class.subscription-offer-form-status-list__item--done]="termsSectionComplete()">
+            <span class="subscription-offer-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Subscription offer flow summary terms' | translate }}</span>
+          </li>
+          <li [class.subscription-offer-form-status-list__item--done]="descriptionSectionComplete()">
+            <span class="subscription-offer-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Subscription offer flow summary description' | translate }}</span>
+          </li>
+        </ul>
+
+        <p class="subscription-offer-form-sequence-note">
+          {{ 'Subscription sequence guidance' | translate }}
+        </p>
+      </div>
+    </aside>
   </div>
 </div>

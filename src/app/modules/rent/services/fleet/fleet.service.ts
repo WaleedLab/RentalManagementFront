@@ -56,7 +56,7 @@ export class FleetService {
   private async toApiPayload(body: FleetUpsertRequest): Promise<Record<string, unknown>> {
     const imagePayload = await buildImageUploadPayload(body.image);
 
-    return {
+    const payload: Record<string, unknown> = {
       ...body,
       Name: body.name,
       Description: body.description,
@@ -65,13 +65,20 @@ export class FleetService {
       Location: body.location,
       ContactNumber: body.contactNumber,
       Email: body.email,
-      Url: imagePayload?.attachment ?? '',
-      URL: imagePayload?.attachment ?? '',
-      url: imagePayload?.attachment ?? '',
-      ImageExtension: imagePayload?.extension ?? '',
-      imageExtension: imagePayload?.extension ?? '',
+      IsActive: body.isActive ?? true,
       image: undefined,
     };
+
+    // Only send base64 when user picked a new file — backend keeps old Url when these are empty.
+    if (imagePayload) {
+      payload['Url'] = imagePayload.attachment;
+      payload['URL'] = imagePayload.attachment;
+      payload['url'] = imagePayload.attachment;
+      payload['ImageExtension'] = imagePayload.extension;
+      payload['imageExtension'] = imagePayload.extension;
+    }
+
+    return payload;
   }
 }
 

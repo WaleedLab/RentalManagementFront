@@ -1,81 +1,248 @@
-<div class="container-fluid">
-  <app-page-header
-    [title]="'Create Bank' | translate"
-    [subtitle]="'Register a bank account and link it to a counting record for fleet payments.' | translate"
-  >
-    <a class="btn btn-outline-secondary" routerLink="/banks">{{ 'Back to Banks' | translate }}</a>
-  </app-page-header>
+<div class="container-fluid contract-flow-page contract-flow-edit bank-form-page">
+  <header class="contract-flow-header bank-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">{{ 'Create Bank' | translate }}</h1>
+        <p class="contract-flow-header__meta mb-0">{{ 'Bank form page subtitle' | translate }}</p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/banks">{{ 'Back to Banks' | translate }}</a>
+    </div>
+  </header>
 
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-body">
-          <form [formGroup]="form" (ngSubmit)="onSubmit()">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">{{ 'Counting ID' | translate }} <span class="text-danger">*</span></label>
-                <div [class.app-field-invalid]="hasError('countingId')">
+  <div class="contract-flow-layout bank-form-layout">
+    <div class="contract-flow-main">
+      <form class="app-form-value-state bank-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+        <ol class="bank-form-workflow" [attr.aria-label]="'Bank form workflow steps' | translate">
+          <li>
+            <button
+              type="button"
+              class="bank-form-workflow__step"
+              [class.bank-form-workflow__step--done]="identitySectionComplete()"
+              [class.bank-form-workflow__step--current]="currentWorkflowStep() === 1"
+              [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+              [attr.aria-controls]="'bank-form-section-identity'"
+              (click)="focusWorkflowSection(1)"
+            >
+              <span class="bank-form-workflow__num">1</span>
+              <span>{{ 'Bank flow step identity' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="bank-form-workflow__step"
+              [class.bank-form-workflow__step--done]="accountingSectionComplete()"
+              [class.bank-form-workflow__step--current]="currentWorkflowStep() === 2"
+              [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+              [attr.aria-controls]="'bank-form-section-accounting'"
+              (click)="focusWorkflowSection(2)"
+            >
+              <span class="bank-form-workflow__num">2</span>
+              <span>{{ 'Bank flow step accounting' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="bank-form-workflow__step"
+              [class.bank-form-workflow__step--done]="descriptionSectionComplete()"
+              [class.bank-form-workflow__step--current]="currentWorkflowStep() === 3"
+              [attr.aria-current]="currentWorkflowStep() === 3 ? 'step' : null"
+              [attr.aria-controls]="'bank-form-section-description'"
+              (click)="focusWorkflowSection(3)"
+            >
+              <span class="bank-form-workflow__num">3</span>
+              <span>{{ 'Bank flow step description' | translate }}</span>
+            </button>
+          </li>
+        </ol>
+
+        <div class="bank-form-fields-shell">
+          <details id="bank-form-section-identity" class="bank-form-section bank-form-fold" open>
+            <summary class="bank-form-section__summary">
+              <span class="bank-form-section__step">1</span>
+              {{ 'Bank section identity title' | translate }}
+            </summary>
+            <div class="bank-form-fold__body">
+              <header class="bank-form-section-head">
+                <span class="bank-form-section-head__icon" aria-hidden="true">🏦</span>
+                <div>
+                  <h2 class="bank-form-section-head__title">{{ 'Bank section identity title' | translate }}</h2>
+                  <p class="bank-form-section-head__hint">{{ 'Bank section identity subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="bank-form-grid bank-form-grid--2">
+                <div class="bank-form-field">
+                  <label class="bank-form-label">
+                    <span>{{ 'Name' | translate }}</span>
+                    <span class="bank-form-badge bank-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="name"
+                    maxlength="255"
+                    autocomplete="organization"
+                    [class.is-invalid]="hasError('name')"
+                    [placeholder]="'Example Bank Name' | translate"
+                  />
+                  <p class="bank-form-hint">{{ 'Hint Bank Name' | translate }}</p>
+                  @if (hasError('name')) {
+                    <div class="bank-form-hint bank-form-hint--danger">{{ getErrorMessage('name') }}</div>
+                  }
+                </div>
+
+                <div class="bank-form-field">
+                  <label class="bank-form-label">
+                    <span>{{ 'Code' | translate }}</span>
+                    <span class="bank-form-badge bank-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="code"
+                    maxlength="100"
+                    autocomplete="off"
+                    [class.is-invalid]="hasError('code')"
+                    [placeholder]="'Example Bank Code' | translate"
+                  />
+                  <p class="bank-form-hint">{{ 'Hint Bank Code' | translate }}</p>
+                  @if (hasError('code')) {
+                    <div class="bank-form-hint bank-form-hint--danger">{{ getErrorMessage('code') }}</div>
+                  }
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details id="bank-form-section-accounting" class="bank-form-section bank-form-fold" open>
+            <summary class="bank-form-section__summary">
+              <span class="bank-form-section__step">2</span>
+              {{ 'Bank section accounting title' | translate }}
+            </summary>
+            <div class="bank-form-fold__body">
+              <header class="bank-form-section-head">
+                <span class="bank-form-section-head__icon" aria-hidden="true">📊</span>
+                <div>
+                  <h2 class="bank-form-section-head__title">{{ 'Bank section accounting title' | translate }}</h2>
+                  <p class="bank-form-section-head__hint">{{ 'Bank section accounting subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="bank-form-grid">
+                <div class="bank-form-field" [class.bank-form-field--invalid]="hasError('countingId')">
+                  <label class="bank-form-label">
+                    <span>{{ 'Counting ID' | translate }}</span>
+                    <span class="bank-form-badge bank-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
                   <app-smooth-select
                     formControlName="countingId"
                     [options]="countingOptions()"
                     [placeholder]="'Select account from chart' | translate"
-                    [disabled]="false"
+                    [searchable]="true"
+                    [searchPlaceholder]="'Search accounts...'"
                     [ariaLabel]="'Counting ID' | translate"
                   />
+                  @if (loadingAccounts()) {
+                    <p class="bank-form-hint">{{ 'Loading accounts hint' | translate }}</p>
+                  } @else {
+                    <p class="bank-form-hint">{{ 'Hint Bank Counting ID' | translate }}</p>
+                  }
+                  @if (hasError('countingId')) {
+                    <div class="bank-form-hint bank-form-hint--danger">{{ getErrorMessage('countingId') }}</div>
+                  }
                 </div>
-                @if (hasError('countingId')) {
-                  <div class="invalid-feedback d-block">{{ getErrorMessage('countingId') }}</div>
-                }
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">{{ 'Name' | translate }} <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" formControlName="name" [class.is-invalid]="hasError('name')" />
-                @if (hasError('name')) {
-                  <div class="invalid-feedback">{{ getErrorMessage('name') }}</div>
-                }
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">{{ 'Code' | translate }} <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" formControlName="code" [class.is-invalid]="hasError('code')" />
-                @if (hasError('code')) {
-                  <div class="invalid-feedback">{{ getErrorMessage('code') }}</div>
-                }
-              </div>
-
-              <div class="col-12">
-                <label class="form-label">{{ 'Description' | translate }} <span class="text-danger">*</span></label>
-                <textarea
-                  class="form-control"
-                  rows="4"
-                  formControlName="description"
-                  [class.is-invalid]="hasError('description')"
-                ></textarea>
-                @if (hasError('description')) {
-                  <div class="invalid-feedback">{{ getErrorMessage('description') }}</div>
-                }
               </div>
             </div>
+          </details>
 
-            @if (form.invalid && submitAttempted()) {
-              <div class="alert alert-warning py-2 px-3 mt-3 mb-0">
-                {{ 'Please complete the required fields' | translate }}
+          <details id="bank-form-section-description" class="bank-form-section bank-form-fold" open>
+            <summary class="bank-form-section__summary">
+              <span class="bank-form-section__step">3</span>
+              {{ 'Bank section description title' | translate }}
+            </summary>
+            <div class="bank-form-fold__body">
+              <header class="bank-form-section-head">
+                <span class="bank-form-section-head__icon" aria-hidden="true">📝</span>
+                <div>
+                  <h2 class="bank-form-section-head__title">{{ 'Bank section description title' | translate }}</h2>
+                  <p class="bank-form-section-head__hint">{{ 'Bank section description subtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="bank-form-grid">
+                <div class="bank-form-field">
+                  <label class="bank-form-label">
+                    <span>{{ 'Description' | translate }}</span>
+                    <span class="bank-form-badge bank-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                  </label>
+                  <textarea
+                    class="form-control"
+                    rows="4"
+                    formControlName="description"
+                    maxlength="500"
+                    [class.is-invalid]="hasError('description')"
+                    [placeholder]="'Example Bank Description' | translate"
+                  ></textarea>
+                  <p class="bank-form-hint">{{ 'Hint Bank Description' | translate }}</p>
+                  @if (hasError('description')) {
+                    <div class="bank-form-hint bank-form-hint--danger">{{ getErrorMessage('description') }}</div>
+                  }
+                </div>
               </div>
-            }
-
-            <div class="app-form-actions">
-              <button class="btn btn-primary" type="submit" [disabled]="loading() || form.invalid">
-                @if (loading()) {
-                  <span class="spinner-border spinner-border-sm me-2"></span>
-                }
-                {{ 'Create' | translate }}
-              </button>
-              <a class="btn btn-cancel" routerLink="/banks">{{ 'Cancel' | translate }}</a>
             </div>
-          </form>
+          </details>
         </div>
-      </div>
+
+        @if (form.invalid && submitAttempted()) {
+          <div class="bank-form-submit-alert">{{ 'Please complete the required fields' | translate }}</div>
+        }
+
+        <div class="app-form-actions">
+          <button class="btn btn-primary" type="submit" [disabled]="loading() || form.invalid">
+            @if (loading()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            {{ 'Create Bank' | translate }}
+          </button>
+          <a class="btn btn-cancel" routerLink="/banks">{{ 'Cancel' | translate }}</a>
+        </div>
+      </form>
     </div>
+
+    <aside class="contract-flow-aside bank-form-aside" [attr.aria-label]="'Bank form summary' | translate">
+      <div class="bank-form-aside-card">
+        <div class="bank-form-progress">
+          <div class="bank-form-progress__head">
+            <span>{{ 'Bank flow profile completion' | translate }}</span>
+            <strong>{{ profileCompletionPercent() }}%</strong>
+          </div>
+          <div
+            class="bank-form-progress__track"
+            role="progressbar"
+            [attr.aria-valuenow]="profileCompletionPercent()"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <span class="bank-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+          </div>
+        </div>
+
+        <ul class="bank-form-status-list">
+          <li [class.bank-form-status-list__item--done]="identitySectionComplete()">
+            <span class="bank-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Bank flow summary identity' | translate }}</span>
+          </li>
+          <li [class.bank-form-status-list__item--done]="accountingSectionComplete()">
+            <span class="bank-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Bank flow summary accounting' | translate }}</span>
+          </li>
+          <li [class.bank-form-status-list__item--done]="descriptionSectionComplete()">
+            <span class="bank-form-status-list__mark" aria-hidden="true"></span>
+            <span>{{ 'Bank flow summary description' | translate }}</span>
+          </li>
+        </ul>
+
+        <p class="bank-form-accounting-note">{{ 'Bank accounting link guidance' | translate }}</p>
+      </div>
+    </aside>
   </div>
 </div>

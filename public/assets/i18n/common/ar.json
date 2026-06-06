@@ -60,6 +60,8 @@
   "Failed to load branches": "فشل تحميل الفروع",
   "Failed to load privileges": "فشل تحميل الصلاحيات",
   "Failed to load accounts": "فشل تحميل الحسابات",
+  "Loading accounts hint": "جاري تحميل دليل الحسابات… يمكنك فتح القائمة أثناء التحميل.",
+  "Search accounts...": "ابحث في الحسابات...",
   "Finance": "المالية",
   "Financial Years": "السنوات المالية",
   "Fleet created": "تم إنشاء الأسطول",

@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { catchError, finalize, of } from 'rxjs';
+import { catchError, finalize, merge, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../core/auth/auth-state.service';
 import { SHARED_FORM_FIELD_DIRECTIVES } from '../../../../shared/forms/shared-form-field.imports';
 import { ToastService } from '../../../../shared/services/toast.service';
-import { PageHeaderComponent } from '../../../../shared/ui/page-header/page-header.component';
 import {
   SmoothSelectComponent,
   SmoothSelectOption,
@@ -30,7 +30,6 @@ import { MaintenanceVehicleService } from '../../services/maintenance-vehicle.se
     RouterLink,
     TranslateModule,
     ...SHARED_FORM_FIELD_DIRECTIVES,
-    PageHeaderComponent,
     SmoothSelectComponent,
   ],
   templateUrl: './maintenance-form.component.html',
@@ -38,6 +37,12 @@ import { MaintenanceVehicleService } from '../../services/maintenance-vehicle.se
 })
 export class MaintenanceFormComponent implements OnInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
+  private static readonly WORKFLOW_SECTION_IDS = [
+    'maintenance-form-section-vehicle',
+    'maintenance-form-section-linking',
+    'maintenance-form-section-extra',
+  ] as const;
+
   private fb = inject(NonNullableFormBuilder);
   private authState = inject(AuthStateService);
   private maintenanceService = inject(MaintenanceService);
@@ -47,11 +52,14 @@ export class MaintenanceFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private translate = inject(TranslateService);
+  private destroyRef = inject(DestroyRef);
 
   isEdit = signal(false);
   maintenanceId = signal<string | null>(null);
   initializing = signal(true);
   saving = signal(false);
+  submitAttempted = signal(false);
+  private formProgressTick = signal(0);
   vehicleOptions = signal<SmoothSelectOption[]>([]);
   insuranceOptions = signal<SmoothSelectOption[]>([]);
   loadingVehicle = signal(false);
@@ -64,7 +72,44 @@ export class MaintenanceFormComponent implements OnInit {
     note: [''],
   });
 
+  vehicleSectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.form.controls.idVehicle.valid;
+  });
+
+  linkingSectionComplete = computed(() => {
+    this.formProgressTick();
+    return this.vehicleSectionComplete() && this.form.controls.idBooking.valid;
+  });
+
+  extraSectionComplete = computed(() => {
+    this.formProgressTick();
+    const f = this.form.controls;
+    return this.vehicleSectionComplete() && f.idInsurancecompanies.valid && f.note.valid;
+  });
+
+  profileCompletionPercent = computed(() => {
+    this.formProgressTick();
+    let done = 0;
+    if (this.vehicleSectionComplete()) done++;
+    if (this.linkingSectionComplete()) done++;
+    if (this.extraSectionComplete()) done++;
+    return Math.round((done / 3) * 100);
+  });
+
+  currentWorkflowStep = computed(() => {
+    this.formProgressTick();
+    if (!this.vehicleSectionComplete()) return 1;
+    if (!this.linkingSectionComplete()) return 2;
+    if (!this.extraSectionComplete()) return 3;
+    return 4;
+  });
+
   ngOnInit(): void {
+    merge(this.form.valueChanges, this.form.statusChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formProgressTick.update(v => v + 1));
+
     const id = this.route.snapshot.paramMap.get('id');
     const fleetId = this.resolveFleetId() ?? undefined;
 
@@ -94,6 +139,26 @@ export class MaintenanceFormComponent implements OnInit {
     this.form.controls.idVehicle.markAsTouched();
   }
 
+  focusWorkflowSection(step: 1 | 2 | 3): void {
+    const sectionId = MaintenanceFormComponent.WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('maintenance-form-section--focus');
+    window.setTimeout(() => section.classList.remove('maintenance-form-section--focus'), 1400);
+  }
+
+  hasError(controlName: 'idVehicle'): boolean {
+    const control = this.form.controls[controlName];
+    return !!control && control.invalid && (control.touched || control.dirty || this.submitAttempted());
+  }
+
   onInsuranceChange(value: SmoothSelectValue): void {
     const next = value === '' || value === null ? null : Number(value);
     const idInsurancecompanies =
@@ -103,6 +168,7 @@ export class MaintenanceFormComponent implements OnInit {
   }
 
   save(): void {
+    this.submitAttempted.set(true);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       focusFirstInvalidControl(this.hostEl.nativeElement);

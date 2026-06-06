@@ -40,7 +40,7 @@ const routes: Routes = [
         loadComponent: () => import('./components/users/user-form/user-form.component').then(m => m.UserFormComponent),
       },
       {
-        path: ':id/privileges',
+        path: 'privileges/:id',
         loadComponent: () => import('./components/users/user-privileges/user-privileges.component').then(m => m.UserPrivilegesComponent),
         data: { title: 'User Privileges', breadcrumb: 'Privileges' },
       },
@@ -98,7 +98,7 @@ const routes: Routes = [
         loadComponent: () => import('./components/fleet/fleet-form/fleet-form.component').then(m => m.FleetFormComponent),
       },
       {
-        path: ':id/edit',
+        path: 'edit/:id',
         loadComponent: () => import('./components/fleet/fleet-form/fleet-form.component').then(m => m.FleetFormComponent),
       },
     ],
@@ -117,7 +117,7 @@ const routes: Routes = [
         loadComponent: () => import('./components/branches/branch-form/branch-form.component').then(m => m.BranchFormComponent),
       },
       {
-        path: ':id/edit',
+        path: 'edit/:id',
         loadComponent: () => import('./components/branches/branch-form/branch-form.component').then(m => m.BranchFormComponent),
       },
     ],
@@ -136,20 +136,20 @@ const routes: Routes = [
         loadComponent: () => import('./components/vehicles/vehicle-form/vehicle-form.component').then(m => m.VehicleFormComponent),
       },
       {
-        path: ':id/edit',
+        path: 'edit/:id',
         loadComponent: () => import('./components/vehicles/vehicle-form/vehicle-form.component').then(m => m.VehicleFormComponent),
       },
       {
-        path: ':id/gallery',
+        path: 'gallery/:id',
         loadComponent: () => import('./components/vehicles/vehicle-gallery/vehicle-gallery.component').then(m => m.VehicleGalleryComponent),
       },
       {
-        path: ':id/details',
+        path: 'details/:id',
         loadComponent: () => import('./components/vehicles/vehicle-form/vehicle-form.component').then(m => m.VehicleFormComponent),
         data: { title: 'Vehicle Preview', breadcrumb: 'Vehicle Preview', viewOnly: true },
       },
       {
-        path: ':id/track',
+        path: 'track/:id',
         loadComponent: () =>
           import('./components/vehicles/vehicle-tracking/vehicle-tracking.component').then(
             m => m.VehicleTrackingComponent,
@@ -172,7 +172,7 @@ const routes: Routes = [
         loadComponent: () => import('./components/category-vehicles/category-vehicle-form/category-vehicle-form.component').then(m => m.CategoryVehicleFormComponent),
       },
       {
-        path: ':id/edit',
+        path: 'edit/:id',
         loadComponent: () => import('./components/category-vehicles/category-vehicle-form/category-vehicle-form.component').then(m => m.CategoryVehicleFormComponent),
       },
     ],
@@ -191,11 +191,11 @@ const routes: Routes = [
         loadComponent: () => import('./components/customers/customer-form/customer-form.component').then(m => m.CustomerFormComponent),
       },
       {
-        path: ':id/edit',
+        path: 'edit/:id',
         loadComponent: () => import('./components/customers/customer-form/customer-form.component').then(m => m.CustomerFormComponent),
       },
       {
-        path: ':id/details',
+        path: 'details/:id',
         loadComponent: () => import('./components/customers/customer-details/customer-details.component').then(m => m.CustomerDetailsComponent),
       },
     ],
@@ -242,13 +242,13 @@ const routes: Routes = [
         loadComponent: () => import('./components/booking/booking-form/booking-form.component').then(m => m.BookingFormComponent),
       },
       {
-        path: ':id/finish',
+        path: 'finish/:id',
         loadComponent: () =>
           import('./components/booking/booking-finish/booking-finish.component').then(m => m.BookingFinishComponent),
         data: { title: 'Contract finish page title', breadcrumb: 'Contract finish page title' },
       },
       {
-        path: ':id/finish-suspended',
+        path: 'finish-suspended/:id',
         loadComponent: () =>
           import('./components/booking/booking-finish-suspended/booking-finish-suspended.component').then(
             m => m.BookingFinishSuspendedComponent,
@@ -259,27 +259,27 @@ const routes: Routes = [
         },
       },
       {
-        path: ':id/suspend',
+        path: 'suspend/:id',
         loadComponent: () =>
           import('./components/booking/booking-suspend/booking-suspend.component').then(m => m.BookingSuspendComponent),
         data: { title: 'Contract suspend page title', breadcrumb: 'Contract suspend page title' },
       },
       {
-        path: ':id/close',
+        path: 'close/:id',
         loadComponent: () =>
           import('./components/booking/booking-close/booking-close.component').then(m => m.BookingCloseComponent),
         data: { title: 'Contract close page title', breadcrumb: 'Contract close page title' },
       },
       {
-        path: ':id/edit',
+        path: 'edit/:id',
         loadComponent: () => import('./components/booking/booking-form/booking-form.component').then(m => m.BookingFormComponent),
       },
       {
-        path: ':id/details',
+        path: 'details/:id',
         loadComponent: () => import('./components/booking/booking-details/booking-details.component').then(m => m.BookingDetailsComponent),
       },
       {
-        path: ':id/track',
+        path: 'track/:id',
         loadComponent: () =>
           import('./components/booking/booking-tracking/booking-tracking.component').then(
             m => m.BookingTrackingComponent,
@@ -314,7 +314,7 @@ const routes: Routes = [
           ),
       },
       {
-        path: ':id/edit',
+        path: 'edit/:id',
         data: { title: 'trafficViolations.editTitle', breadcrumb: 'trafficViolations.editTitle' },
         loadComponent: () =>
           import('./components/traffic-violations/traffic-violation-form/traffic-violation-form.component').then(

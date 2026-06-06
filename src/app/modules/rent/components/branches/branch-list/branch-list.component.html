@@ -62,7 +62,7 @@
                   <div class="table-actions">
                     <a
                       class="table-action-icon table-action-icon--primary"
-                      [routerLink]="['/branches', branch.id, 'edit']"
+                      [routerLink]="['/branches', 'edit', branch.id]"
                       hasPrivilege="UpdateBranch"
                       [attr.aria-label]="'Edit' | translate"
                       [title]="'Edit' | translate"

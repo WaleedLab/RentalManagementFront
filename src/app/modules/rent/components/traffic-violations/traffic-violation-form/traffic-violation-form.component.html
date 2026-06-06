@@ -1,81 +1,336 @@
-<div class="container-fluid traffic-violation-form">
-  <app-page-header
-    [title]="(isEdit() ? 'trafficViolations.editTitle' : 'trafficViolations.createTitle') | translate"
-    [subtitle]="'trafficViolations.formSubtitle' | translate"
-  />
+<div class="container-fluid contract-flow-page contract-flow-edit traffic-violation-form-page">
+  <header class="contract-flow-header traffic-violation-form-header">
+    <div class="contract-flow-header__head">
+      <div>
+        <h1 class="contract-flow-header__title">
+          {{ (isEdit() ? 'trafficViolations.editTitle' : 'trafficViolations.createTitle') | translate }}
+        </h1>
+        <p class="contract-flow-header__meta mb-0">{{ 'trafficViolations.formPageSubtitle' | translate }}</p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/traffic-violations">
+        {{ 'trafficViolations.backToList' | translate }}
+      </a>
+    </div>
+  </header>
 
   @if (initializing()) {
-    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+    <div class="traffic-violation-form-loading">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
   } @else {
-    <div class="card">
-      <div class="card-body">
-        <form [formGroup]="form" (ngSubmit)="save()" class="row g-3" novalidate>
-          <div class="col-md-6">
-            <label class="form-label">{{ 'trafficViolations.fieldName' | translate }}</label>
-            <input class="form-control" type="text" formControlName="nameViolation" appFieldValueState />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">{{ 'trafficViolations.fieldNumber' | translate }}</label>
-            <input class="form-control" type="number" min="1" formControlName="numberViolation" appFieldValueState />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">{{ 'trafficViolations.fieldBooking' | translate }}</label>
-            <app-smooth-select
-              [ariaLabel]="'trafficViolations.fieldBooking' | translate"
-              [options]="bookingOptions()"
-              [value]="idBookingCtrl.value ?? ''"
-              (valueChange)="onBookingChange($event)"
-            />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">{{ 'trafficViolations.fieldVehicle' | translate }}</label>
-            <input class="d-none" type="number" formControlName="idVehicle" tabindex="-1" aria-hidden="true" />
-            <app-smooth-select
-              [ariaLabel]="'trafficViolations.fieldVehicle' | translate"
-              [options]="vehicleOptions()"
-              [value]="idVehicleCtrl.value ?? ''"
-              [placeholder]="'trafficViolations.vehicleSelectPlaceholder' | translate"
-              [disabled]="loadingVehicle()"
-              [searchable]="true"
-              [searchPlaceholder]="'trafficViolations.searchVehicle'"
-              (valueChange)="onVehicleChange($event)"
-            />
-            @if (loadingVehicle()) {
-              <div class="form-text text-muted d-flex align-items-center gap-2 mt-1">
-                <span class="spinner-border spinner-border-sm" role="status"></span>
-                <span>{{ 'trafficViolations.resolvingVehicle' | translate }}</span>
-              </div>
-            } @else {
-              <div class="form-text">{{ 'trafficViolations.vehicleHint' | translate }}</div>
-            }
-            @if (idVehicleCtrl.invalid && idVehicleCtrl.touched) {
-              <div class="invalid-feedback d-block">{{ 'This field is required' | translate }}</div>
-            }
-          </div>
-          <div class="col-md-6">
-            <app-date-picker mode="datetime" formControlName="dateViolation" label="trafficViolations.fieldDate" />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">{{ 'trafficViolations.fieldFine' | translate }}</label>
-            <input class="form-control" type="number" min="0" step="0.01" formControlName="violationFine" appFieldValueState />
-          </div>
-          <div class="col-12">
-            <label class="form-label">{{ 'trafficViolations.fieldDescription' | translate }}</label>
-            <textarea class="form-control" rows="3" formControlName="description" appFieldValueState></textarea>
-          </div>
-          <div class="col-12">
-            <div class="app-form-actions">
-              <button type="submit" class="btn btn-primary" [disabled]="saving()">
-                @if (saving()) {
-                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                }
-                {{ 'Save' | translate }}
+    <div class="contract-flow-layout traffic-violation-form-layout">
+      <div class="contract-flow-main">
+        <form class="app-form-value-state traffic-violation-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+          <ol
+            class="traffic-violation-form-workflow"
+            [attr.aria-label]="'trafficViolations.formWorkflowSteps' | translate"
+          >
+            <li>
+              <button
+                type="button"
+                class="traffic-violation-form-workflow__step"
+                [class.traffic-violation-form-workflow__step--done]="identitySectionComplete()"
+                [class.traffic-violation-form-workflow__step--current]="currentWorkflowStep() === 1"
+                [attr.aria-current]="currentWorkflowStep() === 1 ? 'step' : null"
+                [attr.aria-controls]="'traffic-violation-form-section-identity'"
+                (click)="focusWorkflowSection(1)"
+              >
+                <span class="traffic-violation-form-workflow__num">1</span>
+                <span>{{ 'trafficViolations.flowStepIdentity' | translate }}</span>
               </button>
-              <a class="btn btn-cancel" routerLink="/traffic-violations">{{ 'Cancel' | translate }}</a>
-            </div>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="traffic-violation-form-workflow__step"
+                [class.traffic-violation-form-workflow__step--done]="linkingSectionComplete()"
+                [class.traffic-violation-form-workflow__step--current]="currentWorkflowStep() === 2"
+                [attr.aria-current]="currentWorkflowStep() === 2 ? 'step' : null"
+                [attr.aria-controls]="'traffic-violation-form-section-linking'"
+                (click)="focusWorkflowSection(2)"
+              >
+                <span class="traffic-violation-form-workflow__num">2</span>
+                <span>{{ 'trafficViolations.flowStepLinking' | translate }}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="traffic-violation-form-workflow__step"
+                [class.traffic-violation-form-workflow__step--done]="detailsSectionComplete()"
+                [class.traffic-violation-form-workflow__step--current]="currentWorkflowStep() === 3"
+                [attr.aria-current]="currentWorkflowStep() === 3 ? 'step' : null"
+                [attr.aria-controls]="'traffic-violation-form-section-details'"
+                (click)="focusWorkflowSection(3)"
+              >
+                <span class="traffic-violation-form-workflow__num">3</span>
+                <span>{{ 'trafficViolations.flowStepDetails' | translate }}</span>
+              </button>
+            </li>
+          </ol>
+
+          <div class="traffic-violation-form-fields-shell">
+            <details id="traffic-violation-form-section-identity" class="traffic-violation-form-section traffic-violation-form-fold" open>
+              <summary class="traffic-violation-form-section__summary">
+                <span class="traffic-violation-form-section__step">1</span>
+                {{ 'trafficViolations.sectionIdentityTitle' | translate }}
+              </summary>
+              <div class="traffic-violation-form-fold__body">
+                <header class="traffic-violation-form-section-head">
+                  <span class="traffic-violation-form-section-head__icon" aria-hidden="true">🚨</span>
+                  <div>
+                    <h2 class="traffic-violation-form-section-head__title">
+                      {{ 'trafficViolations.sectionIdentityTitle' | translate }}
+                    </h2>
+                    <p class="traffic-violation-form-section-head__hint">
+                      {{ 'trafficViolations.sectionIdentitySubtitle' | translate }}
+                    </p>
+                  </div>
+                </header>
+                <div class="traffic-violation-form-grid traffic-violation-form-grid--2">
+                  <div class="traffic-violation-form-field">
+                    <label class="traffic-violation-form-label">
+                      <span>{{ 'trafficViolations.fieldName' | translate }}</span>
+                      <span class="traffic-violation-form-badge traffic-violation-form-badge--optional">
+                        {{ 'trafficViolations.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="text"
+                      formControlName="nameViolation"
+                      appFieldValueState
+                      [placeholder]="'trafficViolations.exampleViolationName' | translate"
+                    />
+                    <p class="traffic-violation-form-hint">{{ 'trafficViolations.hintViolationName' | translate }}</p>
+                  </div>
+
+                  <div class="traffic-violation-form-field">
+                    <label class="traffic-violation-form-label">
+                      <span>{{ 'trafficViolations.fieldNumber' | translate }}</span>
+                      <span class="traffic-violation-form-badge traffic-violation-form-badge--required">
+                        {{ 'trafficViolations.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      min="1"
+                      formControlName="numberViolation"
+                      appFieldValueState
+                      [class.is-invalid]="hasError('numberViolation')"
+                      [placeholder]="'trafficViolations.exampleViolationNumber' | translate"
+                    />
+                    <p class="traffic-violation-form-hint">{{ 'trafficViolations.hintViolationNumber' | translate }}</p>
+                    @if (hasError('numberViolation')) {
+                      <div class="traffic-violation-form-hint traffic-violation-form-hint--danger">
+                        {{ 'This field is required' | translate }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <details id="traffic-violation-form-section-linking" class="traffic-violation-form-section traffic-violation-form-fold" open>
+              <summary class="traffic-violation-form-section__summary">
+                <span class="traffic-violation-form-section__step">2</span>
+                {{ 'trafficViolations.sectionLinkingTitle' | translate }}
+              </summary>
+              <div class="traffic-violation-form-fold__body">
+                <header class="traffic-violation-form-section-head">
+                  <span class="traffic-violation-form-section-head__icon" aria-hidden="true">🔗</span>
+                  <div>
+                    <h2 class="traffic-violation-form-section-head__title">
+                      {{ 'trafficViolations.sectionLinkingTitle' | translate }}
+                    </h2>
+                    <p class="traffic-violation-form-section-head__hint">
+                      {{ 'trafficViolations.sectionLinkingSubtitle' | translate }}
+                    </p>
+                  </div>
+                </header>
+                <div class="traffic-violation-form-grid traffic-violation-form-grid--2">
+                  <div class="traffic-violation-form-field">
+                    <label class="traffic-violation-form-label">
+                      <span>{{ 'trafficViolations.fieldBooking' | translate }}</span>
+                      <span class="traffic-violation-form-badge traffic-violation-form-badge--optional">
+                        {{ 'trafficViolations.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <app-smooth-select
+                      [ariaLabel]="'trafficViolations.fieldBooking' | translate"
+                      [options]="bookingOptions()"
+                      [value]="idBookingCtrl.value ?? ''"
+                      [searchable]="true"
+                      [searchPlaceholder]="'trafficViolations.searchBooking'"
+                      (valueChange)="onBookingChange($event)"
+                    />
+                    <p class="traffic-violation-form-hint">{{ 'trafficViolations.hintBooking' | translate }}</p>
+                  </div>
+
+                  <div
+                    class="traffic-violation-form-field"
+                    [class.traffic-violation-form-field--invalid]="hasError('idVehicle')"
+                  >
+                    <label class="traffic-violation-form-label">
+                      <span>{{ 'trafficViolations.fieldVehicle' | translate }}</span>
+                      <span class="traffic-violation-form-badge traffic-violation-form-badge--required">
+                        {{ 'trafficViolations.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input class="d-none" type="number" formControlName="idVehicle" tabindex="-1" aria-hidden="true" />
+                    <app-smooth-select
+                      [ariaLabel]="'trafficViolations.fieldVehicle' | translate"
+                      [options]="vehicleOptions()"
+                      [value]="idVehicleCtrl.value ?? ''"
+                      [placeholder]="'trafficViolations.vehicleSelectPlaceholder' | translate"
+                      [searchable]="true"
+                      [searchPlaceholder]="'trafficViolations.searchVehicle'"
+                      (valueChange)="onVehicleChange($event)"
+                    />
+                    @if (loadingVehicle()) {
+                      <p class="traffic-violation-form-hint">{{ 'trafficViolations.resolvingVehicle' | translate }}</p>
+                    } @else {
+                      <p class="traffic-violation-form-hint">{{ 'trafficViolations.vehicleHint' | translate }}</p>
+                    }
+                    @if (hasError('idVehicle')) {
+                      <div class="traffic-violation-form-hint traffic-violation-form-hint--danger">
+                        {{ 'This field is required' | translate }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <details id="traffic-violation-form-section-details" class="traffic-violation-form-section traffic-violation-form-fold" open>
+              <summary class="traffic-violation-form-section__summary">
+                <span class="traffic-violation-form-section__step">3</span>
+                {{ 'trafficViolations.sectionDetailsTitle' | translate }}
+              </summary>
+              <div class="traffic-violation-form-fold__body">
+                <header class="traffic-violation-form-section-head">
+                  <span class="traffic-violation-form-section-head__icon" aria-hidden="true">💰</span>
+                  <div>
+                    <h2 class="traffic-violation-form-section-head__title">
+                      {{ 'trafficViolations.sectionDetailsTitle' | translate }}
+                    </h2>
+                    <p class="traffic-violation-form-section-head__hint">
+                      {{ 'trafficViolations.sectionDetailsSubtitle' | translate }}
+                    </p>
+                  </div>
+                </header>
+                <div class="traffic-violation-form-grid traffic-violation-form-grid--2">
+                  <div class="traffic-violation-form-field">
+                    <app-date-picker
+                      mode="datetime"
+                      formControlName="dateViolation"
+                      label="trafficViolations.fieldDate"
+                    />
+                    @if (hasError('dateViolation')) {
+                      <div class="traffic-violation-form-hint traffic-violation-form-hint--danger">
+                        {{ 'This field is required' | translate }}
+                      </div>
+                    }
+                  </div>
+
+                  <div class="traffic-violation-form-field">
+                    <label class="traffic-violation-form-label">
+                      <span>{{ 'trafficViolations.fieldFine' | translate }}</span>
+                      <span class="traffic-violation-form-badge traffic-violation-form-badge--required">
+                        {{ 'trafficViolations.requiredFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      formControlName="violationFine"
+                      appFieldValueState
+                      [class.is-invalid]="hasError('violationFine')"
+                      [placeholder]="'trafficViolations.exampleViolationFine' | translate"
+                    />
+                    <p class="traffic-violation-form-hint">{{ 'trafficViolations.hintViolationFine' | translate }}</p>
+                    @if (hasError('violationFine')) {
+                      <div class="traffic-violation-form-hint traffic-violation-form-hint--danger">
+                        {{ 'This field is required' | translate }}
+                      </div>
+                    }
+                  </div>
+
+                  <div class="traffic-violation-form-field traffic-violation-form-field--wide">
+                    <label class="traffic-violation-form-label">
+                      <span>{{ 'trafficViolations.fieldDescription' | translate }}</span>
+                      <span class="traffic-violation-form-badge traffic-violation-form-badge--optional">
+                        {{ 'trafficViolations.optionalFieldBadge' | translate }}
+                      </span>
+                    </label>
+                    <textarea
+                      class="form-control"
+                      rows="4"
+                      formControlName="description"
+                      appFieldValueState
+                      [placeholder]="'trafficViolations.exampleViolationDescription' | translate"
+                    ></textarea>
+                    <p class="traffic-violation-form-hint">{{ 'trafficViolations.hintViolationDescription' | translate }}</p>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <div class="app-form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="saving()">
+              @if (saving()) {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              }
+              {{ 'Save' | translate }}
+            </button>
+            <a class="btn btn-cancel" routerLink="/traffic-violations">{{ 'Cancel' | translate }}</a>
           </div>
         </form>
       </div>
+
+      <aside
+        class="contract-flow-aside traffic-violation-form-aside"
+        [attr.aria-label]="'trafficViolations.formSummary' | translate"
+      >
+        <div class="traffic-violation-form-aside-card">
+          <div class="traffic-violation-form-progress">
+            <div class="traffic-violation-form-progress__head">
+              <span>{{ 'trafficViolations.flowProfileCompletion' | translate }}</span>
+              <strong>{{ profileCompletionPercent() }}%</strong>
+            </div>
+            <div
+              class="traffic-violation-form-progress__track"
+              role="progressbar"
+              [attr.aria-valuenow]="profileCompletionPercent()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span class="traffic-violation-form-progress__fill" [style.width.%]="profileCompletionPercent()"></span>
+            </div>
+          </div>
+
+          <ul class="traffic-violation-form-status-list">
+            <li [class.traffic-violation-form-status-list__item--done]="identitySectionComplete()">
+              <span class="traffic-violation-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'trafficViolations.flowSummaryIdentity' | translate }}</span>
+            </li>
+            <li [class.traffic-violation-form-status-list__item--done]="linkingSectionComplete()">
+              <span class="traffic-violation-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'trafficViolations.flowSummaryLinking' | translate }}</span>
+            </li>
+            <li [class.traffic-violation-form-status-list__item--done]="detailsSectionComplete()">
+              <span class="traffic-violation-form-status-list__mark" aria-hidden="true"></span>
+              <span>{{ 'trafficViolations.flowSummaryDetails' | translate }}</span>
+            </li>
+          </ul>
+
+          <p class="traffic-violation-form-linking-note">{{ 'trafficViolations.linkingGuidance' | translate }}</p>
+        </div>
+      </aside>
     </div>
   }
 </div>
