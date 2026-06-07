@@ -59,7 +59,16 @@ export class SmoothSelectComponent implements ControlValueAccessor, OnInit, OnCh
   get value(): SmoothSelectValue {
     return this.internalValue();
   }
-  @Input() disabled = false;
+  @Input() set disabled(value: boolean | string | null | undefined) {
+    const next = value === true || value === '' || value === 'true';
+    this.disabledInput.set(next);
+    if (next) {
+      this.close();
+    }
+  }
+  get disabled(): boolean {
+    return this.disabledInput();
+  }
   @Input() placeholder = '';
   @Input() ariaLabel = 'Select option';
   @Input() menuMaxHeight = 280;
@@ -73,6 +82,7 @@ export class SmoothSelectComponent implements ControlValueAccessor, OnInit, OnCh
   searchTerm = signal('');
   menuStyles = signal<Record<string, string>>({});
   private internalValue = signal<SmoothSelectValue>('');
+  private disabledInput = signal(false);
   private disabledFromControl = signal(false);
   /** Bumps when `options` @Input changes so computeds refresh (e.g. language switch). */
   private readonly optionsVersion = signal(0);
@@ -85,7 +95,7 @@ export class SmoothSelectComponent implements ControlValueAccessor, OnInit, OnCh
     }
   }
 
-  readonly isDisabled = computed(() => this.disabled || this.disabledFromControl());
+  readonly isDisabled = computed(() => this.disabledInput() || this.disabledFromControl());
   readonly filteredOptions = computed(() => {
     this.optionsVersion();
     const query = this.searchTerm().trim().toLowerCase();

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { Fleet } from '../../../models';
+import { FLEET_FALLBACK_IMAGE, Fleet } from '../../../models';
 import { FleetService } from '../../../services/fleet/fleet.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
@@ -101,8 +101,17 @@ export class FleetListComponent implements OnInit {
     this.load();
   }
 
+  private readonly fleetFallbackImage = FLEET_FALLBACK_IMAGE;
+
   fleetImageUrl(url?: string | null): string {
-    return resolveMediaUrl(url) || 'assets/images/logo/logo-icon.png';
+    return resolveMediaUrl(url) || this.fleetFallbackImage;
+  }
+
+  onFleetImageError(event: Event): void {
+    const target = event.target as HTMLImageElement | null;
+    if (target && target.getAttribute('src') !== this.fleetFallbackImage) {
+      target.setAttribute('src', this.fleetFallbackImage);
+    }
   }
 }
 

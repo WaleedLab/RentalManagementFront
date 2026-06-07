@@ -1,36 +1,43 @@
-<div class="container-fluid contract-flow-page contract-suspend-page">
+<div class="container-fluid contract-flow-page contract-suspend-page contract-suspend-form-page">
   @if (loading()) {
-    <app-page-header [title]="'Contract suspend page title' | translate" [subtitle]="''" />
     <div class="card">
       <div class="card-body text-center py-5">
         <div class="spinner-border text-primary"></div>
       </div>
     </div>
   } @else if (booking(); as item) {
-    <app-page-header [title]="'Contract suspend page title' | translate" [subtitle]="''" />
-
-    <header class="contract-flow-header">
-      <div class="contract-flow-meta" role="region" [attr.aria-label]="'Contract flow meta strip' | translate">
-        <span class="contract-flow-meta__chip">
-          {{ 'Contract flow meta contract' | translate }}:
-          <strong>{{ contractNumber(item) }}</strong>
-        </span>
-        <span class="contract-flow-meta__chip">
-          {{ 'Contract flow meta branch' | translate }}:
-          <strong>{{ valueOrDash(item.branchName) }}</strong>
-        </span>
-        <span class="contract-flow-meta__chip">
-          {{ 'Contract flow meta fleet' | translate }}:
-          <strong>{{ fleetDisplay(item) }}</strong>
-        </span>
-        <app-status-badge
-          [label]="statusBadgeLabelKey(item.status) | translate"
-          [tone]="statusBadgeTone(item.status)"
-        />
+    <header class="contract-flow-header contract-suspend-header">
+      <div class="contract-flow-header__head">
+        <div>
+          <h1 class="contract-flow-header__title">{{ 'Contract suspend page title' | translate }}</h1>
+          <p class="contract-flow-header__meta mb-0">{{ pageHeaderMeta(item) }}</p>
+        </div>
+        <a class="btn btn-outline-secondary btn-sm" routerLink="/booking">
+          {{ 'Back to Bookings' | translate }}
+        </a>
       </div>
     </header>
 
-    <div class="contract-flow-layout">
+    <div class="contract-flow-meta" role="region" [attr.aria-label]="'Contract flow meta strip' | translate">
+      <span class="contract-flow-meta__chip">
+        {{ 'Contract flow meta contract' | translate }}:
+        <strong>{{ contractNumber(item) }}</strong>
+      </span>
+      <span class="contract-flow-meta__chip">
+        {{ 'Contract flow meta branch' | translate }}:
+        <strong>{{ valueOrDash(item.branchName) }}</strong>
+      </span>
+      <span class="contract-flow-meta__chip">
+        {{ 'Contract flow meta fleet' | translate }}:
+        <strong>{{ fleetDisplay(item) }}</strong>
+      </span>
+      <app-status-badge
+        [label]="statusBadgeLabelKey(item.status) | translate"
+        [tone]="statusBadgeTone(item.status)"
+      />
+    </div>
+
+    <div class="contract-flow-layout contract-suspend-layout">
       <div class="contract-flow-main">
         @if (suspendLocked()) {
           <div class="alert alert-danger mb-0" role="alert">
@@ -38,360 +45,560 @@
           </div>
         }
 
-        <section class="contract-flow-section contract-flow-section--reason">
-          <h2 class="contract-flow-section__title">{{ 'Contract suspend card reason' | translate }}</h2>
-          <div class="contract-flow-grid contract-flow-grid--2">
-            <div class="contract-flow-field">
-              <label class="form-label">
-                {{ 'Contract suspend status' | translate }} <span class="text-danger">*</span>
-              </label>
-              <app-smooth-select
-                [value]="suspendStatus()"
-                [ariaLabel]="'Contract suspend status' | translate"
-                [placeholder]="'Contract suspend status' | translate"
-                [options]="suspendStatusOptions()"
-                [disabled]="suspendLocked()"
-                (valueChange)="onSuspendStatusChange('' + $any($event))"
-              />
-              @if (suspendStatusBadge(); as badge) {
-                <span class="rt-badge mt-2 d-inline-flex" [class]="badge.className">{{ badge.label }}</span>
-              }
-            </div>
-            <div class="contract-flow-field" style="grid-column: 1 / -1">
-              <label class="form-label">
-                {{ 'Contract suspend reason' | translate }} <span class="text-danger">*</span>
-              </label>
-              <textarea
-                class="form-control"
-                rows="3"
-                maxlength="500"
-                [disabled]="suspendLocked()"
-                [value]="suspendReason()"
-                [placeholder]="'Contract suspend reason placeholder' | translate"
-                (input)="onSuspendReasonChange($any($event.target).value)"
-              ></textarea>
-              <div class="form-text text-end">
-                {{ 'Contract suspend reason chars left' | translate: { count: suspendReasonCharsLeft() } }}
+        <ol class="finish-form-workflow" [attr.aria-label]="'Contract suspend formWorkflowSteps' | translate">
+          <li>
+            <button
+              type="button"
+              class="finish-form-workflow__step"
+              [class.finish-form-workflow__step--done]="suspendReasonSectionComplete()"
+              [class.finish-form-workflow__step--current]="suspendCurrentWorkflowStep() === 1"
+              [attr.aria-current]="suspendCurrentWorkflowStep() === 1 ? 'step' : null"
+              [attr.aria-controls]="'suspend-form-section-reason'"
+              (click)="focusSuspendWorkflowSection(1)"
+            >
+              <span class="finish-form-workflow__num">1</span>
+              <span>{{ 'Contract suspend flowStepReason' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="finish-form-workflow__step"
+              [class.finish-form-workflow__step--done]="suspendSummarySectionComplete()"
+              [class.finish-form-workflow__step--current]="suspendCurrentWorkflowStep() === 2"
+              [attr.aria-current]="suspendCurrentWorkflowStep() === 2 ? 'step' : null"
+              [attr.aria-controls]="'suspend-form-section-summary'"
+              (click)="focusSuspendWorkflowSection(2)"
+            >
+              <span class="finish-form-workflow__num">2</span>
+              <span>{{ 'Contract suspend flowStepSummary' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="finish-form-workflow__step"
+              [class.finish-form-workflow__step--done]="suspendUsageSectionComplete()"
+              [class.finish-form-workflow__step--current]="suspendCurrentWorkflowStep() === 3"
+              [attr.aria-current]="suspendCurrentWorkflowStep() === 3 ? 'step' : null"
+              [attr.aria-controls]="'suspend-form-section-usage'"
+              (click)="focusSuspendWorkflowSection(3)"
+            >
+              <span class="finish-form-workflow__num">3</span>
+              <span>{{ 'Contract suspend flowStepUsage' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="finish-form-workflow__step"
+              [class.finish-form-workflow__step--done]="suspendTimeSectionComplete()"
+              [class.finish-form-workflow__step--current]="suspendCurrentWorkflowStep() === 4"
+              [attr.aria-current]="suspendCurrentWorkflowStep() === 4 ? 'step' : null"
+              [attr.aria-controls]="'suspend-form-section-time'"
+              (click)="focusSuspendWorkflowSection(4)"
+            >
+              <span class="finish-form-workflow__num">4</span>
+              <span>{{ 'Contract suspend flowStepTime' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="finish-form-workflow__step"
+              [class.finish-form-workflow__step--done]="suspendExtraSectionComplete()"
+              [class.finish-form-workflow__step--current]="suspendCurrentWorkflowStep() === 5"
+              [attr.aria-current]="suspendCurrentWorkflowStep() === 5 ? 'step' : null"
+              [attr.aria-controls]="'suspend-form-section-extra'"
+              (click)="focusSuspendWorkflowSection(5)"
+            >
+              <span class="finish-form-workflow__num">5</span>
+              <span>{{ 'Contract suspend flowStepExtra' | translate }}</span>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="finish-form-workflow__step"
+              [class.finish-form-workflow__step--done]="suspendPaymentSectionComplete()"
+              [class.finish-form-workflow__step--current]="suspendCurrentWorkflowStep() === 6"
+              [attr.aria-current]="suspendCurrentWorkflowStep() === 6 ? 'step' : null"
+              [attr.aria-controls]="'suspend-form-section-payment'"
+              (click)="focusSuspendWorkflowSection(6)"
+            >
+              <span class="finish-form-workflow__num">6</span>
+              <span>{{ 'Contract suspend flowStepPayment' | translate }}</span>
+            </button>
+          </li>
+        </ol>
+
+        <div class="finish-form-fields-shell">
+          <details id="suspend-form-section-reason" class="finish-form-section finish-form-fold" open>
+            <summary class="finish-form-section__summary">
+              <span class="finish-form-section__step">1</span>
+              {{ 'Contract suspend card reason' | translate }}
+            </summary>
+            <div class="finish-form-fold__body">
+              <header class="finish-form-section-head">
+                <span class="finish-form-section-head__icon" aria-hidden="true">⚠️</span>
+                <div>
+                  <h2 class="finish-form-section-head__title">{{ 'Contract suspend card reason' | translate }}</h2>
+                  <p class="finish-form-section-head__hint">{{ 'Contract suspend sectionReasonSubtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="finish-form-grid finish-form-grid--2">
+                <div class="finish-form-field">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract suspend status' | translate }}</span>
+                    <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                  </label>
+                  <app-smooth-select
+                    [value]="suspendStatus()"
+                    [ariaLabel]="'Contract suspend status' | translate"
+                    [placeholder]="'Contract suspend status' | translate"
+                    [options]="suspendStatusOptions()"
+                    [disabled]="suspendLocked()"
+                    (valueChange)="onSuspendStatusChange('' + $any($event))"
+                  />
+                  @if (suspendStatusBadge(); as badge) {
+                    <span class="rt-badge mt-2 d-inline-flex" [class]="badge.className">{{ badge.label }}</span>
+                  }
+                </div>
+                <div class="finish-form-field finish-form-field--span-2">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract suspend reason' | translate }}</span>
+                    <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                  </label>
+                  <textarea
+                    class="form-control"
+                    rows="3"
+                    maxlength="500"
+                    [disabled]="suspendLocked()"
+                    [value]="suspendReason()"
+                    [placeholder]="'Contract suspend reason placeholder' | translate"
+                    (input)="onSuspendReasonChange($any($event.target).value)"
+                  ></textarea>
+                  <div class="form-text text-end">
+                    {{ 'Contract suspend reason chars left' | translate: { count: suspendReasonCharsLeft() } }}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </details>
 
-        <section class="contract-flow-section">
-          <h2 class="contract-flow-section__title">{{ 'Contract flow section customer vehicle' | translate }}</h2>
-          <div class="contract-flow-pair">
-            <div class="contract-flow-info-card">
-              <h3 class="contract-flow-info-card__title">{{ 'Contract flow card customer' | translate }}</h3>
-              <dl class="contract-flow-kv contract-flow-kv--2">
+          <details id="suspend-form-section-summary" class="finish-form-section finish-form-fold" open>
+            <summary class="finish-form-section__summary">
+              <span class="finish-form-section__step">2</span>
+              {{ 'Contract suspend flowStepSummary' | translate }}
+            </summary>
+            <div class="finish-form-fold__body">
+              <header class="finish-form-section-head">
+                <span class="finish-form-section-head__icon" aria-hidden="true">📄</span>
                 <div>
-                  <dt>{{ 'Contract flow customer id' | translate }}</dt>
-                  <dd>{{ valueOrDash(item.customerIqama) }}</dd>
+                  <h2 class="finish-form-section-head__title">{{ 'Contract flow section customer vehicle' | translate }}</h2>
+                  <p class="finish-form-section-head__hint">{{ 'Contract suspend sectionSummarySubtitle' | translate }}</p>
                 </div>
-                <div>
-                  <dt>{{ 'Contract flow customer name' | translate }}</dt>
-                  <dd>{{ valueOrDash(item.customerName) }}</dd>
+              </header>
+              <div class="contract-flow-pair">
+                <div class="contract-flow-info-card">
+                  <h3 class="contract-flow-info-card__title">{{ 'Contract flow card customer' | translate }}</h3>
+                  <dl class="contract-flow-kv contract-flow-kv--2">
+                    <div>
+                      <dt>{{ 'Contract flow customer id' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.customerIqama) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Contract flow customer name' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.customerName) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Contract flow customer mobile' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.customerMobile) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Contract flow customer nationality' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.customerNationality) }}</dd>
+                    </div>
+                  </dl>
                 </div>
-                <div>
-                  <dt>{{ 'Contract flow customer mobile' | translate }}</dt>
-                  <dd>{{ valueOrDash(item.customerMobile) }}</dd>
+                <div class="contract-flow-info-card">
+                  <h3 class="contract-flow-info-card__title">{{ 'Contract flow card vehicle' | translate }}</h3>
+                  <dl class="contract-flow-kv contract-flow-kv--2">
+                    <div>
+                      <dt>{{ 'Contract finish plate' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.vehiclePlateNumber) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Contract flow vehicle type' | translate }}</dt>
+                      <dd>{{ vehicleTypeDisplay(item) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Contract flow vehicle color' | translate }}</dt>
+                      <dd>{{ valueOrDash(item.vehicleColor) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ 'Contract flow vehicle year' | translate }}</dt>
+                      <dd>{{ numberOrDash(item.vehicleYear) }}</dd>
+                    </div>
+                  </dl>
                 </div>
-                <div>
-                  <dt>{{ 'Contract flow customer nationality' | translate }}</dt>
-                  <dd>{{ valueOrDash(item.customerNationality) }}</dd>
-                </div>
-              </dl>
+              </div>
+              <div class="finish-form-subsection">
+                <h3 class="finish-form-subsection__title">{{ 'Contract flow section contract' | translate }}</h3>
+                <dl class="contract-flow-kv contract-flow-kv--2">
+                  <div>
+                    <dt>{{ 'Start Date' | translate }}</dt>
+                    <dd>{{ formatDateTime(item.startDate) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Contract suspend expected return' | translate }}</dt>
+                    <dd>{{ expectedReturnDisplay() }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Contract suspend contract duration' | translate }}</dt>
+                    <dd>{{ contractDurationDisplay() }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Contract summary status label' | translate }}</dt>
+                    <dd>{{ statusBadgeLabelKey(item.status) | translate }}</dd>
+                  </div>
+                </dl>
+              </div>
+              <div class="finish-form-subsection">
+                <h3 class="finish-form-subsection__title">{{ 'Contract flow section pricing' | translate }}</h3>
+                <dl class="contract-flow-kv contract-flow-kv--2">
+                  <div>
+                    <dt>{{ 'Contract finish daily rent' | translate }}</dt>
+                    <dd>{{ moneyOrDash(item.priceInDay) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Monthly Price' | translate }}</dt>
+                    <dd>{{ moneyOrDash(item.priceInMonth) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Contract finish extra hour price' | translate }}</dt>
+                    <dd>{{ moneyOrDash(item.priceHoureExtra) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ 'Contract finish extra km price' | translate }}</dt>
+                    <dd>{{ moneyOrDash(item.priceKmExtra) }}</dd>
+                  </div>
+                </dl>
+              </div>
             </div>
-            <div class="contract-flow-info-card">
-              <h3 class="contract-flow-info-card__title">{{ 'Contract flow card vehicle' | translate }}</h3>
-              <dl class="contract-flow-kv contract-flow-kv--2">
-                <div>
-                  <dt>{{ 'Contract finish plate' | translate }}</dt>
-                  <dd>{{ valueOrDash(item.vehiclePlateNumber) }}</dd>
-                </div>
-                <div>
-                  <dt>{{ 'Contract flow vehicle type' | translate }}</dt>
-                  <dd>{{ vehicleTypeDisplay(item) }}</dd>
-                </div>
-                <div>
-                  <dt>{{ 'Contract flow vehicle color' | translate }}</dt>
-                  <dd>{{ valueOrDash(item.vehicleColor) }}</dd>
-                </div>
-                <div>
-                  <dt>{{ 'Contract flow vehicle year' | translate }}</dt>
-                  <dd>{{ numberOrDash(item.vehicleYear) }}</dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-        </section>
+          </details>
 
-        <section class="contract-flow-section">
-          <h2 class="contract-flow-section__title">{{ 'Contract flow section contract' | translate }}</h2>
-          <dl class="contract-flow-kv contract-flow-kv--2">
-            <div>
-              <dt>{{ 'Start Date' | translate }}</dt>
-              <dd>{{ formatDateTime(item.startDate) }}</dd>
+          <details id="suspend-form-section-usage" class="finish-form-section finish-form-fold" open>
+            <summary class="finish-form-section__summary">
+              <span class="finish-form-section__step">3</span>
+              {{ 'Contract flow section usage' | translate }}
+            </summary>
+            <div class="finish-form-fold__body">
+              <header class="finish-form-section-head">
+                <span class="finish-form-section-head__icon" aria-hidden="true">🛣️</span>
+                <div>
+                  <h2 class="finish-form-section-head__title">{{ 'Contract flow section usage' | translate }}</h2>
+                  <p class="finish-form-section-head__hint">{{ 'Contract suspend sectionUsageSubtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="finish-form-grid finish-form-grid--2">
+                <div class="finish-form-field finish-form-field--readonly">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract finish odometer checkout' | translate }}</span>
+                    <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                  </label>
+                  <input class="form-control" readonly disabled [value]="numberOrDash(item.checkoutCounter)" />
+                </div>
+                <div class="finish-form-field">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract finish odometer return' | translate }}</span>
+                    <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    step="1"
+                    [disabled]="suspendLocked()"
+                    [value]="returnOdometerText()"
+                    (input)="onReturnOdometerInput($any($event.target).value)"
+                  />
+                  @if (returnOdometerViolationHint(); as odomHint) {
+                    <p class="contract-flow-hint contract-flow-hint--danger">{{ odomHint }}</p>
+                  }
+                </div>
+              </div>
+              <div class="contract-flow-kpi-row" role="group" [attr.aria-label]="'Contract flow odometer kpi' | translate">
+                <div class="contract-flow-kpi">
+                  <span class="contract-flow-kpi__value">{{ numberOrDash(totalKmAllowance()) }}</span>
+                  <span class="contract-flow-kpi__label">{{ 'Contract flow kpi allowed km' | translate }}</span>
+                </div>
+                <div class="contract-flow-kpi">
+                  <span class="contract-flow-kpi__value">{{ numberOrDash(odometerDrivenKm()) }}</span>
+                  <span class="contract-flow-kpi__label">{{ 'Contract flow kpi actual km' | translate }}</span>
+                </div>
+                <div class="contract-flow-kpi contract-flow-kpi--excess">
+                  <span class="contract-flow-kpi__value">{{ numberOrDash(numberKmExcessComputed()) }}</span>
+                  <span class="contract-flow-kpi__label">{{ 'Contract flow kpi excess km' | translate }}</span>
+                </div>
+              </div>
             </div>
-            <div>
-              <dt>{{ 'Contract suspend expected return' | translate }}</dt>
-              <dd>{{ expectedReturnDisplay() }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'Contract suspend contract duration' | translate }}</dt>
-              <dd>{{ contractDurationDisplay() }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'Contract summary status label' | translate }}</dt>
-              <dd>{{ statusBadgeLabelKey(item.status) | translate }}</dd>
-            </div>
-          </dl>
-        </section>
+          </details>
 
-        <section class="contract-flow-section">
-          <h2 class="contract-flow-section__title">{{ 'Contract flow section pricing' | translate }}</h2>
-          <dl class="contract-flow-kv contract-flow-kv--2">
-            <div>
-              <dt>{{ 'Contract finish daily rent' | translate }}</dt>
-              <dd>{{ moneyOrDash(item.priceInDay) }}</dd>
+          <details id="suspend-form-section-time" class="finish-form-section finish-form-fold" open>
+            <summary class="finish-form-section__summary">
+              <span class="finish-form-section__step">4</span>
+              {{ 'Contract flow section time' | translate }}
+            </summary>
+            <div class="finish-form-fold__body">
+              <header class="finish-form-section-head">
+                <span class="finish-form-section-head__icon" aria-hidden="true">⏱️</span>
+                <div>
+                  <h2 class="finish-form-section-head__title">{{ 'Contract flow section time' | translate }}</h2>
+                  <p class="finish-form-section-head__hint">{{ 'Contract suspend sectionTimeSubtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="finish-form-grid finish-form-grid--2">
+                <div class="finish-form-field finish-form-field--readonly">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract finish checkout time' | translate }}</span>
+                    <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                  </label>
+                  <input class="form-control" readonly disabled [value]="formatDateTime(item.startDate)" />
+                </div>
+                <div class="finish-form-field">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract finish return time' | translate }}</span>
+                    <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                  </label>
+                  <app-date-picker
+                    mode="datetime"
+                    label=""
+                    [disabled]="suspendLocked()"
+                    [value]="returnDateTime()"
+                    (dateChange)="onReturnDateChange($event ?? '')"
+                  />
+                  @if (returnTimeViolationHint(); as timeHint) {
+                    <p class="contract-flow-hint contract-flow-hint--danger">{{ timeHint }}</p>
+                  }
+                </div>
+                <div class="finish-form-field finish-form-field--readonly">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract finish billed days' | translate }}</span>
+                    <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                  </label>
+                  <div class="contract-flow-stat">{{ numberOrDash(billingElapsedDays()) }}</div>
+                </div>
+                <div class="finish-form-field finish-form-field--readonly">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract finish late duration' | translate }}</span>
+                    <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                  </label>
+                  <div class="contract-flow-stat">{{ lateDurationDisplay() }}</div>
+                </div>
+                <div class="finish-form-field finish-form-field--readonly">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract finish extra hours' | translate }}</span>
+                    <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                  </label>
+                  <div class="contract-flow-stat">{{ numberOrDash(numberOfHoursExcessComputed()) }}</div>
+                </div>
+                <div class="finish-form-field finish-form-field--readonly">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract finish extra hours total' | translate }}</span>
+                    <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                  </label>
+                  <div class="contract-flow-stat">{{ moneyOrDash(extraHoursTotal()) }}</div>
+                </div>
+              </div>
             </div>
-            <div>
-              <dt>{{ 'Monthly Price' | translate }}</dt>
-              <dd>{{ moneyOrDash(item.priceInMonth) }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'Contract finish extra hour price' | translate }}</dt>
-              <dd>{{ moneyOrDash(item.priceHoureExtra) }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'Contract finish extra km price' | translate }}</dt>
-              <dd>{{ moneyOrDash(item.priceKmExtra) }}</dd>
-            </div>
-          </dl>
-        </section>
+          </details>
 
-        <section class="contract-flow-section">
-          <h2 class="contract-flow-section__title">{{ 'Contract flow section usage' | translate }}</h2>
-          <div class="contract-flow-grid contract-flow-grid--2">
-            <div class="contract-flow-field">
-              <label class="form-label">{{ 'Contract finish odometer checkout' | translate }}</label>
-              <input class="form-control" readonly disabled [value]="numberOrDash(item.checkoutCounter)" />
+          <details id="suspend-form-section-extra" class="finish-form-section finish-form-fold">
+            <summary class="finish-form-section__summary">
+              <span class="finish-form-section__step">5</span>
+              {{ 'Contract flow section extra fees' | translate }}
+            </summary>
+            <div class="finish-form-fold__body">
+              <header class="finish-form-section-head">
+                <span class="finish-form-section-head__icon" aria-hidden="true">💰</span>
+                <div>
+                  <h2 class="finish-form-section-head__title">{{ 'Contract flow section extra fees' | translate }}</h2>
+                  <p class="finish-form-section-head__hint">{{ 'Contract suspend sectionExtraSubtitle' | translate }}</p>
+                </div>
+              </header>
+              <div class="finish-form-grid finish-form-grid--2">
+                <div class="finish-form-field">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract finish repairs' | translate }}</span>
+                    <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    [disabled]="suspendLocked()"
+                    [value]="repairs()"
+                    (input)="onRepairsChange($any($event.target).value)"
+                  />
+                </div>
+                <div class="finish-form-field">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract finish traffic' | translate }}</span>
+                    <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    [disabled]="suspendLocked()"
+                    [value]="traffic()"
+                    (input)="onTrafficChange($any($event.target).value)"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="contract-flow-field">
-              <label class="form-label">
-                {{ 'Contract finish odometer return' | translate }} <span class="text-danger">*</span>
-              </label>
-              <input
-                class="form-control"
-                type="number"
-                inputmode="numeric"
-                min="0"
-                step="1"
-                [disabled]="suspendLocked()"
-                [value]="returnOdometerText()"
-                (input)="onReturnOdometerInput($any($event.target).value)"
-              />
-              @if (returnOdometerViolationHint(); as odomHint) {
-                <p class="contract-flow-hint contract-flow-hint--danger">{{ odomHint }}</p>
+          </details>
+
+          <details id="suspend-form-section-payment" class="finish-form-section finish-form-fold" open>
+            <summary class="finish-form-section__summary">
+              <span class="finish-form-section__step">6</span>
+              {{ 'Contract flow section payment' | translate }}
+            </summary>
+            <div class="finish-form-fold__body">
+              <header class="finish-form-section-head">
+                <span class="finish-form-section-head__icon" aria-hidden="true">💳</span>
+                <div>
+                  <h2 class="finish-form-section-head__title">{{ 'Contract flow section payment' | translate }}</h2>
+                  <p class="finish-form-section-head__hint">{{ 'Contract suspend sectionPaymentSubtitle' | translate }}</p>
+                </div>
+              </header>
+              @if (isMoneySuspend()) {
+                <p class="contract-flow-hint mb-2">{{ 'Contract suspend money payment hint' | translate }}</p>
               }
-            </div>
-          </div>
-          <div class="contract-flow-kpi-row" role="group" [attr.aria-label]="'Contract flow odometer kpi' | translate">
-            <div class="contract-flow-kpi">
-              <span class="contract-flow-kpi__value">{{ numberOrDash(totalKmAllowance()) }}</span>
-              <span class="contract-flow-kpi__label">{{ 'Contract flow kpi allowed km' | translate }}</span>
-            </div>
-            <div class="contract-flow-kpi">
-              <span class="contract-flow-kpi__value">{{ numberOrDash(odometerDrivenKm()) }}</span>
-              <span class="contract-flow-kpi__label">{{ 'Contract flow kpi actual km' | translate }}</span>
-            </div>
-            <div class="contract-flow-kpi contract-flow-kpi--excess">
-              <span class="contract-flow-kpi__value">{{ numberOrDash(numberKmExcessComputed()) }}</span>
-              <span class="contract-flow-kpi__label">{{ 'Contract flow kpi excess km' | translate }}</span>
-            </div>
-          </div>
-        </section>
-
-        <section class="contract-flow-section">
-          <h2 class="contract-flow-section__title">{{ 'Contract flow section time' | translate }}</h2>
-          <div class="contract-flow-grid contract-flow-grid--2">
-            <div class="contract-flow-field">
-              <label class="form-label">{{ 'Contract finish checkout time' | translate }}</label>
-              <input class="form-control" readonly disabled [value]="formatDateTime(item.startDate)" />
-            </div>
-            <div class="contract-flow-field">
-              <app-date-picker
-                mode="datetime"
-                label="Contract finish return time"
-                [disabled]="suspendLocked()"
-                [value]="returnDateTime()"
-                (dateChange)="onReturnDateChange($event ?? '')"
-              />
-              @if (returnTimeViolationHint(); as timeHint) {
-                <p class="contract-flow-hint contract-flow-hint--danger">{{ timeHint }}</p>
-              }
-            </div>
-            <div class="contract-flow-field">
-              <label class="form-label">{{ 'Contract finish billed days' | translate }}</label>
-              <div class="contract-flow-stat">{{ numberOrDash(billingElapsedDays()) }}</div>
-            </div>
-            <div class="contract-flow-field">
-              <label class="form-label">{{ 'Contract finish late duration' | translate }}</label>
-              <div class="contract-flow-stat">{{ lateDurationDisplay() }}</div>
-            </div>
-            <div class="contract-flow-field">
-              <label class="form-label">{{ 'Contract finish extra hours' | translate }}</label>
-              <div class="contract-flow-stat">{{ numberOrDash(numberOfHoursExcessComputed()) }}</div>
-            </div>
-            <div class="contract-flow-field">
-              <label class="form-label">{{ 'Contract finish extra hours total' | translate }}</label>
-              <div class="contract-flow-stat">{{ moneyOrDash(extraHoursTotal()) }}</div>
-            </div>
-          </div>
-        </section>
-
-        <section class="contract-flow-section">
-          <h2 class="contract-flow-section__title">{{ 'Contract flow section extra fees' | translate }}</h2>
-          <div class="contract-flow-grid contract-flow-grid--2">
-            <div class="contract-flow-field">
-              <label class="form-label">{{ 'Contract finish repairs' | translate }}</label>
-              <input
-                class="form-control"
-                type="number"
-                min="0"
-                step="0.01"
-                [disabled]="suspendLocked()"
-                [value]="repairs()"
-                (input)="onRepairsChange($any($event.target).value)"
-              />
-            </div>
-            <div class="contract-flow-field">
-              <label class="form-label">{{ 'Contract finish traffic' | translate }}</label>
-              <input
-                class="form-control"
-                type="number"
-                min="0"
-                step="0.01"
-                [disabled]="suspendLocked()"
-                [value]="traffic()"
-                (input)="onTrafficChange($any($event.target).value)"
-              />
-            </div>
-          </div>
-        </section>
-
-        <section class="contract-flow-section">
-          <h2 class="contract-flow-section__title">{{ 'Contract flow section payment' | translate }}</h2>
-          @if (isMoneySuspend()) {
-            <p class="contract-flow-hint mb-2">{{ 'Contract suspend money payment hint' | translate }}</p>
-          }
-          <div class="contract-flow-grid contract-flow-grid--2">
-            <div class="contract-flow-field">
-              <label class="form-label">
-                {{ 'Contract finish payment method' | translate }} <span class="text-danger">*</span>
-              </label>
-              <app-smooth-select
-                [value]="paymentMethod()"
-                [ariaLabel]="'Payment Type' | translate"
-                [placeholder]="'Payment Type' | translate"
-                [options]="paymentTypeOptions()"
-                [disabled]="suspendLocked()"
-                (valueChange)="onPaymentMethodChange('' + $any($event))"
-              />
-            </div>
-            <div class="contract-flow-field">
-              <label class="form-label">
-                {{ 'Contract finish paid at settlement' | translate }}
-                @if (hasSettlementPayment()) {
-                  <span class="text-danger">*</span>
-                } @else if (isMoneySuspend()) {
-                  <span class="text-muted small">({{ 'Contract suspend payment optional' | translate }})</span>
+              <div class="finish-form-grid finish-form-grid--2">
+                <div class="finish-form-field">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract finish payment method' | translate }}</span>
+                    <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                  </label>
+                  <app-smooth-select
+                    [value]="paymentMethod()"
+                    [ariaLabel]="'Payment Type' | translate"
+                    [placeholder]="'Payment Type' | translate"
+                    [options]="paymentTypeOptions()"
+                    [disabled]="suspendLocked()"
+                    (valueChange)="onPaymentMethodChange('' + $any($event))"
+                  />
+                </div>
+                <div class="finish-form-field">
+                  <label class="finish-form-label">
+                    <span>{{ 'Contract finish paid at settlement' | translate }}</span>
+                    @if (hasSettlementPayment()) {
+                      <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                    } @else {
+                      <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                    }
+                  </label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    [value]="settlementMoneyField(settlementPaidAmount())"
+                    [disabled]="suspendLocked()"
+                    (input)="onSettlementPaidInput($any($event.target).value)"
+                  />
+                  @if (isMoneySuspend() && !suspendLocked()) {
+                    <button
+                      type="button"
+                      class="btn btn-link btn-sm p-0 mt-1 contract-flow-link-btn"
+                      (click)="useBalanceAsSettlement()"
+                    >
+                      {{ 'Contract suspend use full balance' | translate }}
+                    </button>
+                  }
+                </div>
+                @if (paymentTypeAllowsCashAccount()) {
+                  <div class="finish-form-field">
+                    <label class="finish-form-label">
+                      <span>{{ 'Contract finish cash account' | translate }}</span>
+                      @if (hasSettlementPayment()) {
+                        <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                      } @else {
+                        <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                      }
+                    </label>
+                    <app-smooth-select
+                      [value]="cashAccount()"
+                      [ariaLabel]="'Cash Account' | translate"
+                      [placeholder]="'Select cash account'"
+                      [options]="cashAccountOptions()"
+                      [disabled]="suspendLocked()"
+                      (valueChange)="onCashChange('' + $any($event))"
+                    />
+                  </div>
+                  <div class="finish-form-field">
+                    <label class="finish-form-label">
+                      <span>{{ 'Contract finish paid cash' | translate }}</span>
+                      <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      [value]="settlementMoneyField(paidCash())"
+                      [disabled]="suspendLocked()"
+                      (input)="onPaidCashChange($any($event.target).value)"
+                    />
+                  </div>
                 }
-              </label>
-              <input
-                class="form-control"
-                type="number"
-                min="0"
-                step="0.01"
-                [value]="settlementMoneyField(settlementPaidAmount())"
-                [disabled]="suspendLocked()"
-                (input)="onSettlementPaidInput($any($event.target).value)"
-              />
-              @if (isMoneySuspend() && !suspendLocked()) {
-                <button
-                  type="button"
-                  class="btn btn-link btn-sm p-0 mt-1 contract-flow-link-btn"
-                  (click)="useBalanceAsSettlement()"
-                >
-                  {{ 'Contract suspend use full balance' | translate }}
-                </button>
-              }
+                @if (paymentTypeAllowsBankAccount()) {
+                  <div class="finish-form-field">
+                    <label class="finish-form-label">
+                      <span>{{ 'Contract finish bank account' | translate }}</span>
+                      @if (hasSettlementPayment()) {
+                        <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                      } @else {
+                        <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                      }
+                    </label>
+                    <app-smooth-select
+                      [value]="bankAccount()"
+                      [ariaLabel]="'Bank Account' | translate"
+                      [placeholder]="'Select bank'"
+                      [options]="bankAccountOptions()"
+                      [searchable]="true"
+                      [disabled]="suspendLocked()"
+                      (valueChange)="onBankChange('' + $any($event))"
+                    />
+                  </div>
+                  <div class="finish-form-field">
+                    <label class="finish-form-label">
+                      <span>{{ 'Contract finish paid bank' | translate }}</span>
+                      <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                    </label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      [value]="settlementMoneyField(paidBank())"
+                      [disabled]="suspendLocked()"
+                      (input)="onPaidBankChange($any($event.target).value)"
+                    />
+                  </div>
+                }
+              </div>
             </div>
-            @if (paymentTypeAllowsCashAccount()) {
-              <div class="contract-flow-field">
-                <label class="form-label">
-                  {{ 'Contract finish cash account' | translate }}
-                  @if (hasSettlementPayment()) {
-                    <span class="text-danger">*</span>
-                  }
-                </label>
-                <app-smooth-select
-                  [value]="cashAccount()"
-                  [ariaLabel]="'Cash Account' | translate"
-                  [placeholder]="'Select cash account'"
-                  [options]="cashAccountOptions()"
-                  [disabled]="suspendLocked()"
-                  (valueChange)="onCashChange('' + $any($event))"
-                />
-              </div>
-              <div class="contract-flow-field">
-                <label class="form-label">{{ 'Contract finish paid cash' | translate }}</label>
-                <input
-                  class="form-control"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  [value]="settlementMoneyField(paidCash())"
-                  [disabled]="suspendLocked()"
-                  (input)="onPaidCashChange($any($event.target).value)"
-                />
-              </div>
-            }
-            @if (paymentTypeAllowsBankAccount()) {
-              <div class="contract-flow-field">
-                <label class="form-label">
-                  {{ 'Contract finish bank account' | translate }}
-                  @if (hasSettlementPayment()) {
-                    <span class="text-danger">*</span>
-                  }
-                </label>
-                <app-smooth-select
-                  [value]="bankAccount()"
-                  [ariaLabel]="'Bank Account' | translate"
-                  [placeholder]="'Select bank'"
-                  [options]="bankAccountOptions()"
-                  [searchable]="true"
-                  [disabled]="suspendLocked()"
-                  (valueChange)="onBankChange('' + $any($event))"
-                />
-              </div>
-              <div class="contract-flow-field">
-                <label class="form-label">{{ 'Contract finish paid bank' | translate }}</label>
-                <input
-                  class="form-control"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  [value]="settlementMoneyField(paidBank())"
-                  [disabled]="suspendLocked()"
-                  (input)="onPaidBankChange($any($event.target).value)"
-                />
-              </div>
-            }
-          </div>
-        </section>
+          </details>
+        </div>
 
-        <div class="contract-flow-actions">
-          <a class="btn btn-cancel" [routerLink]="['/booking', 'details', item.id]">{{ 'Contract suspend back details' | translate }}</a>
+        <div class="contract-flow-actions app-form-actions">
           <button
             type="button"
             class="btn btn-primary"
@@ -403,10 +610,20 @@
             }
             {{ 'Contract suspend submit' | translate }}
           </button>
+          <a class="btn btn-outline-secondary" [routerLink]="['/booking', 'details', item.id]">
+            {{ 'Contract suspend back details' | translate }}
+          </a>
+          <a class="btn btn-cancel" routerLink="/booking">{{ 'Back to Bookings' | translate }}</a>
         </div>
       </div>
 
       <aside class="contract-flow-aside" [attr.aria-label]="'Contract suspend sidebar' | translate">
+        <div class="finish-form-aside-card">
+          <div class="finish-form-aside-card__progress">
+            <span class="finish-form-aside-card__progress-label">{{ 'Contract suspend flowProfileCompletion' | translate }}</span>
+            <strong>{{ suspendFormCompletionPercent() }}%</strong>
+          </div>
+        </div>
         <div class="contract-flow-invoice">
           <h2 class="contract-flow-invoice__title">{{ 'Contract flow section invoice' | translate }}</h2>
           <ul class="contract-flow-invoice__lines">
@@ -474,7 +691,6 @@
       </aside>
     </div>
   } @else {
-    <app-page-header [title]="'Contract suspend page title' | translate" [subtitle]="''" />
     <div class="card">
       <div class="card-body">
         <p class="text-muted mb-3">{{ 'Failed to load booking' | translate }}</p>

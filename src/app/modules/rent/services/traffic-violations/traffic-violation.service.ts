@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { Observable, map, throwError } from 'rxjs';
+import { Observable, catchError, map, of, switchMap, throwError } from 'rxjs';
 
 import { PaginatedAggregatorResponse } from '../../../../core/interfaces';
 import { BaseService } from '../../../../shared/services/base/base.service';
@@ -88,6 +88,63 @@ export class TrafficViolationService {
   softDelete(id: string | number, _fleetId: string): Observable<unknown> {
     const encodedId = encodeURIComponent(String(id));
     return this.api.patchData(`${this.base}/SoftDelete/${encodedId}`, {});
+  }
+
+  /**
+   * `GetTrafficViolationSumForBookingQuery` → `GET TrafficViolation/sum/{IdBooking}/{fleetid}`.
+   * Returns `SumTrafficViolationBooking` for the contract.
+   */
+  getSumForBooking(idBooking: number, fleetId?: string | null): Observable<number> {
+    const fleet = normalizeFleetId(fleetId);
+    if (!fleet || !Number.isFinite(idBooking) || idBooking <= 0) {
+      return of(0);
+    }
+    const idSeg = encodeURIComponent(String(idBooking));
+    const fleetSeg = encodeURIComponent(fleet);
+    return this.api
+      .getData<unknown>(`${this.base}/sum/${idSeg}/${fleetSeg}`, undefined, { suppressErrorToast: true })
+      .pipe(
+        map(raw => this.parseTrafficViolationSum(raw)),
+        catchError(() => of(null)),
+        switchMap(sum => {
+          if (sum !== null && Number.isFinite(sum)) {
+            return of(Math.max(0, sum));
+          }
+          return this.sumViolationsFromList(idBooking, fleet);
+        }),
+      );
+  }
+
+  /** Fallback when sum endpoint is missing or returns not-found — sum fines linked to the booking. */
+  private sumViolationsFromList(idBooking: number, fleetId: string): Observable<number> {
+    return this.getList(fleetId).pipe(
+      map(items =>
+        items
+          .filter(v => v.idBooking === idBooking)
+          .reduce((acc, v) => acc + Math.max(0, Number(v.violationFine) || 0), 0),
+      ),
+      map(sum => Math.round(Math.max(0, sum) * 100) / 100),
+      catchError(() => of(0)),
+    );
+  }
+
+  private parseTrafficViolationSum(raw: unknown): number | null {
+    if (typeof raw === 'number' && Number.isFinite(raw)) {
+      return raw;
+    }
+    const source = (raw ?? {}) as Record<string, unknown>;
+    const inner = source['data'] ?? source['Data'];
+    const obj =
+      typeof inner === 'object' && inner !== null && !Array.isArray(inner)
+        ? (inner as Record<string, unknown>)
+        : source;
+    const candidate =
+      obj['sumTrafficViolationBooking'] ??
+      obj['SumTrafficViolationBooking'] ??
+      source['sumTrafficViolationBooking'] ??
+      source['SumTrafficViolationBooking'];
+    const n = Number(candidate);
+    return Number.isFinite(n) ? n : null;
   }
 
   private toCommandPayload(body: TrafficViolationUpsertRequest): Record<string, unknown> {

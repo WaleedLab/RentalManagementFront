@@ -186,8 +186,8 @@
                   type="button"
                   [disabled]="!canAddToMaintenance(vehicle) || isAddingToMaintenance(vehicle.id)"
                   (click)="addVehicleToMaintenance(vehicle)"
-                  [attr.aria-label]="'vehicles.addToMaintenance.action' | translate"
-                  [title]="'vehicles.addToMaintenance.action' | translate"
+                  [attr.aria-label]="getMaintenanceButtonTitle(vehicle)"
+                  [title]="getMaintenanceButtonTitle(vehicle)"
                 >
                   @if (isAddingToMaintenance(vehicle.id)) {
                     <span class="spinner-border spinner-border-sm" role="status"></span>

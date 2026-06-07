@@ -139,7 +139,7 @@
               <div class="booking-card__date" [ngClass]="endDateHighlightClass(booking)">
                 <span class="booking-card__date-label">{{ 'End Date' | translate }}</span>
                 <span class="booking-card__date-value">
-                  {{ formatBookingDate(booking.endDate) }}
+                  {{ formatBookingDate(bookingCardEndDate(booking)) }}
                   @if (endDateBadgeKey(booking); as badgeKey) {
                     <span class="booking-card__date-badge">{{ badgeKey | translate }}</span>
                   }

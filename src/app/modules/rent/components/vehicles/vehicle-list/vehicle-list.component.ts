@@ -544,10 +544,34 @@ export class VehicleListComponent implements OnInit {
   }
 
   canAddToMaintenance(vehicle: Vehicle): boolean {
-    return vehicle.status !== 'Maintenance' && vehicle.status !== 'Sold';
+    return (
+      vehicle.status !== 'Booked' &&
+      vehicle.status !== 'Maintenance' &&
+      vehicle.status !== 'Sold'
+    );
+  }
+
+  getMaintenanceButtonTitle(vehicle: Vehicle): string {
+    if (vehicle.status === 'Booked') {
+      return this.translate.instant('vehicles.addToMaintenance.disabledBooked');
+    }
+    if (vehicle.status === 'Maintenance') {
+      return this.translate.instant('vehicles.addToMaintenance.disabledAlready');
+    }
+    if (vehicle.status === 'Sold') {
+      return this.translate.instant('vehicles.addToMaintenance.disabledSold');
+    }
+    return this.translate.instant('vehicles.addToMaintenance.action');
   }
 
   addVehicleToMaintenance(vehicle: Vehicle): void {
+    if (!this.canAddToMaintenance(vehicle)) {
+      if (vehicle.status === 'Booked') {
+        this.toast.error(this.translate.instant('vehicles.addToMaintenance.disabledBooked'));
+      }
+      return;
+    }
+
     const fleetId = (this.authState.fleetId() ?? '').trim();
     if (!fleetId) {
       this.toast.error(this.translate.instant('FleetId is required'));

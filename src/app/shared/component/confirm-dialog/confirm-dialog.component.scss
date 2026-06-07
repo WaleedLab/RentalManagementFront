@@ -1,0 +1,65 @@
+.confirm-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+  border-bottom-color: rgba(var(--c-94a3b8-rgb), 0.24);
+}
+
+.confirm-dialog__title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.confirm-dialog__close {
+  position: static;
+  margin: 0;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.confirm-dialog__message {
+  font-weight: 600;
+  color: var(--c-334155);
+  line-height: 1.55;
+}
+
+.confirm-dialog__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  border-top-color: rgba(var(--c-94a3b8-rgb), 0.24);
+}
+
+.confirm-dialog__footer .btn {
+  min-width: 92px;
+  font-weight: 700;
+}
+
+.confirm-dialog[dir='rtl'] .confirm-dialog__header {
+  text-align: right;
+}
+
+.confirm-dialog[dir='rtl'] .confirm-dialog__footer {
+  justify-content: flex-start;
+}
+
+:host-context([data-bs-theme='dark']),
+:host-context(body.dark-only) {
+  .confirm-dialog__header {
+    border-bottom-color: rgba(var(--c-64748b-rgb), 0.34);
+  }
+
+  .confirm-dialog__message {
+    color: var(--c-cbd5e1);
+  }
+
+  .confirm-dialog__footer {
+    border-top-color: rgba(var(--c-64748b-rgb), 0.34);
+  }
+}

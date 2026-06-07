@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { catchError, forkJoin, of } from 'rxjs';
@@ -8,8 +8,8 @@ import { catchError, forkJoin, of } from 'rxjs';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch-id.util';
 import { ToastService } from '../../../../../shared/services/toast.service';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
+import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 import {
   SmoothSelectComponent,
   SmoothSelectOption,
@@ -20,6 +20,10 @@ import { CashAccount } from '../../../../finance/models/cash/cash-account.model'
 import { CashAccountService } from '../../../../finance/services/cash/cash-account.service';
 import { PaymentCountService } from '../../../../finance/services/payment-counts/payment-count.service';
 import { Booking, CloseBookingRequest, Setting } from '../../../models';
+import {
+  bookingStatusTone,
+  bookingStatusTranslationKey,
+} from '../../../models/booking/booking-status.utils';
 import { BookingService } from '../../../services/booking/booking.service';
 import { SettingService } from '../../../services/settings/setting.service';
 import { VehicleService } from '../../../services/vehicles/vehicle.service';
@@ -32,12 +36,12 @@ import {
 import {
   CloseRulesInput,
   CloseRulesSettings,
+  closeMinutesGraceViolated,
+  closeReturnSameDayViolated,
   drivenKmForClose,
   kmCloseViolated,
   minutesLateForClose,
   resolveCheckoutMs,
-  resolvePlannedReturnEndMs,
-  timeCloseViolated,
 } from './booking-close-rules.util';
 import {
   bookingCheckoutOdometer,
@@ -54,14 +58,22 @@ import {
     CommonModule,
     RouterLink,
     TranslateModule,
-    PageHeaderComponent,
     DatePickerComponent,
     SmoothSelectComponent,
+    StatusBadgeComponent,
   ],
   templateUrl: './booking-close.component.html',
   styleUrl: './booking-close.component.scss',
 })
 export class BookingCloseComponent implements OnInit {
+  private static readonly CLOSE_WORKFLOW_SECTION_IDS = [
+    'close-form-section-summary',
+    'close-form-section-return',
+    'close-form-section-refund',
+    'close-form-section-notes',
+  ] as const;
+
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authState = inject(AuthStateService);
@@ -122,6 +134,105 @@ export class BookingCloseComponent implements OnInit {
       value: String(b.id),
     })),
   ]);
+
+  closeSummarySectionComplete = computed(() => !!this.booking());
+
+  closeReturnSectionComplete = computed(
+    () =>
+      this.odometerKmTestPassed() &&
+      this.returnTimeAfterCheckoutPassed() &&
+      this.closeReturnSameDayPassed() &&
+      this.closeMinutesGracePassed(),
+  );
+
+  closeRefundSectionComplete = computed((): boolean => {
+    const amount = roundSettlementMoney(this.refundAmount());
+    if (amount <= 0) {
+      return true;
+    }
+    const type = Number(this.paymentMethod()) || 1;
+    const bankId = String(this.bankAccount() ?? '').trim();
+    const cashId = String(this.cashAccount() ?? '').trim();
+    const paidCash = Math.max(0, Number(this.paidCash()) || 0);
+    const paidBank = Math.max(0, Number(this.paidBank()) || 0);
+    const paidTotal = roundSettlementMoney(paidCash + paidBank);
+    if (paidTotal !== amount) {
+      return false;
+    }
+    if (type === 1) {
+      return !!cashId;
+    }
+    if ([2, 3, 4].includes(type)) {
+      return !!bankId;
+    }
+    if (type === 5) {
+      return !!bankId && !!cashId && (paidCash > 0 || paidBank > 0);
+    }
+    return true;
+  });
+
+  closeNotesSectionComplete = computed(() => true);
+
+  closeFormCompletionPercent = computed((): number => {
+    let done = 0;
+    if (this.closeSummarySectionComplete()) done++;
+    if (this.closeReturnSectionComplete()) done++;
+    if (this.closeRefundSectionComplete()) done++;
+    if (this.closeNotesSectionComplete()) done++;
+    return Math.round((done / 4) * 100);
+  });
+
+  closeCurrentWorkflowStep = computed((): number => {
+    if (!this.closeSummarySectionComplete()) {
+      return 1;
+    }
+    if (!this.closeReturnSectionComplete()) {
+      return 2;
+    }
+    if (!this.closeRefundSectionComplete()) {
+      return 3;
+    }
+    if (!this.closeNotesSectionComplete()) {
+      return 4;
+    }
+    return 5;
+  });
+
+  closeSubmitBlocked = computed(
+    () =>
+      this.closeLocked() ||
+      this.saving() ||
+      this.closeDisabledReason() !== null ||
+      !this.closeRefundSectionComplete(),
+  );
+
+  focusCloseWorkflowSection(step: 1 | 2 | 3 | 4): void {
+    const sectionId = BookingCloseComponent.CLOSE_WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('finish-form-section--focus');
+    window.setTimeout(() => section.classList.remove('finish-form-section--focus'), 1400);
+  }
+
+  contractNumber(item: Booking): string {
+    return (
+      String(item.numberBookingINBasame ?? item.bookingNumber ?? item.id ?? '').trim() || '—'
+    );
+  }
+
+  statusBadgeLabelKey(status: Booking['status']): string {
+    return bookingStatusTranslationKey(status);
+  }
+
+  statusBadgeTone(status: Booking['status']): 'success' | 'warning' | 'danger' | 'secondary' | 'info' {
+    return bookingStatusTone(status);
+  }
 
   /** Paid total from payment-counts sum API, else booking `paidtotal`. */
   paymentsTotalDisplay = computed(() => {
@@ -257,6 +368,19 @@ export class BookingCloseComponent implements OnInit {
     };
   }
 
+  private parsedReturnMs(): number | null {
+    return parseReturnDateTimeLocalMs(this.returnDateTime());
+  }
+
+  private buildCloseRulesInputForForm(item: Booking): CloseRulesInput | null {
+    const returnMs = this.parsedReturnMs();
+    const returnOdom = this.parsedReturnOdometer();
+    if (returnMs === null || returnOdom === null) {
+      return null;
+    }
+    return this.buildCloseRulesInput(item, returnMs, returnOdom);
+  }
+
   private buildCloseRulesInput(
     item: Booking,
     returnMs: number,
@@ -271,15 +395,23 @@ export class BookingCloseComponent implements OnInit {
       returnMs,
       checkoutOdom: Math.max(0, Math.trunc(Number(item.checkoutCounter) || 0)),
       returnOdom,
-      bookedDays: Math.max(0, Math.trunc(Number(item.countOfDay) || 0)),
-      endDateIso: item.endDate,
     };
   }
 
-  closeDisabledReason = computed((): 'locked' | 'invalid_odom' | 'invalid_return_time' | null => {
+  closeDisabledReason = computed(():
+    | 'locked'
+    | 'invalid_odom'
+    | 'invalid_return_time'
+    | 'return_not_same_day'
+    | 'time_grace_exceeded'
+    | 'settings_missing'
+    | null => {
     const item = this.booking();
     if (!item || !this.canClose(item)) {
       return 'locked';
+    }
+    if (!this.settings()) {
+      return 'settings_missing';
     }
     if (!this.odometerKmTestPassed()) {
       return 'invalid_odom';
@@ -287,7 +419,38 @@ export class BookingCloseComponent implements OnInit {
     if (!this.returnTimeAfterCheckoutPassed()) {
       return 'invalid_return_time';
     }
+    if (!this.closeReturnSameDayPassed()) {
+      return 'return_not_same_day';
+    }
+    if (!this.closeMinutesGracePassed()) {
+      return 'time_grace_exceeded';
+    }
     return null;
+  });
+
+  closeReturnSameDayPassed = computed((): boolean => {
+    const item = this.booking();
+    if (!item) {
+      return false;
+    }
+    const rules = this.buildCloseRulesInputForForm(item);
+    if (!rules) {
+      return false;
+    }
+    return !closeReturnSameDayViolated(rules.checkoutMs, rules.returnMs);
+  });
+
+  closeMinutesGracePassed = computed((): boolean => {
+    const item = this.booking();
+    const s = this.settings();
+    if (!item || !s) {
+      return false;
+    }
+    const rules = this.buildCloseRulesInputForForm(item);
+    if (!rules) {
+      return false;
+    }
+    return !closeMinutesGraceViolated(rules, this.closeRulesSettings(s));
   });
 
   returnTimeAfterCheckoutPassed = computed((): boolean => {
@@ -316,7 +479,7 @@ export class BookingCloseComponent implements OnInit {
     if (!isReturnOdometerAboveCheckout(ret, exit)) {
       return false;
     }
-    const rules = this.buildCloseRulesInput(item, Date.now(), ret);
+    const rules = this.buildCloseRulesInputForForm(item);
     const s = this.settings();
     if (!rules || !s) {
       return true;
@@ -341,7 +504,7 @@ export class BookingCloseComponent implements OnInit {
     if (!isReturnOdometerAboveCheckout(ret, exit)) {
       return this.translate.instant('Contract close odometer below checkout short');
     }
-    const rules = this.buildCloseRulesInput(item, Date.now(), ret);
+    const rules = this.buildCloseRulesInputForForm(item);
     const s = this.settings();
     if (!rules || !s || !kmCloseViolated(rules, this.closeRulesSettings(s))) {
       return null;
@@ -363,10 +526,30 @@ export class BookingCloseComponent implements OnInit {
       this.returnOdometerText(),
       this.returnDateTime(),
     );
-    if (v.timeOk || v.checkoutMs === null) {
+    if (!v.timeOk && v.checkoutMs !== null) {
+      return this.translate.instant('Contract finish return before checkout');
+    }
+    const rules = this.buildCloseRulesInputForForm(item);
+    const s = this.settings();
+    if (!rules || !s) {
       return null;
     }
-    return this.translate.instant('Contract finish return before checkout');
+    if (closeReturnSameDayViolated(rules.checkoutMs, rules.returnMs)) {
+      return this.translate.instant('Contract close same day required detail', {
+        checkoutTime: this.checkoutTimeDisplay(item),
+        returnTime: this.formatDateTime(this.dateTimeLocalToApi(this.returnDateTime())),
+      });
+    }
+    const settings = this.closeRulesSettings(s);
+    if (!closeMinutesGraceViolated(rules, settings)) {
+      return null;
+    }
+    return this.translate.instant('Contract close warning time detail', {
+      checkoutTime: this.checkoutTimeDisplay(item),
+      returnTime: this.formatDateTime(this.dateTimeLocalToApi(this.returnDateTime())),
+      lateMinutes: Math.ceil(minutesLateForClose(rules)),
+      allowedMinutes: settings.allowedLateMinutes,
+    });
   });
 
   dismissWarning(): void {
@@ -468,6 +651,10 @@ export class BookingCloseComponent implements OnInit {
     const item = this.booking();
     const s = this.settings();
     if (!item || !this.canClose(item)) {
+      return;
+    }
+    if (!s) {
+      this.toast.error(this.translate.instant('Contract close settings required'));
       return;
     }
     const validation = validateReturnAgainstCheckout(
@@ -778,13 +965,10 @@ export class BookingCloseComponent implements OnInit {
 
   private buildCloseWarningMessages(
     item: Booking,
-    s: Setting | null,
+    s: Setting,
     rules: CloseRulesInput,
   ): string[] {
     const parts: string[] = [];
-    if (!s) {
-      return parts;
-    }
     const settings = this.closeRulesSettings(s);
     if (kmCloseViolated(rules, settings)) {
       parts.push(
@@ -794,16 +978,17 @@ export class BookingCloseComponent implements OnInit {
         }),
       );
     }
-    if (timeCloseViolated(rules, settings)) {
-      const plannedEndMs = resolvePlannedReturnEndMs(
-        rules.checkoutMs,
-        rules.bookedDays,
-        rules.endDateIso,
+    if (closeReturnSameDayViolated(rules.checkoutMs, rules.returnMs)) {
+      parts.push(
+        this.translate.instant('Contract close same day required detail', {
+          checkoutTime: this.checkoutTimeDisplay(item),
+          returnTime: this.formatDateTime(this.dateTimeLocalToApi(this.returnDateTime())),
+        }),
       );
+    } else if (closeMinutesGraceViolated(rules, settings)) {
       parts.push(
         this.translate.instant('Contract close warning time detail', {
-          checkoutTime: this.formatDateTime(item.startDate ?? item.pickupDate),
-          plannedEnd: this.formatDateTime(new Date(plannedEndMs).toISOString()),
+          checkoutTime: this.checkoutTimeDisplay(item),
           returnTime: this.formatDateTime(this.dateTimeLocalToApi(this.returnDateTime())),
           lateMinutes: Math.ceil(minutesLateForClose(rules)),
           allowedMinutes: settings.allowedLateMinutes,
@@ -813,15 +998,8 @@ export class BookingCloseComponent implements OnInit {
     return parts;
   }
 
-  private initialReturnDateTimeLocal(b: Booking): string {
-    const fromReturn = this.toDateTimeLocalValue(b.returnDate);
-    if (fromReturn) {
-      return fromReturn;
-    }
-    const fromEnd = this.toDateTimeLocalValue(b.endDate);
-    if (fromEnd) {
-      return fromEnd;
-    }
+  /** Actual return at close — defaults to now; saved as `dateReturnVehical` (not end date). */
+  private initialReturnDateTimeLocal(_b: Booking): string {
     return this.nowDateTimeLocalValue();
   }
 

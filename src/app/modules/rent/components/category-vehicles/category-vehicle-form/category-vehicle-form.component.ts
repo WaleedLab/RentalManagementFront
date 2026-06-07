@@ -9,6 +9,7 @@ import { merge } from 'rxjs';
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { SHARED_FORM_FIELD_DIRECTIVES } from '../../../../../shared/forms/shared-form-field.imports';
 import { ToastService } from '../../../../../shared/services/toast.service';
+import { greaterThanField } from '../../../../../shared/validators/greater-than-field.validator';
 import { coerceFormNumber, requiredNumber } from '../../../../../shared/validators/required-number.validator';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 import { CategoryVehicleUpsertRequest } from '../../../models';
@@ -33,6 +34,29 @@ export class CategoryVehicleFormComponent implements OnInit {
     'category-form-section-limits',
   ] as const;
 
+  private static readonly HIGH_LOW_FIELD_PAIRS = [
+    ['price_day_low', 'price_day_high'],
+    ['price_month_low', 'price_month_high'],
+    ['priceHoureExtraLow', 'priceHoureExtraHigh'],
+    ['countKMExtraLow', 'countKMExtraHigh'],
+    ['allowToLow', 'allowToHigh'],
+  ] as const;
+
+  private static readonly HIGH_FIELD_TO_LOW: Record<
+    | 'price_day_high'
+    | 'price_month_high'
+    | 'priceHoureExtraHigh'
+    | 'countKMExtraHigh'
+    | 'allowToHigh',
+    string
+  > = {
+    price_day_high: 'price_day_low',
+    price_month_high: 'price_month_low',
+    priceHoureExtraHigh: 'priceHoureExtraLow',
+    countKMExtraHigh: 'countKMExtraLow',
+    allowToHigh: 'allowToLow',
+  };
+
   private fb = inject(NonNullableFormBuilder);
   private readonly nullableFb = inject(FormBuilder);
   private authState = inject(AuthStateService);
@@ -53,15 +77,30 @@ export class CategoryVehicleFormComponent implements OnInit {
     nameAr: ['', [Validators.required, Validators.maxLength(255), Validators.pattern(CategoryVehicleFormComponent.ARABIC_NAME_REGEX)]],
     nameEn: ['', [Validators.maxLength(255), Validators.pattern(CategoryVehicleFormComponent.ENGLISH_NAME_REGEX)]],
     price_day_low: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
-    price_day_high: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
+    price_day_high: this.nullableFb.control<number | null>(null, [
+      requiredNumber({ min: 0 }),
+      greaterThanField('price_day_low'),
+    ]),
     price_month_low: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
-    price_month_high: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
+    price_month_high: this.nullableFb.control<number | null>(null, [
+      requiredNumber({ min: 0 }),
+      greaterThanField('price_month_low'),
+    ]),
     priceHoureExtraLow: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
-    priceHoureExtraHigh: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
+    priceHoureExtraHigh: this.nullableFb.control<number | null>(null, [
+      requiredNumber({ min: 0 }),
+      greaterThanField('priceHoureExtraLow'),
+    ]),
     countKMExtraLow: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
-    countKMExtraHigh: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
+    countKMExtraHigh: this.nullableFb.control<number | null>(null, [
+      requiredNumber({ min: 0 }),
+      greaterThanField('countKMExtraLow'),
+    ]),
     allowToLow: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
-    allowToHigh: this.nullableFb.control<number | null>(null, [requiredNumber({ min: 0 })]),
+    allowToHigh: this.nullableFb.control<number | null>(null, [
+      requiredNumber({ min: 0 }),
+      greaterThanField('allowToLow'),
+    ]),
   });
 
   identitySectionComplete = computed(() => {
@@ -127,12 +166,64 @@ export class CategoryVehicleFormComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.formProgressTick.update(v => v + 1));
 
+    this.setupHighLowValidation();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
 
     this.isEdit.set(true);
     this.categoryId.set(id);
     this.loadCategory(id);
+  }
+
+  showHighMustExceedLow(
+    controlName:
+      | 'price_day_high'
+      | 'price_month_high'
+      | 'priceHoureExtraHigh'
+      | 'countKMExtraHigh'
+      | 'allowToHigh',
+  ): boolean {
+    const high = this.form.controls[controlName];
+    if (!high.hasError('greaterThanLow')) {
+      return false;
+    }
+
+    const lowName = CategoryVehicleFormComponent.HIGH_FIELD_TO_LOW[controlName];
+    const low = this.form.get(lowName);
+    return !!(high.touched || high.dirty || low?.touched || low?.dirty);
+  }
+
+  private setupHighLowValidation(): void {
+    for (const [lowField, highField] of CategoryVehicleFormComponent.HIGH_LOW_FIELD_PAIRS) {
+      this.form
+        .get(lowField)
+        ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => this.revalidateHighField(highField, true));
+
+      this.form
+        .get(highField)
+        ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => this.revalidateHighField(highField, false));
+    }
+  }
+
+  private revalidateHighField(highField: string, fromLowChange: boolean): void {
+    const highCtrl = this.form.get(highField);
+    highCtrl?.updateValueAndValidity({ emitEvent: false });
+
+    if (fromLowChange && highCtrl?.hasError('greaterThanLow')) {
+      highCtrl.markAsTouched({ onlySelf: true });
+      highCtrl.markAsDirty({ onlySelf: true });
+    }
+
+    this.formProgressTick.update(v => v + 1);
+  }
+
+  private revalidateAllHighFields(): void {
+    for (const [, highField] of CategoryVehicleFormComponent.HIGH_LOW_FIELD_PAIRS) {
+      this.revalidateHighField(highField, false);
+    }
   }
 
   focusWorkflowSection(step: 1 | 2 | 3 | 4): void {
@@ -173,7 +264,7 @@ export class CategoryVehicleFormComponent implements OnInit {
           allowToLow: category.allowToLow ?? 0,
           allowToHigh: category.allowToHigh ?? 0,
         });
-        this.formProgressTick.update(v => v + 1);
+        this.revalidateAllHighFields();
       },
       error: err => {
         this.toast.error(err?.message ?? this.translate.instant('Failed to load vehicle category'));

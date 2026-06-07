@@ -328,14 +328,12 @@
 
         <div class="fleet-form-aside-photo">
           <span class="fleet-form-aside-photo__label">{{ 'Fleet Image' | translate }}</span>
-          @if (previewUrl()) {
-            <img [src]="previewUrl()" alt="" class="fleet-form-aside-photo__img" />
-          } @else {
-            <div class="fleet-form-aside-photo__empty">
-              <i class="fa-regular fa-image" aria-hidden="true"></i>
-              <span>{{ 'Fleet image placeholder' | translate }}</span>
-            </div>
-          }
+          <img
+            [src]="previewUrl() || fleetImageFallback"
+            alt=""
+            class="fleet-form-aside-photo__img"
+            (error)="onFleetPreviewError($event)"
+          />
         </div>
       </div>
     </aside>

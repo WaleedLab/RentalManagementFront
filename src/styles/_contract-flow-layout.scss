@@ -74,6 +74,28 @@
   min-width: 0;
 }
 
+/* Keep select/date panels above the next workflow card (sections use overflow:hidden). */
+.contract-flow-page {
+  .finish-form-field:has(app-smooth-select.app-smooth-select-host--open),
+  .finish-form-field:has(app-date-picker.date-picker-host--open) {
+    position: relative;
+    z-index: 30;
+    overflow: visible;
+  }
+
+  .finish-form-grid:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open),
+  .finish-form-fold__body:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open),
+  .finish-form-fields-shell:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open),
+  .finish-form-section:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open) {
+    overflow: visible;
+  }
+
+  .finish-form-section:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open) {
+    position: relative;
+    z-index: 25;
+  }
+}
+
 .contract-flow-aside {
   position: sticky;
   top: var(--app-sticky-below-header, calc(var(--app-compact-header-offset, 68px) + 0.75rem));

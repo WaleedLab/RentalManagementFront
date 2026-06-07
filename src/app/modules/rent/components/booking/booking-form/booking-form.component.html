@@ -503,7 +503,7 @@
             <div class="spinner-border text-primary"></div>
           </div>
         } @else {
-        <div class="contract-flow-page contract-flow-edit">
+        <div class="contract-flow-page contract-flow-edit contract-flow-edit-form">
           <input type="hidden" formControlName="branchId" />
 
           <header class="contract-flow-header">
@@ -556,249 +556,479 @@
 
           <div class="contract-flow-layout">
             <div class="contract-flow-main">
-              <details class="contract-flow-section contract-flow-section--fold">
-                <summary class="contract-flow-section__title">{{ 'Customer Information' | translate }}</summary>
-                <dl class="contract-flow-kv contract-flow-kv--2">
-                  <div>
-                    <dt>{{ 'Identity Number' | translate }}</dt>
-                    <dd>{{ form.controls.customerIqama.value || '—' }}</dd>
-                  </div>
-                  <div>
-                    <dt>{{ 'Arabic Name' | translate }}</dt>
-                    <dd>
-                      {{
-                        selectedCustomer()
-                          ? customerBasicFieldValue('Arabic Name')
-                          : form.controls.customerNameAr.value || '—'
-                      }}
-                    </dd>
-                  </div>
-                </dl>
-              </details>
+              <ol class="finish-form-workflow" [attr.aria-label]="'Booking edit formWorkflowSteps' | translate">
+                <li>
+                  <button
+                    type="button"
+                    class="finish-form-workflow__step"
+                    [class.finish-form-workflow__step--done]="editSummarySectionComplete()"
+                    [class.finish-form-workflow__step--current]="editCurrentWorkflowStep() === 1"
+                    [attr.aria-current]="editCurrentWorkflowStep() === 1 ? 'step' : null"
+                    [attr.aria-controls]="'edit-form-section-summary'"
+                    (click)="focusEditWorkflowSection(1)"
+                  >
+                    <span class="finish-form-workflow__num">1</span>
+                    <span>{{ 'Booking edit flowStepSummary' | translate }}</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    class="finish-form-workflow__step"
+                    [class.finish-form-workflow__step--done]="editVehicleSectionComplete()"
+                    [class.finish-form-workflow__step--current]="editCurrentWorkflowStep() === 2"
+                    [attr.aria-current]="editCurrentWorkflowStep() === 2 ? 'step' : null"
+                    [attr.aria-controls]="'edit-form-section-vehicle'"
+                    (click)="focusEditWorkflowSection(2)"
+                  >
+                    <span class="finish-form-workflow__num">2</span>
+                    <span>{{ 'Booking edit flowStepVehicle' | translate }}</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    class="finish-form-workflow__step"
+                    [class.finish-form-workflow__step--done]="editPricingSectionComplete()"
+                    [class.finish-form-workflow__step--current]="editCurrentWorkflowStep() === 3"
+                    [attr.aria-current]="editCurrentWorkflowStep() === 3 ? 'step' : null"
+                    [attr.aria-controls]="'edit-form-section-pricing'"
+                    (click)="focusEditWorkflowSection(3)"
+                  >
+                    <span class="finish-form-workflow__num">3</span>
+                    <span>{{ 'Booking edit flowStepPricing' | translate }}</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    class="finish-form-workflow__step"
+                    [class.finish-form-workflow__step--done]="editDurationSectionComplete()"
+                    [class.finish-form-workflow__step--current]="editCurrentWorkflowStep() === 4"
+                    [attr.aria-current]="editCurrentWorkflowStep() === 4 ? 'step' : null"
+                    [attr.aria-controls]="'edit-form-section-duration'"
+                    (click)="focusEditWorkflowSection(4)"
+                  >
+                    <span class="finish-form-workflow__num">4</span>
+                    <span>{{ 'Booking edit flowStepDuration' | translate }}</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    class="finish-form-workflow__step"
+                    [class.finish-form-workflow__step--done]="editPaymentSectionComplete()"
+                    [class.finish-form-workflow__step--current]="editCurrentWorkflowStep() === 5"
+                    [attr.aria-current]="editCurrentWorkflowStep() === 5 ? 'step' : null"
+                    [attr.aria-controls]="'edit-form-section-payment'"
+                    (click)="focusEditWorkflowSection(5)"
+                  >
+                    <span class="finish-form-workflow__num">5</span>
+                    <span>{{ 'Booking edit flowStepPayment' | translate }}</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    class="finish-form-workflow__step"
+                    [class.finish-form-workflow__step--done]="editExtraSectionComplete()"
+                    [class.finish-form-workflow__step--current]="editCurrentWorkflowStep() === 6"
+                    [attr.aria-current]="editCurrentWorkflowStep() === 6 ? 'step' : null"
+                    [attr.aria-controls]="'edit-form-section-extra'"
+                    (click)="focusEditWorkflowSection(6)"
+                  >
+                    <span class="finish-form-workflow__num">6</span>
+                    <span>{{ 'Booking edit flowStepExtra' | translate }}</span>
+                  </button>
+                </li>
+              </ol>
 
-              <section class="contract-flow-section">
-                <h3 class="contract-flow-section__title">{{ 'Vehicle Information' | translate }}</h3>
-                <div class="contract-flow-grid contract-flow-grid--2">
-                  <div class="contract-flow-field">
-                    <label class="form-label">{{ 'Booking edit plate search' | translate }}</label>
-                    <input
-                      class="form-control"
-                      [value]="vehiclePlateLookup()"
-                      (input)="onVehiclePlateLookupChange($any($event.target).value)"
-                      (blur)="applyVehicleByPlateLookup()"
-                      [placeholder]="'Plate Number' | translate"
-                    />
-                  </div>
-                  <div class="contract-flow-field contract-flow-field--key">
-                    <label class="form-label">{{ 'Plate Number' | translate }} <span class="text-danger">*</span></label>
-                    <app-smooth-select
-                      formControlName="vehicleId"
-                      [ariaLabel]="'Plate Number' | translate"
-                      [placeholder]="'Select vehicle'"
-                      [options]="vehicleSelectOptions()"
-                      [searchable]="true"
-                    />
-                  </div>
-                </div>
-                @if (selectedVehicle()) {
-                  <dl class="contract-flow-kv contract-flow-kv--3 mt-2">
-                    <div><dt>{{ 'Vehicle Type' | translate }}</dt><dd>{{ vehicleInfoValue('type') }}</dd></div>
-                    <div><dt>{{ 'Year' | translate }}</dt><dd>{{ vehicleInfoValue('year') }}</dd></div>
-                    <div><dt>{{ 'Color' | translate }}</dt><dd>{{ vehicleInfoValue('color') }}</dd></div>
-                  </dl>
-                  <dl class="contract-flow-kv contract-flow-kv--3 mt-2">
-                    <div><dt>{{ 'Insurance Expiry Date' | translate }}</dt><dd>{{ vehicleInfoValue('insuranceExpires') }}</dd></div>
-                    <div><dt>{{ 'Registration Expiry Date' | translate }}</dt><dd>{{ vehicleInfoValue('validityCarRegistration') }}</dd></div>
-                    <div><dt>{{ 'Insurance Policy Number' | translate }}</dt><dd>{{ vehicleInfoValue('insurancePolicyNumber') }}</dd></div>
-                  </dl>
-                }
-                <div class="contract-flow-field contract-flow-field--key mt-2">
-                  <label class="form-label">{{ 'Checkout Counter' | translate }}</label>
-                  <input class="form-control" type="number" min="0" formControlName="checkoutCounter" />
-                </div>
-              </section>
-
-              <section class="contract-flow-section">
-                <h3 class="contract-flow-section__title">{{ 'Booking category pricing bands' | translate }}</h3>
-                <p class="form-text mb-2">{{ 'Booking band smart hint' | translate }}</p>
-                <details class="contract-flow-band" open>
-                  <summary>{{ 'Booking band daily block title' | translate }}</summary>
-                  <div class="contract-flow-band__body">
-                    <ng-container [ngTemplateOutlet]="wizardBandDaily" />
+              <div class="finish-form-fields-shell">
+                <details id="edit-form-section-summary" class="finish-form-section finish-form-fold" open>
+                  <summary class="finish-form-section__summary">
+                    <span class="finish-form-section__step">1</span>
+                    {{ 'Customer Information' | translate }}
+                  </summary>
+                  <div class="finish-form-fold__body">
+                    <header class="finish-form-section-head">
+                      <span class="finish-form-section-head__icon" aria-hidden="true">👤</span>
+                      <div>
+                        <h2 class="finish-form-section-head__title">{{ 'Customer Information' | translate }}</h2>
+                        <p class="finish-form-section-head__hint">{{ 'Booking edit sectionCustomerSubtitle' | translate }}</p>
+                      </div>
+                    </header>
+                    <dl class="contract-flow-kv contract-flow-kv--2">
+                      <div>
+                        <dt>{{ 'Identity Number' | translate }}</dt>
+                        <dd>
+                          {{ form.controls.customerIqama.value || '—' }}
+                          <span class="finish-form-badge finish-form-badge--readonly ms-1">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>{{ 'Arabic Name' | translate }}</dt>
+                        <dd>
+                          {{
+                            selectedCustomer()
+                              ? customerBasicFieldValue('Arabic Name')
+                              : form.controls.customerNameAr.value || '—'
+                          }}
+                          <span class="finish-form-badge finish-form-badge--readonly ms-1">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                        </dd>
+                      </div>
+                    </dl>
                   </div>
                 </details>
-                <details class="contract-flow-band">
-                  <summary>{{ 'Booking band hour block title' | translate }}</summary>
-                  <div class="contract-flow-band__body">
-                    <ng-container [ngTemplateOutlet]="wizardBandHour" />
-                  </div>
-                </details>
-                <details class="contract-flow-band">
-                  <summary>{{ 'Booking band km block title' | translate }}</summary>
-                  <div class="contract-flow-band__body">
-                    <ng-container [ngTemplateOutlet]="wizardBandKm" />
-                  </div>
-                </details>
-              </section>
 
-              <section class="contract-flow-section">
-                <h3 class="contract-flow-section__title">{{ 'Booking edit duration card' | translate }}</h3>
-                <div class="contract-flow-grid contract-flow-grid--2">
-                  <div class="contract-flow-field contract-flow-field--key">
-                    <app-date-picker mode="datetime" formControlName="startDate" label="Start Date" />
-                  </div>
-                  <div class="contract-flow-field contract-flow-field--key">
-                    <label class="form-label">{{ 'Count Of Days' | translate }} <span class="text-danger">*</span></label>
-                    <input class="form-control" type="number" min="1" formControlName="countOfDay" />
-                  </div>
-                  <div class="contract-flow-field contract-flow-field--readonly">
-                    <label class="form-label">{{ 'Vehicle Return Date' | translate }}</label>
-                    <input class="form-control" readonly [value]="editExpectedReturnDisplay()" />
-                  </div>
-                </div>
-                @if (bookingSettings()) {
-                  <div class="alert alert-light contract-flow-alert mt-2 mb-0" role="status">
-                    <div class="booking-restrictions-hint__title">{{ 'Booking Restrictions' | translate }}</div>
-                    <div class="booking-restrictions-hint__items">
-                      @if (bookingSettings()?.dateOfExp) {
-                        <span class="booking-restrictions-hint__item">• {{ 'Allow booking if driving license is expired' | translate }}</span>
-                      }
-                      @if (bookingSettings()?.dateOfExpWithNation) {
-                        <span class="booking-restrictions-hint__item">• {{ 'Allow booking if license and nationality documents are expired' | translate }}</span>
-                      }
-                      @if (bookingSettings()?.expDateAndInsuranceExp) {
-                        <span class="booking-restrictions-hint__item">• {{ 'Allow booking if vehicle registration and insurance are expired' | translate }}</span>
-                      }
-                    </div>
-                  </div>
-                }
-                @if (contractLimitWarnings().length > 0) {
-                  <div class="alert alert-warning contract-flow-alert mt-2 mb-0" role="alert">
-                    <div class="booking-limits-alert__title">{{ 'Booking contract limits exceeded title' | translate }}</div>
-                    @for (warning of contractLimitWarnings(); track warning) {
-                      <div class="booking-limits-alert__item">• {{ warning }}</div>
-                    }
-                  </div>
-                }
-              </section>
-
-              <section class="contract-flow-section">
-                <h3 class="contract-flow-section__title">{{ 'Payment Arrangement' | translate }}</h3>
-                @if (lastPaymentIsPosting()) {
-                  <div class="alert alert-info mb-0" role="alert">
-                    <strong>{{ 'Booking edit voucher posted title' | translate }}</strong>
-                    <p class="mb-0 mt-1">{{ 'Booking edit voucher posted body' | translate }}</p>
-                  </div>
-                } @else {
-                  <div class="contract-flow-grid contract-flow-grid--2">
-                    <div class="contract-flow-field">
-                      <label class="form-label">{{ 'Payment Type' | translate }}</label>
-                      <app-smooth-select
-                        formControlName="paymentType"
-                        [ariaLabel]="'Payment Type' | translate"
-                        [placeholder]="'Payment Type' | translate"
-                        [options]="paymentTypeSelectOptions()"
-                      />
-                    </div>
-                    <div class="contract-flow-field contract-flow-field--key">
-                      <label class="form-label">{{ 'Paid Amount' | translate }}</label>
-                      <input
-                        class="form-control"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        formControlName="paid"
-                        [readonly]="!canEditLastVoucherPaid()"
-                      />
-                    </div>
-                    @if (paymentTypeAllowsCashAccount()) {
-                      <div class="contract-flow-field">
-                        <label class="form-label">{{ 'Cash Account' | translate }}</label>
-                        <app-smooth-select
-                          formControlName="idCash"
-                          [ariaLabel]="'Cash Account' | translate"
-                          [placeholder]="'Select cash account'"
-                          [options]="cashSelectOptions()"
+                <details id="edit-form-section-vehicle" class="finish-form-section finish-form-fold" open>
+                  <summary class="finish-form-section__summary">
+                    <span class="finish-form-section__step">2</span>
+                    {{ 'Vehicle Information' | translate }}
+                  </summary>
+                  <div class="finish-form-fold__body">
+                    <header class="finish-form-section-head">
+                      <span class="finish-form-section-head__icon" aria-hidden="true">🚗</span>
+                      <div>
+                        <h2 class="finish-form-section-head__title">{{ 'Vehicle Information' | translate }}</h2>
+                        <p class="finish-form-section-head__hint">{{ 'Booking edit sectionVehicleSubtitle' | translate }}</p>
+                      </div>
+                    </header>
+                    <div class="finish-form-grid finish-form-grid--2">
+                      <div class="finish-form-field">
+                        <label class="finish-form-label">
+                          <span>{{ 'Booking edit plate search' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                        </label>
+                        <input
+                          class="form-control"
+                          [value]="vehiclePlateLookup()"
+                          (input)="onVehiclePlateLookupChange($any($event.target).value)"
+                          (blur)="applyVehicleByPlateLookup()"
+                          [placeholder]="'Plate Number' | translate"
                         />
                       </div>
-                      <div class="contract-flow-field">
-                        <label class="form-label">{{ 'Paid Cash' | translate }}</label>
-                        <input class="form-control" type="number" min="0" step="0.01" formControlName="paidCash" />
-                      </div>
-                    }
-                    @if (paymentTypeAllowsBankAccount()) {
-                      <div class="contract-flow-field">
-                        <label class="form-label">{{ 'Bank Account' | translate }}</label>
+                      <div class="finish-form-field">
+                        <label class="finish-form-label">
+                          <span>{{ 'Plate Number' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                        </label>
                         <app-smooth-select
-                          formControlName="idBank"
-                          [ariaLabel]="'Bank Account' | translate"
-                          [placeholder]="'Select bank'"
-                          [options]="bankSelectOptions()"
+                          formControlName="vehicleId"
+                          [ariaLabel]="'Plate Number' | translate"
+                          [placeholder]="'Select vehicle'"
+                          [options]="vehicleSelectOptions()"
                           [searchable]="true"
                         />
                       </div>
-                      <div class="contract-flow-field">
-                        <label class="form-label">{{ 'Paid Bank' | translate }}</label>
-                        <input class="form-control" type="number" min="0" step="0.01" formControlName="paidBank" />
+                    </div>
+                    @if (selectedVehicle()) {
+                      <dl class="contract-flow-kv contract-flow-kv--3 mt-2">
+                        <div><dt>{{ 'Vehicle Type' | translate }}</dt><dd>{{ vehicleInfoValue('type') }}</dd></div>
+                        <div><dt>{{ 'Year' | translate }}</dt><dd>{{ vehicleInfoValue('year') }}</dd></div>
+                        <div><dt>{{ 'Color' | translate }}</dt><dd>{{ vehicleInfoValue('color') }}</dd></div>
+                      </dl>
+                      <dl class="contract-flow-kv contract-flow-kv--3 mt-2">
+                        <div><dt>{{ 'Insurance Expiry Date' | translate }}</dt><dd>{{ vehicleInfoValue('insuranceExpires') }}</dd></div>
+                        <div><dt>{{ 'Registration Expiry Date' | translate }}</dt><dd>{{ vehicleInfoValue('validityCarRegistration') }}</dd></div>
+                        <div><dt>{{ 'Insurance Policy Number' | translate }}</dt><dd>{{ vehicleInfoValue('insurancePolicyNumber') }}</dd></div>
+                      </dl>
+                    }
+                    <div class="finish-form-field mt-2">
+                      <label class="finish-form-label">
+                        <span>{{ 'Checkout Counter' | translate }}</span>
+                        <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                      </label>
+                      <input class="form-control" type="number" min="0" formControlName="checkoutCounter" />
+                    </div>
+                  </div>
+                </details>
+
+                <details id="edit-form-section-pricing" class="finish-form-section finish-form-fold" open>
+                  <summary class="finish-form-section__summary">
+                    <span class="finish-form-section__step">3</span>
+                    {{ 'Booking category pricing bands' | translate }}
+                  </summary>
+                  <div class="finish-form-fold__body">
+                    <header class="finish-form-section-head">
+                      <span class="finish-form-section-head__icon" aria-hidden="true">💰</span>
+                      <div>
+                        <h2 class="finish-form-section-head__title">{{ 'Booking category pricing bands' | translate }}</h2>
+                        <p class="finish-form-section-head__hint">{{ 'Booking edit sectionPricingSubtitle' | translate }}</p>
+                      </div>
+                    </header>
+                    <p class="form-text mb-2">{{ 'Booking band smart hint' | translate }}</p>
+                    <details class="contract-flow-band" open>
+                      <summary>{{ 'Booking band daily block title' | translate }}</summary>
+                      <div class="contract-flow-band__body">
+                        <ng-container [ngTemplateOutlet]="wizardBandDaily" />
+                      </div>
+                    </details>
+                    <details class="contract-flow-band">
+                      <summary>{{ 'Booking band hour block title' | translate }}</summary>
+                      <div class="contract-flow-band__body">
+                        <ng-container [ngTemplateOutlet]="wizardBandHour" />
+                      </div>
+                    </details>
+                    <details class="contract-flow-band">
+                      <summary>{{ 'Booking band km block title' | translate }}</summary>
+                      <div class="contract-flow-band__body">
+                        <ng-container [ngTemplateOutlet]="wizardBandKm" />
+                      </div>
+                    </details>
+                  </div>
+                </details>
+
+                <details id="edit-form-section-duration" class="finish-form-section finish-form-fold" open>
+                  <summary class="finish-form-section__summary">
+                    <span class="finish-form-section__step">4</span>
+                    {{ 'Booking edit duration card' | translate }}
+                  </summary>
+                  <div class="finish-form-fold__body">
+                    <header class="finish-form-section-head">
+                      <span class="finish-form-section-head__icon" aria-hidden="true">📅</span>
+                      <div>
+                        <h2 class="finish-form-section-head__title">{{ 'Booking edit duration card' | translate }}</h2>
+                        <p class="finish-form-section-head__hint">{{ 'Booking edit sectionDurationSubtitle' | translate }}</p>
+                      </div>
+                    </header>
+                    <div class="finish-form-grid finish-form-grid--2">
+                      <div class="finish-form-field">
+                        <label class="finish-form-label">
+                          <span>{{ 'Start Date' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                        </label>
+                        <app-date-picker mode="datetime" formControlName="startDate" label="" />
+                      </div>
+                      <div class="finish-form-field">
+                        <label class="finish-form-label">
+                          <span>{{ 'Count Of Days' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                        </label>
+                        <input class="form-control" type="number" min="1" formControlName="countOfDay" />
+                      </div>
+                      <div class="finish-form-field finish-form-field--readonly">
+                        <label class="finish-form-label">
+                          <span>{{ 'Vehicle Return Date' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                        </label>
+                        <input class="form-control" readonly [value]="editExpectedReturnDisplay()" />
+                      </div>
+                    </div>
+                    @if (bookingSettings()) {
+                      <div class="alert alert-light contract-flow-alert mt-2 mb-0" role="status">
+                        <div class="booking-restrictions-hint__title">{{ 'Booking Restrictions' | translate }}</div>
+                        <div class="booking-restrictions-hint__items">
+                          @if (bookingSettings()?.dateOfExp) {
+                            <span class="booking-restrictions-hint__item">• {{ 'Allow booking if driving license is expired' | translate }}</span>
+                          }
+                          @if (bookingSettings()?.dateOfExpWithNation) {
+                            <span class="booking-restrictions-hint__item">• {{ 'Allow booking if license and nationality documents are expired' | translate }}</span>
+                          }
+                          @if (bookingSettings()?.expDateAndInsuranceExp) {
+                            <span class="booking-restrictions-hint__item">• {{ 'Allow booking if vehicle registration and insurance are expired' | translate }}</span>
+                          }
+                        </div>
+                      </div>
+                    }
+                    @if (contractLimitWarnings().length > 0) {
+                      <div class="alert alert-warning contract-flow-alert mt-2 mb-0" role="alert">
+                        <div class="booking-limits-alert__title">{{ 'Booking contract limits exceeded title' | translate }}</div>
+                        @for (warning of contractLimitWarnings(); track warning) {
+                          <div class="booking-limits-alert__item">• {{ warning }}</div>
+                        }
                       </div>
                     }
                   </div>
-                }
-              </section>
+                </details>
 
-              @if (lastPayment()) {
-                <section class="contract-flow-section">
-                  <h3 class="contract-flow-section__title">{{ 'Booking edit last voucher card' | translate }}</h3>
-                  <dl class="contract-flow-kv contract-flow-kv--2">
-                    <div><dt>{{ 'Payment Number' | translate }}</dt><dd>{{ liveLastPaymentRow()?.paymentNumber || '—' }}</dd></div>
-                    <div><dt>{{ 'Bond Type' | translate }}</dt><dd>{{ bondTypeLabel(liveLastPaymentRow()?.bondType) }}</dd></div>
-                    <div><dt>{{ 'Payment Type' | translate }}</dt><dd>{{ paymentTypeLabel(liveLastPaymentRow()?.paymentType) }}</dd></div>
-                    <div><dt>{{ 'Paid Amount' | translate }}</dt><dd>{{ moneyOrDash(liveLastPaymentRow()?.paid) }}</dd></div>
-                    <div><dt>{{ 'Created At' | translate }}</dt><dd>{{ dateOrDash(liveLastPaymentRow()?.createdAt) }}</dd></div>
-                  </dl>
-                  <button type="button" class="btn btn-outline-primary btn-sm mt-2" (click)="navigateToPaymentVouchers()">
-                    {{ 'Booking edit view vouchers' | translate }}
-                  </button>
-                </section>
-              }
+                <details id="edit-form-section-payment" class="finish-form-section finish-form-fold" open>
+                  <summary class="finish-form-section__summary">
+                    <span class="finish-form-section__step">5</span>
+                    {{ 'Payment Arrangement' | translate }}
+                  </summary>
+                  <div class="finish-form-fold__body">
+                    <header class="finish-form-section-head">
+                      <span class="finish-form-section-head__icon" aria-hidden="true">💳</span>
+                      <div>
+                        <h2 class="finish-form-section-head__title">{{ 'Payment Arrangement' | translate }}</h2>
+                        <p class="finish-form-section-head__hint">{{ 'Booking edit sectionPaymentSubtitle' | translate }}</p>
+                      </div>
+                    </header>
+                    @if (lastPaymentIsPosting()) {
+                      <div class="alert alert-info mb-0" role="alert">
+                        <strong>{{ 'Booking edit voucher posted title' | translate }}</strong>
+                        <p class="mb-0 mt-1">{{ 'Booking edit voucher posted body' | translate }}</p>
+                      </div>
+                    } @else {
+                      <div class="finish-form-grid finish-form-grid--2">
+                        <div class="finish-form-field">
+                          <label class="finish-form-label">
+                            <span>{{ 'Payment Type' | translate }}</span>
+                            <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                          </label>
+                          <app-smooth-select
+                            formControlName="paymentType"
+                            [ariaLabel]="'Payment Type' | translate"
+                            [placeholder]="'Payment Type' | translate"
+                            [options]="paymentTypeSelectOptions()"
+                          />
+                        </div>
+                        <div class="finish-form-field">
+                          <label class="finish-form-label">
+                            <span>{{ 'Paid Amount' | translate }}</span>
+                            @if (canEditLastVoucherPaid()) {
+                              <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                            } @else {
+                              <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                            }
+                          </label>
+                          <input
+                            class="form-control"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            formControlName="paid"
+                            [readonly]="!canEditLastVoucherPaid()"
+                          />
+                        </div>
+                        @if (paymentTypeAllowsCashAccount()) {
+                          <div class="finish-form-field">
+                            <label class="finish-form-label">
+                              <span>{{ 'Cash Account' | translate }}</span>
+                              <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                            </label>
+                            <app-smooth-select
+                              formControlName="idCash"
+                              [ariaLabel]="'Cash Account' | translate"
+                              [placeholder]="'Select cash account'"
+                              [options]="cashSelectOptions()"
+                            />
+                          </div>
+                          <div class="finish-form-field">
+                            <label class="finish-form-label">
+                              <span>{{ 'Paid Cash' | translate }}</span>
+                              <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                            </label>
+                            <input class="form-control" type="number" min="0" step="0.01" formControlName="paidCash" />
+                          </div>
+                        }
+                        @if (paymentTypeAllowsBankAccount()) {
+                          <div class="finish-form-field">
+                            <label class="finish-form-label">
+                              <span>{{ 'Bank Account' | translate }}</span>
+                              <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                            </label>
+                            <app-smooth-select
+                              formControlName="idBank"
+                              [ariaLabel]="'Bank Account' | translate"
+                              [placeholder]="'Select bank'"
+                              [options]="bankSelectOptions()"
+                              [searchable]="true"
+                            />
+                          </div>
+                          <div class="finish-form-field">
+                            <label class="finish-form-label">
+                              <span>{{ 'Paid Bank' | translate }}</span>
+                              <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                            </label>
+                            <input class="form-control" type="number" min="0" step="0.01" formControlName="paidBank" />
+                          </div>
+                        }
+                      </div>
+                    }
 
-              <details class="contract-flow-section contract-flow-section--fold">
-                <summary class="contract-flow-section__title">{{ 'Booking edit extra card' | translate }}</summary>
-                <div class="contract-flow-grid contract-flow-grid--2 mt-2">
-                  <div class="contract-flow-field">
-                    <label class="form-label">{{ 'Basame Booking Number' | translate }}</label>
-                    <input class="form-control" formControlName="numberBookingINBasame" maxlength="10" />
-                  </div>
-                  <div class="contract-flow-field">
-                    <label class="form-label">{{ 'Usage Place' | translate }}</label>
-                    <input class="form-control" formControlName="placeUSE" />
-                  </div>
-                  @if (showBookingDistanceGpsEnabled()) {
-                    <div class="contract-flow-field">
-                      <label class="form-label">{{ 'Travelled Distance GPS' | translate }}</label>
-                      <input class="form-control" formControlName="distancetraveledgps" [placeholder]="'Example GPS Distance' | translate" />
-                    </div>
-                  }
-                  <div class="contract-flow-field contract-flow-field--span-2">
-                    <label class="form-label">{{ 'Notes' | translate }}</label>
-                    <textarea class="form-control" rows="2" formControlName="note"></textarea>
-                  </div>
-                  <div class="contract-flow-field">
-                    <label class="form-label">{{ 'Discount' | translate }}</label>
-                    <input class="form-control" type="number" min="0" step="0.01" formControlName="discount" />
-                  </div>
-                  <div class="contract-flow-field">
-                    <label class="form-label">{{ 'Total Tax' | translate }}</label>
-                    <input class="form-control" type="number" min="0" step="0.01" formControlName="totaltax" />
-                    @if (bookingSettings() && bookingSettings()!.id > 0) {
-                      <div class="form-text">{{ 'Booking tax auto hint' | translate: { rate: bookingSettings()?.tax ?? 0 } }}</div>
+                    @if (lastPayment()) {
+                      <div class="finish-form-subsection">
+                        <h3 class="finish-form-subsection__title">{{ 'Booking edit last voucher card' | translate }}</h3>
+                        <dl class="contract-flow-kv contract-flow-kv--2">
+                          <div><dt>{{ 'Payment Number' | translate }}</dt><dd>{{ liveLastPaymentRow()?.paymentNumber || '—' }}</dd></div>
+                          <div><dt>{{ 'Bond Type' | translate }}</dt><dd>{{ bondTypeLabel(liveLastPaymentRow()?.bondType) }}</dd></div>
+                          <div><dt>{{ 'Payment Type' | translate }}</dt><dd>{{ paymentTypeLabel(liveLastPaymentRow()?.paymentType) }}</dd></div>
+                          <div><dt>{{ 'Paid Amount' | translate }}</dt><dd>{{ moneyOrDash(liveLastPaymentRow()?.paid) }}</dd></div>
+                          <div><dt>{{ 'Created At' | translate }}</dt><dd>{{ dateOrDash(liveLastPaymentRow()?.createdAt) }}</dd></div>
+                        </dl>
+                        <button type="button" class="btn btn-outline-primary btn-sm mt-2" (click)="navigateToPaymentVouchers()">
+                          {{ 'Booking edit view vouchers' | translate }}
+                        </button>
+                      </div>
                     }
                   </div>
-                </div>
-              </details>
+                </details>
+
+                <details id="edit-form-section-extra" class="finish-form-section finish-form-fold">
+                  <summary class="finish-form-section__summary">
+                    <span class="finish-form-section__step">6</span>
+                    {{ 'Booking edit extra card' | translate }}
+                  </summary>
+                  <div class="finish-form-fold__body">
+                    <header class="finish-form-section-head">
+                      <span class="finish-form-section-head__icon" aria-hidden="true">📝</span>
+                      <div>
+                        <h2 class="finish-form-section-head__title">{{ 'Booking edit extra card' | translate }}</h2>
+                        <p class="finish-form-section-head__hint">{{ 'Booking edit sectionExtraSubtitle' | translate }}</p>
+                      </div>
+                    </header>
+                    <div class="finish-form-grid finish-form-grid--2">
+                      <div class="finish-form-field">
+                        <label class="finish-form-label">
+                          <span>{{ 'Basame Booking Number' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                        </label>
+                        <input class="form-control" formControlName="numberBookingINBasame" maxlength="10" />
+                      </div>
+                      <div class="finish-form-field">
+                        <label class="finish-form-label">
+                          <span>{{ 'Usage Place' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                        </label>
+                        <input class="form-control" formControlName="placeUSE" />
+                      </div>
+                      @if (showBookingDistanceGpsEnabled()) {
+                        <div class="finish-form-field">
+                          <label class="finish-form-label">
+                            <span>{{ 'Travelled Distance GPS' | translate }}</span>
+                            <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                          </label>
+                          <input class="form-control" formControlName="distancetraveledgps" [placeholder]="'Example GPS Distance' | translate" />
+                        </div>
+                      }
+                      <div class="finish-form-field finish-form-field--span-2">
+                        <label class="finish-form-label">
+                          <span>{{ 'Notes' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                        </label>
+                        <textarea class="form-control" rows="2" formControlName="note"></textarea>
+                      </div>
+                      <div class="finish-form-field">
+                        <label class="finish-form-label">
+                          <span>{{ 'Discount' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                        </label>
+                        <input class="form-control" type="number" min="0" step="0.01" formControlName="discount" />
+                      </div>
+                      <div class="finish-form-field">
+                        <label class="finish-form-label">
+                          <span>{{ 'Total Tax' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                        </label>
+                        <input class="form-control" type="number" min="0" step="0.01" formControlName="totaltax" />
+                        @if (bookingSettings() && bookingSettings()!.id > 0) {
+                          <div class="form-text">{{ 'Booking tax auto hint' | translate: { rate: bookingSettings()?.tax ?? 0 } }}</div>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </details>
+              </div>
             </div>
 
             <aside class="contract-flow-aside" [attr.aria-label]="'Booking edit live summary' | translate">
+              <div class="finish-form-aside-card">
+                <div class="finish-form-aside-card__progress">
+                  <span class="finish-form-aside-card__progress-label">{{ 'Booking edit flowProfileCompletion' | translate }}</span>
+                  <strong>{{ editFormCompletionPercent() }}%</strong>
+                </div>
+              </div>
               <h3 class="contract-flow-invoice__title">{{ 'Contract flow section invoice' | translate }}</h3>
               <div class="contract-flow-aside-block">
                 <div class="contract-flow-aside-block__title">{{ 'Booking Information' | translate }}</div>
