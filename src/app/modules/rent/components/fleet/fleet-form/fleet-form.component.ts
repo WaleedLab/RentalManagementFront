@@ -55,6 +55,7 @@ export class FleetFormComponent implements OnInit {
   loading = signal(false);
   selectedImage = signal<File | null>(null);
   previewUrl = signal<string | null>(null);
+  imageRequiredError = signal(false);
   readonly fleetImageFallback = FLEET_FALLBACK_IMAGE;
   private formProgressTick = signal(0);
 
@@ -87,7 +88,12 @@ export class FleetFormComponent implements OnInit {
 
   brandingSectionComplete = computed(() => {
     this.formProgressTick();
-    return !!(String(this.previewUrl() ?? '').trim() || this.selectedImage());
+    return this.hasRequiredImage();
+  });
+
+  hasRequiredImage = computed(() => {
+    this.formProgressTick();
+    return this.isImageProvided();
   });
 
   profileCompletionPercent = computed(() => {
@@ -116,7 +122,7 @@ export class FleetFormComponent implements OnInit {
 
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.previewUrl.set(this.fleetImageFallback);
+      this.previewUrl.set(null);
       return;
     }
 
@@ -165,6 +171,14 @@ export class FleetFormComponent implements OnInit {
       return;
     }
 
+    if (!this.hasRequiredImage()) {
+      this.imageRequiredError.set(true);
+      this.toast.error(this.translate.instant('Fleet image required'));
+      this.focusWorkflowSection(4);
+      return;
+    }
+
+    this.imageRequiredError.set(false);
     const raw = this.form.getRawValue();
     const body: FleetUpsertRequest = {
       name: raw.name.trim(),
@@ -205,11 +219,32 @@ export class FleetFormComponent implements OnInit {
 
   onImageSelected(file: File | null): void {
     this.selectedImage.set(file);
+    this.imageRequiredError.set(false);
     if (file) {
       this.previewUrl.set(URL.createObjectURL(file));
     } else {
-      this.previewUrl.set(this.fleetImageFallback);
+      this.previewUrl.set(null);
     }
     this.formProgressTick.update(v => v + 1);
+  }
+
+  private isImageProvided(): boolean {
+    if (this.selectedImage()) {
+      return true;
+    }
+    const preview = String(this.previewUrl() ?? '').trim();
+    if (!preview || this.isFallbackImageUrl(preview)) {
+      return false;
+    }
+    return true;
+  }
+
+  private isFallbackImageUrl(url: string): boolean {
+    const normalized = url.split('?')[0]?.split('#')[0] ?? url;
+    return (
+      normalized === this.fleetImageFallback ||
+      normalized.endsWith('/fleet_defult.png') ||
+      normalized.endsWith('fleet_defult.png')
+    );
   }
 }

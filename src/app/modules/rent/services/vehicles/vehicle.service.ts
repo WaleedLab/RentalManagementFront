@@ -170,14 +170,18 @@ export class VehicleService {
   }
 
   create(body: VehicleUpsertRequest): Observable<unknown> {
-    return from(this.toApiPayload(body)).pipe(
-      switchMap(payload => this.api.postData(this.base, payload)),
+    return from(this.toApiPayload(body, { isCreate: true })).pipe(
+      switchMap(payload =>
+        this.api.postData(this.base, payload, { suppressErrorToast: true }),
+      ),
     );
   }
 
   update(body: VehicleUpsertRequest): Observable<unknown> {
-    return from(this.toApiPayload(body)).pipe(
-      switchMap(payload => this.api.putData(`${this.base}/${body.id}`, payload)),
+    return from(this.toApiPayload(body, { isCreate: false })).pipe(
+      switchMap(payload =>
+        this.api.putData(`${this.base}/${body.id}`, payload, { suppressErrorToast: true }),
+      ),
     );
   }
 
@@ -206,63 +210,82 @@ export class VehicleService {
     return this.api.patchData<boolean>(`${this.base}/SoftDelete/${id}`, {});
   }
 
-  private async toApiPayload(body: VehicleUpsertRequest): Promise<Record<string, unknown>> {
+  private async toApiPayload(
+    body: VehicleUpsertRequest,
+    options: { isCreate: boolean },
+  ): Promise<Record<string, unknown>> {
     const imagePayload = await buildImageUploadPayload(body.image);
-    const isAvailable = body.status === 'Available';
-    const statusCode =
-      body.status === 'Sold'
-        ? 0
-        : body.status === 'Available'
-        ? 1
-        : body.status === 'Booked'
-          ? 2
-          : body.status === 'Maintenance'
-            ? 3
-            : 4;
 
-    return {
-      id: body.id,
-      color: body.color,
-      insuranceNumber: body.insuranceNumber,
-      insuranceType: body.insuranceType,
-      insuranceExpires: body.insuranceExpires,
-      licenseExpirationDate: body.licenseExpirationDate,
-      insurancePolicyNumber: body.insurancePolicyNumber,
-      operatinCard: body.operatinCard,
-      validityCarRegistration: body.validityCarRegistration,
-      fleetId: body.fleetId,
-      branchId: body.branchId,
-      idCategoryVehicle: body.idCategoryVehicle,
-      vin: body.vin,
-      yearMake: body.yearMake,
-      engine: body.engine,
-      serialNumber: body.serialNumber,
-      plateNumber: body.plateNumber,
-      countKm: body.countKm,
-      capacitOil: body.capacitOil,
-      status: body.status,
-      Status: body.status,
-      vehicleStatus: body.status,
-      VehicleStatus: body.status,
-      stutus: body.status,
-      Stutus: body.status,
-      statusCode,
-      StatusCode: statusCode,
-      isAvailable,
-      IsAvailable: isAvailable,
-      isAvalible: isAvailable,
-      IsAvalible: isAvailable,
-      isActive: body.isActive,
-      notes: body.notes,
-      url: imagePayload?.attachment,
-      Url: imagePayload?.attachment,
-      imageExtension: imagePayload?.extension ?? '',
-      ImageExtension: imagePayload?.extension ?? '',
-      attachment: imagePayload?.attachment,
-      Attachment: imagePayload?.attachment,
-      extension: imagePayload?.extension,
-      Extension: imagePayload?.extension,
+    const payload: Record<string, unknown> = {
+      PlateNumber: body.plateNumber?.trim() ?? '',
+      SerialNumber: body.serialNumber?.trim() ?? '',
+      InsurancePolicyNumber: body.insurancePolicyNumber?.trim() ?? '',
+      FleetId: body.fleetId,
+      BranchId: body.branchId,
+      IdCategoryVehicle: body.idCategoryVehicle,
+      YearMake: body.yearMake,
+      CountKm: body.countKm ?? 0,
+      CapacitOil: body.capacitOil ?? 0,
+      InsuranceExpires: this.toApiDateTime(body.insuranceExpires),
+      LicenseExpirationDate: this.toApiDateTime(body.licenseExpirationDate),
+      OperatinCard: this.toApiDateTime(body.operatinCard),
+      ValidityCarRegistration: this.toApiDateTime(body.validityCarRegistration),
     };
+
+    const color = body.color?.trim();
+    if (color) {
+      payload['Color'] = color;
+    }
+
+    const insuranceNumber = body.insuranceNumber?.trim();
+    if (insuranceNumber) {
+      payload['InsuranceNumber'] = insuranceNumber;
+    }
+
+    if (body.insuranceType != null) {
+      payload['InsuranceType'] = body.insuranceType;
+    }
+
+    const vin = body.vin?.trim();
+    if (vin) {
+      payload['VIN'] = vin;
+    }
+
+    const engine = body.engine?.trim();
+    if (engine) {
+      payload['Engine'] = engine;
+    }
+
+    if (!options.isCreate && body.id) {
+      const vehicleId = Number(body.id);
+      payload['Id'] = Number.isFinite(vehicleId) && vehicleId > 0 ? vehicleId : body.id;
+    }
+
+    if (imagePayload) {
+      payload['Url'] = imagePayload.attachment;
+      payload['ImageExtension'] = imagePayload.extension;
+    }
+
+    return payload;
+  }
+
+  /** Backend `CreateVehicleCommand` expects `DateTime`; date-only strings need a time segment. */
+  private toApiDateTime(value: string): string {
+    const trimmed = String(value ?? '').trim();
+    if (!trimmed) {
+      return trimmed;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      return `${trimmed}T00:00:00`;
+    }
+
+    const parsed = new Date(trimmed);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toISOString();
+    }
+
+    return trimmed;
   }
 
   private getByIdFromList(
