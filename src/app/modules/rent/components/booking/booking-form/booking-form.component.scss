@@ -1380,6 +1380,18 @@
 .contract-flow-edit-form .finish-form-field:has(app-smooth-select.app-smooth-select-host--open),
 .contract-flow-edit-form .finish-form-field:has(app-date-picker.date-picker-host--open) {
   position: relative;
-  z-index: 20;
+  z-index: 30;
   overflow: visible;
+}
+
+.contract-flow-edit-form .finish-form-grid:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open),
+.contract-flow-edit-form .finish-form-fold__body:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open),
+.contract-flow-edit-form .finish-form-fields-shell:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open),
+.contract-flow-edit-form .finish-form-section:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open) {
+  overflow: visible;
+}
+
+.contract-flow-edit-form .finish-form-section:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open) {
+  position: relative;
+  z-index: 25;
 }

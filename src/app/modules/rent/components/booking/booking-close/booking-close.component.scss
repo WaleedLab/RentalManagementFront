@@ -258,6 +258,26 @@
   min-width: 0;
 }
 
+/* Keep dropdown panels above the next workflow card (section uses overflow:hidden). */
+.contract-close-form-page .finish-form-field:has(app-smooth-select.app-smooth-select-host--open),
+.contract-close-form-page .finish-form-field:has(app-date-picker.date-picker-host--open) {
+  position: relative;
+  z-index: 30;
+  overflow: visible;
+}
+
+.contract-close-form-page .finish-form-grid:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open),
+.contract-close-form-page .finish-form-fold__body:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open),
+.contract-close-form-page .finish-form-fields-shell:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open),
+.contract-close-form-page .finish-form-section:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open) {
+  overflow: visible;
+}
+
+.contract-close-form-page .finish-form-section:has(app-smooth-select.app-smooth-select-host--open, app-date-picker.date-picker-host--open) {
+  position: relative;
+  z-index: 25;
+}
+
 .contract-close-card {
   border-top: 3px solid var(--bs-primary);
 }
