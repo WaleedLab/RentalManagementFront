@@ -51,6 +51,7 @@
                     [src]="fleetImageUrl(f.url)"
                     [alt]="f.name || ('Fleet Image' | translate)"
                     loading="lazy"
+                    (error)="onFleetImageError($event)"
                   />
                 </td>
                 <td>{{ f.name || '-' }}</td>

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -11,7 +11,6 @@ import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch
 import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
-import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 import {
   SmoothSelectComponent,
@@ -61,7 +60,6 @@ import {
     FormsModule,
     RouterLink,
     TranslateModule,
-    PageHeaderComponent,
     SmoothSelectComponent,
     DatePickerComponent,
     StatusBadgeComponent,
@@ -74,6 +72,16 @@ export class BookingSuspendComponent implements OnInit {
   private static readonly BOND_TYPE_RECEIPT = 2;
   private static readonly SUSPEND_REASON_MAX = 500;
 
+  private static readonly SUSPEND_WORKFLOW_SECTION_IDS = [
+    'suspend-form-section-reason',
+    'suspend-form-section-summary',
+    'suspend-form-section-usage',
+    'suspend-form-section-time',
+    'suspend-form-section-extra',
+    'suspend-form-section-payment',
+  ] as const;
+
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authState = inject(AuthStateService);
@@ -273,14 +281,16 @@ export class BookingSuspendComponent implements OnInit {
     if (this.suspendLocked() || this.saving()) {
       return true;
     }
-    if (!this.suspendReason().trim()) {
+    if (!this.suspendReasonSectionComplete()) {
       return true;
     }
-    const v = this.returnAgainstCheckout();
-    if (!v) {
+    if (!this.suspendUsageSectionComplete() || !this.suspendTimeSectionComplete()) {
       return true;
     }
-    return !v.odometerOk || !v.timeOk;
+    if (!this.suspendPaymentSectionComplete()) {
+      return true;
+    }
+    return false;
   });
 
   odometerDrivenKm = computed(() => {
@@ -454,6 +464,96 @@ export class BookingSuspendComponent implements OnInit {
   });
 
   hasSettlementPayment = computed(() => (Number(this.settlementPaidAmount()) || 0) > 0.009);
+
+  suspendReasonSectionComplete = computed(
+    () => !!String(this.suspendReason() ?? '').trim(),
+  );
+
+  suspendSummarySectionComplete = computed(() => !!this.booking());
+
+  suspendUsageSectionComplete = computed(() => {
+    const v = this.returnAgainstCheckout();
+    return !!v?.odometerOk;
+  });
+
+  suspendTimeSectionComplete = computed(() => {
+    const v = this.returnAgainstCheckout();
+    return !!v?.timeOk && !!String(this.returnDateTime() ?? '').trim();
+  });
+
+  suspendExtraSectionComplete = computed(() => true);
+
+  suspendPaymentSectionComplete = computed((): boolean => {
+    const amount = roundSettlementMoney(this.settlementPaidAmount());
+    if (amount <= 0) {
+      return true;
+    }
+    const type = Number(this.paymentMethod()) || 1;
+    const bankId = String(this.bankAccount() ?? '').trim();
+    const cashId = String(this.cashAccount() ?? '').trim();
+    const paidCash = Math.max(0, Number(this.paidCash()) || 0);
+    const paidBank = Math.max(0, Number(this.paidBank()) || 0);
+    if (!settlementTotalsMatch(roundSettlementMoney(paidCash + paidBank), amount)) {
+      return false;
+    }
+    if (type === 1) {
+      return !!cashId;
+    }
+    if ([2, 3, 4].includes(type)) {
+      return !!bankId;
+    }
+    if (type === 5) {
+      return !!bankId && !!cashId && (paidCash > 0 || paidBank > 0);
+    }
+    return true;
+  });
+
+  suspendFormCompletionPercent = computed((): number => {
+    let done = 0;
+    if (this.suspendReasonSectionComplete()) done++;
+    if (this.suspendSummarySectionComplete()) done++;
+    if (this.suspendUsageSectionComplete()) done++;
+    if (this.suspendTimeSectionComplete()) done++;
+    if (this.suspendExtraSectionComplete()) done++;
+    if (this.suspendPaymentSectionComplete()) done++;
+    return Math.round((done / 6) * 100);
+  });
+
+  suspendCurrentWorkflowStep = computed((): number => {
+    if (!this.suspendReasonSectionComplete()) {
+      return 1;
+    }
+    if (!this.suspendSummarySectionComplete()) {
+      return 2;
+    }
+    if (!this.suspendUsageSectionComplete()) {
+      return 3;
+    }
+    if (!this.suspendTimeSectionComplete()) {
+      return 4;
+    }
+    if (!this.suspendExtraSectionComplete()) {
+      return 5;
+    }
+    if (!this.suspendPaymentSectionComplete()) {
+      return 6;
+    }
+    return 7;
+  });
+
+  focusSuspendWorkflowSection(step: 1 | 2 | 3 | 4 | 5 | 6): void {
+    const sectionId = BookingSuspendComponent.SUSPEND_WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('finish-form-section--focus');
+    window.setTimeout(() => section.classList.remove('finish-form-section--focus'), 1400);
+  }
 
   constructor() {
     effect(() => {

@@ -171,6 +171,7 @@
                   <div
                     class="traffic-violation-form-field"
                     [class.traffic-violation-form-field--invalid]="hasError('idVehicle')"
+                    [class.traffic-violation-form-field--readonly]="vehicleLockedByBooking()"
                   >
                     <label class="traffic-violation-form-label">
                       <span>{{ 'trafficViolations.fieldVehicle' | translate }}</span>
@@ -186,10 +187,13 @@
                       [placeholder]="'trafficViolations.vehicleSelectPlaceholder' | translate"
                       [searchable]="true"
                       [searchPlaceholder]="'trafficViolations.searchVehicle'"
+                      [disabled]="vehicleLockedByBooking()"
                       (valueChange)="onVehicleChange($event)"
                     />
                     @if (loadingVehicle()) {
                       <p class="traffic-violation-form-hint">{{ 'trafficViolations.resolvingVehicle' | translate }}</p>
+                    } @else if (vehicleLockedByBooking()) {
+                      <p class="traffic-violation-form-hint">{{ 'trafficViolations.vehicleLockedByBookingHint' | translate }}</p>
                     } @else {
                       <p class="traffic-violation-form-hint">{{ 'trafficViolations.vehicleHint' | translate }}</p>
                     }

@@ -7,7 +7,7 @@
   "Booking Restrictions": "Booking Restrictions",
   "Define who can still book under special conditions.": "Define who can still book under special conditions.",
   "Number of free late hours": "Number of free late hours",
-  "Allowed late minutes after contract end": "Allowed close minutes (after period end from checkout time)",
+  "Allowed late minutes after contract end": "Allowed close minutes (checkout time, same day only)",
   "Late hours counted per day": "Late hours counted per day",
   "Allowed extra kilometers at contract close": "Allowed close km (return odometer − checkout odometer)",
   "Minimum delay value": "Minimum delay value",

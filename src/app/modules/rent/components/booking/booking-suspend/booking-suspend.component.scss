@@ -1,3 +1,258 @@
 .contract-suspend-page {
   padding-bottom: 1.5rem;
 }
+
+.contract-suspend-form-page {
+  --app-contract-flow-aside-width: 15.5rem;
+}
+
+.contract-suspend-header .contract-flow-header__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.contract-suspend-layout {
+  margin-top: 0.75rem;
+}
+
+.contract-suspend-form-page .finish-form-fields-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.contract-suspend-form-page .finish-form-workflow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  list-style: none;
+  margin: 0 0 0.85rem;
+  padding: 0;
+
+  li {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.contract-suspend-form-page .finish-form-workflow__step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--app-contract-flow-card-border);
+  background: var(--app-contract-flow-readonly-bg);
+  font-size: 0.74rem;
+  color: var(--app-contract-flow-kv-label);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.3;
+
+  &:hover {
+    border-color: rgba(var(--rt-brand-primary-rgb), 0.35);
+    background: rgba(var(--rt-brand-primary-rgb), 0.06);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: rgba(var(--rt-brand-primary-rgb), 0.55);
+    box-shadow: 0 0 0 0.15rem rgba(var(--rt-brand-primary-rgb), 0.18);
+  }
+}
+
+.contract-suspend-form-page .finish-form-workflow__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: var(--app-contract-flow-card-border);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.contract-suspend-form-page .finish-form-workflow__step--current {
+  border-color: rgba(var(--rt-brand-primary-rgb), 0.45);
+  background: rgba(var(--rt-brand-primary-rgb), 0.08);
+  color: var(--app-contract-flow-segment-active-text);
+  font-weight: 600;
+
+  .finish-form-workflow__num {
+    background: rgba(var(--rt-brand-primary-rgb), 0.22);
+  }
+}
+
+.contract-suspend-form-page .finish-form-workflow__step--done:not(.finish-form-workflow__step--current) {
+  border-color: rgba(var(--rt-success-rgb, 14, 143, 106), 0.35);
+}
+
+.contract-suspend-form-page .finish-form-section {
+  border-radius: 14px;
+  border: 1px solid var(--app-contract-flow-card-border);
+  background: var(--app-contract-flow-card-bg);
+  overflow: hidden;
+}
+
+.contract-suspend-form-page .finish-form-section--focus {
+  box-shadow: 0 0 0 0.15rem rgba(var(--rt-brand-primary-rgb), 0.18);
+}
+
+.contract-suspend-form-page .finish-form-section__summary {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.72rem 0.95rem;
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--app-contract-flow-section-title);
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+}
+
+.contract-suspend-form-page .finish-form-section__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  background: rgba(var(--rt-brand-primary-rgb), 0.12);
+  color: var(--app-contract-flow-segment-active-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.contract-suspend-form-page .finish-form-fold__body {
+  padding: 0 0.95rem 1rem;
+  border-top: 1px solid var(--app-contract-flow-card-border);
+}
+
+.contract-suspend-form-page .finish-form-section-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin: 0.85rem 0 0.75rem;
+}
+
+.contract-suspend-form-page .finish-form-section-head__title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--app-contract-flow-section-title);
+}
+
+.contract-suspend-form-page .finish-form-section-head__hint {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--app-contract-flow-kv-label);
+}
+
+.contract-suspend-form-page .finish-form-subsection {
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--app-contract-flow-card-border);
+}
+
+.contract-suspend-form-page .finish-form-subsection__title {
+  margin: 0 0 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--app-contract-flow-section-title);
+}
+
+.contract-suspend-form-page .finish-form-grid {
+  display: grid;
+  gap: 0.65rem 0.75rem;
+}
+
+.contract-suspend-form-page .finish-form-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 575px) {
+  .contract-suspend-form-page .finish-form-grid--2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contract-suspend-form-page .finish-form-field--span-2 {
+  grid-column: 1 / -1;
+}
+
+.contract-suspend-form-page .finish-form-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--app-wizard-field-label);
+}
+
+.contract-suspend-form-page .finish-form-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.08rem 0.42rem;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 700;
+}
+
+.contract-suspend-form-page .finish-form-badge--required {
+  background: rgba(var(--rt-error-rgb, 220, 38, 38), 0.12);
+  color: var(--rt-error);
+}
+
+.contract-suspend-form-page .finish-form-badge--optional {
+  background: var(--app-contract-flow-readonly-bg);
+  color: var(--app-contract-flow-kv-label);
+  border: 1px solid var(--app-contract-flow-card-border);
+}
+
+.contract-suspend-form-page .finish-form-badge--readonly {
+  background: rgba(var(--rt-brand-primary-rgb), 0.08);
+  color: var(--app-contract-flow-kv-label);
+}
+
+.contract-suspend-form-page .finish-form-field--readonly .form-control[disabled],
+.contract-suspend-form-page .finish-form-field--readonly .form-control[readonly] {
+  background: var(--app-contract-flow-readonly-bg);
+  opacity: 1;
+}
+
+.contract-suspend-form-page .finish-form-aside-card {
+  border-radius: 14px;
+  border: 1px solid var(--app-contract-flow-card-border);
+  background: var(--app-contract-flow-card-bg);
+  padding: 0.75rem 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.contract-suspend-form-page .finish-form-aside-card__progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.contract-suspend-form-page app-smooth-select,
+.contract-suspend-form-page app-date-picker {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}

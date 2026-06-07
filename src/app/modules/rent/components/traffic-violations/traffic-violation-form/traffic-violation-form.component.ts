@@ -117,6 +117,13 @@ export class TrafficViolationFormComponent implements OnInit {
     return 4;
   });
 
+  /** Vehicle comes from the booking contract and cannot be changed while a booking is selected. */
+  vehicleLockedByBooking = computed(() => {
+    this.formProgressTick();
+    const id = this.idBookingCtrl.value;
+    return id != null && Number.isFinite(Number(id)) && Number(id) > 0;
+  });
+
   get idBookingCtrl() {
     return this.form.controls.idBooking;
   }
@@ -129,12 +136,13 @@ export class TrafficViolationFormComponent implements OnInit {
     const next = value === '' || value === null ? null : Number(value);
     this.idBookingCtrl.setValue(Number.isFinite(next as number) ? (next as number) : null);
     this.idBookingCtrl.markAsTouched();
+    this.formProgressTick.update(v => v + 1);
 
     if (next === null || !Number.isFinite(next)) {
       return;
     }
 
-    const booking = this.bookings().find(b => b.id === next);
+    const booking = this.bookings().find(b => Number(b.id) === next);
     if (!booking) {
       return;
     }
@@ -149,6 +157,10 @@ export class TrafficViolationFormComponent implements OnInit {
   }
 
   onVehicleChange(value: SmoothSelectValue): void {
+    if (this.vehicleLockedByBooking()) {
+      return;
+    }
+
     const next = value === '' || value === null ? null : Number(value);
     const idV = Number.isFinite(next as number) && (next as number) > 0 ? (next as number) : null;
     this.idVehicleCtrl.setValue(idV);

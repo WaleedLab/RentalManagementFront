@@ -10,7 +10,11 @@
     <div class="skeleton skeleton--chart"></div>
   } @else if (showChartFallback()) {
     <div class="dashboard-widget__fallback" role="status">
-      {{ 'DashboardChartLoadFromExistingGift' | translate }}
+      @if (dataUnavailable) {
+        {{ 'Dashboard summary failed to load' | translate }}
+      } @else {
+        {{ 'Dashboard chart no data' | translate }}
+      }
     </div>
   } @else {
     <div class="dashboard-widget__chart">

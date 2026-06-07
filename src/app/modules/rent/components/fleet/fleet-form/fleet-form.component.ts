@@ -11,7 +11,7 @@ import { ToastService } from '../../../../../shared/services/toast.service';
 import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-upload.component';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
-import type { FleetUpsertRequest } from '../../../models';
+import { FLEET_FALLBACK_IMAGE, type FleetUpsertRequest } from '../../../models';
 import { FleetService } from '../../../services/fleet/fleet.service';
 
 @Component({
@@ -32,7 +32,7 @@ export class FleetFormComponent implements OnInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
   private static readonly FLEET_NAME_REGEX = /^[\u0600-\u06FFA-Za-z0-9\s.'-]{2,255}$/;
   private static readonly FLEET_CODE_REGEX = /^[A-Za-z0-9-_]{0,100}$/;
-  private static readonly CONTACT_NUMBER_REGEX = /^(?:(?:\+966|00966)(?:5\d{8}|1\d{8})|0(?:5\d{8}|1\d{8}))$/;
+  private static readonly CONTACT_NUMBER_REGEX = /^(?:\+?[0-9]\s?[-()]?){7,20}$/;
 
   private static readonly WORKFLOW_SECTION_IDS = [
     'fleet-form-section-identity',
@@ -51,10 +51,11 @@ export class FleetFormComponent implements OnInit {
 
   isEdit = signal(false);
   fleetId = signal<string | null>(null);
+  loadedIsActive = signal(true);
   loading = signal(false);
   selectedImage = signal<File | null>(null);
   previewUrl = signal<string | null>(null);
-  readonly fleetImageFallback = 'assets/images/logo/logo-icon.png';
+  readonly fleetImageFallback = FLEET_FALLBACK_IMAGE;
   private formProgressTick = signal(0);
 
   form = this.fb.group({
@@ -114,21 +115,25 @@ export class FleetFormComponent implements OnInit {
       .subscribe(() => this.formProgressTick.update(v => v + 1));
 
     const id = this.route.snapshot.paramMap.get('id');
-    if (!id) return;
+    if (!id) {
+      this.previewUrl.set(this.fleetImageFallback);
+      return;
+    }
 
     this.isEdit.set(true);
     this.fleetId.set(id);
     this.loading.set(true);
     this.fleetService.getById(id).subscribe({
       next: fleet => {
+        this.loadedIsActive.set(fleet.isActive);
         this.form.patchValue({
-          name: fleet.name,
-          fleetCode: fleet.fleetCode || '',
-          taxNumber: fleet.taxNumber || '',
-          location: fleet.location || '',
-          contactNumber: fleet.contactNumber || '',
-          email: fleet.email || '',
-          description: fleet.description || '',
+          name: fleet.name?.trim() ?? '',
+          fleetCode: fleet.fleetCode?.trim() ?? '',
+          taxNumber: fleet.taxNumber?.trim() ?? '',
+          location: fleet.location?.trim() ?? '',
+          contactNumber: fleet.contactNumber?.trim() ?? '',
+          email: fleet.email?.trim() ?? '',
+          description: fleet.description?.trim() ?? '',
         });
         this.previewUrl.set(resolveMediaUrl(fleet.url) ?? this.fleetImageFallback);
         this.formProgressTick.update(v => v + 1);
@@ -169,7 +174,7 @@ export class FleetFormComponent implements OnInit {
       contactNumber: raw.contactNumber.trim() || undefined,
       email: raw.email.trim() || undefined,
       description: raw.description.trim() || undefined,
-      isActive: true,
+      isActive: this.isEdit() ? this.loadedIsActive() : true,
       image: this.selectedImage(),
     };
 
@@ -191,10 +196,19 @@ export class FleetFormComponent implements OnInit {
     });
   }
 
+  onFleetPreviewError(event: Event): void {
+    const target = event.target as HTMLImageElement | null;
+    if (target && target.getAttribute('src') !== this.fleetImageFallback) {
+      target.setAttribute('src', this.fleetImageFallback);
+    }
+  }
+
   onImageSelected(file: File | null): void {
     this.selectedImage.set(file);
     if (file) {
       this.previewUrl.set(URL.createObjectURL(file));
+    } else {
+      this.previewUrl.set(this.fleetImageFallback);
     }
     this.formProgressTick.update(v => v + 1);
   }

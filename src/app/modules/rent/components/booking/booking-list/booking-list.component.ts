@@ -260,6 +260,11 @@ export class BookingListComponent implements OnInit {
     return new Intl.DateTimeFormat(lang, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
   }
 
+  /** Card «تاريخ النهاية» shows vehicle return date, falling back to contract end date. */
+  bookingCardEndDate(booking: Booking): string {
+    return String(booking.returnDate ?? booking.endDate ?? '').trim();
+  }
+
   endDateHighlightClass(booking: Booking): string {
     const state = this.bookingEndDateState(booking);
     if (state === 'overdue') {
@@ -287,7 +292,7 @@ export class BookingListComponent implements OnInit {
     if (status === 'close' || status === 'finsh') {
       return 'none';
     }
-    const end = this.parseDateOnly(booking.endDate);
+    const end = this.parseDateOnly(this.bookingCardEndDate(booking));
     if (!end) {
       return 'none';
     }

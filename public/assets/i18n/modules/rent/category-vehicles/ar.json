@@ -29,6 +29,8 @@
   "Optional field badge": "اختياري",
   "Required field badge": "مطلوب",
   "Category English name must be valid.": "اسم التصنيف الإنجليزي يجب أن يكون صالحًا.",
+  "Category high limit must exceed low limit": "يجب أن يكون الحد الأعلى أكبر من الحد الأدنى.",
+  "Category high limit rule hint": "يجب أن يكون الحد الأعلى أكبر من الحد الأدنى.",
   "Category image": "صورة التصنيف",
   "Code": "الرمز",
   "Create": "إنشاء",

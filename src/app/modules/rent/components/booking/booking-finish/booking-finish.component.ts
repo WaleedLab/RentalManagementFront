@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -30,6 +30,7 @@ import { normalizeSetting } from '../../../models/settings/setting.normalizer';
 import { Setting } from '../../../models/settings/setting.model';
 import { BookingService } from '../../../services/booking/booking.service';
 import { SettingService } from '../../../services/settings/setting.service';
+import { TrafficViolationService } from '../../../services/traffic-violations/traffic-violation.service';
 import { VehicleService } from '../../../services/vehicles/vehicle.service';
 import {
   FinishBillingResult,
@@ -68,6 +69,16 @@ import { isBookingSuspended } from '../booking-card-actions.util';
   styleUrl: './booking-finish.component.scss',
 })
 export class BookingFinishComponent implements OnInit {
+  private static readonly WORKFLOW_SECTION_IDS = [
+    'finish-form-section-summary',
+    'finish-form-section-usage',
+    'finish-form-section-time',
+    'finish-form-section-extra',
+    'finish-form-section-payment',
+    'finish-form-section-notes',
+  ] as const;
+
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authState = inject(AuthStateService);
@@ -76,6 +87,7 @@ export class BookingFinishComponent implements OnInit {
   private bankService = inject(BankService);
   private cashAccountService = inject(CashAccountService);
   private paymentCountService = inject(PaymentCountService);
+  private trafficViolationService = inject(TrafficViolationService);
   private settingService = inject(SettingService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
@@ -110,6 +122,12 @@ export class BookingFinishComponent implements OnInit {
    * When null, UI falls back to booking snapshot `paidtotal`.
    */
   bookingsPaymentSumFromApi = signal<number | null>(null);
+
+  /**
+   * `GetTrafficViolationSumForBookingQuery` → `GET TrafficViolation/sum/{IdBooking}/{fleetId}`.
+   * When loaded, drives `traffic()` for finish billing.
+   */
+  trafficViolationsSumFromApi = signal<number | null>(null);
 
   /** Fleet settings: grace minutes, free late hours, late-hours-per-day threshold. */
   settings = signal<Setting | null>(null);
@@ -256,6 +274,94 @@ export class BookingFinishComponent implements OnInit {
     }
     return !v.odometerOk || !v.timeOk;
   });
+
+  summarySectionComplete = computed(() => true);
+
+  usageSectionComplete = computed((): boolean => {
+    const v = this.returnAgainstCheckout();
+    return !!v?.odometerOk;
+  });
+
+  timeSectionComplete = computed((): boolean => {
+    const v = this.returnAgainstCheckout();
+    return !!v?.timeOk && !!String(this.returnDateTime() ?? '').trim();
+  });
+
+  extraSectionComplete = computed(() => true);
+
+  paymentSectionComplete = computed((): boolean => {
+    const amount = roundSettlementMoney(this.settlementPaidAmount());
+    if (amount <= 0) {
+      return true;
+    }
+    const type = Number(this.paymentMethod()) || 1;
+    const bankId = String(this.bankAccount() ?? '').trim();
+    const cashId = String(this.cashAccount() ?? '').trim();
+    if (type === 1) {
+      return !!cashId;
+    }
+    if ([2, 3, 4].includes(type)) {
+      return !!bankId;
+    }
+    if (type === 5) {
+      return !!bankId && !!cashId;
+    }
+    return true;
+  });
+
+  notesSectionComplete = computed(() => true);
+
+  finishFormCompletionPercent = computed((): number => {
+    let done = 0;
+    if (this.summarySectionComplete()) done++;
+    if (this.usageSectionComplete()) done++;
+    if (this.timeSectionComplete()) done++;
+    if (this.extraSectionComplete()) done++;
+    if (this.paymentSectionComplete()) done++;
+    if (this.notesSectionComplete()) done++;
+    return Math.round((done / 6) * 100);
+  });
+
+  currentWorkflowStep = computed((): number => {
+    if (!this.usageSectionComplete()) {
+      return 2;
+    }
+    if (!this.timeSectionComplete()) {
+      return 3;
+    }
+    if (!this.extraSectionComplete()) {
+      return 4;
+    }
+    if (!this.paymentSectionComplete()) {
+      return 5;
+    }
+    if (!this.notesSectionComplete()) {
+      return 6;
+    }
+    return 7;
+  });
+
+  focusWorkflowSection(step: 1 | 2 | 3 | 4 | 5 | 6): void {
+    const sectionId = BookingFinishComponent.WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('finish-form-section--focus');
+    window.setTimeout(() => section.classList.remove('finish-form-section--focus'), 1400);
+  }
+
+  checkoutTimeDisplay(item: Booking): string {
+    const pickup = String(item.pickupDate ?? '').trim();
+    if (pickup) {
+      return this.formatDateTime(pickup);
+    }
+    return this.formatDateTime(item.startDate);
+  }
 
   odometerDrivenKm = computed(() => {
     const b = this.booking();
@@ -495,11 +601,6 @@ export class BookingFinishComponent implements OnInit {
   onRepairsChange(value: string): void {
     const n = Number(value);
     this.repairs.set(Number.isFinite(n) ? Math.max(0, n) : 0);
-  }
-
-  onTrafficChange(value: string): void {
-    const n = Number(value);
-    this.traffic.set(Number.isFinite(n) ? Math.max(0, n) : 0);
   }
 
   onNotesChange(value: string): void {
@@ -805,6 +906,7 @@ export class BookingFinishComponent implements OnInit {
       this.settings.set(st);
       this.patchFormFromBooking(b);
       this.loadBookingsPaymentSum(b.id, fleetId);
+      this.loadTrafficViolationsSum(b.id, fleetId);
       this.loadVehicleBranch(b, fleetId);
     });
   }
@@ -844,11 +946,26 @@ export class BookingFinishComponent implements OnInit {
       });
   }
 
+  private loadTrafficViolationsSum(bookingId: string, fleetId: string): void {
+    const idBooking = this.toBookingNumericId(bookingId);
+    if (!idBooking) {
+      this.trafficViolationsSumFromApi.set(0);
+      this.traffic.set(0);
+      return;
+    }
+    this.trafficViolationsSumFromApi.set(null);
+    this.trafficViolationService.getSumForBooking(idBooking, fleetId).subscribe(sum => {
+      this.trafficViolationsSumFromApi.set(sum);
+      this.traffic.set(Math.max(0, sum));
+    });
+  }
+
   private patchFormFromBooking(b: Booking): void {
     this.returnDateTime.set(this.nowDateTimeLocalValue());
     this.returnOdometerText.set('');
     this.repairs.set(Math.max(0, Number(b.totalMaintance ?? 0) || 0));
-    this.traffic.set(Math.max(0, Number(b.totalTrafic ?? 0) || 0));
+    /** Traffic fines come from TrafficViolation records — not booking.totalTrafic snapshot. */
+    this.traffic.set(0);
     this.notes.set(String(b.notes ?? ''));
 
     const ext = b as Booking & {

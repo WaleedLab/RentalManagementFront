@@ -280,7 +280,13 @@
   color: var(--app-form-hint-color);
 }
 
+.category-form-hint--rule {
+  color: var(--app-contract-flow-kv-label);
+}
+
 .category-form-hint--danger {
+  margin-top: 0.15rem;
+  font-weight: 600;
   color: var(--rt-error);
 }
 

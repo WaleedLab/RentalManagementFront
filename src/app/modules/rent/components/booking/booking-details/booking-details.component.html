@@ -11,84 +11,281 @@
     </div>
   } @else if (booking(); as item) {
     @if (isExtendMode()) {
-      <app-page-header
-        [title]="'Contract extension page title' | translate"
-        [subtitle]="contractSubtitle(item)"
-      />
-      <div class="card contract-details-card">
-        <div class="card-body">
-          <section class="contract-panel contract-panel--extend">
-            <h2 class="contract-panel__title">{{ 'Contract extension page title' | translate }}</h2>
-            <div class="row g-3 extend-form-grid">
-              <div class="col-md-6 extend-readonly-field">
-                <label class="form-label">اسم العميل</label>
-                <input class="form-control" readonly disabled [value]="valueOrDash(item.customerName)" />
-              </div>
-              <div class="col-md-6 extend-readonly-field">
-                <label class="form-label">رقم اللوحة</label>
-                <input class="form-control" readonly disabled [value]="valueOrDash(item.vehiclePlateNumber)" />
-              </div>
-              <div class="col-md-6 extend-readonly-field">
-                <label class="form-label">رقم العقد</label>
-                <input class="form-control" readonly disabled [value]="contractNumber(item)" />
-              </div>
-              <div class="col-md-6">
-                <div class="extend-payment-date-row">
-                  <div class="extend-payment-date-row__date">
-                    <app-date-picker
-                      mode="datetime"
-                      label="Payment date"
-                      [value]="extendPaymentDate()"
-                      (dateChange)="onExtendPaymentDateChange($event ?? '')"
-                    />
-                    @if (extendPaymentDateViolationHint(); as payDateHint) {
-                      <p class="extend-field-hint extend-field-hint--danger text-pre-wrap">{{ payDateHint }}</p>
-                    }
-                  </div>
-                  <div class="extend-payment-date-row__days">
-                    <label class="form-label">عدد الأيام</label>
-                    <input
-                      class="form-control extend-payment-date-row__days-input"
-                      type="text"
-                      readonly
-                      tabindex="-1"
-                      [value]="extendPaymentElapsedDaysDisplay(item)"
-                    />
+      <div class="contract-flow-page contract-extension-form-page">
+        <header class="contract-flow-header contract-extension-header">
+          <div class="contract-flow-header__head">
+            <div>
+              <h1 class="contract-flow-header__title">{{ 'Contract extension page title' | translate }}</h1>
+              <p class="contract-flow-header__meta mb-0">{{ 'Contract extension formPageSubtitle' | translate }}</p>
+            </div>
+            <a class="btn btn-outline-secondary btn-sm" routerLink="/booking">
+              {{ 'Back' | translate }}
+            </a>
+          </div>
+        </header>
+
+        <div class="contract-flow-meta" role="region" [attr.aria-label]="'Contract flow meta strip' | translate">
+          <span class="contract-flow-meta__chip">
+            {{ 'Contract flow meta contract' | translate }}:
+            <strong>{{ contractNumber(item) }}</strong>
+          </span>
+          <span class="contract-flow-meta__chip">
+            {{ 'Contract flow meta branch' | translate }}:
+            <strong>{{ valueOrDash(item.branchName) }}</strong>
+          </span>
+          <span class="contract-flow-meta__chip">
+            {{ 'Contract finish plate' | translate }}:
+            <strong>{{ valueOrDash(item.vehiclePlateNumber) }}</strong>
+          </span>
+          <app-status-badge
+            [label]="statusBadgeLabelKey(item.status) | translate"
+            [tone]="statusBadgeTone(item.status)"
+          />
+        </div>
+
+        <div class="contract-flow-layout contract-extension-layout">
+          <div class="contract-flow-main">
+            <ol class="finish-form-workflow" [attr.aria-label]="'Contract extension formWorkflowSteps' | translate">
+              <li>
+                <button
+                  type="button"
+                  class="finish-form-workflow__step"
+                  [class.finish-form-workflow__step--done]="extendSummarySectionComplete()"
+                  [class.finish-form-workflow__step--current]="extendCurrentWorkflowStep() === 1"
+                  [attr.aria-current]="extendCurrentWorkflowStep() === 1 ? 'step' : null"
+                  [attr.aria-controls]="'extend-form-section-summary'"
+                  (click)="focusExtendWorkflowSection(1)"
+                >
+                  <span class="finish-form-workflow__num">1</span>
+                  <span>{{ 'Contract extension flowStepSummary' | translate }}</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  class="finish-form-workflow__step"
+                  [class.finish-form-workflow__step--done]="extendPeriodSectionComplete()"
+                  [class.finish-form-workflow__step--current]="extendCurrentWorkflowStep() === 2"
+                  [attr.aria-current]="extendCurrentWorkflowStep() === 2 ? 'step' : null"
+                  [attr.aria-controls]="'extend-form-section-period'"
+                  (click)="focusExtendWorkflowSection(2)"
+                >
+                  <span class="finish-form-workflow__num">2</span>
+                  <span>{{ 'Contract extension flowStepPeriod' | translate }}</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  class="finish-form-workflow__step"
+                  [class.finish-form-workflow__step--done]="extendAmountsSectionComplete()"
+                  [class.finish-form-workflow__step--current]="extendCurrentWorkflowStep() === 3"
+                  [attr.aria-current]="extendCurrentWorkflowStep() === 3 ? 'step' : null"
+                  [attr.aria-controls]="'extend-form-section-amounts'"
+                  (click)="focusExtendWorkflowSection(3)"
+                >
+                  <span class="finish-form-workflow__num">3</span>
+                  <span>{{ 'Contract extension flowStepAmounts' | translate }}</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  class="finish-form-workflow__step"
+                  [class.finish-form-workflow__step--done]="extendPaymentSectionComplete()"
+                  [class.finish-form-workflow__step--current]="extendCurrentWorkflowStep() === 4"
+                  [attr.aria-current]="extendCurrentWorkflowStep() === 4 ? 'step' : null"
+                  [attr.aria-controls]="'extend-form-section-payment'"
+                  (click)="focusExtendWorkflowSection(4)"
+                >
+                  <span class="finish-form-workflow__num">4</span>
+                  <span>{{ 'Contract extension flowStepPayment' | translate }}</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  class="finish-form-workflow__step"
+                  [class.finish-form-workflow__step--done]="extendNotesSectionComplete()"
+                  [class.finish-form-workflow__step--current]="extendCurrentWorkflowStep() === 5"
+                  [attr.aria-current]="extendCurrentWorkflowStep() === 5 ? 'step' : null"
+                  [attr.aria-controls]="'extend-form-section-notes'"
+                  (click)="focusExtendWorkflowSection(5)"
+                >
+                  <span class="finish-form-workflow__num">5</span>
+                  <span>{{ 'Contract extension flowStepNotes' | translate }}</span>
+                </button>
+              </li>
+            </ol>
+
+            <div class="finish-form-fields-shell">
+              <details id="extend-form-section-summary" class="finish-form-section finish-form-fold" open>
+                <summary class="finish-form-section__summary">
+                  <span class="finish-form-section__step">1</span>
+                  {{ 'Contract extension sectionSummaryTitle' | translate }}
+                </summary>
+                <div class="finish-form-fold__body">
+                  <header class="finish-form-section-head">
+                    <span class="finish-form-section-head__icon" aria-hidden="true">📄</span>
+                    <div>
+                      <h2 class="finish-form-section-head__title">{{ 'Contract extension sectionSummaryTitle' | translate }}</h2>
+                      <p class="finish-form-section-head__hint">{{ 'Contract extension sectionSummarySubtitle' | translate }}</p>
+                    </div>
+                  </header>
+                  <div class="finish-form-grid finish-form-grid--2">
+                    <div class="finish-form-field finish-form-field--readonly">
+                      <label class="finish-form-label">
+                        <span>{{ 'Contract flow customer name' | translate }}</span>
+                        <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                      </label>
+                      <input class="form-control" readonly disabled [value]="valueOrDash(item.customerName)" />
+                    </div>
+                    <div class="finish-form-field finish-form-field--readonly">
+                      <label class="finish-form-label">
+                        <span>{{ 'Contract finish plate' | translate }}</span>
+                        <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                      </label>
+                      <input class="form-control" readonly disabled [value]="valueOrDash(item.vehiclePlateNumber)" />
+                    </div>
+                    <div class="finish-form-field finish-form-field--readonly">
+                      <label class="finish-form-label">
+                        <span>{{ 'Contract Number' | translate }}</span>
+                        <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                      </label>
+                      <input class="form-control" readonly disabled [value]="contractNumber(item)" />
+                    </div>
+                    <div class="finish-form-field finish-form-field--readonly">
+                      <label class="finish-form-label">
+                        <span>{{ 'Contract finish daily rent' | translate }}</span>
+                        <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                      </label>
+                      <input class="form-control" readonly disabled [value]="moneyOrDash(item.priceInDay)" />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="col-md-6 extend-field-group extend-field-group--pay-now">
-                <label class="form-label extend-field-group__label" for="extend-pay-now-input">دفعة الآن</label>
-                <input
-                  id="extend-pay-now-input"
-                  class="form-control extend-field-group__input extend-field-group__input--pay-now"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  required
-                  placeholder="أدخل مبلغ الدفعة"
-                  [value]="extendCurrentPaymentAmount() ?? ''"
-                  (input)="onExtendPaidAmountChange($any($event.target).value)"
-                />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">إجمالي المبلغ المطلوب</label>
-                <input class="form-control" readonly [value]="moneyOrDash(extendRequiredAmount())" />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">مجموع المدفوع</label>
-                <input class="form-control" readonly [value]="moneyOrDash(extendPaidTotal(item))" />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">المبلغ المتبقي</label>
-                <input class="form-control" readonly [value]="moneyOrDash(extendRemainingAmount(item))" />
-              </div>
-              <div class="col-12">
-                <div class="extend-payment-card">
-                  <div class="extend-payment-card__title">ترتيب الدفع</div>
-                  <div class="extend-payment-grid">
-                    <div class="extend-payment-field">
-                      <label class="form-label">نوع الدفع</label>
+              </details>
+
+              <details id="extend-form-section-period" class="finish-form-section finish-form-fold" open>
+                <summary class="finish-form-section__summary">
+                  <span class="finish-form-section__step">2</span>
+                  {{ 'Contract extension sectionPeriodTitle' | translate }}
+                </summary>
+                <div class="finish-form-fold__body">
+                  <header class="finish-form-section-head">
+                    <span class="finish-form-section-head__icon" aria-hidden="true">📅</span>
+                    <div>
+                      <h2 class="finish-form-section-head__title">{{ 'Contract extension sectionPeriodTitle' | translate }}</h2>
+                      <p class="finish-form-section-head__hint">{{ 'Contract extension sectionPeriodSubtitle' | translate }}</p>
+                    </div>
+                  </header>
+                  <div class="finish-form-grid finish-form-grid--2">
+                    <div class="finish-form-field">
+                      <label class="finish-form-label">
+                        <span>{{ 'Contract extension payment date' | translate }}</span>
+                        <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                      </label>
+                      <app-date-picker
+                        mode="datetime"
+                        label=""
+                        [value]="extendPaymentDate()"
+                        (dateChange)="onExtendPaymentDateChange($event ?? '')"
+                      />
+                      @if (extendPaymentDateViolationHint(); as payDateHint) {
+                        <p class="contract-flow-hint contract-flow-hint--danger text-pre-wrap">{{ payDateHint }}</p>
+                      }
+                    </div>
+                    <div class="finish-form-field finish-form-field--readonly">
+                      <label class="finish-form-label">
+                        <span>{{ 'Contract extension elapsed days' | translate }}</span>
+                        <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                      </label>
+                      <input
+                        class="form-control"
+                        type="text"
+                        readonly
+                        tabindex="-1"
+                        [value]="extendPaymentElapsedDaysDisplay(item)"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <details id="extend-form-section-amounts" class="finish-form-section finish-form-fold" open>
+                <summary class="finish-form-section__summary">
+                  <span class="finish-form-section__step">3</span>
+                  {{ 'Contract extension sectionAmountsTitle' | translate }}
+                </summary>
+                <div class="finish-form-fold__body">
+                  <header class="finish-form-section-head">
+                    <span class="finish-form-section-head__icon" aria-hidden="true">💵</span>
+                    <div>
+                      <h2 class="finish-form-section-head__title">{{ 'Contract extension sectionAmountsTitle' | translate }}</h2>
+                      <p class="finish-form-section-head__hint">{{ 'Contract extension sectionAmountsSubtitle' | translate }}</p>
+                    </div>
+                  </header>
+                  <div class="finish-form-grid finish-form-grid--2">
+                    <div class="finish-form-field extend-form-field--pay-now">
+                      <label class="finish-form-label" for="extend-pay-now-input">
+                        <span>{{ 'Contract extension pay now' | translate }}</span>
+                        <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                      </label>
+                      <input
+                        id="extend-pay-now-input"
+                        class="form-control extend-form-field__pay-now-input"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        required
+                        [placeholder]="'Contract extension pay now placeholder' | translate"
+                        [value]="extendCurrentPaymentAmount() ?? ''"
+                        (input)="onExtendPaidAmountChange($any($event.target).value)"
+                      />
+                    </div>
+                    <div class="finish-form-field finish-form-field--readonly">
+                      <label class="finish-form-label">
+                        <span>{{ 'Contract extension required total' | translate }}</span>
+                        <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                      </label>
+                      <input class="form-control" readonly [value]="moneyOrDash(extendRequiredAmount())" />
+                    </div>
+                    <div class="finish-form-field finish-form-field--readonly">
+                      <label class="finish-form-label">
+                        <span>{{ 'Contract extension paid total' | translate }}</span>
+                        <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                      </label>
+                      <input class="form-control" readonly [value]="moneyOrDash(extendPaidTotal(item))" />
+                    </div>
+                    <div class="finish-form-field finish-form-field--readonly">
+                      <label class="finish-form-label">
+                        <span>{{ 'Remaining Amount' | translate }}</span>
+                        <span class="finish-form-badge finish-form-badge--readonly">{{ 'Contract finish readonlyBadge' | translate }}</span>
+                      </label>
+                      <input class="form-control" readonly [value]="moneyOrDash(extendRemainingAmount(item))" />
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <details id="extend-form-section-payment" class="finish-form-section finish-form-fold" open>
+                <summary class="finish-form-section__summary">
+                  <span class="finish-form-section__step">4</span>
+                  {{ 'Payment Arrangement' | translate }}
+                </summary>
+                <div class="finish-form-fold__body">
+                  <header class="finish-form-section-head">
+                    <span class="finish-form-section-head__icon" aria-hidden="true">💳</span>
+                    <div>
+                      <h2 class="finish-form-section-head__title">{{ 'Payment Arrangement' | translate }}</h2>
+                      <p class="finish-form-section-head__hint">{{ 'Contract extension sectionPaymentSubtitle' | translate }}</p>
+                    </div>
+                  </header>
+                  <div class="finish-form-grid finish-form-grid--2">
+                    <div class="finish-form-field">
+                      <label class="finish-form-label">
+                        <span>{{ 'Payment Type' | translate }}</span>
+                        <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                      </label>
                       <app-smooth-select
                         [value]="extendPaymentMethod()"
                         [ariaLabel]="'Payment Type' | translate"
@@ -97,76 +294,145 @@
                         (valueChange)="onExtendPaymentMethodChange('' + $any($event))"
                       />
                     </div>
-                    <div class="extend-payment-field">
-                      <label class="form-label">{{ 'Cash Account' | translate }}</label>
-                      <app-smooth-select
-                        [value]="extendBankCashAccount()"
-                        [ariaLabel]="'Cash Account' | translate"
-                        [placeholder]="'Select cash account'"
-                        [options]="extendCashAccountOptions()"
-                        [disabled]="extendPaymentTypeIsBankOnly()"
-                        (valueChange)="onExtendCashAccountChange('' + $any($event))"
-                      />
-                      @if (extendPaymentTypeIsBankOnly()) {
-                        <div class="form-text text-warning">مقفل لأن نوع الدفع بنكي فقط.</div>
-                      }
+                    @if (!extendPaymentTypeIsBankOnly()) {
+                      <div class="finish-form-field">
+                        <label class="finish-form-label">
+                          <span>{{ 'Cash Account' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                        </label>
+                        <app-smooth-select
+                          [value]="extendBankCashAccount()"
+                          [ariaLabel]="'Cash Account' | translate"
+                          [placeholder]="'Select cash account'"
+                          [options]="extendCashAccountOptions()"
+                          (valueChange)="onExtendCashAccountChange('' + $any($event))"
+                        />
+                      </div>
+                      <div class="finish-form-field">
+                        <label class="finish-form-label">
+                          <span>{{ 'Paid Cash' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                        </label>
+                        <input
+                          class="form-control"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          [value]="extendPaidCash()"
+                          [readonly]="!extendPaymentTypeIsMixed()"
+                          (input)="onExtendPaidCashChange($any($event.target).value)"
+                        />
+                      </div>
+                    }
+                    @if (!extendPaymentTypeIsCash()) {
+                      <div class="finish-form-field">
+                        <label class="finish-form-label">
+                          <span>{{ 'Bank Account' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
+                        </label>
+                        <app-smooth-select
+                          [value]="extendBankAccount()"
+                          [ariaLabel]="'Bank Account' | translate"
+                          [placeholder]="'Select bank'"
+                          [options]="extendBankAccountOptions()"
+                          (valueChange)="onExtendBankAccountChange('' + $any($event))"
+                        />
+                      </div>
+                      <div class="finish-form-field">
+                        <label class="finish-form-label">
+                          <span>{{ 'Paid Bank' | translate }}</span>
+                          <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                        </label>
+                        <input
+                          class="form-control"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          [value]="extendPaidBank()"
+                          [readonly]="!extendPaymentTypeIsMixed()"
+                          (input)="onExtendPaidBankChange($any($event.target).value)"
+                        />
+                      </div>
+                    }
+                  </div>
+                  @if (extendPaymentTypeIsBankOnly()) {
+                    <p class="form-text text-warning mb-0">{{ 'Contract extension cash locked bank only' | translate }}</p>
+                  }
+                </div>
+              </details>
+
+              <details id="extend-form-section-notes" class="finish-form-section finish-form-fold">
+                <summary class="finish-form-section__summary">
+                  <span class="finish-form-section__step">5</span>
+                  {{ 'Notes' | translate }}
+                </summary>
+                <div class="finish-form-fold__body">
+                  <header class="finish-form-section-head">
+                    <span class="finish-form-section-head__icon" aria-hidden="true">📝</span>
+                    <div>
+                      <h2 class="finish-form-section-head__title">{{ 'Notes' | translate }}</h2>
+                      <p class="finish-form-section-head__hint">{{ 'Contract extension sectionNotesSubtitle' | translate }}</p>
                     </div>
-                    <div class="extend-payment-field">
-                      <label class="form-label">المبلغ النقدي</label>
-                      <input
-                        class="form-control extend-payment-amount"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        [value]="extendPaidCash()"
-                        [disabled]="extendPaymentTypeIsBankOnly()"
-                        [readonly]="!extendPaymentTypeIsMixed()"
-                        (input)="onExtendPaidCashChange($any($event.target).value)"
-                      />
-                    </div>
-                    <div class="extend-payment-field extend-payment-field--span-2">
-                      <label class="form-label">{{ 'Bank Account' | translate }}</label>
-                      <app-smooth-select
-                        [value]="extendBankAccount()"
-                        [ariaLabel]="'Bank Account' | translate"
-                        [placeholder]="'Select bank'"
-                        [options]="extendBankAccountOptions()"
-                        [disabled]="extendPaymentTypeIsCash()"
-                        (valueChange)="onExtendBankAccountChange('' + $any($event))"
-                      />
-                    </div>
-                    <div class="extend-payment-field">
-                      <label class="form-label">المبلغ البنكي</label>
-                      <input
-                        class="form-control extend-payment-amount"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        [value]="extendPaidBank()"
-                        [disabled]="extendPaymentTypeIsCash()"
-                        [readonly]="!extendPaymentTypeIsMixed()"
-                        (input)="onExtendPaidBankChange($any($event.target).value)"
-                      />
-                    </div>
+                  </header>
+                  <div class="finish-form-field">
+                    <label class="finish-form-label">
+                      <span>{{ 'Notes' | translate }}</span>
+                      <span class="finish-form-badge finish-form-badge--optional">{{ 'Contract finish optionalFieldBadge' | translate }}</span>
+                    </label>
+                    <textarea
+                      class="form-control"
+                      rows="4"
+                      [placeholder]="'Contract extension notes placeholder' | translate"
+                      [value]="extendNotes()"
+                      (input)="onExtendNotesChange($any($event.target).value)"
+                    ></textarea>
                   </div>
                 </div>
-              </div>
-              <div class="col-12">
-                <label class="form-label">ملاحظات</label>
-                <textarea
-                  class="form-control"
-                  rows="4"
-                  placeholder="اكتب ملاحظات التمديد هنا"
-                  [value]="extendNotes()"
-                  (input)="onExtendNotesChange($any($event.target).value)"
-                ></textarea>
+              </details>
+            </div>
+
+            <div class="contract-flow-actions app-form-actions">
+              <button
+                type="button"
+                class="btn btn-primary"
+                [disabled]="extendSubmitBlocked()"
+                (click)="submitExtend()"
+              >
+                {{ 'Contract extension submit' | translate }}
+              </button>
+              <a class="btn btn-cancel" routerLink="/booking">{{ 'Back' | translate }}</a>
+            </div>
+          </div>
+
+          <aside class="contract-flow-aside" [attr.aria-label]="'Contract flow financial summary' | translate">
+            <div class="finish-form-aside-card">
+              <div class="finish-form-aside-card__progress">
+                <span class="finish-form-aside-card__progress-label">{{ 'Contract extension flowProfileCompletion' | translate }}</span>
+                <strong>{{ extendFormCompletionPercent() }}%</strong>
               </div>
             </div>
-          </section>
-          <div class="contract-details__footer contract-details__footer--extend">
-            <button type="button" class="btn contract-details__extend-submit" (click)="submitExtend()">تمديد</button>
-            <a class="btn contract-details__extend-back" routerLink="/booking">{{ 'Back' | translate }}</a>
-          </div>
+            <div class="contract-flow-invoice">
+              <h2 class="contract-flow-invoice__title">{{ 'Contract flow section invoice' | translate }}</h2>
+              <ul class="contract-flow-invoice__lines">
+                <li class="contract-flow-invoice__line">
+                  <span>{{ 'Contract extension required total' | translate }}</span>
+                  <strong>{{ moneyOrDash(extendRequiredAmount()) }}</strong>
+                </li>
+                <li class="contract-flow-invoice__line">
+                  <span>{{ 'Contract extension paid total' | translate }}</span>
+                  <strong>{{ moneyOrDash(extendPaidTotal(item)) }}</strong>
+                </li>
+                <li class="contract-flow-invoice__line">
+                  <span>{{ 'Remaining Amount' | translate }}</span>
+                  <strong>{{ moneyOrDash(extendRemainingAmount(item)) }}</strong>
+                </li>
+                <li class="contract-flow-invoice__line contract-flow-invoice__line--total">
+                  <span>{{ 'Contract extension pay now' | translate }}</span>
+                  <strong>{{ moneyOrDash(extendCurrentPaymentAmount()) }}</strong>
+                </li>
+              </ul>
+            </div>
+          </aside>
         </div>
       </div>
     } @else {
@@ -517,46 +783,38 @@
             }
             @case ('photos') {
               <div class="contract-dash-stack">
-                <article class="contract-dash-card">
-                  <h2 class="contract-dash-card__title">{{ 'Contract section photos checkout' | translate }}</h2>
-                  <div class="contract-dash-gallery">
-                    @for (angle of photoAngles; track angle) {
-                      <button
-                        type="button"
-                        class="contract-dash-gallery__item"
-                        [disabled]="!contractPhotoSlotUrl(item, 'checkout', angle)"
-                        (click)="openPhotoLightbox(contractPhotoSlotUrl(item, 'checkout', angle)!, vehiclePhotoLabel(angle), $event)"
-                      >
-                        @if (contractPhotoSlotUrl(item, 'checkout', angle); as imgUrl) {
-                          <img [src]="imgUrl" alt="" />
-                        } @else {
-                          <span class="contract-dash-gallery__ph">{{ 'Contract photo placeholder' | translate }}</span>
+                @if (bookingImagesLoading()) {
+                  <article class="contract-dash-card">
+                    <p class="contract-dash-hint mb-0">{{ 'Contract photos loading' | translate }}</p>
+                  </article>
+                } @else if (bookingImageSets().length === 0) {
+                  <article class="contract-dash-card">
+                    <p class="contract-dash-hint mb-0">{{ 'Contract photos empty' | translate }}</p>
+                  </article>
+                } @else {
+                  @for (imageSet of bookingImageSets(); track imageSet.id) {
+                    <article class="contract-dash-card">
+                      <h2 class="contract-dash-card__title">{{ bookingImageSectionTitle(imageSet.status) }}</h2>
+                      <div class="contract-dash-gallery">
+                        @for (angle of photoAngles; track angle) {
+                          <button
+                            type="button"
+                            class="contract-dash-gallery__item"
+                            [disabled]="!bookingImageSlotUrl(imageSet, angle)"
+                            (click)="openPhotoLightbox(bookingImageSlotUrl(imageSet, angle)!, vehiclePhotoLabel(angle), $event)"
+                          >
+                            @if (bookingImageSlotUrl(imageSet, angle); as imgUrl) {
+                              <img [src]="imgUrl" alt="" (error)="onBookingPhotoError($event)" />
+                            } @else {
+                              <span class="contract-dash-gallery__ph">{{ 'Contract photo placeholder' | translate }}</span>
+                            }
+                            <span class="contract-dash-gallery__cap">{{ vehiclePhotoLabel(angle) }}</span>
+                          </button>
                         }
-                        <span class="contract-dash-gallery__cap">{{ vehiclePhotoLabel(angle) }}</span>
-                      </button>
-                    }
-                  </div>
-                </article>
-                <article class="contract-dash-card">
-                  <h2 class="contract-dash-card__title">{{ 'Contract section photos return' | translate }}</h2>
-                  <div class="contract-dash-gallery">
-                    @for (angle of photoAngles; track angle) {
-                      <button
-                        type="button"
-                        class="contract-dash-gallery__item"
-                        [disabled]="!contractPhotoSlotUrl(item, 'return', angle)"
-                        (click)="openPhotoLightbox(contractPhotoSlotUrl(item, 'return', angle)!, vehiclePhotoLabel(angle), $event)"
-                      >
-                        @if (contractPhotoSlotUrl(item, 'return', angle); as imgUrl) {
-                          <img [src]="imgUrl" alt="" />
-                        } @else {
-                          <span class="contract-dash-gallery__ph">{{ 'Contract photo placeholder' | translate }}</span>
-                        }
-                        <span class="contract-dash-gallery__cap">{{ vehiclePhotoLabel(angle) }}</span>
-                      </button>
-                    }
-                  </div>
-                </article>
+                      </div>
+                    </article>
+                  }
+                }
               </div>
             }
             @case ('settlement') {

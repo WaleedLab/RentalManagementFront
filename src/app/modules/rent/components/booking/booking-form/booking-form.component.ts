@@ -212,6 +212,120 @@ export class BookingFormComponent implements OnInit {
   originalPaidSnapshot = signal<number | null | undefined>(undefined);
   editMode = computed(() => this.editBookingId() !== null);
 
+  private static readonly EDIT_WORKFLOW_SECTION_IDS = [
+    'edit-form-section-summary',
+    'edit-form-section-vehicle',
+    'edit-form-section-pricing',
+    'edit-form-section-duration',
+    'edit-form-section-payment',
+    'edit-form-section-extra',
+  ] as const;
+
+  private readonly editFormProgressTick = signal(0);
+
+  editSummarySectionComplete = computed((): boolean => {
+    this.editFormProgressTick();
+    return !!String(this.form.controls.customerIqama.value ?? '').trim();
+  });
+
+  editVehicleSectionComplete = computed((): boolean => {
+    this.editFormProgressTick();
+    const vehicleId = String(this.form.controls.vehicleId.value ?? '').trim();
+    return !!vehicleId && this.form.controls.checkoutCounter.valid;
+  });
+
+  editPricingSectionComplete = computed((): boolean => {
+    this.editFormProgressTick();
+    return (
+      this.form.controls.priceInDay.valid &&
+      this.form.controls.priceHoureExtra.valid &&
+      this.form.controls.priceKmExtra.valid
+    );
+  });
+
+  editDurationSectionComplete = computed((): boolean => {
+    this.editFormProgressTick();
+    this.bookingScheduleRevision();
+    const start = String(this.form.controls.startDate.value ?? '').trim();
+    return !!start && this.form.controls.countOfDay.valid;
+  });
+
+  editPaymentSectionComplete = computed((): boolean => {
+    this.editFormProgressTick();
+    if (this.lastPaymentIsPosting()) {
+      return true;
+    }
+    if (!this.form.controls.paid.valid) {
+      return false;
+    }
+    const paid = Number(this.form.controls.paid.value) || 0;
+    if (paid <= 0) {
+      return true;
+    }
+    const type = Number(this.form.controls.paymentType.value) || 1;
+    const cashId = String(this.form.controls.idCash.value ?? '').trim();
+    const bankId = String(this.form.controls.idBank.value ?? '').trim();
+    if (type === 1) {
+      return !!cashId;
+    }
+    if ([2, 3, 4].includes(type)) {
+      return !!bankId;
+    }
+    if (type === 5) {
+      return !!bankId && !!cashId;
+    }
+    return true;
+  });
+
+  editExtraSectionComplete = computed(() => true);
+
+  editFormCompletionPercent = computed((): number => {
+    let done = 0;
+    if (this.editSummarySectionComplete()) done++;
+    if (this.editVehicleSectionComplete()) done++;
+    if (this.editPricingSectionComplete()) done++;
+    if (this.editDurationSectionComplete()) done++;
+    if (this.editPaymentSectionComplete()) done++;
+    if (this.editExtraSectionComplete()) done++;
+    return Math.round((done / 6) * 100);
+  });
+
+  editCurrentWorkflowStep = computed((): number => {
+    if (!this.editSummarySectionComplete()) {
+      return 1;
+    }
+    if (!this.editVehicleSectionComplete()) {
+      return 2;
+    }
+    if (!this.editPricingSectionComplete()) {
+      return 3;
+    }
+    if (!this.editDurationSectionComplete()) {
+      return 4;
+    }
+    if (!this.editPaymentSectionComplete()) {
+      return 5;
+    }
+    if (!this.editExtraSectionComplete()) {
+      return 6;
+    }
+    return 7;
+  });
+
+  focusEditWorkflowSection(step: 1 | 2 | 3 | 4 | 5 | 6): void {
+    const sectionId = BookingFormComponent.EDIT_WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('finish-form-section--focus');
+    window.setTimeout(() => section.classList.remove('finish-form-section--focus'), 1400);
+  }
+
   /** Create flow: 0 customer → 1 vehicle → 2 booking → 3 payment → 4 review */
   private static readonly WIZARD_STEP_KEYS = [
     'Booking wizard step customer',
@@ -247,13 +361,32 @@ export class BookingFormComponent implements OnInit {
     return this.formatWizardDateTime(value);
   });
 
-  editExpectedReturnDisplay = computed(() => this.wizardExpectedReturnDisplay());
+  editExpectedReturnDisplay = computed(() => {
+    this.editFormProgressTick();
+    this.bookingScheduleRevision();
+    return this.wizardExpectedReturnDisplay();
+  });
 
-  editSummaryPaid = computed(() => this.displayedPaidTotalForEdit());
+  editSummaryPaid = computed(() => {
+    this.editFormProgressTick();
+    this.paymentCountSum();
+    this.lastPayment();
+    return this.displayedPaidTotalForEdit();
+  });
 
-  editSummaryRemaining = computed(() => this.remainingAmount());
+  editSummaryRemaining = computed(() => {
+    this.editFormProgressTick();
+    this.paymentCountSum();
+    this.lastPayment();
+    const net = this.amountAfterTaxAndDiscount();
+    const paid = this.displayedPaidTotalForEdit();
+    return Math.max(0, Math.round((net - paid) * 100) / 100);
+  });
 
-  editSummaryGrandTotal = computed(() => this.amountAfterTaxAndDiscount());
+  editSummaryGrandTotal = computed(() => {
+    this.editFormProgressTick();
+    return this.amountAfterTaxAndDiscount();
+  });
 
   wizardRentalDurationDisplay = computed(() => {
     this.bookingScheduleRevision();
@@ -486,6 +619,11 @@ export class BookingFormComponent implements OnInit {
     this.editBookingId.set(Number.isFinite(routeId) && routeId > 0 ? routeId : null);
 
     this.form.controls.dateReturnVehical.disable({ emitEvent: false });
+
+    merge(this.form.valueChanges, this.form.statusChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.editFormProgressTick.update(n => n + 1));
+
     this.form.controls.customerId.valueChanges
       .pipe(
         startWith(this.form.controls.customerId.value),
@@ -586,7 +724,7 @@ export class BookingFormComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.syncDatesFromStartAndDays();
-        this.bumpBookingScheduleDisplay();
+        this.bumpEditLiveSummary();
       });
 
     merge(
@@ -606,6 +744,7 @@ export class BookingFormComponent implements OnInit {
         this.syncBookingTotals();
         this.refreshContractLimitWarnings();
         this.refreshContractBandPriceHints();
+        this.bumpEditLiveSummary();
       });
 
     merge(
@@ -652,6 +791,7 @@ export class BookingFormComponent implements OnInit {
       .subscribe(() => {
         this.syncBookingTotals();
         this.refreshContractLimitWarnings();
+        this.bumpEditLiveSummary();
       });
 
     this.form.controls.customerIqama.valueChanges
@@ -1240,6 +1380,7 @@ export class BookingFormComponent implements OnInit {
       idCountingCustVehicle: this.valueOf(booking.idCountingCustVehicle),
     };
     this.form.patchValue(patch, { emitEvent: false });
+    this.syncDatesFromStartAndDays();
     this.ensureVehicleLoadedForEdit(this.valueOf(booking.vehicleId));
     if (customerIqama) {
       this.customerLookupByIqama(customerIqama);
@@ -1251,6 +1392,7 @@ export class BookingFormComponent implements OnInit {
     this.refreshContractLimitWarnings();
     this.refreshContractBandPriceHints();
     this.loadPaymentSummaryForBooking(Number(booking.id));
+    this.bumpEditLiveSummary();
   }
 
   onVehiclePlateLookupChange(value: string): void {
@@ -1354,6 +1496,7 @@ export class BookingFormComponent implements OnInit {
         if (Number.isFinite(paid)) {
           this.form.patchValue({ paid }, { emitEvent: false });
         }
+        this.bumpEditLiveSummary();
       });
   }
 
@@ -2750,6 +2893,12 @@ export class BookingFormComponent implements OnInit {
 
   private bumpBookingScheduleDisplay(): void {
     this.bookingScheduleRevision.update(n => n + 1);
+  }
+
+  /** Re-render edit sidebar totals / return date after silent form patches. */
+  private bumpEditLiveSummary(): void {
+    this.editFormProgressTick.update(n => n + 1);
+    this.bumpBookingScheduleDisplay();
   }
 
   /** Rental period step (index 2): refresh derived return date / duration labels. */

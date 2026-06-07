@@ -160,8 +160,23 @@
                     <span>{{ 'Daily Price (High)' | translate }}</span>
                     <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
                   </label>
-                  <input type="number" min="0" step="0.01" class="form-control" formControlName="price_day_high" [placeholder]="'Example Daily Price High' | translate" />
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="form-control"
+                    formControlName="price_day_high"
+                    [class.is-invalid]="showHighMustExceedLow('price_day_high')"
+                    [placeholder]="'Example Daily Price High' | translate"
+                  />
                   <p class="category-form-hint">{{ 'Hint Daily Price High' | translate }}</p>
+                  @if (showHighMustExceedLow('price_day_high')) {
+                    <p class="category-form-hint category-form-hint--danger" role="alert">
+                      {{ 'Category high limit must exceed low limit' | translate }}
+                    </p>
+                  } @else {
+                    <p class="category-form-hint category-form-hint--rule">{{ 'Category high limit rule hint' | translate }}</p>
+                  }
                 </div>
                 <div class="category-form-field">
                   <label class="category-form-label">
@@ -176,8 +191,23 @@
                     <span>{{ 'Monthly Price (High)' | translate }}</span>
                     <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
                   </label>
-                  <input type="number" min="0" step="0.01" class="form-control" formControlName="price_month_high" [placeholder]="'Example Monthly Price High' | translate" />
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="form-control"
+                    formControlName="price_month_high"
+                    [class.is-invalid]="showHighMustExceedLow('price_month_high')"
+                    [placeholder]="'Example Monthly Price High' | translate"
+                  />
                   <p class="category-form-hint">{{ 'Hint Monthly Price High' | translate }}</p>
+                  @if (showHighMustExceedLow('price_month_high')) {
+                    <p class="category-form-hint category-form-hint--danger" role="alert">
+                      {{ 'Category high limit must exceed low limit' | translate }}
+                    </p>
+                  } @else {
+                    <p class="category-form-hint category-form-hint--rule">{{ 'Category high limit rule hint' | translate }}</p>
+                  }
                 </div>
               </div>
             </div>
@@ -210,8 +240,23 @@
                     <span>{{ 'Extra Hour Price (High)' | translate }}</span>
                     <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
                   </label>
-                  <input type="number" min="0" step="0.01" class="form-control" formControlName="priceHoureExtraHigh" [placeholder]="'Example Extra Hour Price High' | translate" />
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="form-control"
+                    formControlName="priceHoureExtraHigh"
+                    [class.is-invalid]="showHighMustExceedLow('priceHoureExtraHigh')"
+                    [placeholder]="'Example Extra Hour Price High' | translate"
+                  />
                   <p class="category-form-hint">{{ 'Hint Extra Hour Price High' | translate }}</p>
+                  @if (showHighMustExceedLow('priceHoureExtraHigh')) {
+                    <p class="category-form-hint category-form-hint--danger" role="alert">
+                      {{ 'Category high limit must exceed low limit' | translate }}
+                    </p>
+                  } @else {
+                    <p class="category-form-hint category-form-hint--rule">{{ 'Category high limit rule hint' | translate }}</p>
+                  }
                 </div>
                 <div class="category-form-field">
                   <label class="category-form-label">
@@ -226,8 +271,23 @@
                     <span>{{ 'Extra KM Price (High)' | translate }}</span>
                     <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
                   </label>
-                  <input type="number" min="0" step="0.01" class="form-control" formControlName="countKMExtraHigh" [placeholder]="'Example Extra KM Price High' | translate" />
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="form-control"
+                    formControlName="countKMExtraHigh"
+                    [class.is-invalid]="showHighMustExceedLow('countKMExtraHigh')"
+                    [placeholder]="'Example Extra KM Price High' | translate"
+                  />
                   <p class="category-form-hint">{{ 'Hint Extra KM Price High' | translate }}</p>
+                  @if (showHighMustExceedLow('countKMExtraHigh')) {
+                    <p class="category-form-hint category-form-hint--danger" role="alert">
+                      {{ 'Category high limit must exceed low limit' | translate }}
+                    </p>
+                  } @else {
+                    <p class="category-form-hint category-form-hint--rule">{{ 'Category high limit rule hint' | translate }}</p>
+                  }
                 </div>
               </div>
             </div>
@@ -260,8 +320,23 @@
                     <span>{{ 'Allowed Limit (High)' | translate }}</span>
                     <span class="category-form-badge category-form-badge--required">{{ 'Required field badge' | translate }}</span>
                   </label>
-                  <input type="number" min="0" step="0.01" class="form-control" formControlName="allowToHigh" [placeholder]="'Example Allowed Limit High' | translate" />
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="form-control"
+                    formControlName="allowToHigh"
+                    [class.is-invalid]="showHighMustExceedLow('allowToHigh')"
+                    [placeholder]="'Example Allowed Limit High' | translate"
+                  />
                   <p class="category-form-hint">{{ 'Hint Allowed Limit High' | translate }}</p>
+                  @if (showHighMustExceedLow('allowToHigh')) {
+                    <p class="category-form-hint category-form-hint--danger" role="alert">
+                      {{ 'Category high limit must exceed low limit' | translate }}
+                    </p>
+                  } @else {
+                    <p class="category-form-hint category-form-hint--rule">{{ 'Category high limit rule hint' | translate }}</p>
+                  }
                 </div>
               </div>
             </div>

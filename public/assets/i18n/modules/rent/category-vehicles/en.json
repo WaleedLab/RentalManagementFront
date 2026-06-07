@@ -29,6 +29,8 @@
   "Optional field badge": "Optional",
   "Required field badge": "Required",
   "Category English name must be valid.": "Category English name must be valid.",
+  "Category high limit must exceed low limit": "The high limit must be greater than the low limit.",
+  "Category high limit rule hint": "The high limit must be greater than the low limit.",
   "Category image": "Category image",
   "Code": "Code",
   "Create": "Create",

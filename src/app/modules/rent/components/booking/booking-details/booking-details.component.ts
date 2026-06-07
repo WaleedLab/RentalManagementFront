@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -11,6 +11,7 @@ import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
 import {
   SmoothSelectComponent,
   SmoothSelectOption,
@@ -23,6 +24,7 @@ import { BankService } from '../../../../finance/services/banks/bank.service';
 import { CashAccountService } from '../../../../finance/services/cash/cash-account.service';
 import { PaymentCountService } from '../../../../finance/services/payment-counts/payment-count.service';
 import { Booking, BookingStatus } from '../../../models';
+import { BookingImageApp } from '../../../models/booking-image-app/booking-image-app.model';
 import {
   bookingStatusTone,
   bookingStatusTranslationKey,
@@ -32,6 +34,7 @@ import {
   getBookingStatusSurfaceStyle,
 } from '../../../models/booking/booking-status.utils';
 import { BookingService } from '../../../services/booking/booking.service';
+import { BookingImageAppService } from '../../../services/booking-image-app/booking-image-app.service';
 import { VehicleService } from '../../../services/vehicles/vehicle.service';
 import {
   bookingCheckoutMs,
@@ -77,6 +80,7 @@ export type ContractDetailsTabId =
     RouterLink,
     TranslateModule,
     PageHeaderComponent,
+    StatusBadgeComponent,
     SmoothSelectComponent,
     DatePickerComponent,
   ],
@@ -87,6 +91,16 @@ export class BookingDetailsComponent implements OnInit {
   private static readonly EXTEND_BOND_TYPE_RECEIPT = 2;
   private static readonly EXTEND_STATUS_EDIT = 2;
 
+  private static readonly EXTEND_WORKFLOW_SECTION_IDS = [
+    'extend-form-section-summary',
+    'extend-form-section-period',
+    'extend-form-section-amounts',
+    'extend-form-section-payment',
+    'extend-form-section-notes',
+  ] as const;
+
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
+
   /** `datetime-local` value in local time (no timezone suffix). */
   private static toDateTimeLocalInputValue(d: Date = new Date()): string {
     const p = (n: number) => String(n).padStart(2, '0');
@@ -96,6 +110,7 @@ export class BookingDetailsComponent implements OnInit {
   private router = inject(Router);
   private authState = inject(AuthStateService);
   private bookingService = inject(BookingService);
+  private bookingImageAppService = inject(BookingImageAppService);
   private vehicleService = inject(VehicleService);
   private paymentCountService = inject(PaymentCountService);
   private bankService = inject(BankService);
@@ -109,6 +124,9 @@ export class BookingDetailsComponent implements OnInit {
   loading = signal(false);
   paymentCountSum = signal<number | null>(null);
   paymentRows = signal<PaymentCount[]>([]);
+  /** `GetBookingImageAppByIdBookingsQuery` rows for the photos tab. */
+  bookingImageSets = signal<BookingImageApp[]>([]);
+  bookingImagesLoading = signal(false);
   isExtendMode = signal(false);
   extendPaymentDate = signal(BookingDetailsComponent.toDateTimeLocalInputValue());
   extendRequiredAmountValue = signal<number>(0);
@@ -122,6 +140,93 @@ export class BookingDetailsComponent implements OnInit {
   extendPaidCash = signal<number>(0);
   extendPaidBank = signal<number>(0);
   extendNotes = signal('');
+
+  extendSummarySectionComplete = computed(() => !!this.booking());
+
+  extendPeriodSectionComplete = computed((): boolean => {
+    if (!String(this.extendPaymentDate() ?? '').trim()) {
+      return false;
+    }
+    return !this.extendPaymentDateViolationHint();
+  });
+
+  extendAmountsSectionComplete = computed(
+    () => Math.max(0, Number(this.extendCurrentPaymentAmount()) || 0) > 0,
+  );
+
+  extendPaymentSectionComplete = computed((): boolean => {
+    const paid = Math.max(0, Number(this.extendCurrentPaymentAmount()) || 0);
+    if (paid <= 0) {
+      return true;
+    }
+    const type = Number(this.extendPaymentMethod()) || 1;
+    const bankId = String(this.extendBankAccount() ?? '').trim();
+    const cashId = String(this.extendBankCashAccount() ?? '').trim();
+    if (type === 1) {
+      return !!cashId;
+    }
+    if ([2, 3, 4].includes(type)) {
+      return !!bankId;
+    }
+    if (type === 5) {
+      return !!bankId && !!cashId;
+    }
+    return true;
+  });
+
+  extendNotesSectionComplete = computed(() => true);
+
+  extendFormCompletionPercent = computed((): number => {
+    let done = 0;
+    if (this.extendSummarySectionComplete()) done++;
+    if (this.extendPeriodSectionComplete()) done++;
+    if (this.extendAmountsSectionComplete()) done++;
+    if (this.extendPaymentSectionComplete()) done++;
+    if (this.extendNotesSectionComplete()) done++;
+    return Math.round((done / 5) * 100);
+  });
+
+  extendCurrentWorkflowStep = computed((): number => {
+    if (!this.extendSummarySectionComplete()) {
+      return 1;
+    }
+    if (!this.extendPeriodSectionComplete()) {
+      return 2;
+    }
+    if (!this.extendAmountsSectionComplete()) {
+      return 3;
+    }
+    if (!this.extendPaymentSectionComplete()) {
+      return 4;
+    }
+    if (!this.extendNotesSectionComplete()) {
+      return 5;
+    }
+    return 6;
+  });
+
+  extendSubmitBlocked = computed(
+    () =>
+      this.loading() ||
+      !this.extendPeriodSectionComplete() ||
+      !this.extendAmountsSectionComplete() ||
+      !this.extendPaymentSectionComplete(),
+  );
+
+  focusExtendWorkflowSection(step: 1 | 2 | 3 | 4 | 5): void {
+    const sectionId = BookingDetailsComponent.EXTEND_WORKFLOW_SECTION_IDS[step - 1];
+    const section = this.hostEl.nativeElement.querySelector(
+      `#${sectionId}`,
+    ) as HTMLDetailsElement | null;
+    if (!section) {
+      return;
+    }
+    section.open = true;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.classList.add('finish-form-section--focus');
+    window.setTimeout(() => section.classList.remove('finish-form-section--focus'), 1400);
+  }
+
   extendPaymentTypeOptions = computed<SmoothSelectOption[]>(() => [
     { label: this.translate.instant('Cash'), value: 1 },
     { label: this.translate.instant('Network/POS'), value: 2 },
@@ -226,6 +331,36 @@ export class BookingDetailsComponent implements OnInit {
     return key ? this.translate.instant(key) : angle;
   }
 
+  /** «صور السيارة عند {حالة}» — uses API `Stutus` with booking-status i18n when possible. */
+  bookingImageSectionTitle(status: string): string {
+    const raw = String(status ?? '').trim();
+    if (!raw) {
+      return this.translate.instant('Contract section photos generic');
+    }
+    const normalized = bookingStatusFromCode(raw);
+    const statusLabel = this.translate.instant(bookingStatusTranslationKey(normalized));
+    return this.translate.instant('Contract section photos at status', { status: statusLabel });
+  }
+
+  bookingImageSlotUrl(set: BookingImageApp, angle: string): string | null {
+    const map: Partial<Record<string, string | undefined>> = {
+      front: set.imageFront,
+      right: set.imageRight,
+      left: set.imageLeft,
+      back: set.imageBack,
+      interior: set.imageCounter,
+    };
+    const resolved = resolveMediaUrl(map[angle] ?? '');
+    return resolved && resolved.length > 0 ? resolved : null;
+  }
+
+  onBookingPhotoError(event: Event): void {
+    const img = event.target as HTMLImageElement | null;
+    if (img) {
+      img.style.display = 'none';
+    }
+  }
+
   setActiveTab(tabId: ContractDetailsTabId): void {
     this.activeTab.set(tabId);
   }
@@ -276,27 +411,24 @@ export class BookingDetailsComponent implements OnInit {
     return resolved && resolved.length > 0 ? resolved : null;
   }
 
-  contractPhotoSlotUrl(item: Booking, phase: 'checkout' | 'return', angle: string): string | null {
-    const checkoutMap: Partial<Record<string, string | undefined>> = {
-      front: item.checkoutPhotoFrontUrl,
-      right: item.checkoutPhotoRightUrl,
-      left: item.checkoutPhotoLeftUrl,
-      back: item.checkoutPhotoBackUrl,
-      interior: item.checkoutPhotoInteriorUrl,
-    };
-    const returnMap: Partial<Record<string, string | undefined>> = {
-      front: item.checkinPhotoFrontUrl,
-      right: item.checkinPhotoRightUrl,
-      left: item.checkinPhotoLeftUrl,
-      back: item.checkinPhotoBackUrl,
-      interior: item.checkinPhotoInteriorUrl,
-    };
-    const raw = (phase === 'checkout' ? checkoutMap[angle] : returnMap[angle]) ?? '';
-    const resolved = resolveMediaUrl(raw);
-    if (resolved && resolved.length > 0) {
-      return resolved;
+  private loadBookingImages(booking: Booking): void {
+    const fleetId = String(this.authState.fleetId() ?? booking.fleetId ?? '').trim();
+    const idBooking = this.toBookingNumericId(booking.id);
+    if (!idBooking || !fleetId) {
+      this.bookingImageSets.set([]);
+      return;
     }
-    return this.logoOnlyUrl(item);
+    this.bookingImagesLoading.set(true);
+    this.bookingImageAppService.getByBooking(idBooking, fleetId).subscribe({
+      next: sets => {
+        this.bookingImageSets.set(sets);
+        this.bookingImagesLoading.set(false);
+      },
+      error: () => {
+        this.bookingImageSets.set([]);
+        this.bookingImagesLoading.set(false);
+      },
+    });
   }
 
   valueOrDash(value: unknown): string {
@@ -678,14 +810,7 @@ export class BookingDetailsComponent implements OnInit {
     this.bookingService.extend(payload).subscribe({
       next: () => {
         this.toast.success('تم تنفيذ التمديد بنجاح');
-        this.bookingService
-          .getById(String(idBooking), fleetId)
-          .pipe(catchError(() => of(item)))
-          .subscribe(refreshed => {
-            this.booking.set(refreshed);
-            this.loadPaymentSummaryForBooking(refreshed);
-            this.setExtendRequiredAmountFromBooking(refreshed);
-          });
+        this.router.navigate(['/booking']);
       },
       error: () => this.toast.error('فشل تنفيذ التمديد'),
       complete: () => this.loading.set(false),
@@ -1229,6 +1354,7 @@ export class BookingDetailsComponent implements OnInit {
         this.booking.set(booking);
         this.loadVehicleBranch(booking);
         this.loadPaymentSummaryForBooking(booking);
+        this.loadBookingImages(booking);
         this.loading.set(false);
       },
       error: () => {
@@ -1267,6 +1393,7 @@ export class BookingDetailsComponent implements OnInit {
           return;
         }
         this.loadPaymentSummaryForBooking(booking);
+        this.loadBookingImages(booking);
       },
       error: () => {
         if (extendFromQuery) {

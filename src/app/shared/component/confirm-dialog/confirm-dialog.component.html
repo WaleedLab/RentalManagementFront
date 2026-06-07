@@ -1,11 +1,18 @@
-<div class="modal-header">
-  <h5 class="modal-title">{{ title }}</h5>
-  <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
-</div>
-<div class="modal-body">
-  {{ message }}
-</div>
-<div class="modal-footer">
-  <button type="button" class="btn btn-cancel" (click)="cancel()">Cancel</button>
-  <button type="button" class="btn btn-primary" (click)="confirm()">Confirm</button>
+<div class="confirm-dialog" [attr.dir]="dialogDir">
+  <div class="modal-header confirm-dialog__header">
+    <h5 class="modal-title confirm-dialog__title">{{ title }}</h5>
+    <button
+      type="button"
+      class="btn-close confirm-dialog__close"
+      [attr.aria-label]="'Close' | translate"
+      (click)="cancel()"
+    ></button>
+  </div>
+  <div class="modal-body confirm-dialog__message">
+    {{ message }}
+  </div>
+  <div class="modal-footer confirm-dialog__footer">
+    <button type="button" class="btn btn-cancel" (click)="cancel()">{{ 'Cancel' | translate }}</button>
+    <button type="button" class="btn btn-primary" (click)="confirm()">{{ 'Confirm' | translate }}</button>
+  </div>
 </div>
