@@ -779,10 +779,6 @@ export class BookingDetailsComponent implements OnInit {
   }
 
   submitExtend(): void {
-    const ok = window.confirm('هل أنت متأكد من تنفيذ تمديد العقد؟');
-    if (!ok) {
-      return;
-    }
     const item = this.booking();
     if (!item) {
       this.toast.error('تعذر تنفيذ التمديد: بيانات العقد غير متوفرة');
@@ -852,15 +848,25 @@ export class BookingDetailsComponent implements OnInit {
       paidBank,
     };
 
-    this.loading.set(true);
-    this.bookingService.extend(payload).subscribe({
-      next: () => {
-        this.toast.success('تم تنفيذ التمديد بنجاح');
-        this.router.navigate(['/booking']);
-      },
-      error: () => this.toast.error('فشل تنفيذ التمديد'),
-      complete: () => this.loading.set(false),
-    });
+    this.confirm
+      .confirm(
+        this.translate.instant('Contract extend confirm title'),
+        this.translate.instant('Contract extend confirm body'),
+      )
+      .subscribe(confirmed => {
+        if (!confirmed) {
+          return;
+        }
+        this.loading.set(true);
+        this.bookingService.extend(payload).subscribe({
+          next: () => {
+            this.toast.success('تم تنفيذ التمديد بنجاح');
+            this.router.navigate(['/booking']);
+          },
+          error: () => this.toast.error('فشل تنفيذ التمديد'),
+          complete: () => this.loading.set(false),
+        });
+      });
   }
 
   onExtendBankAccountChange(value: string): void {
