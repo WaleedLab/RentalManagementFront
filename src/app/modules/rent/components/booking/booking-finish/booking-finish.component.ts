@@ -9,6 +9,7 @@ import { catchError, forkJoin, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch-id.util';
+import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
@@ -92,6 +93,7 @@ export class BookingFinishComponent implements OnInit {
   private settingService = inject(SettingService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
+  private confirmService = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly langTick = signal(0);
 
@@ -737,10 +739,20 @@ export class BookingFinishComponent implements OnInit {
     if (!item || !this.canFinish(item)) {
       return;
     }
-    const ok = window.confirm(this.translate.instant('Contract finish confirm'));
-    if (!ok) {
-      return;
-    }
+    this.confirmService
+      .confirm(
+        this.translate.instant('Contract finish confirm title'),
+        this.translate.instant('Contract finish confirm'),
+      )
+      .subscribe(confirmed => {
+        if (!confirmed) {
+          return;
+        }
+        this.executeFinishSubmit(item);
+      });
+  }
+
+  private executeFinishSubmit(item: Booking): void {
     const fleetId = this.authState.fleetId() ?? '';
     const idBooking = this.toBookingNumericId(item.id);
     const idBranch = resolveContractPaymentBranch({

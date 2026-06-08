@@ -7,6 +7,7 @@ import { catchError, forkJoin, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch-id.util';
+import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
@@ -85,6 +86,7 @@ export class BookingCloseComponent implements OnInit {
   private settingService = inject(SettingService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
+  private confirmService = inject(ConfirmService);
 
   booking = signal<Booking | null>(null);
   vehicleBranchId = signal<number | null>(null);
@@ -697,8 +699,27 @@ export class BookingCloseComponent implements OnInit {
       return;
     }
 
-    const ok = window.confirm(this.translate.instant('Contract close confirm'));
-    if (!ok) {
+    this.confirmService
+      .confirm(
+        this.translate.instant('Contract close confirm title'),
+        this.translate.instant('Contract close confirm'),
+      )
+      .subscribe(confirmed => {
+        if (!confirmed) {
+          return;
+        }
+        this.executeCloseSubmit(item, returnIso, validation);
+      });
+  }
+
+  private executeCloseSubmit(
+    item: Booking,
+    returnIso: string,
+    validation: ReturnType<typeof validateReturnAgainstCheckout>,
+  ): void {
+    const checkinCounter = validation.returnOdom;
+    if (checkinCounter === null) {
+      this.toast.error(this.translate.instant('Contract close odometer required'));
       return;
     }
 
@@ -774,7 +795,7 @@ export class BookingCloseComponent implements OnInit {
       fleetId,
       dateReturnVehical: returnIso,
       note: this.notes().trim() || undefined,
-      checkinCounter: validation.returnOdom,
+      checkinCounter,
       paid: refundTotal,
       paymentType,
     };

@@ -8,6 +8,7 @@ import { catchError, forkJoin, of } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { resolveContractPaymentBranch } from '../../../../../shared/utils/branch-id.util';
+import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { StatusBadgeComponent } from '../../../../../shared/ui/status-badge/status-badge.component';
@@ -74,6 +75,7 @@ export class BookingFinishSuspendedComponent implements OnInit {
   private paymentCountService = inject(PaymentCountService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
+  private confirmService = inject(ConfirmService);
 
   booking = signal<Booking | null>(null);
   maintenanceSummary = signal<MaintenanceByBookingSummary | null>(null);
@@ -388,11 +390,20 @@ export class BookingFinishSuspendedComponent implements OnInit {
       }
     }
 
-    const ok = window.confirm(this.translate.instant(this.finishConfirmKey()));
-    if (!ok) {
-      return;
-    }
+    this.confirmService
+      .confirm(
+        this.translate.instant(this.pageTitleKey()),
+        this.translate.instant(this.finishConfirmKey()),
+      )
+      .subscribe(confirmed => {
+        if (!confirmed) {
+          return;
+        }
+        this.executeFinishSuspendedSubmit(item);
+      });
+  }
 
+  private executeFinishSuspendedSubmit(item: Booking): void {
     const fleetId = this.authState.fleetId() ?? '';
     const idBooking = this.toBookingNumericId(item.id);
     if (!fleetId || !idBooking) {

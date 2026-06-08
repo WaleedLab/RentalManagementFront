@@ -641,9 +641,197 @@ $cy-border: rgba(var(--c-22d3ee-rgb), 0.35);
   }
 }
 
-@media (max-width: 575.98px) {
+@media (max-width: 767.98px) {
+  :host {
+    height: auto;
+    min-height: 100dvh;
+    overflow: auto;
+  }
+
+  .login-cyber {
+    height: auto;
+    min-height: 100dvh;
+    padding:
+      max(12px, env(safe-area-inset-top, 0px))
+      max(14px, env(safe-area-inset-right, 0px))
+      max(12px, env(safe-area-inset-bottom, 0px))
+      max(14px, env(safe-area-inset-left, 0px));
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .login-cyber__parallax {
+    display: none;
+  }
+
+  .login-cyber__top {
+    position: relative;
+    top: auto;
+    inset-inline-start: auto;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 0.35rem;
+  }
+
+  .login-cyber__grid {
+    flex: 0 1 auto;
+    padding-top: 0.5rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .login-cyber__aside-wrap {
+    gap: 1rem;
+    max-width: 100%;
+  }
+
+  .login-cyber__brand-showcase {
+    gap: 0.65rem;
+    padding: 0;
+  }
+
   .login-cyber__brand-showcase__word {
-    font-size: 0.95rem;
-    letter-spacing: 0.08em;
+    font-size: 0.92rem;
+    letter-spacing: 0.07em;
+    max-width: 100%;
+  }
+
+  .login-cyber__brand-showcase__tagline {
+    margin-top: 0.25rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    max-width: 100%;
+  }
+
+  .login-cyber__brand-showcase__logos {
+    gap: 0.75rem 1.1rem;
+    margin-top: 0.15rem;
+  }
+
+  .login-cyber__brand-showcase__img {
+    width: clamp(96px, 26vw, 128px);
+    max-height: clamp(72px, 20vw, 96px);
+  }
+
+  .login-cyber__brand-showcase__img--secondary {
+    width: clamp(108px, 28vw, 140px);
+    max-height: clamp(80px, 21vw, 104px);
+  }
+
+  .login-cyber__lang-btn {
+    min-height: 40px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+
+  .login-cyber__card {
+    padding: 1.35rem 1.1rem 1.25rem;
+    border-radius: 18px;
+  }
+
+  .login-cyber__card-badge {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 12px;
+    font-size: 1rem;
+  }
+
+  .login-cyber__card-title {
+    font-size: 1.28rem;
+    margin-bottom: 6px;
+  }
+
+  .login-cyber__card-sub {
+    margin-bottom: 1.1rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .login-cyber__form {
+    gap: 14px;
+  }
+
+  .login-cyber__input {
+    min-height: 52px;
+    font-size: 16px;
+    padding-inline-start: 46px;
+    border-radius: 14px;
+  }
+
+  .login-cyber__input--has-toggle {
+    padding-inline-end: 52px;
+  }
+
+  .login-cyber__toggle-pass {
+    width: 44px;
+    height: 44px;
+  }
+
+  .login-cyber__remember {
+    font-size: 0.92rem;
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .login-cyber__submit {
+    min-height: 52px;
+    font-size: 1.05rem;
+    border-radius: 14px;
+    margin-top: 6px;
+  }
+
+  .login-cyber__footer {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+  }
+
+  .login-cyber__copyright {
+    font-size: 0.72rem;
+    line-height: 1.5;
+    padding-inline: 0.25rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .login-cyber {
+    padding-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px));
+  }
+
+  .login-cyber__brand-showcase__word {
+    font-size: 0.86rem;
+    letter-spacing: 0.06em;
+  }
+
+  .login-cyber__brand-showcase__tagline {
+    font-size: 0.84rem;
+  }
+
+  .login-cyber__card {
+    padding: 1.2rem 1rem 1.1rem;
+  }
+}
+
+@media (max-width: 767.98px) and (max-height: 740px) {
+  .login-cyber__brand-showcase {
+    gap: 0.45rem;
+  }
+
+  .login-cyber__brand-showcase__img {
+    width: clamp(84px, 24vw, 112px);
+    max-height: clamp(64px, 18vw, 84px);
+  }
+
+  .login-cyber__brand-showcase__img--secondary {
+    width: clamp(92px, 25vw, 120px);
+    max-height: clamp(70px, 19vw, 90px);
+  }
+
+  .login-cyber__card-badge {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 8px;
+  }
+
+  .login-cyber__card-sub {
+    margin-bottom: 0.85rem;
   }
 }

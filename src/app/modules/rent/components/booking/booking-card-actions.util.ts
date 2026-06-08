@@ -80,7 +80,7 @@ export function bookingFinishLabelKey(booking: Pick<Booking, 'status'>): string 
     return 'Booking card finish after debt';
   }
   if (isBookingSuspendedDueToSumMoney(booking)) {
-    return 'Booking card finish before debt';
+    return 'Booking card finish';
   }
   return 'Booking card finish';
 }
