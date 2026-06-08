@@ -265,20 +265,27 @@
                 </div>
               </header>
               <div class="fleet-form-field fleet-form-field--wide">
+                <label class="fleet-form-label">
+                  <span>{{ 'Fleet Image' | translate }}</span>
+                  <span class="fleet-form-badge fleet-form-badge--required">{{ 'Required field badge' | translate }}</span>
+                </label>
                 <app-file-upload
-                  [label]="'Fleet Image' | translate"
+                  [label]="''"
                   [previewUrl]="previewUrl()"
                   [fallbackPreviewUrl]="fleetImageFallback"
                   (fileSelected)="onImageSelected($event)"
                 />
                 <p class="fleet-form-hint">{{ 'Hint Fleet Image' | translate }}</p>
+                @if (imageRequiredError() && !hasRequiredImage()) {
+                  <p class="fleet-form-hint text-danger mb-0">{{ 'Fleet image required' | translate }}</p>
+                }
               </div>
             </div>
           </details>
         </div>
 
         <div class="app-form-actions">
-          <button class="btn btn-primary" type="submit" [disabled]="form.invalid || loading()">
+          <button class="btn btn-primary" type="submit" [disabled]="form.invalid || loading() || !hasRequiredImage()">
             @if (loading()) {
               <span class="spinner-border spinner-border-sm me-2"></span>
             }

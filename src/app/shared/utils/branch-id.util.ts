@@ -4,6 +4,14 @@ export function loginBranchId(loginBranchIdClaim: string | number | null | undef
   return Number.isFinite(n) && n > 0 ? Math.trunc(n) : 0;
 }
 
+/** Branch id from JWT; `null` when missing (e.g. admin without branch claim). */
+export function loginBranchIdOrNull(
+  loginBranchIdClaim: string | number | null | undefined,
+): number | null {
+  const n = Number(String(loginBranchIdClaim ?? '').trim());
+  return Number.isFinite(n) && n > 0 ? Math.trunc(n) : null;
+}
+
 /** Positive branch id or `0`. */
 export function normalizeBranchId(value: string | number | null | undefined): number {
   const n = Number(value);
@@ -29,12 +37,23 @@ export function resolveContractPaymentBranch(params: {
   return loginBranchId(params.loginBranchId);
 }
 
+/** Resolves branch for create/update payloads: positive id or `null` (never `0`). */
+export function resolveBranchIdForPayload(
+  idBranch: number | null | undefined,
+): number | null {
+  if (idBranch === null || idBranch === undefined) {
+    return null;
+  }
+  const normalized = normalizeBranchId(idBranch);
+  return normalized > 0 ? normalized : null;
+}
+
 /** Payload keys for ASP.NET commands expecting both casings. */
 export function withBranchIdPayload<T extends object>(
   payload: T,
-  idBranch: number,
-): T & { idBranch: number; IdBranch: number } {
-  const branch = normalizeBranchId(idBranch);
+  idBranch: number | null | undefined,
+): T & { idBranch: number | null; IdBranch: number | null } {
+  const branch = resolveBranchIdForPayload(idBranch);
   return {
     ...payload,
     idBranch: branch,

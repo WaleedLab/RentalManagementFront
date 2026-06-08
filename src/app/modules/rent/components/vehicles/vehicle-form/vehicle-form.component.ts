@@ -23,6 +23,7 @@ import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { FileUploadComponent } from '../../../../../shared/ui/file-upload/file-upload.component';
 import { SmoothSelectComponent, SmoothSelectOption } from '../../../../../shared/ui/smooth-select/smooth-select.component';
+import { normalizeApiError } from '../../../../../core/api/api-response.utils';
 import { focusFirstInvalidControl } from '../../../../../shared/utils/focus-first-invalid-control.util';
 
 export type VehicleDateExpiryState = 'valid' | 'expiring' | 'expired' | 'empty';
@@ -82,6 +83,7 @@ export class VehicleFormComponent implements OnInit {
   loading = signal(false);
   selectedImage = signal<File | null>(null);
   previewUrl = signal<string | null>(null);
+  imageRequiredError = signal(false);
   readonly vehicleFallbackImage = VEHICLE_FALLBACK_IMAGE;
   branches = signal<Branch[]>([]);
   private formProgressTick = signal(0);
@@ -132,7 +134,12 @@ export class VehicleFormComponent implements OnInit {
 
   attachmentsSectionComplete = computed(() => {
     this.formProgressTick();
-    return !!(String(this.previewUrl() ?? '').trim() || this.selectedImage());
+    return this.hasRequiredImage();
+  });
+
+  hasRequiredImage = computed(() => {
+    this.formProgressTick();
+    return this.isImageProvided();
   });
 
   profileCompletionPercent = computed(() => {
@@ -253,6 +260,12 @@ export class VehicleFormComponent implements OnInit {
       return;
     }
     this.selectedImage.set(file);
+    this.imageRequiredError.set(false);
+    if (file) {
+      this.previewUrl.set(URL.createObjectURL(file));
+    } else {
+      this.previewUrl.set(null);
+    }
     this.formProgressTick.update(n => n + 1);
   }
 
@@ -347,8 +360,6 @@ export class VehicleFormComponent implements OnInit {
     if (image.getAttribute('src') !== this.vehicleFallbackImage) {
       image.setAttribute('src', this.vehicleFallbackImage);
     }
-
-    this.previewUrl.set(this.vehicleFallbackImage);
   }
 
   getBranchLabel(branch: Branch): string {
@@ -408,6 +419,15 @@ export class VehicleFormComponent implements OnInit {
       return;
     }
 
+    if (!this.hasRequiredImage()) {
+      this.imageRequiredError.set(true);
+      this.toast.error(this.translate.instant('Vehicle image required'));
+      this.focusWorkflowSection(4);
+      return;
+    }
+
+    this.imageRequiredError.set(false);
+
     const raw = this.form.getRawValue();
     const selectedStatus = raw.status;
     const body: VehicleUpsertRequest = {
@@ -428,8 +448,8 @@ export class VehicleFormComponent implements OnInit {
       insurancePolicyNumber: raw.insurancePolicyNumber,
       operatinCard: raw.operatinCard,
       validityCarRegistration: raw.validityCarRegistration,
-      countKm: raw.countKm,
-      capacitOil: raw.capacitOil,
+      countKm: raw.countKm ?? 0,
+      capacitOil: raw.capacitOil ?? 0,
       status: raw.status,
       isActive: raw.isActive,
       notes: raw.notes || undefined,
@@ -460,7 +480,8 @@ export class VehicleFormComponent implements OnInit {
         this.router.navigate(['/vehicles']);
       },
       error: err => {
-        this.toast.error(err?.message ?? this.translate.instant('Failed to save vehicle'));
+        const normalized = normalizeApiError(err);
+        this.toast.error(normalized.message || this.translate.instant('Failed to save vehicle'));
         this.loading.set(false);
       },
       complete: () => this.loading.set(false),
@@ -509,6 +530,26 @@ export class VehicleFormComponent implements OnInit {
     }
 
     return numericId;
+  }
+
+  private isImageProvided(): boolean {
+    if (this.selectedImage()) {
+      return true;
+    }
+    const preview = String(this.previewUrl() ?? '').trim();
+    if (!preview || this.isFallbackImageUrl(preview)) {
+      return false;
+    }
+    return true;
+  }
+
+  private isFallbackImageUrl(url: string): boolean {
+    const normalized = url.split('?')[0]?.split('#')[0] ?? url;
+    return (
+      normalized === this.vehicleFallbackImage ||
+      normalized.endsWith('/defult_car.png') ||
+      normalized.endsWith('defult_car.png')
+    );
   }
 }
 

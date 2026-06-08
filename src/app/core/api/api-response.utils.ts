@@ -43,6 +43,17 @@ export function extractApiErrorBodyMessage(errorBody: unknown): string | null {
   if (errors.length) {
     return errors.join(' ').slice(0, 800);
   }
+  const nestedErrors = e['errors'];
+  if (nestedErrors && typeof nestedErrors === 'object' && !Array.isArray(nestedErrors)) {
+    const joined = Object.values(nestedErrors as Record<string, unknown>)
+      .flatMap(value => (Array.isArray(value) ? value : [value]))
+      .map(item => String(item))
+      .filter(Boolean)
+      .join(' ');
+    if (joined) {
+      return joined.slice(0, 800);
+    }
+  }
   const propertyErrors = readEnvelopePropertyErrors(e);
   const validationMessages = Object.values(propertyErrors).flatMap(value =>
     Array.isArray(value) ? value.map(item => String(item)).filter(Boolean) : [],

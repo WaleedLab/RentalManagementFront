@@ -454,7 +454,7 @@
                 <div class="vehicle-form-field vehicle-form-field--wide">
                   <label class="vehicle-form-label">
                     <span>{{ 'Vehicle Image' | translate }}</span>
-                    <span class="vehicle-form-badge vehicle-form-badge--optional">{{ 'Optional field badge' | translate }}</span>
+                    <span class="vehicle-form-badge vehicle-form-badge--required">{{ 'Required field badge' | translate }}</span>
                   </label>
                   @if (isViewMode()) {
                     <div class="vehicle-form-upload-card vehicle-form-upload-card--preview">
@@ -476,6 +476,9 @@
                     </div>
                   }
                   <p class="vehicle-form-hint">{{ 'Hint Vehicle Image' | translate }}</p>
+                  @if (imageRequiredError() && !hasRequiredImage()) {
+                    <p class="vehicle-form-hint text-danger mb-0">{{ 'Vehicle image required' | translate }}</p>
+                  }
                 </div>
                 <div class="vehicle-form-field vehicle-form-field--wide">
                   <label class="vehicle-form-label">
@@ -498,7 +501,7 @@
 
         @if (!isViewMode()) {
           <div class="app-form-actions vehicle-form-actions">
-            <button class="btn btn-primary" type="submit" [disabled]="loading()">
+            <button class="btn btn-primary" type="submit" [disabled]="loading() || !hasRequiredImage()">
               {{ (isEdit() ? 'Update Vehicle' : 'Create Vehicle') | translate }}
             </button>
             <a class="btn btn-cancel" routerLink="/vehicles">{{ 'Cancel' | translate }}</a>

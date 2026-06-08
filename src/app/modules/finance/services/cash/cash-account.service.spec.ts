@@ -106,6 +106,27 @@ describe('CashAccountService', () => {
     req.flush({ data: null, succeeded: true, errors: [], propertyErrors: {}, httpStatusCode: 200 });
   });
 
+  it('creates a cash account with null branch for admin users without branch claim', () => {
+    const adminPayload: CreateCashAccountRequest = {
+      id: cashId,
+      countingId,
+      name: 'Fleet Cash',
+      createdBy: userId,
+      fleetId,
+      idBranch: null,
+    };
+
+    service.create(adminPayload).subscribe(response => {
+      expect(response).toEqual(jasmine.objectContaining({ id: cashId }));
+    });
+
+    const req = httpMock.expectOne(`${apiBase}/Cash`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body.idBranch).toBeNull();
+    expect(req.request.body.IdBranch).toBeNull();
+    req.flush({ data: { id: cashId }, succeeded: true, errors: [], propertyErrors: {}, httpStatusCode: 200 });
+  });
+
   it('creates a cash account using the actual Cash endpoint and preserves the body fields', () => {
     service.create(createPayload).subscribe(response => {
       expect(response).toEqual(jasmine.objectContaining({ id: cashId }));
@@ -171,6 +192,7 @@ describe('CashAccountService', () => {
       description: undefined,
       createdBy: userId,
       fleetId,
+      idBranch: null,
     };
 
     service.create(payload).subscribe(response => {

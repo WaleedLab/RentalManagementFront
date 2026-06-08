@@ -163,7 +163,7 @@ describe('BankService', () => {
       bankName: undefined,
       accountNumber: undefined,
       iban: undefined,
-      idBranch: undefined,
+      idBranch: null,
       status: undefined,
     };
 
@@ -182,7 +182,7 @@ describe('BankService', () => {
       bankName: undefined,
       accountNumber: undefined,
       iban: undefined,
-      idBranch: undefined,
+      idBranch: null,
       status: undefined,
     }));
     req.flush({ data: { id: bankId }, succeeded: true, errors: [], propertyErrors: {}, httpStatusCode: 200 });
