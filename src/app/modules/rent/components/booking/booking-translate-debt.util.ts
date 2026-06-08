@@ -6,12 +6,16 @@ import { normalizeFleetId } from '../../../../shared/utils/fleet-query.utils';
 import { Booking } from '../../models';
 import { BookingService } from '../../services/booking/booking.service';
 
+function bookingStatusCode(booking: Pick<Booking, 'status'> | null | undefined): string {
+  return String(booking?.status ?? '').trim();
+}
+
 export function canBookingTranslateToDebtAction(
   booking: Pick<Booking, 'status'> | null | undefined,
 ): boolean {
-  const s = String(booking?.status ?? '').trim();
-  /** تعليق مالي: معلّق ذمم / دفعة على الحساب — قبل تحويل الحالة إلى `translate`. */
-  return s === 'Suspended_due_to_sum_money' || s === 'Payment_on_account';
+  const s = bookingStatusCode(booking);
+  /** قبل التحويل فقط — تعليق مالي أو تعليق حادث. */
+  return s === 'Suspended_due_to_sum_money' || s === 'Suspended_due_to_accident';
 }
 
 export function runBookingTranslateToDebt(options: {
@@ -40,11 +44,13 @@ export function runBookingTranslateToDebt(options: {
     return;
   }
 
+  const confirmBodyKey =
+    bookingStatusCode(booking) === 'Suspended_due_to_accident'
+      ? 'Booking translate to debt confirm body accident'
+      : 'Booking translate to debt confirm body';
+
   confirmService
-    .confirm(
-      translate('Booking translate to debt confirm title'),
-      translate('Booking translate to debt confirm body'),
-    )
+    .confirm(translate('Booking translate to debt confirm title'), translate(confirmBodyKey))
     .subscribe(confirmed => {
       if (!confirmed) {
         return;

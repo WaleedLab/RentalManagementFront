@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.utils';
 import {
@@ -97,17 +96,17 @@ export class VehicleListComponent implements OnInit {
   expirationNextDays = signal(15);
   expirationCountsLoading = signal(false);
   private readonly expirationBarConfig = [
-    { key: 'insurance', labelEn: 'Insurance', iconClass: 'fa-solid fa-shield-halved', tone: 'insurance' },
-    { key: 'periodicInspection', labelEn: 'Periodic inspection', iconClass: 'fa-solid fa-clipboard-check', tone: 'inspection' },
-    { key: 'operatingCard', labelEn: 'Operating card', iconClass: 'fa-solid fa-id-card', tone: 'operating' },
-    { key: 'carRegistration', labelEn: 'Car registration', iconClass: 'fa-solid fa-file-lines', tone: 'registration' },
+    { key: 'insurance', labelKey: 'Insurance', iconClass: 'fa-solid fa-shield-halved', tone: 'insurance' },
+    { key: 'periodicInspection', labelKey: 'Periodic inspection', iconClass: 'fa-solid fa-clipboard-check', tone: 'inspection' },
+    { key: 'operatingCard', labelKey: 'Operating card', iconClass: 'fa-solid fa-id-card', tone: 'operating' },
+    { key: 'carRegistration', labelKey: 'Car registration', iconClass: 'fa-solid fa-file-lines', tone: 'registration' },
   ] as const;
   private readonly vehicleStatusLegendConfig = [
-    { key: 'IsAvalible', labelAr: 'متاحة', labelEn: 'Available', iconClass: 'fa-solid fa-circle-check', iconColor: '#16A34A' },
-    { key: 'IsBooking', labelAr: 'محجوزة', labelEn: 'Booked', iconClass: 'fa-solid fa-calendar-check', iconColor: '#F59E0B' },
-    { key: 'IsMaintanes', labelAr: 'صيانة', labelEn: 'Maintenance', iconClass: 'fa-solid fa-screwdriver-wrench', iconColor: '#DC2626' },
-    { key: 'IsMangament', labelAr: 'إدارة', labelEn: 'Management', iconClass: 'fa-solid fa-briefcase', iconColor: '#6366F1' },
-    { key: 'IsSold', labelAr: 'مباعة', labelEn: 'Sold', iconClass: 'fa-solid fa-tags', iconColor: '#374151' },
+    { key: 'IsAvalible', labelKey: 'Available', iconClass: 'fa-solid fa-circle-check', iconColor: '#16A34A' },
+    { key: 'IsBooking', labelKey: 'Booked', iconClass: 'fa-solid fa-calendar-check', iconColor: '#F59E0B' },
+    { key: 'IsMaintanes', labelKey: 'Maintenance', iconClass: 'fa-solid fa-screwdriver-wrench', iconColor: '#DC2626' },
+    { key: 'IsMangament', labelKey: 'Management', iconClass: 'fa-solid fa-briefcase', iconColor: '#6366F1' },
+    { key: 'IsSold', labelKey: 'Sold', iconClass: 'fa-solid fa-tags', iconColor: '#374151' },
   ] as const;
   readonly statusFilterOptions = computed<SmoothSelectOption[]>(() => {
     this.languageTick();
@@ -166,16 +165,15 @@ export class VehicleListComponent implements OnInit {
     return this.translate.instant('Expiring within days', { days });
   });
   expirationBarItems = computed(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
     const counts = this.expirationCounts();
-    const useApiLabel = this.isArabicUi();
 
     return this.expirationBarConfig.map(config => {
       const matched = counts.find(item => (item.key ?? '').toLowerCase() === config.key.toLowerCase());
       return {
         key: config.key,
-        label: useApiLabel
-          ? matched?.label || config.labelEn
-          : config.labelEn,
+        label: t(config.labelKey),
         iconClass: config.iconClass,
         tone: config.tone,
         expiredCount: matched?.expiredCount ?? 0,
@@ -184,10 +182,12 @@ export class VehicleListComponent implements OnInit {
     });
   });
   vehicleLegendItems = computed(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
     const counts = this.vehicleStatusCounts();
     const items = this.vehicleStatusLegendConfig.map(item => ({
       key: item.key,
-      label: this.isArabicUi() ? item.labelAr : item.labelEn,
+      label: t(item.labelKey),
       iconClass: item.iconClass,
       iconColor: item.iconColor,
       count:
@@ -208,7 +208,7 @@ export class VehicleListComponent implements OnInit {
     return [
       {
         key: 'total',
-        label: this.translate.instant('Total Vehicles'),
+        label: t('Total Vehicles'),
         iconClass: 'fa-solid fa-list-check',
         iconColor: '#2563EB',
         count: this.vehicleStatusTotalCount(),
@@ -216,7 +216,7 @@ export class VehicleListComponent implements OnInit {
       ...items,
       {
         key: 'unknown',
-        label: this.translate.instant('Unknown'),
+        label: t('Unknown'),
         iconClass: 'fa-solid fa-circle-question',
         iconColor: '#64748B',
         count: unknownCount,
@@ -572,6 +572,21 @@ export class VehicleListComponent implements OnInit {
       return;
     }
 
+    const vehicleName = this.getVehicleTitle(vehicle);
+    this.confirm
+      .confirm(
+        this.translate.instant('vehicles.addToMaintenance.title'),
+        this.translate.instant('vehicles.addToMaintenance.confirm', { vehicle: vehicleName }),
+      )
+      .subscribe(confirmed => {
+        if (!confirmed) {
+          return;
+        }
+        this.createMaintenanceForVehicle(vehicle);
+      });
+  }
+
+  private createMaintenanceForVehicle(vehicle: Vehicle): void {
     const fleetId = (this.authState.fleetId() ?? '').trim();
     if (!fleetId) {
       this.toast.error(this.translate.instant('FleetId is required'));
@@ -583,54 +598,31 @@ export class VehicleListComponent implements OnInit {
       return;
     }
 
-    const vehicleName = this.getVehicleTitle(vehicle);
-    this.confirm
-      .confirm(
-        this.translate.instant('vehicles.addToMaintenance.title'),
-        this.translate.instant('vehicles.addToMaintenance.confirm', { vehicle: vehicleName }),
-      )
-      .subscribe(confirmed => {
-        if (!confirmed) {
-          return;
-        }
-
-        this.addingMaintenanceIds.update(ids => [...ids, vehicle.id]);
-        this.maintenanceService
-          .create({
-            fleetId,
-            idVehicle,
-            idBooking: null,
-            idInsurancecompanies: null,
-            note: null,
-          })
-          .subscribe({
-            next: row => {
-              this.toast.success(this.translate.instant('vehicles.addToMaintenance.success'));
-              this.vehicles.update(items =>
-                items.map(item =>
-                  String(item.id) === String(vehicle.id) ? { ...item, status: 'Maintenance' } : item,
-                ),
-              );
-              this.loadStatusCounts();
-
-              const maintenanceId = row.id;
-              if (maintenanceId && maintenanceId !== '0') {
-                this.router.navigate(['/maintenance', 'edit', maintenanceId], {
-                  queryParams: { fleetId },
-                });
-              } else {
-                this.router.navigate(['/maintenance']);
-              }
-            },
-            error: err =>
-              this.toast.error(
-                err?.message ?? this.translate.instant('vehicles.addToMaintenance.failed'),
-              ),
-            complete: () =>
-              this.addingMaintenanceIds.update(ids =>
-                ids.filter(currentId => String(currentId) !== String(vehicle.id)),
-              ),
-          });
+    this.addingMaintenanceIds.update(ids => [...ids, vehicle.id]);
+    this.maintenanceService
+      .create({
+        fleetId,
+        idVehicle,
+        idBooking: null,
+        idInsurancecompanies: null,
+        note: null,
+      })
+      .subscribe({
+        next: () => {
+          this.toast.success(this.translate.instant('vehicles.addToMaintenance.success'));
+          this.vehicles.update(items =>
+            items.map(item =>
+              String(item.id) === String(vehicle.id) ? { ...item, status: 'Maintenance' } : item,
+            ),
+          );
+          this.loadStatusCounts();
+        },
+        error: err =>
+          this.toast.error(err?.message ?? this.translate.instant('vehicles.addToMaintenance.failed')),
+        complete: () =>
+          this.addingMaintenanceIds.update(ids =>
+            ids.filter(currentId => String(currentId) !== String(vehicle.id)),
+          ),
       });
   }
 
@@ -651,6 +643,19 @@ export class VehicleListComponent implements OnInit {
 
     modalRef.componentInstance.result.subscribe((selectedStatus: VehicleStatus | null) => {
       if (!selectedStatus || selectedStatus === vehicle.status) {
+        return;
+      }
+
+      if (selectedStatus === 'Maintenance') {
+        if (!this.canAddToMaintenance(vehicle)) {
+          if (vehicle.status === 'Booked') {
+            this.toast.error(this.translate.instant('vehicles.addToMaintenance.disabledBooked'));
+          } else if (vehicle.status === 'Sold') {
+            this.toast.error(this.translate.instant('vehicles.addToMaintenance.disabledSold'));
+          }
+          return;
+        }
+        this.createMaintenanceForVehicle(vehicle);
         return;
       }
 

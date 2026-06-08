@@ -20,6 +20,14 @@
   font-weight: 500;
 }
 
+:host-context(body.dark-only) .accounting-widget__header h3 {
+  color: #f1f5f9;
+}
+
+:host-context(body.dark-only) .accounting-widget__header p {
+  color: #cbd5e1;
+}
+
 .accounting-widget__chart {
   margin-top: 12px;
   height: 280px;

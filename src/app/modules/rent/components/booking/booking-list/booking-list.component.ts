@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -80,6 +81,7 @@ export class BookingListComponent implements OnInit {
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
   private translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
   bookings = signal<Booking[]>([]);
   totalCount = signal(0);
   totalPages = signal(0);
@@ -104,34 +106,44 @@ export class BookingListComponent implements OnInit {
     'Unknown',
   ];
   statusFilterOptions = computed<SmoothSelectOption[]>(() => {
+    this.langTick();
     const t = (key: string) => this.translate.instant(key);
     return [
       { label: t('All statuses'), value: '' },
       ...this.statusValues.map(status => ({ label: t(bookingStatusTranslationKey(status)), value: status })),
     ];
   });
-  branchFilterOptions = computed<SmoothSelectOption[]>(() => [
-    { label: this.translate.instant('All branches'), value: '' },
-    ...this.branches().map(branch => ({
-      label: this.getBranchOptionLabel(branch),
-      value: Number(branch.id),
-    })),
-  ]);
-  orderByOptions = computed<SmoothSelectOption[]>(() => [
-    { label: this.translate.instant('Created Date'), value: 'CreatedAt' },
-    { label: this.translate.instant('Start Date'), value: 'StartDate' },
-    { label: this.translate.instant('End Date'), value: 'EndDate' },
-    { label: this.translate.instant('Total'), value: 'TOTAL' },
-  ]);
-  orderDirectionOptions = computed<SmoothSelectOption[]>(() => [
-    { label: this.translate.instant('Descending'), value: 'DESC' },
-    { label: this.translate.instant('Ascending'), value: 'ASC' },
-  ]);
+  branchFilterOptions = computed<SmoothSelectOption[]>(() => {
+    this.langTick();
+    return [
+      { label: this.translate.instant('All branches'), value: '' },
+      ...this.branches().map(branch => ({
+        label: this.getBranchOptionLabel(branch),
+        value: Number(branch.id),
+      })),
+    ];
+  });
+  orderByOptions = computed<SmoothSelectOption[]>(() => {
+    this.langTick();
+    return [
+      { label: this.translate.instant('Created Date'), value: 'CreatedAt' },
+      { label: this.translate.instant('Start Date'), value: 'StartDate' },
+      { label: this.translate.instant('End Date'), value: 'EndDate' },
+      { label: this.translate.instant('Total'), value: 'TOTAL' },
+    ];
+  });
+  orderDirectionOptions = computed<SmoothSelectOption[]>(() => {
+    this.langTick();
+    return [
+      { label: this.translate.instant('Descending'), value: 'DESC' },
+      { label: this.translate.instant('Ascending'), value: 'ASC' },
+    ];
+  });
   private langTick = signal(0);
 
   colorGuide = computed(() => {
     this.langTick();
-    return getBookingListColorGuideItems(this.translate.currentLang || 'ar');
+    return getBookingListColorGuideItems((key: string) => this.translate.instant(key));
   });
 
   pageSubtitle = computed(() => {
@@ -340,7 +352,12 @@ export class BookingListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.translate.onLangChange.subscribe(() => this.langTick.update(v => v + 1));
+    this.translate.onLangChange
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.langTick.update(v => v + 1));
+    this.translate.onTranslationChange
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.langTick.update(v => v + 1));
     this.loadBranches();
     this.load();
   }

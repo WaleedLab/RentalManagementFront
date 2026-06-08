@@ -61,9 +61,9 @@
   --fin-health-attention: var(--c-ffb547);
   --fin-health-risk: var(--c-ff5a5a);
   --fin-health-muted: var(--app-dark-text-muted);
-  --fin-chart-grid: color-mix(in srgb, var(--app-dark-accent-cyan) 12%, transparent);
-  --fin-chart-tick: var(--app-dark-text-secondary);
-  --fin-chart-legend: var(--app-dark-text);
+  --fin-chart-grid: rgba(148, 163, 184, 0.22);
+  --fin-chart-tick: #cbd5e1;
+  --fin-chart-legend: #f1f5f9;
   --fin-shimmer-a: rgba(var(--c-94a3b8-rgb), 0.08);
   --fin-shimmer-b: rgba(var(--c-94a3b8-rgb), 0.18);
   --fin-timeline-bg: color-mix(in srgb, var(--app-dark-accent-emerald) 10%, transparent);

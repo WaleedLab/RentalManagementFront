@@ -163,6 +163,11 @@
                   @if (suspendStatusBadge(); as badge) {
                     <span class="rt-badge mt-2 d-inline-flex" [class]="badge.className">{{ badge.label }}</span>
                   }
+                  @if (moneySuspendBlocked() && !suspendLocked()) {
+                    <p class="contract-flow-hint contract-flow-hint--danger mt-2 mb-0" role="alert">
+                      {{ 'Contract suspend money balance required' | translate }}
+                    </p>
+                  }
                 </div>
                 <div class="finish-form-field finish-form-field--span-2">
                   <label class="finish-form-label">
@@ -512,7 +517,7 @@
                     [disabled]="suspendLocked()"
                     (input)="onSettlementPaidInput($any($event.target).value)"
                   />
-                  @if (isMoneySuspend() && !suspendLocked()) {
+                  @if (isMoneySuspend() && moneySuspendAllowed() && !suspendLocked()) {
                     <button
                       type="button"
                       class="btn btn-link btn-sm p-0 mt-1 contract-flow-link-btn"

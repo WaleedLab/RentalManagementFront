@@ -106,7 +106,7 @@
   "maintenance.finish.success": "تم إنهاء الصيانة وتحويلها إلى مكتملة.",
   "maintenance.finish.failed": "تعذر إنهاء سجل الصيانة.",
   "maintenance.finish.loadFailed": "تعذر تحميل بنود الصيانة.",
-  "maintenance.details.action": "تفاصيل الصيانة",
+  "maintenance.details.action": "إضافة قطع غيار",
   "maintenance.details.title": "تفاصيل الصيانة",
   "maintenance.details.message": "أضف قطع الغيار والفواتير المرتبطة بالمركبة {{vehicle}} أثناء التنفيذ.",
   "maintenance.details.existingTitle": "البنود المسجلة",

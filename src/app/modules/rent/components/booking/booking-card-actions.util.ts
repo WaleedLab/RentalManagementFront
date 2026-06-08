@@ -3,10 +3,24 @@ import { canBookingTranslateToDebtAction } from './booking-translate-debt.util';
 
 export { canBookingTranslateToDebtAction };
 
-/** عقد معلّق (حادث أو مبلغ). */
+/** عقد معلّق (حادث أو تعليق مالي). */
 export function isBookingSuspended(booking: Pick<Booking, 'status'> | null | undefined): boolean {
   const s = String(booking?.status ?? '').trim();
   return s === 'Suspended_due_to_accident' || s === 'Suspended_due_to_sum_money';
+}
+
+/** عقد محوّل إلى ذمم (`translate`). */
+export function isBookingReceivables(
+  booking: Pick<Booking, 'status'> | null | undefined,
+): boolean {
+  return String(booking?.status ?? '').trim() === 'translate';
+}
+
+/** إنهاء عبر صفحة `finish-suspended` (معلّق أو ذمم). */
+export function isBookingFinishSuspendedFlow(
+  booking: Pick<Booking, 'status'> | null | undefined,
+): boolean {
+  return isBookingSuspended(booking) || isBookingReceivables(booking);
 }
 
 /**
@@ -42,7 +56,7 @@ export function isBookingSuspendedDueToAccident(
   return String(booking?.status ?? '').trim() === 'Suspended_due_to_accident';
 }
 
-/** عقد معلّق — ذمم / مبالغ مستحقة. */
+/** عقد معلّق — تعليق مالي (قبل التحويل إلى ذمم). */
 export function isBookingSuspendedDueToSumMoney(
   booking: Pick<Booking, 'status'> | null | undefined,
 ): boolean {
@@ -51,7 +65,7 @@ export function isBookingSuspendedDueToSumMoney(
 
 /** مسار إنهاء العقد حسب الحالة. */
 export function bookingFinishRoute(booking: Pick<Booking, 'id' | 'status'>): (string | number)[] {
-  if (isBookingSuspended(booking)) {
+  if (isBookingFinishSuspendedFlow(booking)) {
     return ['/booking', 'finish-suspended', booking.id];
   }
   return ['/booking', 'finish', booking.id];
@@ -62,8 +76,11 @@ export function bookingFinishLabelKey(booking: Pick<Booking, 'status'>): string 
   if (isBookingSuspendedDueToAccident(booking)) {
     return 'Booking card finish after accident';
   }
-  if (isBookingSuspendedDueToSumMoney(booking)) {
+  if (isBookingReceivables(booking)) {
     return 'Booking card finish after debt';
+  }
+  if (isBookingSuspendedDueToSumMoney(booking)) {
+    return 'Booking card finish before debt';
   }
   return 'Booking card finish';
 }
@@ -73,7 +90,7 @@ export function bookingFinishActionClass(booking: Pick<Booking, 'status'>): stri
   if (isBookingSuspendedDueToAccident(booking)) {
     return 'booking-card__action--finish-suspended-accident';
   }
-  if (isBookingSuspendedDueToSumMoney(booking)) {
+  if (isBookingReceivables(booking) || isBookingSuspendedDueToSumMoney(booking)) {
     return 'booking-card__action--finish-suspended-debt';
   }
   return 'booking-card__action--finish';
@@ -84,20 +101,20 @@ export function bookingFinishToolbarButtonClass(booking: Pick<Booking, 'status'>
   if (isBookingSuspendedDueToAccident(booking)) {
     return 'btn-outline-danger';
   }
-  if (isBookingSuspendedDueToSumMoney(booking)) {
+  if (isBookingReceivables(booking) || isBookingSuspendedDueToSumMoney(booking)) {
     return 'btn-outline-warning';
   }
   return 'btn-outline-success';
 }
 
 export function canBookingFinishAction(booking: Booking): boolean {
-  return isBookingFullActions(booking) || isBookingSuspended(booking);
+  return isBookingFullActions(booking) || isBookingFinishSuspendedFlow(booking);
 }
 
 export function canBookingPrintAction(booking: Booking): boolean {
   return (
     isBookingFullActions(booking) ||
-    isBookingSuspended(booking) ||
+    isBookingFinishSuspendedFlow(booking) ||
     isBookingFinished(booking) ||
     isBookingClosed(booking)
   );

@@ -1,0 +1,81 @@
+// Central sticky offset: measured/fallback header height + 40px gap (all pages, languages, themes).
+:root {
+  --app-compact-header-offset: 68px;
+  --app-sticky-header-gap: 40px;
+  --app-sticky-below-header: calc(var(--app-compact-header-offset) + var(--app-sticky-header-gap));
+  --app-sticky-panel-bottom-gap: 0.35rem;
+  --app-sticky-panel-max-height: calc(
+    100vh - var(--app-sticky-below-header) - var(--app-sticky-panel-bottom-gap)
+  );
+}
+
+@mixin app-sticky-index-panel {
+  position: -webkit-sticky;
+  position: sticky;
+  top: var(--app-sticky-below-header);
+  inset-block-start: var(--app-sticky-below-header);
+  max-height: var(--app-sticky-panel-max-height);
+  min-height: min(22rem, var(--app-sticky-panel-max-height));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: 2;
+}
+
+.page-wrapper.compact-wrapper {
+  .contract-flow-aside,
+  .booking-wizard-summary,
+  .customer-details-card--side,
+  [class$='-form-aside'] {
+    @include app-sticky-index-panel;
+  }
+
+  .contract-flow-page {
+    [class$='-form-section'],
+    .finish-form-section {
+      scroll-margin-top: var(--app-sticky-below-header);
+    }
+  }
+}
+
+/* RTL / Arabic: same tokens + reinforced sticky (legacy theme + Cairo line-height can shrink the gap). */
+html[dir='rtl'] .page-wrapper.compact-wrapper,
+html[lang='ar'] .page-wrapper.compact-wrapper,
+body.rtl .page-wrapper.compact-wrapper {
+  .contract-flow-aside,
+  .booking-wizard-summary,
+  .customer-details-card--side,
+  [class$='-form-aside'] {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: var(--app-sticky-below-header) !important;
+    inset-block-start: var(--app-sticky-below-header) !important;
+    max-height: var(--app-sticky-panel-max-height) !important;
+  }
+}
+
+@media (max-width: 1199px) {
+  .page-wrapper.compact-wrapper {
+    .contract-flow-aside,
+    .booking-wizard-summary,
+    [class$='-form-aside'] {
+      position: static;
+      inset-block-start: auto;
+      max-height: none;
+      min-height: 0;
+      overflow-y: visible;
+    }
+  }
+
+  html[dir='rtl'] .page-wrapper.compact-wrapper,
+  html[lang='ar'] .page-wrapper.compact-wrapper,
+  body.rtl .page-wrapper.compact-wrapper {
+    .contract-flow-aside,
+    .booking-wizard-summary,
+    [class$='-form-aside'] {
+      position: static !important;
+      inset-block-start: auto !important;
+      top: auto !important;
+      max-height: none !important;
+    }
+  }
+}

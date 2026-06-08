@@ -134,6 +134,22 @@ export class BookingSuspendComponent implements OnInit {
 
   isAccidentSuspend = computed(() => this.suspendStatus() === 'Suspended_due_to_accident');
 
+  /** المتبقي على العقد قبل سداد التسوية (قد يكون سالباً عند الدفع الزائد). */
+  contractBalanceRaw = computed(() => {
+    const b = this.booking();
+    if (!b) {
+      return 0;
+    }
+    const total = this.computedGrandTotal();
+    const paid = this.paymentsTotalDisplay();
+    return Math.round((total - paid) * 100) / 100;
+  });
+
+  /** التعليق المالي مسموح فقط عند وجود مبلغ متبقٍ أكبر من صفر. */
+  moneySuspendAllowed = computed(() => this.contractBalanceRaw() > 0.009);
+
+  moneySuspendBlocked = computed(() => this.isMoneySuspend() && !this.moneySuspendAllowed());
+
   suspendStatusOptions = computed<SmoothSelectOption[]>(() => [
     {
       label: this.translate.instant('Booking status.Suspended_due_to_accident'),
@@ -281,6 +297,9 @@ export class BookingSuspendComponent implements OnInit {
     if (this.suspendLocked() || this.saving()) {
       return true;
     }
+    if (this.moneySuspendBlocked()) {
+      return true;
+    }
     if (!this.suspendReasonSectionComplete()) {
       return true;
     }
@@ -332,7 +351,8 @@ export class BookingSuspendComponent implements OnInit {
     return Math.round(Math.max(0, hours) * Math.max(0, rate) * 100) / 100;
   });
 
-  computedNetBeforeTax = computed(() => {
+  /** Rental + extras + fees − discount. Traffic fines and repairs are excluded from VAT base. */
+  computedTaxableNet = computed(() => {
     const b = this.booking();
     if (!b) {
       return 0;
@@ -343,35 +363,38 @@ export class BookingSuspendComponent implements OnInit {
     const other = Math.max(0, Number(b.otherExpenses ?? 0) || 0);
     const trans = Math.max(0, Number(b.transportationFees ?? 0) || 0);
     const sum =
-      rental +
-      this.extraHoursTotal() +
-      this.extraKmTotal() +
-      other +
-      this.traffic() +
-      this.repairs() +
-      trans -
-      disc;
+      rental + this.extraHoursTotal() + this.extraKmTotal() + other + trans - disc;
     return Math.round(Math.max(0, sum) * 100) / 100;
   });
 
-  /** Scale tax with net so changing return time/odometer updates VAT roughly like the original contract ratio. */
+  /** Scale VAT on taxable lines only; traffic and repairs are added after tax on the grand total. */
   computedTaxAmount = computed(() => {
     const b = this.booking();
     if (!b) {
       return 0;
     }
-    const net = this.computedNetBeforeTax();
+    const taxableNet = this.computedTaxableNet();
     const oldTotal = Math.max(0, Number(b.totalAmount ?? 0) || 0);
     const oldTax = Math.max(0, Number(b.totaltax ?? 0) || 0);
-    const oldNet = Math.max(0, oldTotal - oldTax);
-    if (oldNet < 1e-4) {
+    const oldTraffic = Math.max(0, Number(b.totalTrafic ?? 0) || 0);
+    const oldRepairs = Math.max(0, Number(b.totalMaintance ?? 0) || 0);
+    const oldTaxableNet = Math.max(0, oldTotal - oldTax - oldTraffic - oldRepairs);
+    if (oldTaxableNet < 1e-4) {
       return Math.round(oldTax * 100) / 100;
     }
-    return Math.round(Math.max(0, net * (oldTax / oldNet)) * 100) / 100;
+    return Math.round(Math.max(0, taxableNet * (oldTax / oldTaxableNet)) * 100) / 100;
   });
 
   computedGrandTotal = computed(() => {
-    return Math.round((this.computedNetBeforeTax() + this.computedTaxAmount()) * 100) / 100;
+    return (
+      Math.round(
+        (this.computedTaxableNet() +
+          this.computedTaxAmount() +
+          this.traffic() +
+          this.repairs()) *
+          100,
+      ) / 100
+    );
   });
 
   /** Paid total from payment-counts aggregate, else booking `paidtotal`. */
@@ -384,15 +407,7 @@ export class BookingSuspendComponent implements OnInit {
     return Math.max(0, Number(b?.paidtotal ?? 0) || 0);
   });
 
-  balanceDisplay = computed(() => {
-    const b = this.booking();
-    if (!b) {
-      return 0;
-    }
-    const total = this.computedGrandTotal();
-    const paid = this.paymentsTotalDisplay();
-    return Math.max(0, Math.round((total - paid) * 100) / 100);
-  });
+  balanceDisplay = computed(() => Math.max(0, this.contractBalanceRaw()));
 
   computedRentalTotal = computed(() => {
     const b = this.booking();
@@ -727,14 +742,19 @@ export class BookingSuspendComponent implements OnInit {
 
   onSuspendStatusChange(value: string): void {
     const v = String(value ?? '').trim() as BookingSuspendedStatus;
-    if (v === 'Suspended_due_to_accident' || v === 'Suspended_due_to_sum_money') {
-      this.suspendStatus.set(v);
-      this.settlementUserEdited.set(false);
-      this.settlementPaidAmount.set(0);
-      this.paidCash.set(0);
-      this.paidBank.set(0);
-      this.applySettlementDistribution(0, this.paymentMethod());
+    if (v !== 'Suspended_due_to_accident' && v !== 'Suspended_due_to_sum_money') {
+      return;
     }
+    if (v === 'Suspended_due_to_sum_money' && !this.moneySuspendAllowed()) {
+      this.toast.error(this.translate.instant('Contract suspend money balance required'));
+      return;
+    }
+    this.suspendStatus.set(v);
+    this.settlementUserEdited.set(false);
+    this.settlementPaidAmount.set(0);
+    this.paidCash.set(0);
+    this.paidBank.set(0);
+    this.applySettlementDistribution(0, this.paymentMethod());
   }
 
   onPaymentMethodChange(value: string): void {
@@ -845,6 +865,10 @@ export class BookingSuspendComponent implements OnInit {
     const reason = this.suspendReason().trim();
     if (!reason) {
       this.toast.error(this.translate.instant('Contract suspend reason required'));
+      return;
+    }
+    if (this.isMoneySuspend() && !this.moneySuspendAllowed()) {
+      this.toast.error(this.translate.instant('Contract suspend money balance required'));
       return;
     }
 

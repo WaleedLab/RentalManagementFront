@@ -373,6 +373,6 @@ describe('PaymentCountListComponent', () => {
     const row = component.rows()[0];
     expect(row['booking']).toBe('BK-44 - Ahmed Ali');
     expect(row['customer']).toBe('Ahmed Ali');
-    expect(row['vehicle']).toBe('Toyota Camry - ABC-123');
+    expect(row['vehicle']).toBe('ABC-123');
   });
 });

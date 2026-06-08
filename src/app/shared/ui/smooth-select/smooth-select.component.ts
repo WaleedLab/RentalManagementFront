@@ -86,6 +86,8 @@ export class SmoothSelectComponent implements ControlValueAccessor, OnInit, OnCh
   private disabledFromControl = signal(false);
   /** Bumps when `options` @Input changes so computeds refresh (e.g. language switch). */
   private readonly optionsVersion = signal(0);
+  /** Bumps on language / translation bundle changes for placeholder labels. */
+  private readonly langTick = signal(0);
   private onChange: (value: SmoothSelectValue) => void = () => {};
   private onTouched: () => void = () => {};
 
@@ -122,6 +124,7 @@ export class SmoothSelectComponent implements ControlValueAccessor, OnInit, OnCh
 
   selectedLabel = computed(() => {
     this.optionsVersion();
+    this.langTick();
     const selectedOption = this.options.find(option => this.areValuesEqual(option.value, this.internalValue()));
     if (selectedOption) {
       return this.optionLabelText(selectedOption);
@@ -143,6 +146,12 @@ export class SmoothSelectComponent implements ControlValueAccessor, OnInit, OnCh
       if (event instanceof NavigationStart) {
         this.close();
       }
+    });
+    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.langTick.update(v => v + 1);
+    });
+    this.translate.onTranslationChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.langTick.update(v => v + 1);
     });
   }
 

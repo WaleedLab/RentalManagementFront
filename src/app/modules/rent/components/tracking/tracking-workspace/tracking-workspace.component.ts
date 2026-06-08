@@ -2,19 +2,19 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   DestroyRef,
-  ElementRef,
   HostListener,
   OnInit,
   computed,
   inject,
   input,
   signal,
+  ElementRef,
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject, debounceTime, distinctUntilChanged, finalize, map, skip, switchMap, throwError } from 'rxjs';
 
@@ -29,6 +29,7 @@ import {
 import { TrackingWorkspaceContext, TrackingWorkspaceSession } from '../../../models/tracking/tracking.model';
 import { VehicleTrackingService } from '../../../services/tracking/vehicle-tracking.service';
 import { resolveTrackingErrorMessage } from '../../../utils/tracking-error.utils';
+import { prepareTrackingIframeHtml, wrapTrackingIframeUrl } from '../../../utils/tracking-iframe-fill.util';
 
 @Component({
   selector: 'app-tracking-workspace',
@@ -43,6 +44,10 @@ import { resolveTrackingErrorMessage } from '../../../utils/tracking-error.utils
   ],
   templateUrl: './tracking-workspace.component.html',
   styleUrl: './tracking-workspace.component.scss',
+  host: {
+    class: 'tw-host',
+    '[class.tw-host--fullscreen]': 'fullscreen()',
+  },
 })
 export class TrackingWorkspaceComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
@@ -57,7 +62,7 @@ export class TrackingWorkspaceComponent implements OnInit {
 
   context = input.required<TrackingWorkspaceContext>();
 
-  mapHost = viewChild<ElementRef<HTMLElement>>('mapHost');
+  private readonly mapFrame = viewChild<ElementRef<HTMLIFrameElement>>('mapFrame');
 
   loading = signal(false);
   mapLoading = signal(false);
@@ -70,14 +75,21 @@ export class TrackingWorkspaceComponent implements OnInit {
     dateTo: [''],
   });
 
-  safeIframeUrl = computed<SafeResourceUrl | null>(() => {
-    const url = this.session()?.iframeUrl;
-    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
-  });
-
-  safeIframeSrcdoc = computed<SafeHtml | null>(() => {
-    const html = this.session()?.iframeSrcdoc;
-    return html ? this.sanitizer.bypassSecurityTrustHtml(html) : null;
+  /** API HTML/URL prepared to fill the map shell (responsive srcdoc). */
+  trackingIframeDoc = computed<SafeHtml | null>(() => {
+    const session = this.session();
+    if (!session) {
+      return null;
+    }
+    const html = session.iframeSrcdoc?.trim();
+    if (html) {
+      return this.sanitizer.bypassSecurityTrustHtml(prepareTrackingIframeHtml(html));
+    }
+    const url = session.iframeUrl?.trim();
+    if (url) {
+      return this.sanitizer.bypassSecurityTrustHtml(wrapTrackingIframeUrl(url));
+    }
+    return null;
   });
 
   liveLabel = computed(() => {
@@ -149,6 +161,13 @@ export class TrackingWorkspaceComponent implements OnInit {
       .subscribe(() => this.queueTrack());
 
     this.queueTrack();
+
+    this.destroyRef.onDestroy(() => {
+      if (typeof document !== 'undefined') {
+        document.body.classList.remove('tracking-workspace-fullscreen');
+        document.body.style.overflow = '';
+      }
+    });
   }
 
   trackNow(): void {
@@ -240,23 +259,53 @@ export class TrackingWorkspaceComponent implements OnInit {
 
   onIframeLoad(): void {
     this.mapLoading.set(false);
+    this.notifyTrackingIframeResize();
+  }
+
+  /** Ask embedded report (and nested maps) to reflow after the shell size is known. */
+  private notifyTrackingIframeResize(): void {
+    const frame = this.mapFrame()?.nativeElement;
+    const docWindow = frame?.contentWindow;
+    if (!docWindow) {
+      return;
+    }
+
+    const stretch = (docWindow as Window & { __rentalStretchTrackingReport?: () => void })
+      .__rentalStretchTrackingReport;
+
+    docWindow.dispatchEvent(new Event('resize'));
+    stretch?.();
+
+    window.setTimeout(() => {
+      docWindow.dispatchEvent(new Event('resize'));
+      stretch?.();
+    }, 350);
+
+    window.setTimeout(() => stretch?.(), 1200);
   }
 
   toggleFullscreen(): void {
-    const host = this.mapHost()?.nativeElement;
-    if (!host) {
+    const next = !this.fullscreen();
+    this.fullscreen.set(next);
+    if (typeof document === 'undefined') {
       return;
     }
-    if (!document.fullscreenElement) {
-      host.requestFullscreen?.().then(() => this.fullscreen.set(true)).catch(() => undefined);
-      return;
-    }
-    document.exitFullscreen?.().then(() => this.fullscreen.set(false)).catch(() => undefined);
+    document.body.classList.toggle('tracking-workspace-fullscreen', next);
+    document.body.style.overflow = next ? 'hidden' : '';
+    window.setTimeout(() => this.notifyTrackingIframeResize(), 120);
+    window.setTimeout(() => this.notifyTrackingIframeResize(), 500);
   }
 
-  @HostListener('document:fullscreenchange')
-  onFullscreenChange(): void {
-    this.fullscreen.set(Boolean(document.fullscreenElement));
+  @HostListener('document:keydown.escape')
+  onEscapeFullscreen(): void {
+    if (!this.fullscreen()) {
+      return;
+    }
+    this.fullscreen.set(false);
+    if (typeof document !== 'undefined') {
+      document.body.classList.remove('tracking-workspace-fullscreen');
+      document.body.style.overflow = '';
+    }
   }
 
   toggleTheme(): void {

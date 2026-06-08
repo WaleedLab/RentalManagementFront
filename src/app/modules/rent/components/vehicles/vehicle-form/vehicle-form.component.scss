@@ -130,7 +130,6 @@
   padding: 0;
   overflow-x: clip;
   overflow-y: visible;
-  scroll-margin-top: calc(var(--app-compact-header-offset, 68px) + 0.75rem);
   transition:
     border-color 0.25s ease,
     box-shadow 0.25s ease;

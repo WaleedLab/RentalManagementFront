@@ -3,14 +3,6 @@ $sidebar-width: 246px;
 $sidebar-collapsed-width: 78px;
 
 .page-wrapper.compact-wrapper {
-  --app-compact-header-offset: 68px;
-  /* Sticky panels (form summaries, side cards) sit below the fixed header when scrolling */
-  --app-sticky-below-header: calc(var(--app-compact-header-offset) + 0.75rem);
-  --app-sticky-panel-bottom-gap: 0.35rem;
-  --app-sticky-panel-max-height: calc(
-    100vh - var(--app-sticky-below-header) - var(--app-sticky-panel-bottom-gap)
-  );
-
   .page-header .header-wrapper {
     padding: 9px 20px !important;
   }
@@ -1314,17 +1306,5 @@ body.dark-only .page-wrapper.compact-wrapper .page-header .header-wrapper .toggl
 
   .page-wrapper.compact-wrapper .page-body-wrapper > .sidebar-wrapper {
     z-index: 10040 !important;
-  }
-}
-
-/* Sticky side summaries / panels — keep below fixed app header on scroll */
-.page-wrapper.compact-wrapper {
-  .booking-wizard-summary,
-  .customer-details-card--side {
-    top: var(--app-sticky-below-header);
-    max-height: var(--app-sticky-panel-max-height);
-    min-height: min(22rem, var(--app-sticky-panel-max-height));
-    overflow-y: auto;
-    overscroll-behavior: contain;
   }
 }

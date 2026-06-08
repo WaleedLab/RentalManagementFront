@@ -1,60 +1,77 @@
-<div
-  class="tw"
-  [class.tw--fullscreen]="fullscreen()"
-  [class.tw--loading]="loading()"
-  [formGroup]="filtersForm"
->
-  <app-list-command-bar
-    [title]="pageTitleKey()"
-    [subtitle]="pageSubtitle()"
-    [iconSrc]="pageIconSrc"
-    commandClass="tw-command"
-    toolbarClass="tw-command__toolbar"
-  >
-    <a commandLeading class="tw-back" [routerLink]="context().backLink">
-      <i class="fa-solid fa-arrow-right-long" aria-hidden="true"></i>
-    </a>
-
-    <ng-container commandActions>
+<div class="tw" [class.tw--loading]="loading()" [formGroup]="filtersForm">
+  @if (fullscreen()) {
+    <div class="tw-float-bar" role="toolbar" [attr.aria-label]="'Tracking fullscreen' | translate">
+      <a class="tw-back" [routerLink]="context().backLink">
+        <i class="fa-solid fa-arrow-right-long" aria-hidden="true"></i>
+      </a>
+      <div class="tw-float-bar__title">
+        <strong>{{ pageTitleKey() | translate }}</strong>
+        <span>{{ pageSubtitle() }}</span>
+      </div>
       <div class="tw-topbar__status" [class]="liveClass()">
         <span class="tw-live-dot" aria-hidden="true"></span>
         <span>{{ liveLabel() | translate }}</span>
-        @if (session()?.lastUpdated) {
-          <span class="tw-topbar__updated">
-            · {{ session()?.lastUpdated | date: 'short' }}
-          </span>
-        }
       </div>
-      @if (context().detailsLink) {
-        <a class="tw-icon-btn" [routerLink]="context().detailsLink!" [title]="'Details' | translate">
-          <i class="fa-solid fa-eye"></i>
-        </a>
-      }
-      <button class="tw-icon-btn" type="button" (click)="toggleTheme()" [title]="'Tracking toggle theme' | translate">
-        <i class="fa-solid" [class.fa-moon]="isDarkTheme()" [class.fa-sun]="!isDarkTheme()"></i>
-      </button>
       <button class="tw-icon-btn" type="button" (click)="refresh()" [disabled]="loading()" [title]="'Refresh tracking' | translate">
         <i class="fa-solid fa-rotate" [class.fa-spin]="loading()"></i>
       </button>
-      <button class="tw-icon-btn" type="button" (click)="toggleFullscreen()" [title]="'Tracking fullscreen' | translate">
-        <i class="fa-solid" [class.fa-compress]="fullscreen()" [class.fa-expand]="!fullscreen()"></i>
+      <button class="tw-icon-btn" type="button" (click)="toggleFullscreen()" [title]="'Tracking exit fullscreen' | translate">
+        <i class="fa-solid fa-compress" aria-hidden="true"></i>
       </button>
-    </ng-container>
+    </div>
+  } @else {
+    <app-list-command-bar
+      [title]="pageTitleKey()"
+      [subtitle]="pageSubtitle()"
+      [iconSrc]="pageIconSrc"
+      commandClass="tw-command"
+      toolbarClass="tw-command__toolbar"
+    >
+      <a commandLeading class="tw-back" [routerLink]="context().backLink">
+        <i class="fa-solid fa-arrow-right-long" aria-hidden="true"></i>
+      </a>
 
-    <ng-container commandToolbar>
-      <label class="fin-field fin-field--range tw-command__dates">
-        <app-date-range-filter
-          [from]="filtersForm.controls.dateFrom.value"
-          [to]="filtersForm.controls.dateTo.value"
-          [fromLabel]="'From date'"
-          [toLabel]="'To date'"
-          [fromPlaceholder]="'From date'"
-          [toPlaceholder]="'To date'"
-          (rangeChange)="onDateRangeChange($event)"
-        />
-      </label>
-    </ng-container>
-  </app-list-command-bar>
+      <ng-container commandActions>
+        <div class="tw-topbar__status" [class]="liveClass()">
+          <span class="tw-live-dot" aria-hidden="true"></span>
+          <span>{{ liveLabel() | translate }}</span>
+          @if (session()?.lastUpdated) {
+            <span class="tw-topbar__updated">
+              · {{ session()?.lastUpdated | date: 'short' }}
+            </span>
+          }
+        </div>
+        @if (context().detailsLink) {
+          <a class="tw-icon-btn" [routerLink]="context().detailsLink!" [title]="'Details' | translate">
+            <i class="fa-solid fa-eye"></i>
+          </a>
+        }
+        <button class="tw-icon-btn" type="button" (click)="toggleTheme()" [title]="'Tracking toggle theme' | translate">
+          <i class="fa-solid" [class.fa-moon]="isDarkTheme()" [class.fa-sun]="!isDarkTheme()"></i>
+        </button>
+        <button class="tw-icon-btn" type="button" (click)="refresh()" [disabled]="loading()" [title]="'Refresh tracking' | translate">
+          <i class="fa-solid fa-rotate" [class.fa-spin]="loading()"></i>
+        </button>
+        <button class="tw-icon-btn" type="button" (click)="toggleFullscreen()" [title]="'Tracking fullscreen' | translate">
+          <i class="fa-solid fa-expand"></i>
+        </button>
+      </ng-container>
+
+      <ng-container commandToolbar>
+        <label class="fin-field fin-field--range tw-command__dates">
+          <app-date-range-filter
+            [from]="filtersForm.controls.dateFrom.value"
+            [to]="filtersForm.controls.dateTo.value"
+            [fromLabel]="'From date'"
+            [toLabel]="'To date'"
+            [fromPlaceholder]="'From date'"
+            [toPlaceholder]="'To date'"
+            (rangeChange)="onDateRangeChange($event)"
+          />
+        </label>
+      </ng-container>
+    </app-list-command-bar>
+  }
 
   <section class="tw-map-stage" #mapHost>
     <div class="tw-map-shell">
@@ -66,24 +83,14 @@
         </div>
       }
 
-      @if (safeIframeSrcdoc(); as srcdoc) {
+      @if (trackingIframeDoc(); as srcdoc) {
         <iframe
+          #mapFrame
           class="tw-map-frame"
           [srcdoc]="srcdoc"
           [class.tw-map-frame--hidden]="mapLoading()"
           [title]="'Live map' | translate"
           loading="lazy"
-          (load)="onIframeLoad()"
-        ></iframe>
-      } @else if (safeIframeUrl(); as iframeUrl) {
-        <iframe
-          class="tw-map-frame"
-          [src]="iframeUrl"
-          [class.tw-map-frame--hidden]="mapLoading()"
-          [title]="'Live map' | translate"
-          loading="lazy"
-          allow="fullscreen"
-          referrerpolicy="no-referrer-when-downgrade"
           (load)="onIframeLoad()"
         ></iframe>
       } @else if (!loading()) {

@@ -13,6 +13,8 @@
 @import './styles/color-system';
 @import './styles/scrollbars';
 @import './styles/contract-flow-layout';
+@import './styles/sticky-layout';
+@import './styles/modal-layout';
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
@@ -209,16 +211,66 @@ body.dark-only {
   background: transparent !important;
 }
 
-/* Tracking: keep app footer visible (do not stretch content to full viewport). */
+/* Tracking: map fills viewport slice between breadcrumb and footer (no gray gap below). */
 .page-body:has(app-vehicle-tracking),
 .page-body:has(app-booking-tracking) {
   z-index: auto !important;
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 12.5rem);
+  max-height: calc(100dvh - 12.5rem);
   min-height: 0;
-  padding-bottom: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
+  padding-bottom: 0;
+  box-sizing: border-box;
+
+  > .container-fluid:first-child {
+    flex: 0 0 auto;
+  }
 
   > app-vehicle-tracking,
   > app-booking-tracking {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .page-body:has(app-vehicle-tracking),
+  .page-body:has(app-booking-tracking) {
+    height: calc(100dvh - 13.5rem);
+    max-height: calc(100dvh - 13.5rem);
+  }
+}
+
+/* Tracking fullscreen: hide app chrome trapped above isolated page-body stacking context. */
+body.tracking-workspace-fullscreen {
+  overflow: hidden !important;
+
+  .page-header,
+  app-header,
+  .sidebar-wrapper,
+  app-footer,
+  .tap-top {
+    display: none !important;
+  }
+
+  .page-body .container-fluid:has(app-breadcrumb),
+  .page-body > .container-fluid:first-child {
+    display: none !important;
+  }
+
+  .page-body:has(app-vehicle-tracking),
+  .page-body:has(app-booking-tracking) {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    margin-top: 0 !important;
+    padding: 0 !important;
   }
 }
 
@@ -828,29 +880,6 @@ h2,
   line-height: var(--line-height-heading);
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--letter-spacing-heading);
-}
-
-.modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.65rem;
-
-  .modal-title {
-    flex: 1;
-    min-width: 0;
-    margin: 0;
-    padding-inline-end: 0.15rem;
-    line-height: 1.45;
-    word-break: break-word;
-  }
-
-  .btn-close {
-    position: static;
-    margin: 0;
-    flex-shrink: 0;
-    align-self: flex-start;
-  }
 }
 
 h3,

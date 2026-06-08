@@ -2,10 +2,6 @@
   border-bottom: 1px solid var(--app-modal-border, rgba(var(--c-e2e8f0-rgb), 0.8));
 }
 
-.maintenance-finish-dialog__close {
-  margin-inline-start: auto;
-}
-
 .maintenance-finish-dialog__message {
   margin-bottom: 1rem;
   color: var(--app-table-muted-color);

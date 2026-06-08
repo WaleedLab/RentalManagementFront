@@ -327,18 +327,14 @@ export function getBookingListCardStatusClass(status: string): string {
 }
 
 export function getBookingListColorGuideItems(
-  lang: string,
+  translate: (key: string) => string,
 ): Array<{ key: BookingStatusKey; label: string; color: string }> {
-  const useAr = (lang || 'ar').toLowerCase().startsWith('ar');
-  return BOOKING_LIST_COLOR_GUIDE_KEYS.map(key => {
-    const theme = BOOKING_STATUS_THEME[key];
-    return {
-      key,
-      label: useAr ? theme.labelAr : theme.labelEn,
-      /** نفس لون الحافة على كرت الحجز — `--app-booking-list-accent-*`. */
-      color: BOOKING_LIST_LEGEND_ACCENT[key] ?? BOOKING_LIST_LEGEND_ACCENT.Unknown!,
-    };
-  });
+  return BOOKING_LIST_COLOR_GUIDE_KEYS.map(key => ({
+    key,
+    label: translate(bookingStatusTranslationKey(key)),
+    /** نفس لون الحافة على كرت الحجز — `--app-booking-list-accent-*`. */
+    color: BOOKING_LIST_LEGEND_ACCENT[key] ?? BOOKING_LIST_LEGEND_ACCENT.Unknown!,
+  }));
 }
 
 /** CSS custom properties for status-tinted surfaces (cards, hero cells, badges). */
