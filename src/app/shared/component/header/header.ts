@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, HostListener, NgZone, OnDestroy, OnInit, 
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 
+import { LayoutService } from '../../services/layout/layout.service';
 import { NavMenuService } from '../../services/layout/nav-menu.service';
 import { Language } from './language/language';
 import { Notification } from './notification/notification';
@@ -23,6 +24,7 @@ import { Theme } from './theme/theme';
 })
 export class Header implements OnInit, OnDestroy {
   public navmenu = inject(NavMenuService);
+  private layout = inject(LayoutService);
   private translate = inject(TranslateService);
   private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
@@ -40,6 +42,7 @@ export class Header implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.layout.scheduleCompactHeaderOffsetSync();
     this.refreshDateTime();
     this.clockIntervalId = setInterval(() => {
       this.zone.run(() => {
@@ -49,6 +52,7 @@ export class Header implements OnInit, OnDestroy {
     }, 1000);
     this.languageSubscription = this.translate.onLangChange.subscribe(() => {
       this.refreshDateTime();
+      this.layout.scheduleCompactHeaderOffsetSync();
       this.cdr.detectChanges();
     });
   }
@@ -70,6 +74,7 @@ export class Header implements OnInit, OnDestroy {
   @HostListener('window:resize')
   onResize() {
     this.navmenu.isDisplay = window.innerWidth < 992;
+    this.layout.scheduleCompactHeaderOffsetSync();
   }
 
   private refreshDateTime(): void {

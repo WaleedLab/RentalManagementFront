@@ -244,7 +244,7 @@ export class PaymentCountListComponent implements OnInit {
           if (!key) continue;
           const title = [vehicle.make, vehicle.model].filter(Boolean).join(' ');
           const plate = vehicle.plateNumber?.trim() || '';
-          vehicleDict[key] = [title, plate].filter(Boolean).join(' - ') || '-';
+          vehicleDict[key] = plate || '-';
           vehicleDetailDict[key] = {
             name: title || '-',
             plateNumber: plate || '-',
@@ -592,16 +592,42 @@ export class PaymentCountListComponent implements OnInit {
   }
 
   private resolveVehicleName(item: PaymentCount): string {
-    const direct = String(
-      (item as { vehicleName?: string; nameVehicle?: string; carName?: string }).vehicleName ??
-        (item as { nameVehicle?: string }).nameVehicle ??
-        (item as { carName?: string }).carName ??
-        '',
-    ).trim();
-    if (direct) return direct;
+    const plate = this.readBackendText(item, [
+      'plateNumber',
+      'PlateNumber',
+      'vehiclePlatnumber',
+      'VehiclePlatnumber',
+    ]);
+    if (plate) {
+      return plate;
+    }
+
     const key = String(item.idVehicle ?? '').trim();
-    if (!key) return '-';
-    return this.vehicleNames()[key] || '-';
+    if (key) {
+      const fromDetails = this.vehicleDetails()[key]?.plateNumber;
+      if (fromDetails && fromDetails !== '-') {
+        return fromDetails;
+      }
+      const fromLookup = this.vehicleNames()[key];
+      if (fromLookup && fromLookup !== '-') {
+        return fromLookup;
+      }
+    }
+
+    const combined = this.readBackendText(item, [
+      'vehicleName',
+      'VehicleName',
+      'nameVehicle',
+      'NameVehicle',
+      'carName',
+      'CarName',
+    ]);
+    if (combined) {
+      const dashSplit = combined.split(' - ');
+      return (dashSplit.length > 1 ? dashSplit[0] : combined).trim() || '-';
+    }
+
+    return '-';
   }
 
   private readBackendText(item: PaymentCount, keys: string[]): string {

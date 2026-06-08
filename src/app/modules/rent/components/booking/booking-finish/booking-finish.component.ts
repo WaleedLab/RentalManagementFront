@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, ElementRef, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -50,7 +51,7 @@ import {
   roundSettlementMoney,
   settlementMoneyInputDisplay,
 } from '../booking-settlement-payment.util';
-import { isBookingSuspended } from '../booking-card-actions.util';
+import { isBookingFinishSuspendedFlow } from '../booking-card-actions.util';
 
 @Component({
   selector: 'app-booking-finish',
@@ -91,6 +92,8 @@ export class BookingFinishComponent implements OnInit {
   private settingService = inject(SettingService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly langTick = signal(0);
 
   booking = signal<Booking | null>(null);
   /** Branch of the contract vehicle (preferred for settlement payments). */
@@ -132,29 +135,38 @@ export class BookingFinishComponent implements OnInit {
   /** Fleet settings: grace minutes, free late hours, late-hours-per-day threshold. */
   settings = signal<Setting | null>(null);
 
-  paymentTypeOptions = computed<SmoothSelectOption[]>(() => [
-    { label: this.translate.instant('Cash'), value: 1 },
-    { label: this.translate.instant('Network/POS'), value: 2 },
-    { label: this.translate.instant('Cheque'), value: 3 },
-    { label: this.translate.instant('Bank Transfer'), value: 4 },
-    { label: this.translate.instant('Bank/Cash'), value: 5 },
-  ]);
+  paymentTypeOptions = computed<SmoothSelectOption[]>(() => {
+    this.langTick();
+    return [
+      { label: this.translate.instant('Cash'), value: 1 },
+      { label: this.translate.instant('Network/POS'), value: 2 },
+      { label: this.translate.instant('Cheque'), value: 3 },
+      { label: this.translate.instant('Bank Transfer'), value: 4 },
+      { label: this.translate.instant('Bank/Cash'), value: 5 },
+    ];
+  });
 
-  cashAccountOptions = computed<SmoothSelectOption[]>(() => [
-    { label: this.translate.instant('Select cash account'), value: '' },
-    ...this.cashAccounts().map(c => ({
-      label: c.name || '-',
-      value: String(c.id),
-    })),
-  ]);
+  cashAccountOptions = computed<SmoothSelectOption[]>(() => {
+    this.langTick();
+    return [
+      { label: this.translate.instant('Select cash account'), value: '' },
+      ...this.cashAccounts().map(c => ({
+        label: c.name || '-',
+        value: String(c.id),
+      })),
+    ];
+  });
 
-  bankAccountOptions = computed<SmoothSelectOption[]>(() => [
-    { label: this.translate.instant('Select bank'), value: '' },
-    ...this.banks().map(b => ({
-      label: b.name || '-',
-      value: String(b.id),
-    })),
-  ]);
+  bankAccountOptions = computed<SmoothSelectOption[]>(() => {
+    this.langTick();
+    return [
+      { label: this.translate.instant('Select bank'), value: '' },
+      ...this.banks().map(b => ({
+        label: b.name || '-',
+        value: String(b.id),
+      })),
+    ];
+  });
 
   totalKmAllowance = computed(() => {
     const b = this.booking();
@@ -242,6 +254,7 @@ export class BookingFinishComponent implements OnInit {
   });
 
   returnOdometerViolationHint = computed((): string | null => {
+    this.langTick();
     const b = this.booking();
     if (!b || this.finishLocked()) {
       return null;
@@ -257,6 +270,7 @@ export class BookingFinishComponent implements OnInit {
   });
 
   returnTimeViolationHint = computed((): string | null => {
+    this.langTick();
     const v = this.returnAgainstCheckout();
     if (!v || v.timeOk) {
       return null;
@@ -411,7 +425,8 @@ export class BookingFinishComponent implements OnInit {
     return Math.round(Math.max(0, hours) * Math.max(0, rate) * 100) / 100;
   });
 
-  computedNetBeforeTax = computed(() => {
+  /** Rental + extras + fees − discount. Traffic fines and repairs are excluded from VAT base. */
+  computedTaxableNet = computed(() => {
     const b = this.booking();
     if (!b) {
       return 0;
@@ -422,35 +437,38 @@ export class BookingFinishComponent implements OnInit {
     const other = Math.max(0, Number(b.otherExpenses ?? 0) || 0);
     const trans = Math.max(0, Number(b.transportationFees ?? 0) || 0);
     const sum =
-      rental +
-      this.extraHoursTotal() +
-      this.extraKmTotal() +
-      other +
-      this.traffic() +
-      this.repairs() +
-      trans -
-      disc;
+      rental + this.extraHoursTotal() + this.extraKmTotal() + other + trans - disc;
     return Math.round(Math.max(0, sum) * 100) / 100;
   });
 
-  /** Scale tax with net so changing return time/odometer updates VAT roughly like the original contract ratio. */
+  /** Scale VAT on taxable lines only; traffic and repairs are added after tax on the grand total. */
   computedTaxAmount = computed(() => {
     const b = this.booking();
     if (!b) {
       return 0;
     }
-    const net = this.computedNetBeforeTax();
+    const taxableNet = this.computedTaxableNet();
     const oldTotal = Math.max(0, Number(b.totalAmount ?? 0) || 0);
     const oldTax = Math.max(0, Number(b.totaltax ?? 0) || 0);
-    const oldNet = Math.max(0, oldTotal - oldTax);
-    if (oldNet < 1e-4) {
+    const oldTraffic = Math.max(0, Number(b.totalTrafic ?? 0) || 0);
+    const oldRepairs = Math.max(0, Number(b.totalMaintance ?? 0) || 0);
+    const oldTaxableNet = Math.max(0, oldTotal - oldTax - oldTraffic - oldRepairs);
+    if (oldTaxableNet < 1e-4) {
       return Math.round(oldTax * 100) / 100;
     }
-    return Math.round(Math.max(0, net * (oldTax / oldNet)) * 100) / 100;
+    return Math.round(Math.max(0, taxableNet * (oldTax / oldTaxableNet)) * 100) / 100;
   });
 
   computedGrandTotal = computed(() => {
-    return Math.round((this.computedNetBeforeTax() + this.computedTaxAmount()) * 100) / 100;
+    return (
+      Math.round(
+        (this.computedTaxableNet() +
+          this.computedTaxAmount() +
+          this.traffic() +
+          this.repairs()) *
+          100,
+      ) / 100
+    );
   });
 
   /** Paid total from payment-counts aggregate, else booking `paidtotal`. */
@@ -494,6 +512,13 @@ export class BookingFinishComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.translate.onLangChange
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.langTick.update(v => v + 1));
+    this.translate.onTranslationChange
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.langTick.update(v => v + 1));
+
     const id = String(this.route.snapshot.paramMap.get('id') ?? '').trim();
     if (!id) {
       this.toast.error(this.translate.instant('Failed to load booking'));
@@ -898,7 +923,7 @@ export class BookingFinishComponent implements OnInit {
         this.vehicleBranchId.set(null);
         return;
       }
-      if (isBookingSuspended(b)) {
+      if (isBookingFinishSuspendedFlow(b)) {
         this.router.navigate(['/booking', 'finish-suspended', b.id], { replaceUrl: true });
         return;
       }

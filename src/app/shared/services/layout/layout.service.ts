@@ -7,6 +7,11 @@ export type AppThemeId = 'dark-only' | 'light-only';
 })
 export class LayoutService {
   private static readonly THEME_STORAGE_KEY = 'rental-app.layout-theme';
+  private static readonly HEADER_OFFSET_FALLBACK_PX = 68;
+  private static readonly HEADER_SELECTOR = '.page-wrapper.compact-wrapper .page-header';
+
+  private headerOffsetObserver: ResizeObserver | null = null;
+  private headerOffsetFrameId: number | null = null;
 
   public customizer: string = '';
 
@@ -47,6 +52,7 @@ export class LayoutService {
 
     document.body.classList.toggle('rtl', direction === 'rtl');
     document.body.classList.toggle('ltr', direction === 'ltr');
+    this.scheduleCompactHeaderOffsetSync();
   }
 
   applyTheme(theme: AppThemeId): void {
@@ -54,6 +60,55 @@ export class LayoutService {
     document.body.classList.toggle('dark-only', theme === 'dark-only');
     document.body.classList.toggle('light-only', theme === 'light-only');
     this.persistTheme(theme);
+    this.scheduleCompactHeaderOffsetSync();
+  }
+
+  /** Keeps `--app-compact-header-offset` aligned with the real fixed header (RTL/Cairo vs LTR/Inter). */
+  scheduleCompactHeaderOffsetSync(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    if (this.headerOffsetFrameId !== null) {
+      window.cancelAnimationFrame(this.headerOffsetFrameId);
+    }
+
+    this.headerOffsetFrameId = window.requestAnimationFrame(() => {
+      this.headerOffsetFrameId = window.requestAnimationFrame(() => {
+        this.headerOffsetFrameId = null;
+        this.syncCompactHeaderOffset();
+      });
+    });
+  }
+
+  private syncCompactHeaderOffset(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const header = document.querySelector<HTMLElement>(LayoutService.HEADER_SELECTOR);
+    if (!header) {
+      return;
+    }
+
+    const apply = () => {
+      const measured = Math.ceil(header.getBoundingClientRect().height);
+      const height = Math.max(LayoutService.HEADER_OFFSET_FALLBACK_PX, measured);
+      document.documentElement.style.setProperty('--app-compact-header-offset', `${height}px`);
+    };
+
+    apply();
+
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    if (!this.headerOffsetObserver) {
+      this.headerOffsetObserver = new ResizeObserver(() => apply());
+    }
+
+    this.headerOffsetObserver.disconnect();
+    this.headerOffsetObserver.observe(header);
   }
 
   toggleTheme(): AppThemeId {

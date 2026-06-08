@@ -33,8 +33,11 @@ export class AccountingChartComponent implements AfterViewInit, OnChanges, OnDes
   @ViewChild('canvasRef') canvasRef?: ElementRef<HTMLCanvasElement>;
   private chart?: Chart;
 
+  private themeObserver?: MutationObserver;
+
   ngAfterViewInit(): void {
     this.renderChart();
+    this.watchThemeChanges();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -44,15 +47,90 @@ export class AccountingChartComponent implements AfterViewInit, OnChanges, OnDes
   }
 
   ngOnDestroy(): void {
+    this.themeObserver?.disconnect();
     this.chart?.destroy();
   }
 
-  private themeVar(name: string, fallback: string): string {
-    const root =
+  private watchThemeChanges(): void {
+    if (typeof MutationObserver === 'undefined' || typeof document === 'undefined') {
+      return;
+    }
+    this.themeObserver = new MutationObserver(() => this.renderChart());
+    this.themeObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+  }
+
+  private themeHost(): HTMLElement {
+    return (
+      (this.canvasRef?.nativeElement.closest('app-accounting-dashboard') as HTMLElement | null) ??
       (this.canvasRef?.nativeElement.closest('.fin-dashboard') as HTMLElement | null) ??
-      document.documentElement;
-    const value = getComputedStyle(root).getPropertyValue(name).trim();
-    return value || fallback;
+      document.documentElement
+    );
+  }
+
+  private isDarkTheme(): boolean {
+    return document.body.classList.contains('dark-only');
+  }
+
+  /** Chart.js cannot parse nested `var(--token)` values — resolve to rgb/hex. */
+  private resolveThemeColor(
+    varName: string,
+    lightFallback: string,
+    darkFallback?: string,
+  ): string {
+    const host = this.themeHost();
+    const fallback = this.isDarkTheme() ? (darkFallback ?? lightFallback) : lightFallback;
+    const specified = getComputedStyle(host).getPropertyValue(varName).trim();
+    if (!specified) {
+      return fallback;
+    }
+    if (/^#|^rgb|^hsla?/i.test(specified)) {
+      return specified;
+    }
+
+    const probe = document.createElement('span');
+    probe.style.position = 'absolute';
+    probe.style.visibility = 'hidden';
+    probe.style.pointerEvents = 'none';
+    probe.style.color = specified.includes('var(') ? specified : `var(${varName})`;
+    host.appendChild(probe);
+    const resolved = getComputedStyle(probe).color.trim();
+    host.removeChild(probe);
+    return resolved && resolved !== 'rgba(0, 0, 0, 0)' ? resolved : fallback;
+  }
+
+  private resolveThemePaint(
+    varName: string,
+    property: 'color' | 'backgroundColor',
+    lightFallback: string,
+    darkFallback?: string,
+  ): string {
+    const host = this.themeHost();
+    const fallback = this.isDarkTheme() ? (darkFallback ?? lightFallback) : lightFallback;
+    const specified = getComputedStyle(host).getPropertyValue(varName).trim();
+    if (!specified) {
+      return fallback;
+    }
+    if (/^#|^rgb|^hsla?/i.test(specified)) {
+      return specified;
+    }
+
+    const probe = document.createElement('span');
+    probe.style.position = 'absolute';
+    probe.style.visibility = 'hidden';
+    probe.style.pointerEvents = 'none';
+    const paint = specified.includes('var(') ? specified : `var(${varName})`;
+    if (property === 'backgroundColor') {
+      probe.style.backgroundColor = paint;
+    } else {
+      probe.style.color = paint;
+    }
+    host.appendChild(probe);
+    const resolved = getComputedStyle(probe)[property].trim();
+    host.removeChild(probe);
+    return resolved && resolved !== 'rgba(0, 0, 0, 0)' ? resolved : fallback;
   }
 
   private renderChart(): void {
@@ -63,16 +141,21 @@ export class AccountingChartComponent implements AfterViewInit, OnChanges, OnDes
     this.chart?.destroy();
     const chartType = this.type === 'area' ? 'line' : this.type;
     const fillArea = this.type === 'area' || this.type === 'line';
-    const tickColor = this.themeVar('--fin-chart-tick', '#334155');
-    const legendColor = this.themeVar('--fin-chart-legend', tickColor);
-    const gridColor = this.themeVar('--fin-chart-grid', 'rgba(15, 23, 42, 0.12)');
+    const tickColor = this.resolveThemeColor('--fin-chart-tick', '#334155', '#cbd5e1');
+    const legendColor = this.resolveThemeColor('--fin-chart-legend', '#0f172a', '#f1f5f9');
+    const gridColor = this.resolveThemePaint(
+      '--fin-chart-grid',
+      'backgroundColor',
+      'rgba(15, 23, 42, 0.12)',
+      'rgba(148, 163, 184, 0.22)',
+    );
 
     const datasets = this.series.map((item, index) => {
       const palette = [
-        this.themeVar('--fin-accent', '#059669'),
-        this.themeVar('--fin-accent-secondary', '#2563eb'),
-        this.themeVar('--fin-warning', '#d97706'),
-        this.themeVar('--fin-danger', '#dc2626'),
+        this.resolveThemeColor('--fin-accent', '#059669', '#34d399'),
+        this.resolveThemeColor('--fin-accent-secondary', '#2563eb', '#38bdf8'),
+        this.resolveThemeColor('--fin-warning', '#d97706', '#fbbf24'),
+        this.resolveThemeColor('--fin-danger', '#dc2626', '#f87171'),
       ];
       const color = item.color?.trim() ? item.color : palette[index % palette.length];
       return {
@@ -112,8 +195,18 @@ export class AccountingChartComponent implements AfterViewInit, OnChanges, OnDes
           tooltip: {
             titleColor: legendColor,
             bodyColor: tickColor,
-            backgroundColor: this.themeVar('--fin-glass', '#ffffff'),
-            borderColor: this.themeVar('--fin-border', '#e2e8f0'),
+            backgroundColor: this.resolveThemePaint(
+              '--fin-glass',
+              'backgroundColor',
+              '#ffffff',
+              '#1e293b',
+            ),
+            borderColor: this.resolveThemePaint(
+              '--fin-border',
+              'backgroundColor',
+              '#e2e8f0',
+              'rgba(148, 163, 184, 0.35)',
+            ),
             borderWidth: 1,
           },
         },

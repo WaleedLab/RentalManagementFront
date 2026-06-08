@@ -426,8 +426,8 @@
                   </label>
                   <app-smooth-select
                     [value]="paymentMethod()"
-                    [ariaLabel]="'Payment Type' | translate"
-                    [placeholder]="'Payment Type' | translate"
+                    [ariaLabel]="'Payment Type'"
+                    [placeholder]="'Payment Type'"
                     [options]="paymentTypeOptions()"
                     [disabled]="finishLocked()"
                     (valueChange)="onPaymentMethodChange('' + $any($event))"
@@ -471,7 +471,7 @@
                     </label>
                     <app-smooth-select
                       [value]="cashAccount()"
-                      [ariaLabel]="'Cash Account' | translate"
+                      [ariaLabel]="'Cash Account'"
                       [placeholder]="'Select cash account'"
                       [options]="cashAccountOptions()"
                       [disabled]="finishLocked()"
@@ -499,7 +499,7 @@
                     </label>
                     <app-smooth-select
                       [value]="bankAccount()"
-                      [ariaLabel]="'Bank Account' | translate"
+                      [ariaLabel]="'Bank Account'"
                       [placeholder]="'Select bank'"
                       [options]="bankAccountOptions()"
                       [searchable]="true"

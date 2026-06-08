@@ -80,9 +80,37 @@ function normalizeSparePartLines(value: unknown): MaintenanceSparePartLine[] {
   return out;
 }
 
+/** Create API may return a scalar id, a string id, or a full maintenance DTO. */
+export function resolveMaintenanceIdFromCreateResponse(raw: unknown): string | null {
+  if (raw === null || raw === undefined) {
+    return null;
+  }
+  if (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) {
+    return String(Math.trunc(raw));
+  }
+  if (typeof raw === 'string') {
+    const text = raw.trim();
+    if (!text || text === '0') {
+      return null;
+    }
+    const n = Number(text);
+    if (Number.isFinite(n) && n > 0) {
+      return String(Math.trunc(n));
+    }
+  }
+  if (typeof raw === 'object' && !Array.isArray(raw)) {
+    const id = toNumber(pickLoose(raw as Record<string, unknown>, 'id', 'Id', 'maintenanceId', 'MaintenanceId'));
+    if (id !== undefined && id > 0) {
+      return String(Math.trunc(id));
+    }
+  }
+  return null;
+}
+
 export function normalizeMaintenance(raw: unknown): Maintenance {
+  const scalarId = resolveMaintenanceIdFromCreateResponse(raw);
   const r = (raw ?? {}) as Record<string, unknown>;
-  const id = toNumber(pickLoose(r, 'id', 'Id')) ?? 0;
+  const id = scalarId ? Number(scalarId) : (toNumber(pickLoose(r, 'id', 'Id')) ?? 0);
 
   return {
     id: String(id),

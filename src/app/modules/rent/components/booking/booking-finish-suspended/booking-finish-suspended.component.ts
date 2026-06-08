@@ -31,7 +31,8 @@ import {
 import { BookingService } from '../../../services/booking/booking.service';
 import { VehicleService } from '../../../services/vehicles/vehicle.service';
 import {
-  isBookingSuspended,
+  isBookingFinishSuspendedFlow,
+  isBookingReceivables,
   isBookingSuspendedDueToAccident,
   isBookingSuspendedDueToSumMoney,
 } from '../booking-card-actions.util';
@@ -95,13 +96,31 @@ export class BookingFinishSuspendedComponent implements OnInit {
 
   isAccidentFlow = computed(() => isBookingSuspendedDueToAccident(this.booking()));
 
-  isDebtFlow = computed(() => isBookingSuspendedDueToSumMoney(this.booking()));
+  isBeforeDebtFlow = computed(() => isBookingSuspendedDueToSumMoney(this.booking()));
 
-  pageTitleKey = computed(() =>
-    this.isAccidentFlow()
-      ? 'Contract finish suspended accident title'
-      : 'Contract finish suspended debt title',
-  );
+  isAfterDebtFlow = computed(() => isBookingReceivables(this.booking()));
+
+  isDebtFlow = computed(() => this.isBeforeDebtFlow() || this.isAfterDebtFlow());
+
+  pageTitleKey = computed(() => {
+    if (this.isAccidentFlow()) {
+      return 'Contract finish suspended accident title';
+    }
+    if (this.isAfterDebtFlow()) {
+      return 'Contract finish suspended after debt title';
+    }
+    return 'Contract finish suspended before debt title';
+  });
+
+  finishConfirmKey = computed(() => {
+    if (this.isAccidentFlow()) {
+      return 'Contract finish suspended accident confirm';
+    }
+    if (this.isAfterDebtFlow()) {
+      return 'Contract finish suspended after debt confirm';
+    }
+    return 'Contract finish suspended before debt confirm';
+  });
 
   paymentTypeOptions = computed<SmoothSelectOption[]>(() => [
     { label: this.translate.instant('Cash'), value: 1 },
@@ -211,7 +230,7 @@ export class BookingFinishSuspendedComponent implements OnInit {
   }
 
   canFinishSuspended(item: Booking | null): boolean {
-    return !!item && isBookingSuspended(item);
+    return !!item && isBookingFinishSuspendedFlow(item);
   }
 
   finishLocked(): boolean {
@@ -369,13 +388,7 @@ export class BookingFinishSuspendedComponent implements OnInit {
       }
     }
 
-    const ok = window.confirm(
-      this.translate.instant(
-        this.isAccidentFlow()
-          ? 'Contract finish suspended accident confirm'
-          : 'Contract finish suspended debt confirm',
-      ),
-    );
+    const ok = window.confirm(this.translate.instant(this.finishConfirmKey()));
     if (!ok) {
       return;
     }
@@ -495,7 +508,7 @@ export class BookingFinishSuspendedComponent implements OnInit {
           this.toast.error(this.translate.instant('Failed to load booking'));
           return;
         }
-        if (!isBookingSuspended(b)) {
+        if (!isBookingFinishSuspendedFlow(b)) {
           this.router.navigate(['/booking', 'finish', b.id], { replaceUrl: true });
           return;
         }

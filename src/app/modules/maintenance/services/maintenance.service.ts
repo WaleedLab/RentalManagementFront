@@ -13,7 +13,11 @@ import {
   MaintenanceFinishRequest,
   MaintenanceUpsertRequest,
 } from '../models/maintenance.model';
-import { normalizeMaintenance, normalizeMaintenanceByBookingSummary } from '../models/maintenance.normalizer';
+import {
+  normalizeMaintenance,
+  normalizeMaintenanceByBookingSummary,
+  resolveMaintenanceIdFromCreateResponse,
+} from '../models/maintenance.normalizer';
 
 /**
  * Matches `MaintenanceRouting`:
@@ -100,9 +104,25 @@ export class MaintenanceService {
   }
 
   create(body: MaintenanceUpsertRequest): Observable<Maintenance> {
-    return this.api
-      .postData<unknown>(this.base, this.toCommandPayload(body))
-      .pipe(map(raw => normalizeMaintenance(raw)));
+    return this.api.postData<unknown>(this.base, this.toCommandPayload(body)).pipe(
+      map(raw => {
+        const id = resolveMaintenanceIdFromCreateResponse(raw);
+        const seed: Record<string, unknown> = {
+          idVehicle: body.idVehicle,
+          IdVehicle: body.idVehicle,
+          fleetId: body.fleetId,
+          FleetId: body.fleetId,
+        };
+        if (id) {
+          seed['id'] = id;
+          seed['Id'] = id;
+        }
+        if (typeof raw === 'object' && raw !== null && !Array.isArray(raw)) {
+          return normalizeMaintenance({ ...(raw as Record<string, unknown>), ...seed });
+        }
+        return normalizeMaintenance(seed);
+      }),
+    );
   }
 
   update(body: MaintenanceUpsertRequest): Observable<unknown> {

@@ -1,0 +1,41 @@
+// Central modal header layout — keeps title and close button separated in LTR + RTL.
+.modal-header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: nowrap;
+
+  .modal-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    padding-inline-end: 0.25rem;
+    line-height: 1.45;
+    word-break: break-word;
+    text-align: start;
+  }
+
+  .btn-close {
+    position: static !important;
+    inset: unset !important;
+    flex: 0 0 2rem;
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    margin: 0 !important;
+    padding: 0.25rem !important;
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+}
+
+// Legacy RTL theme used margin-right:auto on .btn-close, pushing it onto the title.
+html[dir='rtl'] .modal-header .btn-close,
+body.rtl .modal-header .btn-close,
+[dir='rtl'] .modal-header .btn-close {
+  margin: 0 !important;
+  left: unset !important;
+  right: unset !important;
+}

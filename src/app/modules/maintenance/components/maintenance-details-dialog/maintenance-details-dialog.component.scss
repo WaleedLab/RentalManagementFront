@@ -2,11 +2,6 @@
   border-bottom-color: rgba(var(--c-94a3b8-rgb), 0.24);
 }
 
-.maintenance-details-dialog__close {
-  margin: 0;
-  margin-inline-start: auto;
-}
-
 .maintenance-details-dialog__body {
   max-height: min(78vh, 720px);
   overflow: auto;
@@ -121,10 +116,6 @@
 .maintenance-details-dialog__footer .btn {
   min-width: 92px;
   font-weight: 700;
-}
-
-.maintenance-details-dialog[dir='rtl'] .maintenance-details-dialog__header {
-  text-align: right;
 }
 
 :host-context([data-bs-theme='dark']),

@@ -405,12 +405,14 @@
                   <p class="customer-form-section-head__hint">{{ 'Hint Customer Image' | translate }}</p>
                 </div>
               </header>
-              <div class="customer-form-upload">
-                <app-file-upload
-                  [label]="''"
-                  [previewUrl]="previewUrl()"
-                  (fileSelected)="onImageSelected($event)"
-                />
+              <div class="customer-form-field customer-form-field--wide">
+                <div class="customer-form-upload-card">
+                  <app-file-upload
+                    [label]="''"
+                    [previewUrl]="previewUrl()"
+                    (fileSelected)="onImageSelected($event)"
+                  />
+                </div>
               </div>
             </div>
           </details>
@@ -476,53 +478,61 @@
               </div>
             </div>
           </details>
-        </div>
 
-        @if (canManageSubscriptions() && isEdit()) {
-          <section class="customer-form-section">
-            <header class="customer-form-section-head">
-              <div>
-                <h2 class="customer-form-section-head__title">
-                  {{ 'Customer flow subscriptions title' | translate }}
-                </h2>
-              </div>
-            </header>
-            <div class="customer-form-grid customer-form-grid--2">
-              <div class="customer-form-field customer-form-field--readonly">
-                <label class="customer-form-label">{{ 'Rental Count' | translate }}</label>
-                <input class="form-control" type="text" [value]="rentalCount()" readonly />
-              </div>
-              <div class="customer-form-field customer-form-field--readonly">
-                <label class="customer-form-label">{{ 'Auto Suggested Category' | translate }}</label>
-                <input class="form-control" type="text" [value]="getAutoAssignedSubscriptionName()" readonly />
-              </div>
-              <div class="customer-form-field customer-form-field--wide">
-                <label class="customer-form-label">{{ 'Offer Assignment Mode' | translate }}</label>
-                <div class="subscription-mode-toggle">
-                  <label class="form-check">
-                    <input class="form-check-input" type="radio" formControlName="subscriptionAssignmentMode" value="auto" />
-                    <span class="form-check-label">{{ 'Automatic by rental count' | translate }}</span>
-                  </label>
-                  <label class="form-check">
-                    <input class="form-check-input" type="radio" formControlName="subscriptionAssignmentMode" value="manual" />
-                    <span class="form-check-label">{{ 'Manual admin assignment' | translate }}</span>
-                  </label>
+          @if (canManageSubscriptions() && isEdit()) {
+            <details id="customer-form-section-subscriptions" class="customer-form-section customer-form-fold" open>
+              <summary class="customer-form-section__summary">
+                {{ 'Customer flow subscriptions title' | translate }}
+              </summary>
+              <div class="customer-form-fold__body">
+                <header class="customer-form-section-head">
+                  <div>
+                    <h2 class="customer-form-section-head__title">
+                      {{ 'Customer flow subscriptions title' | translate }}
+                    </h2>
+                    <p class="customer-form-section-head__hint">
+                      {{ 'Hint Subscription Category' | translate }}
+                    </p>
+                  </div>
+                </header>
+                <div class="customer-form-grid customer-form-grid--2">
+                  <div class="customer-form-field customer-form-field--readonly">
+                    <label class="customer-form-label">{{ 'Rental Count' | translate }}</label>
+                    <input class="form-control" type="text" [value]="rentalCount()" readonly />
+                  </div>
+                  <div class="customer-form-field customer-form-field--readonly">
+                    <label class="customer-form-label">{{ 'Auto Suggested Category' | translate }}</label>
+                    <input class="form-control" type="text" [value]="getAutoAssignedSubscriptionName()" readonly />
+                  </div>
+                  <div class="customer-form-field customer-form-field--wide">
+                    <label class="customer-form-label">{{ 'Offer Assignment Mode' | translate }}</label>
+                    <div class="subscription-mode-toggle">
+                      <label class="form-check">
+                        <input class="form-check-input" type="radio" formControlName="subscriptionAssignmentMode" value="auto" />
+                        <span class="form-check-label">{{ 'Automatic by rental count' | translate }}</span>
+                      </label>
+                      <label class="form-check">
+                        <input class="form-check-input" type="radio" formControlName="subscriptionAssignmentMode" value="manual" />
+                        <span class="form-check-label">{{ 'Manual admin assignment' | translate }}</span>
+                      </label>
+                    </div>
+                  </div>
+                  @if (form.controls.subscriptionAssignmentMode.value === 'manual') {
+                    <div class="customer-form-field customer-form-field--wide">
+                      <label class="customer-form-label">{{ 'Manual Subscription Category' | translate }}</label>
+                      <app-smooth-select
+                        formControlName="idSubscriptionsOfCustomer"
+                        [ariaLabel]="'Manual Subscription Category' | translate"
+                        [options]="getManualSubscriptionOptions()"
+                        [placeholder]="'Select category'"
+                      />
+                    </div>
+                  }
                 </div>
               </div>
-              @if (form.controls.subscriptionAssignmentMode.value === 'manual') {
-                <div class="customer-form-field customer-form-field--wide">
-                  <label class="customer-form-label">{{ 'Manual Subscription Category' | translate }}</label>
-                  <app-smooth-select
-                    formControlName="idSubscriptionsOfCustomer"
-                    [ariaLabel]="'Manual Subscription Category' | translate"
-                    [options]="getManualSubscriptionOptions()"
-                    [placeholder]="'Select category'"
-                  />
-                </div>
-              }
-            </div>
-          </section>
-        }
+            </details>
+          }
+        </div>
 
         <datalist id="customer-nationalities-list">
           @for (nationality of nationalitySuggestions(); track nationality) {

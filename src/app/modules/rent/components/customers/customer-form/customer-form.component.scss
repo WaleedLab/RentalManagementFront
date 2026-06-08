@@ -134,7 +134,6 @@
   padding: 0;
   box-shadow: none;
   overflow: visible;
-  scroll-margin-top: calc(var(--app-compact-header-offset, 68px) + 0.75rem);
   transition:
     border-color 0.25s ease,
     box-shadow 0.25s ease;
@@ -297,8 +296,29 @@
   color: var(--rt-error);
 }
 
-.customer-form-upload {
-  max-width: 18rem;
+.customer-form-upload-card {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px dashed var(--app-contract-flow-card-border);
+  background: var(--app-contract-flow-readonly-bg);
+  overflow: hidden;
+
+  ::ng-deep .upload-card,
+  ::ng-deep .card {
+    --media-box-width: 100%;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  ::ng-deep .card-body {
+    width: 100%;
+  }
+
+  ::ng-deep .form-label:empty {
+    display: none;
+  }
 }
 
 .customer-form-fold--extra:not([open]) .customer-form-fold__body {

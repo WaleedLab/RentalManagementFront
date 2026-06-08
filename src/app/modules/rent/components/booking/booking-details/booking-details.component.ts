@@ -23,6 +23,9 @@ import { PaymentCount } from '../../../../finance/models/payment-counts/payment-
 import { BankService } from '../../../../finance/services/banks/bank.service';
 import { CashAccountService } from '../../../../finance/services/cash/cash-account.service';
 import { PaymentCountService } from '../../../../finance/services/payment-counts/payment-count.service';
+import { MaintenanceByBookingSummary } from '../../../../maintenance/models/maintenance.model';
+import { isMaintenanceCompletedStatus } from '../../../../maintenance/models/maintenance.normalizer';
+import { MaintenanceService } from '../../../../maintenance/services/maintenance.service';
 import { Booking, BookingStatus } from '../../../models';
 import { BookingImageApp } from '../../../models/booking-image-app/booking-image-app.model';
 import {
@@ -35,6 +38,7 @@ import {
 } from '../../../models/booking/booking-status.utils';
 import { BookingService } from '../../../services/booking/booking.service';
 import { BookingImageAppService } from '../../../services/booking-image-app/booking-image-app.service';
+import { TrafficViolationService } from '../../../services/traffic-violations/traffic-violation.service';
 import { VehicleService } from '../../../services/vehicles/vehicle.service';
 import {
   bookingCheckoutMs,
@@ -115,6 +119,8 @@ export class BookingDetailsComponent implements OnInit {
   private paymentCountService = inject(PaymentCountService);
   private bankService = inject(BankService);
   private cashAccountService = inject(CashAccountService);
+  private trafficViolationService = inject(TrafficViolationService);
+  private maintenanceService = inject(MaintenanceService);
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
   private translate = inject(TranslateService);
@@ -123,6 +129,11 @@ export class BookingDetailsComponent implements OnInit {
   vehicleBranchId = signal<number | null>(null);
   loading = signal(false);
   paymentCountSum = signal<number | null>(null);
+  /** `GetTrafficViolationSumForBookingQuery` — live sum from TrafficViolation records. */
+  trafficViolationsSumFromApi = signal<number | null>(null);
+  /** `GetMaintenanceByIdBookingQuery` — maintenance linked to the booking. */
+  maintenanceSummary = signal<MaintenanceByBookingSummary | null>(null);
+  maintenanceSummaryResolved = signal(false);
   paymentRows = signal<PaymentCount[]>([]);
   /** `GetBookingImageAppByIdBookingsQuery` rows for the photos tab. */
   bookingImageSets = signal<BookingImageApp[]>([]);
@@ -459,6 +470,41 @@ export class BookingDetailsComponent implements OnInit {
       return fromPaymentCount;
     }
     const fallback = item.paidtotal ?? item.paidAmount;
+    const parsed = Number(fallback);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  /** Traffic fines from violation records — not the booking `totalTrafic` snapshot alone. */
+  displayedTrafficTotal(item: Booking): number | null {
+    const fromApi = this.trafficViolationsSumFromApi();
+    if (fromApi !== null && Number.isFinite(fromApi)) {
+      return fromApi;
+    }
+    const fallback = item.totalTrafic;
+    if (fallback === null || fallback === undefined) {
+      return null;
+    }
+    const parsed = Number(fallback);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  /**
+   * Maintenance total from `GetMaintenanceByIdBookingQuery` when status is completed;
+   * otherwise 0 (in-progress / missing records are not billed on the contract summary).
+   */
+  displayedMaintenanceTotal(item: Booking): number | null {
+    if (this.maintenanceSummaryResolved()) {
+      const summary = this.maintenanceSummary();
+      if (summary && isMaintenanceCompletedStatus(summary.status)) {
+        const total = Number(summary.total ?? 0);
+        return Number.isFinite(total) ? Math.max(0, total) : 0;
+      }
+      return 0;
+    }
+    const fallback = item.totalMaintance;
+    if (fallback === null || fallback === undefined) {
+      return null;
+    }
     const parsed = Number(fallback);
     return Number.isFinite(parsed) ? parsed : null;
   }
@@ -1025,14 +1071,57 @@ export class BookingDetailsComponent implements OnInit {
     return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
   }
 
+  private loadMaintenanceSummary(booking: Booking): void {
+    const fleetId = String(booking.fleetId ?? this.authState.fleetId() ?? '').trim();
+    const idBooking = this.toBookingNumericId(booking.id);
+    if (!idBooking || !fleetId) {
+      this.maintenanceSummary.set(null);
+      this.maintenanceSummaryResolved.set(false);
+      return;
+    }
+    this.maintenanceSummary.set(null);
+    this.maintenanceSummaryResolved.set(false);
+    this.maintenanceService
+      .getTotalByBooking(idBooking, fleetId)
+      .pipe(catchError(() => of(null)))
+      .subscribe(summary => {
+        this.maintenanceSummary.set(summary);
+        this.maintenanceSummaryResolved.set(true);
+      });
+  }
+
+  private loadTrafficViolationsSum(booking: Booking): void {
+    const fleetId = String(booking.fleetId ?? this.authState.fleetId() ?? '').trim();
+    const idBooking = this.toBookingNumericId(booking.id);
+    if (!idBooking || !fleetId) {
+      this.trafficViolationsSumFromApi.set(null);
+      return;
+    }
+    this.trafficViolationsSumFromApi.set(null);
+    this.trafficViolationService
+      .getSumForBooking(idBooking, fleetId)
+      .pipe(catchError(() => of(null)))
+      .subscribe(sum => {
+        this.trafficViolationsSumFromApi.set(
+          sum !== null && Number.isFinite(sum) ? Math.max(0, sum) : null,
+        );
+      });
+  }
+
   private loadPaymentSummaryForBooking(booking: Booking): void {
-    const fleetId = this.authState.fleetId() ?? '';
+    const fleetId = String(booking.fleetId ?? this.authState.fleetId() ?? '').trim();
     const idBooking = this.toBookingNumericId(booking.id);
     if (!idBooking || !fleetId) {
       this.paymentCountSum.set(null);
       this.paymentRows.set([]);
+      this.trafficViolationsSumFromApi.set(null);
+      this.maintenanceSummary.set(null);
+      this.maintenanceSummaryResolved.set(false);
       return;
     }
+
+    this.loadTrafficViolationsSum(booking);
+    this.loadMaintenanceSummary(booking);
 
     forkJoin({
       sum: this.paymentCountService
@@ -1297,8 +1386,8 @@ export class BookingDetailsComponent implements OnInit {
       countKMExtra: this.moneyOrDash(item.countKMExtra),
       otherExpenses: this.moneyOrDash(item.otherExpenses),
       transportationFees: this.moneyOrDash(item.transportationFees),
-      totalTrafic: this.moneyOrDash(item.totalTrafic),
-      totalMaintance: this.moneyOrDash(item.totalMaintance),
+      totalTrafic: this.moneyOrDash(this.displayedTrafficTotal(item)),
+      totalMaintance: this.moneyOrDash(this.displayedMaintenanceTotal(item)),
       discount: this.moneyOrDash(item.discount),
       totaltax: this.moneyOrDash(item.totaltax),
       total: this.moneyOrDash(item.totalAmount),

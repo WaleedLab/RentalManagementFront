@@ -33,6 +33,7 @@ import {
   mobileNumberValidators,
   sanitizeMobileDigits,
 } from '../../../../../shared/utils/mobile-number.util';
+import { ConfirmService } from '../../../../../shared/services/confirm.service';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { DatePickerComponent } from '../../../../../shared/ui/date-picker/date-picker.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
@@ -167,6 +168,7 @@ export class BookingFormComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
+  private confirmService = inject(ConfirmService);
 
   bookingSettings = signal<Setting | null>(null);
   showBookingDistanceGpsEnabled = computed(
@@ -2050,11 +2052,17 @@ export class BookingFormComponent implements OnInit {
       this.createWizardStep.set(3);
       return;
     }
-    const ok = window.confirm(this.translate.instant('Booking wizard create confirm'));
-    if (!ok) {
-      return;
-    }
-    this.save();
+    this.confirmService
+      .confirm(
+        this.translate.instant('Booking wizard create confirm title'),
+        this.translate.instant('Booking wizard create confirm body'),
+      )
+      .subscribe(confirmed => {
+        if (!confirmed) {
+          return;
+        }
+        this.save();
+      });
   }
 
   private scrollWizardToTop(): void {

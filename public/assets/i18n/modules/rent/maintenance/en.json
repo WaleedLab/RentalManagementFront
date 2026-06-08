@@ -106,7 +106,7 @@
   "maintenance.finish.success": "Maintenance finished and marked as completed.",
   "maintenance.finish.failed": "Could not finish maintenance record.",
   "maintenance.finish.loadFailed": "Could not load maintenance detail lines.",
-  "maintenance.details.action": "Maintenance details",
+  "maintenance.details.action": "Add spare parts",
   "maintenance.details.title": "Maintenance details",
   "maintenance.details.message": "Add spare parts and invoice lines for {{vehicle}} while work is in progress.",
   "maintenance.details.existingTitle": "Recorded lines",

@@ -5,8 +5,8 @@
   [class.date-picker--datetime]="mode === 'datetime'"
   [class.date-picker--hijri]="calendarModeState() === 'hijri'"
 >
-  @if (labelText()) {
-    <label class="date-label">{{ labelText() }}</label>
+  @if (label) {
+    <label class="date-label">{{ label | translate }}</label>
   }
 
   <button

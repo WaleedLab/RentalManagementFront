@@ -849,11 +849,11 @@
                     </div>
                     <div>
                       <dt>{{ 'Maintenance Total' | translate }}</dt>
-                      <dd>{{ moneyOrDash(item.totalMaintance) }}</dd>
+                      <dd>{{ moneyOrDash(displayedMaintenanceTotal(item)) }}</dd>
                     </div>
                     <div>
                       <dt>{{ 'Traffic Total' | translate }}</dt>
-                      <dd>{{ moneyOrDash(item.totalTrafic) }}</dd>
+                      <dd>{{ moneyOrDash(displayedTrafficTotal(item)) }}</dd>
                     </div>
                     <div>
                       <dt>{{ 'Transportation Fees' | translate }}</dt>
