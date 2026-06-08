@@ -649,29 +649,69 @@
   margin-top: 0.25rem;
 }
 
+.nationality-field--open {
+  position: relative;
+  z-index: 320;
+  isolation: isolate;
+}
+
+.booking-wizard-field--dropdown-open {
+  position: relative;
+  z-index: 320;
+  overflow: visible;
+}
+
+.booking-wizard-grid:has(.nationality-field--open),
+.booking-wizard-card:has(.nationality-field--open) {
+  overflow: visible;
+}
+
+/* Theme sets --bs-body-bg: transparent globally — use opaque surfaces here. */
 .nationality-suggestions {
-  z-index: 40;
+  z-index: 330;
   top: 100%;
   left: 0;
-  margin-top: 0.2rem;
+  right: 0;
+  margin: 0.2rem 0 0;
+  padding: 0.25rem 0;
   max-height: 14rem;
   overflow-y: auto;
+  overflow-x: hidden;
+  list-style: none;
   border-radius: 0.5rem;
   border: 1px solid rgba(var(--c-94a3b8-rgb), 0.35);
-  background: var(--bs-body-bg, var(--c-ffffff));
+  background-color: #ffffff;
+  box-shadow:
+    0 18px 36px -20px rgba(var(--rt-shadow-rgb), 0.45),
+    0 8px 16px -12px rgba(var(--c-3b82f6-rgb), 0.18);
+}
+
+.nationality-suggestions__item {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
 }
 
 .nationality-suggestions__btn {
-  color: var(--bs-body-color, var(--c-0f172a));
-  font-size: 0.82rem;
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
   border: 0;
   border-radius: 0;
+  text-align: start;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--c-0f172a);
+  background-color: #ffffff;
+  cursor: pointer;
 }
 
 .nationality-suggestions__btn:hover,
 .nationality-suggestions__btn:focus-visible {
-  background: rgba(var(--c-3b82f6-rgb), 0.08);
-  color: var(--bs-body-color, var(--c-0f172a));
+  background-color: rgba(var(--c-3b82f6-rgb), 0.1);
+  color: var(--c-0f172a);
+  outline: none;
 }
 
 .nationality-suggestions__item + .nationality-suggestions__item {
@@ -681,11 +721,14 @@
 :host-context(body.dark-only) .nationality-suggestions,
 :host-context([data-bs-theme='dark']) .nationality-suggestions {
   border-color: rgba(var(--c-64748b-rgb), 0.52);
-  background: linear-gradient(155deg, rgba(var(--c-0f172a-rgb), 0.98), rgba(var(--c-1e293b-rgb), 0.96));
+  background-color: #0f172a;
 }
 
+:host-context(body.dark-only) .nationality-suggestions__item,
+:host-context([data-bs-theme='dark']) .nationality-suggestions__item,
 :host-context(body.dark-only) .nationality-suggestions__btn,
 :host-context([data-bs-theme='dark']) .nationality-suggestions__btn {
+  background-color: #0f172a;
   color: rgba(var(--c-f1f5f9-rgb), 0.96);
 }
 
@@ -693,7 +736,7 @@
 :host-context(body.dark-only) .nationality-suggestions__btn:focus-visible,
 :host-context([data-bs-theme='dark']) .nationality-suggestions__btn:hover,
 :host-context([data-bs-theme='dark']) .nationality-suggestions__btn:focus-visible {
-  background: rgba(var(--c-3b82f6-rgb), 0.18);
+  background-color: rgba(var(--c-3b82f6-rgb), 0.22);
   color: rgba(var(--c-f1f5f9-rgb), 0.98);
 }
 

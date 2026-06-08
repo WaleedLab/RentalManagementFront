@@ -14,8 +14,8 @@ export interface CreateBankRequest {
   description?: string;
   code?: string;
   fleetId: string;
-  /** Branch registered at login; `0` when absent. */
-  idBranch: number;
+  /** Login branch; `null` for admin without branch claim. */
+  idBranch: number | null;
 }
 
 export interface UpdateBankRequest extends CreateBankRequest {

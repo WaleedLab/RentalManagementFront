@@ -9,7 +9,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { merge } from 'rxjs';
 
 import { AuthStateService } from '../../../../../core/auth/auth-state.service';
-import { loginBranchId } from '../../../../../shared/utils/branch-id.util';
+import { loginBranchIdOrNull } from '../../../../../shared/utils/branch-id.util';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import {
   SmoothSelectComponent,
@@ -147,7 +147,7 @@ export class BankFormComponent implements OnInit {
       description: raw.description.trim() || undefined,
       code: raw.code.trim() || undefined,
       fleetId: raw.fleetId.trim(),
-      idBranch: loginBranchId(this.authState.branchId()),
+      idBranch: loginBranchIdOrNull(this.authState.branchId()),
     };
 
     this.loading.set(true);

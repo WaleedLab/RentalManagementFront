@@ -85,25 +85,38 @@
                             </div>
                           }
                         </div>
-                        <div class="booking-wizard-field">
+                        <div
+                          class="booking-wizard-field"
+                          [class.booking-wizard-field--dropdown-open]="nationalitySuggestionsOpen() && nationalitySuggestions().length > 0"
+                        >
                           <label class="form-label">{{ 'Nationality' | translate }} <span class="text-danger">*</span></label>
-                          <div class="nationality-field position-relative">
+                          <div
+                            class="nationality-field position-relative"
+                            [class.nationality-field--open]="nationalitySuggestionsOpen() && nationalitySuggestions().length > 0"
+                          >
                             <input
                               class="form-control"
                               formControlName="customerNationality"
                               maxlength="200"
                               autocomplete="off"
+                              autocapitalize="off"
+                              spellcheck="false"
+                              data-lpignore="true"
+                              data-form-type="other"
+                              role="combobox"
+                              aria-autocomplete="list"
+                              [attr.aria-expanded]="nationalitySuggestionsOpen() && nationalitySuggestions().length > 0"
                               (focus)="onNationalityFocus()"
                               (input)="onNationalityInput()"
                               (blur)="onNationalityBlur()"
                             />
                             @if (nationalitySuggestionsOpen() && nationalitySuggestions().length > 0) {
-                              <ul class="nationality-suggestions list-group position-absolute w-100 shadow-sm" role="listbox">
+                              <ul class="nationality-suggestions position-absolute w-100" role="listbox">
                                 @for (s of nationalitySuggestions(); track s.canonicalValue) {
-                                  <li class="list-group-item p-0 nationality-suggestions__item" role="option">
+                                  <li class="nationality-suggestions__item" role="option">
                                     <button
                                       type="button"
-                                      class="btn btn-link nationality-suggestions__btn text-start w-100 py-2 px-3 text-decoration-none"
+                                      class="nationality-suggestions__btn"
                                       (mousedown)="pickNationalitySuggestion($event, s)"
                                     >
                                       {{ s.label }}
