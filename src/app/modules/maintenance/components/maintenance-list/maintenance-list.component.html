@@ -9,6 +9,24 @@
     </a>
 
     <ng-container commandToolbar>
+      <app-list-search-field
+        [placeholder]="'maintenance.searchPlaceholder'"
+        [value]="search()"
+        (valueChange)="search.set($event)"
+        (search)="onSearch()"
+      />
+
+      <label class="fin-field">
+        <span>{{ 'Status' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Status' | translate"
+          [placeholder]="'All statuses'"
+          [options]="statusFilterOptions()"
+          [value]="status()"
+          (valueChange)="onStatusChange($event)"
+        />
+      </label>
+
       <label class="fin-field">
         <span>{{ 'maintenance.fieldBranch' | translate }}</span>
         <app-smooth-select
@@ -19,12 +37,26 @@
           (valueChange)="onBranchChange($event)"
         />
       </label>
-      <app-list-search-field
-        [placeholder]="'maintenance.searchPlaceholder'"
-        [value]="search()"
-        (valueChange)="search.set($event)"
-        (search)="onSearch()"
-      />
+
+      <label class="fin-field">
+        <span>{{ 'Sort by' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Sort by' | translate"
+          [options]="orderByOptions()"
+          [value]="orderBy()"
+          (valueChange)="onOrderByChange($event)"
+        />
+      </label>
+
+      <label class="fin-field">
+        <span>{{ 'Order direction' | translate }}</span>
+        <app-smooth-select
+          [ariaLabel]="'Order direction' | translate"
+          [options]="orderDirectionOptions()"
+          [value]="orderByDirection()"
+          (valueChange)="onOrderDirectionChange($event)"
+        />
+      </label>
     </ng-container>
   </app-list-command-bar>
 

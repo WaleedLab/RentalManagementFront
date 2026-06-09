@@ -26,7 +26,7 @@ import { PaymentCountService } from '../../../../finance/services/payment-counts
 import { MaintenanceByBookingSummary } from '../../../../maintenance/models/maintenance.model';
 import { isMaintenanceCompletedStatus } from '../../../../maintenance/models/maintenance.normalizer';
 import { MaintenanceService } from '../../../../maintenance/services/maintenance.service';
-import { Booking, BookingStatus } from '../../../models';
+import { BOOKING_CONTRACT_DEFAULT_LOGO, Booking, BookingStatus } from '../../../models';
 import { BookingImageApp } from '../../../models/booking-image-app/booking-image-app.model';
 import {
   bookingStatusTone,
@@ -417,9 +417,18 @@ export class BookingDetailsComponent implements OnInit {
     }
   }
 
-  logoOnlyUrl(item: Booking): string | null {
+  readonly contractDefaultLogo = BOOKING_CONTRACT_DEFAULT_LOGO;
+
+  contractLogoUrl(item: Booking): string {
     const resolved = resolveMediaUrl(item.urlLogo);
-    return resolved && resolved.length > 0 ? resolved : null;
+    return resolved && resolved.length > 0 ? resolved : this.contractDefaultLogo;
+  }
+
+  onContractLogoError(event: Event): void {
+    const target = event.target as HTMLImageElement | null;
+    if (target && target.getAttribute('src') !== this.contractDefaultLogo) {
+      target.setAttribute('src', this.contractDefaultLogo);
+    }
   }
 
   private loadBookingImages(booking: Booking): void {
@@ -1422,7 +1431,11 @@ export class BookingDetailsComponent implements OnInit {
 
   /** Absolute URL so the static print page loads the fleet logo reliably. */
   private logoAbsoluteUrlForPrint(item: Booking): string {
-    return this.logoOnlyUrl(item) ?? `${window.location.origin}/assets/images/logo/logo-icon.png`;
+    const logo = this.contractLogoUrl(item);
+    if (logo.startsWith('http://') || logo.startsWith('https://') || logo.startsWith('/')) {
+      return logo.startsWith('/') ? `${window.location.origin}${logo}` : logo;
+    }
+    return `${window.location.origin}/${logo.replace(/^\//, '')}`;
   }
 
   private resolveBookingBranchAddress(item: Booking): string {

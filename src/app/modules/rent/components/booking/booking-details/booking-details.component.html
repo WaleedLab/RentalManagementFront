@@ -440,9 +440,12 @@
         <div class="card-body">
           <div class="contract-dash-hero__head">
             <div class="contract-dash-hero__brand">
-              @if (logoOnlyUrl(item); as logo) {
-                <img [src]="logo" alt="" class="contract-dash-hero__logo" />
-              }
+              <img
+                [src]="contractLogoUrl(item)"
+                alt=""
+                class="contract-dash-hero__logo"
+                (error)="onContractLogoError($event)"
+              />
               <div>
                 <h1 class="contract-dash-hero__title">{{ 'Contract details view' | translate }}</h1>
                 <p class="contract-dash-hero__subtitle">{{ contractSubtitle(item) }}</p>

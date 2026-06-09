@@ -484,6 +484,7 @@
   "Contract suspend money balance required": "Financial hold is not allowed when the remaining balance is zero or less.",
   "Contract suspend payment account required": "Select a cash or bank account to record the remaining payment.",
   "Contract suspend money payment hint": "No payment is recorded automatically. Enter an amount only if the customer pays part of the balance, or leave the field empty.",
+  "Contract suspend paid at suspension": "Amount paid at suspension",
   "Contract suspend payment optional": "Optional",
   "Contract suspend back details": "Back to contract details",
   "Contract suspend sidebar": "Suspend summary",

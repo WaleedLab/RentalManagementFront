@@ -530,6 +530,15 @@ body.light-only .page-wrapper.compact-wrapper .page-body-wrapper .form-select op
   background: rgba(var(--c-dc3545-rgb), 0.08);
 }
 
+.table-action-icon--success {
+  color: var(--c-16a34a);
+  border-color: rgba(var(--c-16a34a-rgb), 0.28);
+}
+
+.table-action-icon--success:hover {
+  background: rgba(var(--c-16a34a-rgb), 0.1);
+}
+
 html[dir='rtl'] .table-actions {
   justify-content: flex-start;
 }
@@ -600,6 +609,15 @@ body.dark-only {
 
   .table-action-icon--secondary:hover {
     background: var(--app-table-row-hover);
+  }
+
+  .table-action-icon--success {
+    color: var(--c-22c55e);
+    border-color: rgba(var(--c-22c55e-rgb), 0.32);
+  }
+
+  .table-action-icon--success:hover {
+    background: rgba(var(--c-22c55e-rgb), 0.12);
   }
 
   .app-filter-label {

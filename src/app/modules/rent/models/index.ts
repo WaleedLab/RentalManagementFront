@@ -1,6 +1,7 @@
 export * from '../../../shared/models/base/api-response.model';
 export * from './users/account-manager.model';
 export * from './booking/booking.model';
+export * from './booking/booking-contract-default-logo';
 export * from './booking/traffic-booking.model';
 export * from './branches/branch.model';
 export * from './category-vehicles/category-vehicle.model';

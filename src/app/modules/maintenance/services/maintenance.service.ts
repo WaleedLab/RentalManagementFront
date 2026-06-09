@@ -50,9 +50,10 @@ export class MaintenanceService {
   }
 
   getPaginated(params: MaintenanceFilters): Observable<PaginatedAggregatorResponse<Maintenance>> {
-    const orderBy = params.orderBy ?? 0;
+    const orderBy = params.orderBy ?? 'CreatedAt';
     const direction = params.orderByDirection ?? 'DESC';
     const branchId = params.branchId && params.branchId > 0 ? params.branchId : 0;
+    const status = params.status?.trim() || undefined;
 
     return this.api
       .getData<unknown>(`${this.base}/Paginated`, {
@@ -66,6 +67,8 @@ export class MaintenanceService {
         pageSize: params.pageSize,
         Search: params.search,
         search: params.search,
+        Stutus: status,
+        stutus: status,
         OrderBy: orderBy,
         orderBy,
         OrderByDirection: direction,

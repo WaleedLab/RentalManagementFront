@@ -1,5 +1,8 @@
-/** Mirrors backend `MaintenanceOrderingEnum` (int). */
-export type MaintenanceOrderBy = number;
+/** Mirrors backend `MaintenanceEnum` string names. */
+export type MaintenanceStatus = 'Pending' | 'InProgress' | 'Completed';
+
+/** Mirrors backend `MaintenanceOrderingEnum`. */
+export type MaintenanceOrderBy = 'CreatedAt';
 
 export interface MaintenanceSparePartLine {
   idSparePartName: number;
@@ -48,6 +51,8 @@ export interface MaintenanceFilters {
   pageNumber: number;
   pageSize: number;
   search?: string;
+  /** Backend query `Stutus` — `MaintenanceEnum`. */
+  status?: MaintenanceStatus | '' | null;
   orderBy?: MaintenanceOrderBy;
   orderByDirection?: 'ASC' | 'DESC';
 }

@@ -20,7 +20,7 @@ import {
   SmoothSelectValue,
 } from '../../../../shared/ui/smooth-select/smooth-select.component';
 import { MaintenanceBranchOption } from '../../models/branch-reference.model';
-import { Maintenance } from '../../models/maintenance.model';
+import { Maintenance, MaintenanceStatus } from '../../models/maintenance.model';
 import {
   MaintenanceAcceptDialogComponent,
   MaintenanceAcceptDialogResult,
@@ -71,11 +71,40 @@ export class MaintenanceListComponent implements OnInit {
   pageNumber = signal(1);
   pageSize = signal(10);
   search = signal('');
+  status = signal<MaintenanceStatus | ''>('');
   branchId = signal<number | ''>('');
+  orderBy = signal<'CreatedAt'>('CreatedAt');
+  orderByDirection = signal<'ASC' | 'DESC'>('DESC');
   deletingIds = signal<string[]>([]);
   acceptingIds = signal<string[]>([]);
   finishingIds = signal<string[]>([]);
   private readonly languageTick = signal(0);
+  private readonly statusValues: MaintenanceStatus[] = ['Pending', 'InProgress', 'Completed'];
+
+  statusFilterOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    const t = (key: string) => this.translate.instant(key);
+    return [
+      { label: t('All statuses'), value: '' },
+      ...this.statusValues.map(value => ({
+        label: t(`maintenance.statusName.${value}`),
+        value,
+      })),
+    ];
+  });
+
+  orderByOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    return [{ label: this.translate.instant('Created Date'), value: 'CreatedAt' }];
+  });
+
+  orderDirectionOptions = computed<SmoothSelectOption[]>(() => {
+    this.languageTick();
+    return [
+      { label: this.translate.instant('Descending'), value: 'DESC' },
+      { label: this.translate.instant('Ascending'), value: 'ASC' },
+    ];
+  });
 
   branchFilterOptions = computed<SmoothSelectOption[]>(() => {
     this.languageTick();
@@ -114,6 +143,9 @@ export class MaintenanceListComponent implements OnInit {
         fleetId: this.authState.fleetId() ?? undefined,
         branchId: rawBranchId === '' ? null : Number(rawBranchId),
         search: this.search() || undefined,
+        status: this.status() || undefined,
+        orderBy: this.orderBy(),
+        orderByDirection: this.orderByDirection(),
         pageNumber: this.pageNumber(),
         pageSize: this.pageSize(),
       })
@@ -137,6 +169,19 @@ export class MaintenanceListComponent implements OnInit {
     this.load();
   }
 
+  onStatusChange(value: SmoothSelectValue): void {
+    const normalized = String(value ?? '').trim();
+    if (!normalized) {
+      this.status.set('');
+    } else if (this.statusValues.includes(normalized as MaintenanceStatus)) {
+      this.status.set(normalized as MaintenanceStatus);
+    } else {
+      this.status.set('');
+    }
+    this.pageNumber.set(1);
+    this.load();
+  }
+
   onBranchChange(value: SmoothSelectValue): void {
     if (value === '' || value === null) {
       this.branchId.set('');
@@ -144,6 +189,25 @@ export class MaintenanceListComponent implements OnInit {
       const parsed = Number(value);
       this.branchId.set(Number.isFinite(parsed) && parsed > 0 ? parsed : '');
     }
+    this.pageNumber.set(1);
+    this.load();
+  }
+
+  onOrderByChange(value: SmoothSelectValue): void {
+    const normalized = String(value ?? '').trim();
+    if (normalized === 'CreatedAt' && this.orderBy() !== normalized) {
+      this.orderBy.set('CreatedAt');
+      this.pageNumber.set(1);
+      this.load();
+    }
+  }
+
+  onOrderDirectionChange(value: SmoothSelectValue): void {
+    const normalized = value === 'ASC' ? 'ASC' : 'DESC';
+    if (this.orderByDirection() === normalized) {
+      return;
+    }
+    this.orderByDirection.set(normalized);
     this.pageNumber.set(1);
     this.load();
   }

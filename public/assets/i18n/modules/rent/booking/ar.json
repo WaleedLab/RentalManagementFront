@@ -484,6 +484,7 @@
   "Contract suspend money balance required": "لا يمكن التعليق المالي عندما يكون المبلغ المتبقي صفراً أو أقل.",
   "Contract suspend payment account required": "اختر حساب الصندوق أو البنك لسداد المبلغ المتبقي.",
   "Contract suspend money payment hint": "لا يُسجَّل أي سداد تلقائياً. أدخل المبلغ يدوياً إذا دفع العميل جزءاً من المتبقي، أو اترك الحقل فارغاً.",
+  "Contract suspend paid at suspension": "المبلغ المدفوع عند التعليق",
   "Contract suspend payment optional": "اختياري",
   "Contract suspend back details": "رجوع إلى تفاصيل العقد",
   "Contract suspend sidebar": "ملخص التعليق",
