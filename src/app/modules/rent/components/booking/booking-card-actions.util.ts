@@ -85,25 +85,13 @@ export function bookingFinishLabelKey(booking: Pick<Booking, 'status'>): string 
   return 'Booking card finish';
 }
 
-/** صنف CSS لزر الإنهاء في البطاقات والتفاصيل. */
-export function bookingFinishActionClass(booking: Pick<Booking, 'status'>): string {
-  if (isBookingSuspendedDueToAccident(booking)) {
-    return 'booking-card__action--finish-suspended-accident';
-  }
-  if (isBookingReceivables(booking) || isBookingSuspendedDueToSumMoney(booking)) {
-    return 'booking-card__action--finish-suspended-debt';
-  }
-  return 'booking-card__action--finish';
+/** صنف CSS لزر الإنهاء في بطاقات الحجوزات — أخضر لكل الحالات. */
+export function bookingFinishActionClass(_booking: Pick<Booking, 'status'>): string {
+  return 'table-action-icon--success';
 }
 
-/** صنف Bootstrap لزر الإنهاء في شريط التفاصيل. */
-export function bookingFinishToolbarButtonClass(booking: Pick<Booking, 'status'>): string {
-  if (isBookingSuspendedDueToAccident(booking)) {
-    return 'btn-outline-danger';
-  }
-  if (isBookingReceivables(booking) || isBookingSuspendedDueToSumMoney(booking)) {
-    return 'btn-outline-warning';
-  }
+/** صنف Bootstrap لزر الإنهاء في شريط التفاصيل — أخضر لكل الحالات. */
+export function bookingFinishToolbarButtonClass(_booking: Pick<Booking, 'status'>): string {
   return 'btn-outline-success';
 }
 

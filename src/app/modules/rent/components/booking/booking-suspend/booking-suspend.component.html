@@ -501,7 +501,7 @@
                 </div>
                 <div class="finish-form-field">
                   <label class="finish-form-label">
-                    <span>{{ 'Contract finish paid at settlement' | translate }}</span>
+                    <span>{{ 'Contract suspend paid at suspension' | translate }}</span>
                     @if (hasSettlementPayment()) {
                       <span class="finish-form-badge finish-form-badge--required">{{ 'Contract finish requiredFieldBadge' | translate }}</span>
                     } @else {
@@ -680,7 +680,7 @@
               </dd>
             </div>
             <div>
-              <dt>{{ 'Contract finish paid at settlement' | translate }}</dt>
+              <dt>{{ 'Contract suspend paid at suspension' | translate }}</dt>
               <dd>{{ moneyOrDash(settlementPaidAmount()) }}</dd>
             </div>
             <div>

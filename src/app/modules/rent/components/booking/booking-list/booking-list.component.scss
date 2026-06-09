@@ -346,8 +346,32 @@
   color: var(--app-booking-status-debt);
 }
 
+.booking-card__menu-item--finish {
+  color: var(--c-16a34a);
+
+  i {
+    color: var(--c-16a34a);
+  }
+
+  &:hover {
+    background: rgba(var(--c-16a34a-rgb), 0.1);
+  }
+}
+
 :host-context(body.dark-only) .booking-card__status-pill {
   border-color: var(--booking-badge-border-dark, transparent);
+}
+
+:host-context(body.dark-only) .booking-card__menu-item--finish {
+  color: var(--c-22c55e);
+
+  i {
+    color: var(--c-22c55e);
+  }
+
+  &:hover {
+    background: rgba(var(--c-22c55e-rgb), 0.12);
+  }
 }
 
 @media (max-width: 1399.98px) {

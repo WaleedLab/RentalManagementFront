@@ -114,7 +114,7 @@ export class BookingSuspendComponent implements OnInit {
   cashAccount = signal('');
   paidCash = signal(0);
   paidBank = signal(0);
-  /** المبلغ المدفوع عند التصفية — يُعبّأ تلقائياً من «الباقي» ما لم يعدّله المستخدم. */
+  /** المبلغ المدفوع عند التعليق — يُعبّأ يدوياً أو من «استخدام كامل المتبقي». */
   settlementPaidAmount = signal(0);
   private settlementUserEdited = signal(false);
 
